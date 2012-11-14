@@ -99,7 +99,9 @@ public final class Broadwick {
             try (DataReader dr = new DataReader(project.getData())) {
 
                 final Map<String, Models.Model> registeredModels = registerModels(project);
-                log.info("Running broadwick for the following models {}", registeredModels.keySet());
+                log.info("Running broadwick ({}) for the following models {}", 
+                         BroadwickVersion.getVersionAndTimeStamp(),
+                         registeredModels.keySet());
 
                 // Run the models, each on a separate thread.
                 // TODO in a grid environment we cannot do this - need to think again here....

@@ -91,13 +91,23 @@ public final class BroadwickVersion {
     }
 
     /**
-     * Get the build version number and timestamp.
+     * Get the build version number and timestamp. This gets the following attributes in the manifest file
+     * <code>Implementation-Version</code>
+     * <code>Implementation-Build</code>
+     * <code>Build-timestamp</code>
+     * If the manifest file is NOT the one for the framework (i.e. a model that utilises the framework) then
+     * it will report the versions of both.
      * @return a string containing the version and timestamp.
      */
     public static String getVersionAndTimeStamp() {
         final Manifest manifest = getManifest();
         final StringBuilder sb = new StringBuilder();
         final Attributes attr = manifest.getMainAttributes();
+        
+        //TODO this will get the info form the main manifest file.
+        // HOWEVER, this framework is packaged as an executable jar and when added to a project
+        // the manifest is overwritten so the build information for the framework is lost - this needs to 
+        // be fixed
 
         sb.append(attr.getValue(IMPL_VERSION));
         sb.append(String.format(BUILD_STRING_FORMAT, attr.getValue(IMPL_BUILD)));

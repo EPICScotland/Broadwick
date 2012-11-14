@@ -34,10 +34,16 @@
         </developer>
     </developers>
 
+    <scm>
+        <connection>scm:hg:.</connection>
+        <developerConnection>scm:hg:.</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+    
     <!--
     <issueManagement>
-	<system>JIRA</system>
-	<url>http://jira.company.com/</url>
+       	<system>JIRA</system>
+       	<url>http://jira.company.com/</url>
     </issueManagement>
     -->
 
@@ -55,8 +61,12 @@
      			be exclusively 3rd party files. -->
         <sonar.exclusions>broadwick/config/generated/*.java, broadwick/BroadwickGui.java
         </sonar.exclusions>
+        
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 
         <addjars-maven-plugin.version>1.0.4</addjars-maven-plugin.version>
+        <buildnumber-maven-plugin.version>1.0</buildnumber-maven-plugin.version>
         <ch.qos.logback.logback-classic.version>1.0.7</ch.qos.logback.logback-classic.version>
         <ch.qos.logback.logback-core.version>1.0.7</ch.qos.logback.logback-core.version>
         <com.google.guava.version>13.0.1</com.google.guava.version>
@@ -80,7 +90,6 @@
         <maven-changes-plugin.version>2.7.1</maven-changes-plugin.version>
         <maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
         <maven-fluido-skin.version>1.2.1</maven-fluido-skin.version>
-        <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
         <maven-javadoc-plugin.version>2.8.1</maven-javadoc-plugin.version>
         <maven-jaxb2-plugin.version>0.8.2</maven-jaxb2-plugin.version>
         <maven-jxr-plugin.version>2.3</maven-jxr-plugin.version>
@@ -208,6 +217,24 @@
                     </execution>
                 </executions>
             </plugin>
+            
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>${buildnumber-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                </configuration>
+            </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>${maven-assembly-plugin.version}</version>
@@ -223,6 +250,7 @@
                         </manifest>
                         <manifestEntries>
                             <Implementation-Build>${buildNumber}</Implementation-Build>
+                            <Build-timestamp>${timestamp}</Build-timestamp>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -266,8 +294,8 @@
                 <configuration>
                     <!--<parallel>classes</parallel>-->
                     <includes>
-                      <include>**/*Suite.java</include>
-                     </includes>
+                        <include>**/*Suite.java</include>
+                    </includes>
                 </configuration>
             </plugin>
 
