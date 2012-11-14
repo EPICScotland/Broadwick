@@ -146,7 +146,6 @@
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element name="class" minOccurs="1" maxOccurs="1" type="xsd:string"/>
-                        <xsd:element name="solver" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="parameters" minOccurs="0" maxOccurs="1" type="Parameters"/>
                         <xsd:element name="priors" minOccurs="0" maxOccurs="1" type="Priors"/>
                     </xsd:sequence>
