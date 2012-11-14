@@ -1,0 +1,55 @@
+#![Running a Model]
+broadwick:Main[a]
+init:init[a]
+/Model:Model
+/Calculation:engines
+/t1:DataThread[a]
+/t2:Thread[a]
+
+broadwick:init.init( command line args )
+*1 init
+Reads configuration file
+Reads and parses data files
+Figures out what models to create
+*1
+
+
+
+[c:loop models to create]
+broadwick:requirements=Model.new( configuration parameters )
+*2 Model
+Constructs and initialises each model 
+specified in the configuration file.
+*2
+[/c]
+broadwick:Calculation.new()
+*3 Calculation
+Create the calculation engines 
+the model(s) require
+*3
+
+
+
+broadwick:Calculation.run()
+[c:loop While Calculation is not finished]
+Calculation:t1.new()
+Calculation:t1.readNextDaysData()
+Calculation:status=t2.new()
+t2:status=Model.step()
+#Calculation:Calculation.saveResults()
+[/c]
+
+
+
+broadwick:Calculation.destroy()
+*4 Calculation
+Save Results
+*4
+
+broadwick:Model.destroy()
+*5 Model
+Do any clean up here e.g.
+close files, release objects etc.
+*5
+
+

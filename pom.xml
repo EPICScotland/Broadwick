@@ -1,0 +1,368 @@
+<!-- Recipe: You want to download javadocs for your depenencies into local
+       	repository to be able to use them ie. in Netbeans
+        mvn dependency:resolve -Dclassifier=javadoc
+        mvn dependency:resolve -Dclassifier=sources
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>broadwick</groupId>
+    <artifactId>broadwick</artifactId>
+    <version>0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Broadwick</name>
+    <url>http://maven.apache.org</url>
+    <description>Framework for mathematical modelling of epidemics.</description>
+
+    <organization>
+        <name/>
+        <url/>
+    </organization>
+
+    <developers>
+        <developer>
+            <id>duke</id>
+            <name>Anthony O'Hare</name>
+            <email>Anthony.OHare@glasgow.ac.uk</email>
+            <roles>
+                <role>Architect</role>
+            </roles>
+            <!--<organization>Acme.com</organization>-->
+        </developer>
+    </developers>
+
+    <!--
+    <issueManagement>
+	<system>JIRA</system>
+	<url>http://jira.company.com/</url>
+    </issueManagement>
+    -->
+
+    <licenses>
+        <license>
+            <name>Apache 2</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments/>
+        </license>
+    </licenses>
+
+    <properties>
+        <!-- Sonar exclusions. [CSV] List of files for sonar to ignore (this will 
+     			be exclusively 3rd party files. -->
+        <sonar.exclusions>broadwick/config/generated/*.java, broadwick/BroadwickGui.java
+        </sonar.exclusions>
+
+        <addjars-maven-plugin.version>1.0.4</addjars-maven-plugin.version>
+        <ch.qos.logback.logback-classic.version>1.0.7</ch.qos.logback.logback-classic.version>
+        <ch.qos.logback.logback-core.version>1.0.7</ch.qos.logback.logback-core.version>
+        <com.google.guava.version>13.0.1</com.google.guava.version>
+        <jacoco-maven-plugin.version>0.5.10.201208310627</jacoco-maven-plugin.version>
+        <jdk.version>1.7</jdk.version>
+        <joda-time.version>2.1</joda-time.version>
+        <jre.version>1.7</jre.version>
+        <junit.junit.version>4.10</junit.junit.version>
+        <neo4j-version>1.9.M01</neo4j-version>
+        <org.h2.version>1.3.168</org.h2.version>
+        <org.apache.mahout.commons.commons-cli.version>2.0-mahout</org.apache.mahout.commons.commons-cli.version>
+        <org.apache.commons.lang3.version>3.1</org.apache.commons.lang3.version>  
+        <org.apache.commons-math.version>2.2</org.apache.commons-math.version>
+        <org.projectlombok.lombok.version>0.11.6</org.projectlombok.lombok.version>
+        <org.slf4j.slf4j-api.version>1.7.2</org.slf4j.slf4j-api.version>
+        <org.swinglabs.swing-layout.version>1.0.3</org.swinglabs.swing-layout.version>
+        <taglist-maven-plugin.version>2.4</taglist-maven-plugin.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.min-version>3.0.3</maven.min-version>
+        <maven-assembly-plugin.version>2.3</maven-assembly-plugin.version>
+        <maven-changes-plugin.version>2.7.1</maven-changes-plugin.version>
+        <maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
+        <maven-fluido-skin.version>1.2.1</maven-fluido-skin.version>
+        <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
+        <maven-javadoc-plugin.version>2.8.1</maven-javadoc-plugin.version>
+        <maven-jaxb2-plugin.version>0.8.2</maven-jaxb2-plugin.version>
+        <maven-jxr-plugin.version>2.3</maven-jxr-plugin.version>
+        <maven-project-info-reports-plugin.version>2.4</maven-project-info-reports-plugin.version>
+        <maven-site-plugin.version>3.0</maven-site-plugin.version>
+        <maven-surefire-plugin.version>2.12</maven-surefire-plugin.version>
+    </properties>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>onejar-maven-plugin.googlecode.com</id>
+            <url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <dependencies>
+        <!-- Testing dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Useful dependencies -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${org.projectlombok.lombok.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${com.google.guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${org.apache.commons.lang3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math</artifactId>
+            <version>${org.apache.commons-math.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.mahout.commons</groupId>
+            <artifactId>commons-cli</artifactId>
+            <version>${org.apache.mahout.commons.commons-cli.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>${joda-time.version}</version>
+        </dependency>
+
+        <!-- Database dependencies -->
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j</artifactId>
+            <version>${neo4j-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${org.h2.version}</version>
+        </dependency>
+
+        <!-- Logging dependencies -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${org.slf4j.slf4j-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${ch.qos.logback.logback-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${ch.qos.logback.logback-classic.version}</version>
+        </dependency>
+
+        <!-- GUI dependencies -->
+        <dependency>
+            <groupId>org.swinglabs</groupId>
+            <artifactId>swing-layout</artifactId>
+            <version>${org.swinglabs.swing-layout.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jre.version}</target>
+                    <testSource>${jdk.version}</testSource>
+                    <testTarget>${jre.version}</testTarget>
+                    <showDeprecation>true</showDeprecation>
+                    <showWarnings>true</showWarnings>
+                    <compilerArgument>-Xlint:all</compilerArgument>
+                </configuration>
+            </plugin>
+            <!-- generate the java classes from the xsd definition -->
+            <plugin>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
+                <version>${maven-jaxb2-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generatePackage>broadwick.config.generated</generatePackage>
+                        </configuration>
+
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>${maven-assembly-plugin.version}</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/assemble/jar-with-dependencies.xml</descriptor>
+                    </descriptors>
+                    <archive>
+                        <manifest>
+                            <mainClass>broadwick.Broadwick</mainClass>
+                            <addClasspath>true</addClasspath>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Implementation-Build>${buildNumber}</Implementation-Build>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attached</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-maven-plugin.version}</version>
+                <configuration>
+                    <!--<destfile>${basedir}/target/coverage-reports/jacoco-unit.exec</destfile>    -->
+                    <!--<datafile>${basedir}/target/coverage-reports/jacoco-unit.exec</datafile> -->
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>jacoco-initialize</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-site</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <configuration>
+                    <!--<parallel>classes</parallel>-->
+                    <includes>
+                      <include>**/*Suite.java</include>
+                     </includes>
+                </configuration>
+            </plugin>
+
+            <!-- Site plugin and it's associated report plugins -->
+            <plugin>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>${maven-site-plugin.version}</version>
+                <configuration>
+                    <locales>en,fr,de</locales>
+                    <attach>true</attach>
+                    <reportPlugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-project-info-reports-plugin</artifactId>
+                            <version>${maven-project-info-reports-plugin.version}</version>
+                            <configuration>
+                                <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+                                <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+                            </configuration>
+                            <reports>
+                                <report>index</report>
+                                <report>summary</report>
+                                <report>license</report>
+                                <report>dependencies</report>
+                                <report>help</report>
+                                <report>modules</report>
+                                <report>project-team</report>
+                                <!--<report>scm</report>-->
+                                <report>plugins</report>
+                                <report>plugin-management</report>
+                            </reports>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-javadoc-plugin</artifactId>
+                            <version>${maven-javadoc-plugin.version}</version>
+                            <configuration>
+                                <show>private</show>
+                                <nohelp>true</nohelp>
+                                <doclet>gr.spinellis.umlgraph.doclet.UmlGraphDoc</doclet>
+                                <docletArtifact>
+                                    <groupId>gr.spinellis</groupId>
+                                    <artifactId>UmlGraph</artifactId>
+                                    <version>4.4</version>
+                                </docletArtifact>
+                                <additionalparam>
+                                    -inferrel -inferdep -quiet -hide java.*
+                                    -collpackages java.util.* -qualify
+                                    -postfixpackage -nodefontsize 9
+                                    -nodefontpackagesize 7
+                                    -edgefontname "Trebuchet MS"
+                                    -nodefontabstractname "Trebuchet MS"
+                                    -nodefontclassabstractname
+                                    "Trebuchet MS"
+                                    -nodefontclassname "Trebuchet MS"
+                                    -nodefontname
+                                    "Trebuchet MS"
+                                    -nodefontpackagename "Trebuchet MS"
+                                    -nodefonttagname
+                                    "Trebuchet MS"
+                                </additionalparam>
+                            </configuration>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-jxr-plugin</artifactId>
+                            <version>${maven-jxr-plugin.version}</version>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-changes-plugin</artifactId>
+                            <version>${maven-changes-plugin.version}</version>
+                            <reportSets>
+                                <reportSet>
+                                    <reports>
+                                        <report>changes-report</report>
+                                    </reports>
+                                </reportSet>
+                            </reportSets>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>taglist-maven-plugin</artifactId>
+                            <version>${taglist-maven-plugin.version}</version>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.jacoco</groupId>
+                            <artifactId>jacoco-maven-plugin</artifactId>
+                            <version>${jacoco-maven-plugin.version}</version>
+                        </plugin>
+                    </reportPlugins>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>

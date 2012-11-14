@@ -1,0 +1,24 @@
+#![MCMC]
+mcmc:MCMC[a]
+parameters:Parameters[a]
+acceptor:Acceptor[a]
+/simulator:Simulator[a]
+/output:MCMCOutput[a]
+
+mcmc:simulator.new()
+[c:loop do MCMC]
+mcmc:trial=parameters.propose()
+mcmc:result=simulator.run()
+mcmc:yesNo=acceptor.accept()
+[c:alt Accept Trial]
+      mcmc:parameters.update()
+      --[Reject]
+      mcmc:nothing to do
+    [/c]
+[/c]
+mcmc:output.new()
+mcmc:output.saveResults()
+*1 output
+Save trace plots etc.
+*1
+

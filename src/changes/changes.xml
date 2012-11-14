@@ -1,0 +1,14 @@
+<document>
+   <properties>
+      <title>Broadwick Framework for epi-modelling</title>
+      <author email="anthony.ohare@glasgow.ac.uk">Anthony O'Hare</author>
+   </properties>
+   <body>
+      <release version="current"  date="0000-00-00" description="Current work version">
+           <action dev="Anthony O'Hare" type="add">
+               Initіal release.
+           </action>         
+         </release>
+   </body>
+</document>
+
