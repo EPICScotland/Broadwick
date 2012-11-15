@@ -74,7 +74,7 @@
         <jdk.version>1.7</jdk.version>
         <joda-time.version>2.1</joda-time.version>
         <jre.version>1.7</jre.version>
-        <junit.junit.version>4.10</junit.junit.version>
+        <junit.junit.version>4.11</junit.junit.version>
         <neo4j-version>1.9.M01</neo4j-version>
         <org.h2.version>1.3.168</org.h2.version>
         <org.apache.mahout.commons.commons-cli.version>2.0-mahout</org.apache.mahout.commons.commons-cli.version>
