@@ -29,7 +29,11 @@ public final class ConfigValidator {
      * @return a ConfigValidationErrors object that contains all the errors (if any).
      */
     public ConfigValidationErrors validate() {
+        try {
         validateModels();
+        } catch (Exception e) {
+            errors.addError("Could not valudate the configuration file. " + e.getLocalizedMessage());
+        }
 
         return errors;
     }
@@ -41,14 +45,9 @@ public final class ConfigValidator {
     private void validateModels() {
         for (Models.Model model : project.getModels().getModel()) {
 
-            final String clazz = model.getClazz();
+            final String clazz = model.getClassname();
+            log.info("validateModels model - {}", clazz);
             final Model modelObj = this.<Model>createObject(Model.class, clazz);
-
-            // Check if the solver exists
-            //final Solver solverObj = this.<Solver>createObject(Solver.class, model.getSolver());
-            //if (solverObj == null) {
-            //    errors.addError("Solver " + model.getSolver() + " does not exist in configuration file.");
-            //}
 
             if (modelObj != null) {
                 // Check that the parameters are in the model.
@@ -65,8 +64,8 @@ public final class ConfigValidator {
      * @param model the model object whose parameters we are to validate.
      */
     private void validateModelParameters(final Models.Model model) {
-        final String modelName = String.format("The Model %s", model.getClazz());
-        final Model modelObj = this.<Model>createObject(Model.class, model.getClazz());
+        final String modelName = String.format("The Model %s", model.getClassname());
+        final Model modelObj = this.<Model>createObject(Model.class, model.getClassname());
         final Parameters parameters = model.getParameters();
 
         if (parameters != null) {
@@ -85,8 +84,8 @@ public final class ConfigValidator {
      * @param model the model object whose priors we are to validate.
      */
     private void validateModelPriors(final Models.Model model) {
-        final String modelName = String.format("The Model %s", model.getClazz());
-        final Model modelObj = this.<Model>createObject(Model.class, model.getClazz());
+        final String modelName = String.format("The Model %s", model.getClassname());
+        final Model modelObj = this.<Model>createObject(Model.class, model.getClassname());
         final Priors priors = model.getPriors();
 
         if (priors != null) {

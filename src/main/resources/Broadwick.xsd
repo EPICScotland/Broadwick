@@ -61,8 +61,8 @@
                         <xsd:element name="dateFormat" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="customTags" minOccurs="0" maxOccurs="1" type="CustomTags"/>
                     </xsd:sequence>
-                </xsd:complexType>   
-            </xsd:element>  
+                </xsd:complexType>
+            </xsd:element>
             <xsd:element name="FullMovementFile" minOccurs="0" maxOccurs="unbounded">
                 <xsd:complexType>
                     <xsd:sequence>
@@ -75,14 +75,14 @@
                         <xsd:element name="destinationDateColumn" type="xsd:int"/>
                         <xsd:element name="destinationLocationIdColumn" type="xsd:int"/>
                         <xsd:element name="marketIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
-                        <xsd:element name="marketDateColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>            
+                        <xsd:element name="marketDateColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
                         <xsd:element name="speciesColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
                         <xsd:element name="dateFormat" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="customTags" minOccurs="0" maxOccurs="1" type="CustomTags"/>
                     </xsd:sequence>
-                </xsd:complexType>   
-            </xsd:element>  
-            
+                </xsd:complexType>
+            </xsd:element>
+
             <xsd:element name="BatchMovementFile" minOccurs="0" maxOccurs="unbounded">
                 <xsd:complexType>
                     <xsd:sequence>
@@ -95,13 +95,13 @@
                         <xsd:element name="destinationDateColumn" type="xsd:int"/>
                         <xsd:element name="destinationLocationIdColumn" type="xsd:int"/>
                         <xsd:element name="marketIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
-                        <xsd:element name="marketDateColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>      
+                        <xsd:element name="marketDateColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
                         <xsd:element name="speciesColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
                         <xsd:element name="dateFormat" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="customTags" minOccurs="0" maxOccurs="1" type="CustomTags"/>
                     </xsd:sequence>
-                </xsd:complexType>   
-            </xsd:element>   
+                </xsd:complexType>
+            </xsd:element>
             <xsd:element name="PopulationFile" minOccurs="0" maxOccurs="unbounded">
                 <xsd:complexType>
                     <xsd:sequence>
@@ -145,7 +145,7 @@
             <xsd:element name="model" minOccurs="1" maxOccurs="unbounded">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element name="class" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="classname" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="parameters" minOccurs="0" maxOccurs="1" type="Parameters"/>
                         <xsd:element name="priors" minOccurs="0" maxOccurs="1" type="Priors"/>
                     </xsd:sequence>

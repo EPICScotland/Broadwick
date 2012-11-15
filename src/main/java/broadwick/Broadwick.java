@@ -4,9 +4,9 @@ import broadwick.config.ConfigValidationErrors;
 import broadwick.config.ConfigValidator;
 import broadwick.config.generated.Logs;
 import broadwick.config.generated.Models;
-import broadwick.config.generated.Models.Model;
 import broadwick.config.generated.Project;
 import broadwick.data.DataReader;
+import broadwick.model.Model;
 import com.google.common.base.Throwables;
 import java.io.File;
 import java.util.HashMap;
@@ -44,7 +44,7 @@ public final class Broadwick {
 
     /**
      * Read the configuration file from the configuration file.
-     * @param logFacade  the LoggingFacade object used to log any messages.
+     * @param logFacade the LoggingFacade object used to log any messages.
      * @param configFile the name of the configuration file.
      */
     private void readConfigFile(final LoggingFacade logFacade, final String configFile) {
@@ -98,10 +98,10 @@ public final class Broadwick {
 
             try (DataReader dr = new DataReader(project.getData())) {
 
-                final Map<String, Models.Model> registeredModels = registerModels(project);
-                log.info("Running broadwick ({}) for the following models {}", 
-                         BroadwickVersion.getVersionAndTimeStamp(),
-                         registeredModels.keySet());
+                final Map<String, Model> registeredModels = registerModels(project);
+                log.info("Running broadwick ({}) for the following models {}",
+                        BroadwickVersion.getVersionAndTimeStamp(),
+                        registeredModels.keySet());
 
                 // Run the models, each on a separate thread.
                 // TODO in a grid environment we cannot do this - need to think again here....
@@ -112,17 +112,17 @@ public final class Broadwick {
                 for (final Entry<String, Model> entry : registeredModels.entrySet()) {
                     es.submit(new Runnable() {
                         @Override
-                        public void run() { 
+                        public void run() {
                             final String modelName = entry.getKey();
                             try {
-                                log.info("Running {}", modelName);
-                                final broadwick.model.Model model = (broadwick.model.Model) entry.getValue().getClass().newInstance();
-                                model.run();
-                            } catch (InstantiationException | IllegalAccessException ex) {
+                                log.info("Running {} [{}]", modelName, entry.getValue().getClass().getCanonicalName());
+                                entry.getValue().run();
+//                            } catch (ClassCastException | ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+                            } catch (Exception ex) {
                                 log.error("Failed to create instance of model {}", modelName);
-                            } 
+                                log.error("{}", Throwables.getStackTraceAsString(ex));
+                            }
                         }
-
                     });
                 }
                 es.shutdown();
@@ -146,15 +146,16 @@ public final class Broadwick {
      * @param project the unmarshalled configuration file.
      * @return the registered models.
      */
-    private Map<String, Models.Model> registerModels(final Project project) {
-        final Map<String, Models.Model> registeredModels = new HashMap<>();
+    private Map<String, Model> registerModels(final Project project) {
+        final Map<String, Model> registeredModels = new HashMap<>();
         for (Models.Model model : project.getModels().getModel()) {
             try {
-                final Class<? extends Models.Model> aClass = model.getClass();
-                final Models.Model newInstance = aClass.newInstance();
 
+                // Create and register the new model object that we will be running later.
+                final Model newInstance = Model.class.cast(Class.forName(model.getClassname()).newInstance());
                 registeredModels.put(model.getId(), newInstance);
-            } catch (InstantiationException | IllegalAccessException ex) {
+
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
                 log.error("Could not create model ; {}", ex.getLocalizedMessage());
                 registeredModels.clear();
             }
@@ -171,7 +172,6 @@ public final class Broadwick {
         final Broadwick broadwick = new Broadwick(args);
         broadwick.run();
     }
-
     private Project project;
     private Logger log;
 }
