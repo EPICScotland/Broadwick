@@ -4,7 +4,6 @@ import broadwick.config.generated.Models;
 import broadwick.config.generated.Parameters;
 import broadwick.config.generated.Priors;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import lombok.Getter;
@@ -32,7 +31,7 @@ public abstract class Model {
      * Set the Model element from the configuration file.
      * @param model the xml element corresponding to the Model element in the config.
      */
-    public void setModelConfiguration(final Models.Model model) {
+    public final void setModelConfiguration(final Models.Model model) {
         this.model = model;
         setParameters();
         setPriors();
