@@ -30,9 +30,9 @@ public final class ConfigValidator {
      */
     public ConfigValidationErrors validate() {
         try {
-        validateModels();
+            validateModels();
         } catch (Exception e) {
-            errors.addError("Could not valudate the configuration file. " + e.getLocalizedMessage());
+            errors.addError("Could not validate the configuration file. " + e.getLocalizedMessage());
         }
 
         return errors;
@@ -45,8 +45,10 @@ public final class ConfigValidator {
     private void validateModels() {
         for (Models.Model model : project.getModels().getModel()) {
 
+            // we create (using reflection) the model(s) in the configuration file and check that the parameters
+            // and priors in the configuration file are valid for the model (by checking that the model has fields
+            // marked with the @Parameter and @Prior annotations).
             final String clazz = model.getClassname();
-            log.info("validateModels model - {}", clazz);
             final Model modelObj = this.<Model>createObject(Model.class, clazz);
 
             if (modelObj != null) {
@@ -55,6 +57,8 @@ public final class ConfigValidator {
 
                 // Check that the priors are in the model.
                 validateModelPriors(model);
+            } else {
+                errors.addError(String.format("Could not create class [%s]. Does it exist?",clazz));
             }
         }
     }
@@ -89,7 +93,6 @@ public final class ConfigValidator {
         final Priors priors = model.getPriors();
 
         if (priors != null) {
-
             for (Priors.Prior prior : priors.getPrior()) {
                 if (!hasDeclaredField(modelObj, prior.getName())) {
                     final StringBuilder validationFailures = new StringBuilder();
@@ -103,7 +106,7 @@ public final class ConfigValidator {
 
     /**
      * Checks that a model contains a given parameter as a field.
-     * @param model     the model object to be checked.
+     * @param model the model object to be checked.
      * @param parameter the name of the parameter (class field).
      * @return true if the model class contains the field, false otherwise.
      */
@@ -120,7 +123,7 @@ public final class ConfigValidator {
      * If the project has been validated, i.e. it is structurally ok, then this method will simply return the project
      * supplied in this objects constructor, else it will return null.
      * @return null if the project is invalid (i.e. contains major errors) else
-     *         returns the project object supplied to the constructor.
+     * returns the project object supplied to the constructor.
      */
     public Project getValidatedProject() {
         if (errors.isValid()) {
@@ -135,9 +138,9 @@ public final class ConfigValidator {
      * <code>
      * Solver solverObj = this.<Solver>createObject(Solver.class, "RungeKutta4");
      * </code>
-     * @param <T>   the type of object to create.
+     * @param <T> the type of object to create.
      * @param clazz the class type of the object we will create.
-     * @param name  the name of the class that is to be instantiated.
+     * @param name the name of the class that is to be instantiated.
      * @return the created object.
      */
     private <T> T createObject(final Class<T> clazz, final String name) {
@@ -151,7 +154,6 @@ public final class ConfigValidator {
         }
         return object;
     }
-
     private Project project;
     private ConfigValidationErrors errors = new ConfigValidationErrors();
 }
