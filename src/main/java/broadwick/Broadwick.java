@@ -150,12 +150,12 @@ public final class Broadwick {
         final Map<String, Model> registeredModels = new HashMap<>();
         for (Models.Model model : project.getModels().getModel()) {
             try {
-
                 // Create and register the new model object that we will be running later.
                 final Model newInstance = Model.class.cast(Class.forName(model.getClassname()).newInstance());
+                newInstance.setModelConfiguration(model);
                 registeredModels.put(model.getId(), newInstance);
 
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException ex) {
                 log.error("Could not create model ; {}", ex.getLocalizedMessage());
                 registeredModels.clear();
             }
