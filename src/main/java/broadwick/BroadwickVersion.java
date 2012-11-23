@@ -1,6 +1,7 @@
 package broadwick;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URL;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -100,21 +101,24 @@ public final class BroadwickVersion {
      * @return a string containing the version and timestamp.
      */
     public static String getVersionAndTimeStamp() {
-        final Manifest manifest = getManifest();
-        final StringBuilder sb = new StringBuilder();
-        final Attributes attr = manifest.getMainAttributes();
-        
-        //TODO this will get the info form the main manifest file.
-        // HOWEVER, this framework is packaged as an executable jar and when added to a project
-        // the manifest is overwritten so the build information for the framework is lost - this needs to 
-        // be fixed
+        try {
+            final Manifest manifest = getManifest();
+            final StringBuilder sb = new StringBuilder();
+            final Attributes attr = manifest.getMainAttributes();
 
-        sb.append(attr.getValue(IMPL_VERSION));
-        sb.append(String.format(BUILD_STRING_FORMAT, attr.getValue(IMPL_BUILD)));
-        sb.append(String.format(" (%s)", attr.getValue(BUILD_TIMESTAMP)));
-        return sb.toString();
+            //TODO this will get the info form the main manifest file.
+            // HOWEVER, this framework is packaged as an executable jar and when added to a project
+            // the manifest is overwritten so the build information for the framework is lost - this needs to
+            // be fixed
+
+            sb.append(String.format("Version %s ", attr.getValue(IMPL_VERSION)) );
+            sb.append(String.format("Build (%s - %s : %s) ", InetAddress.getLocalHost().getHostName(),
+                    attr.getValue(IMPL_BUILD), attr.getValue(BUILD_TIMESTAMP)) );
+            return sb.toString();
+        } catch (Exception e) {
+            return "UNKNOWN VERSION";
+        }
     }
-
     private static BroadwickVersion version;
     private static final String BUILD_STRING_FORMAT = " : build %s ";
     private static final String IMPL_VERSION = "Implementation-Version";
