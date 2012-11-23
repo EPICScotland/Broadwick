@@ -43,7 +43,6 @@ public class LocationsFileReader implements Callable<Integer> {
             }
         }
 
-
         if (errors.length() > 0) {
             throw new BroadwickException(errors.toString());
         }
@@ -55,7 +54,9 @@ public class LocationsFileReader implements Callable<Integer> {
 
         try (FileInput fle = new FileInput(locationsFile.getName(), locationsFile.getSeparator())) {
             List<String> line;
+            //CHECKSTYLE:OFF
             while (!(line = fle.readLine()).isEmpty()) {
+                //CHECKSTYLE:ON
                 createDatabaseNode(line);
                 readSoFar++;
             }
@@ -84,6 +85,7 @@ public class LocationsFileReader implements Callable<Integer> {
         final Transaction tx = dataDb.getInternalDb().beginTx();
         try {
             node = dataDb.getNodeById(nodeId);
+            node.setProperty(MovementDatabaseFacade.TYPE, MovementDatabaseFacade.LOCATION);
 
             for (Table.Cell<String, Integer, String> cell : locationsDescr.cellSet()) {
                 final String property = cell.getRowKey();

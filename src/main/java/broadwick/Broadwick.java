@@ -6,6 +6,7 @@ import broadwick.config.generated.Logs;
 import broadwick.config.generated.Models;
 import broadwick.config.generated.Project;
 import broadwick.data.DataReader;
+import broadwick.data.Lookup;
 import broadwick.model.Model;
 import com.google.common.base.Throwables;
 import java.io.File;
@@ -98,7 +99,7 @@ public final class Broadwick {
 
             try (DataReader dr = new DataReader(project.getData())) {
 
-                final Map<String, Model> registeredModels = registerModels(project);
+                final Map<String, Model> registeredModels = registerModels(project, dr.getLookup());
                 log.info("Running broadwick ({}) for the following models {}",
                         BroadwickVersion.getVersionAndTimeStamp(),
                         registeredModels.keySet());
@@ -144,15 +145,17 @@ public final class Broadwick {
      * Create and register the models internally. If there was a problem registering the models an empty cache is
      * returned.
      * @param project the unmarshalled configuration file.
+     * @param lookup the Lookuup object that allows the model to access the data specified in the data files.
      * @return the registered models.
      */
-    private Map<String, Model> registerModels(final Project project) {
+    private Map<String, Model> registerModels(final Project project, final Lookup lookup ) {
         final Map<String, Model> registeredModels = new HashMap<>();
         for (Models.Model model : project.getModels().getModel()) {
             try {
                 // Create and register the new model object that we will be running later.
                 final Model newInstance = Model.class.cast(Class.forName(model.getClassname()).newInstance());
                 newInstance.setModelConfiguration(model);
+                newInstance.setModelDataLookup(lookup);
                 registeredModels.put(model.getId(), newInstance);
 
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException ex) {

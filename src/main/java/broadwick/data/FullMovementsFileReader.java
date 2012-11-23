@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -31,7 +32,7 @@ public class FullMovementsFileReader implements Callable<Integer> {
 
     /**
      * Create the movement file reader.
-     * @param movementFile the [xml] tag of the config file that is to be read.
+     * @param movementFile the [XML] tag of the config file that is to be read.
      * @param dataReader   the reader object that contains some useful functionality.
      * @param dataDb       the database facade object used to save the data in the movements file section.
      */
@@ -79,7 +80,9 @@ public class FullMovementsFileReader implements Callable<Integer> {
         // for each line of the full movement section add the movement to the database.
         try (FileInput fle = new FileInput(movementFile.getName(), movementFile.getSeparator())) {
             List<String> line;
+            //CHECKSTYLE:OFF
             while (!(line = fle.readLine()).isEmpty()) {
+                //CHECKSTYLE:ON
                 createDatabaseEntry(line);
                 readSoFar++;
             }
@@ -143,13 +146,21 @@ public class FullMovementsFileReader implements Callable<Integer> {
     private final DateTimeFormatter dateFormat;
     private static final String VARCHAR = "VARCHAR";
     private static final String DATE = "DATE";
+    @Getter
     private static final String ID = "Id";
+    @Getter
     private static final String DEPARTURE_DATE = "DepartureDate";
+    @Getter
     private static final String DEPARTURE_ID = "DepartureId";
+    @Getter
     private static final String DESTINATION_DATE = "DestinationDate";
+    @Getter
     private static final String DESTINATION_ID = "DestinationId";
+    @Getter
     private static final String MARKET_ID = "MarketId";
+    @Getter
     private static final String MARKET_DATE = "MarketDate";
+    @Getter
     private static final String SPECIES = "Sprcies";
     private static final String NEWLINE = "\n";
     private static final String SECTION_NAME = "FullMovementsFile";

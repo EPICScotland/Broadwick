@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -30,7 +31,7 @@ public class DirectedMovementsFileReader implements Callable<Integer> {
 
     /**
      * Create the movement file reader.
-     * @param movementFile the [xml] tag of the config file that is to be read.
+     * @param movementFile the [XML] tag of the config file that is to be read.
      * @param dataReader   the reader object that contains some useful functionality.
      * @param dataDb       the database facade object used to save the data in the movements file section.
      */
@@ -69,7 +70,9 @@ public class DirectedMovementsFileReader implements Callable<Integer> {
 
         try (FileInput fle = new FileInput(movementFile.getName(), movementFile.getSeparator())) {
             List<String> line;
+            //CHECKSTYLE:OFF
             while (!(line = fle.readLine()).isEmpty()) {
+                //CHECKSTYLE:ON
                 createDatabaseEntry(line);
                 readSoFar++;
             }
@@ -130,10 +133,15 @@ public class DirectedMovementsFileReader implements Callable<Integer> {
     private final DateTimeFormatter dateFormat;
     private static final String VARCHAR = "VARCHAR";
     private static final String DATE = "DATE";
+    @Getter
     private static final String ID = "Id";
-    private static final String SPECIES = "Sprcies";
+    @Getter
+    private static final String SPECIES = "Species";
+    @Getter
     private static final String LOCATION_ID = "LocationId";
+    @Getter
     private static final String MOVEMENT_DATE = "MovementDate";
+    @Getter
     private static final String MOVEMENT_DIRECTION = "MovementDirection";
     private static final String NEWLINE = "\n";
     private static final String SECTION_NAME = "DirectedMovementFile";

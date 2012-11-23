@@ -3,19 +3,18 @@ package broadwick.model;
 import broadwick.config.generated.Models;
 import broadwick.config.generated.Parameters;
 import broadwick.config.generated.Priors;
+import broadwick.data.Lookup;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 import lombok.Getter;
 
 /**
- * This interface declares a model for the Broadwick framework. To create a model
- * for this framework (by model we mean both the model and the methodology for
- * running/solving it) the user creates an implementation of this class and refers
- * to it in the framework configuration file.
+ * This interface declares a model for the Broadwick framework. To create a model for this framework (by model we mean
+ * both the model and the methodology for running/solving it) the user creates an implementation of this class and
+ * refers to it in the framework configuration file.
  * <code>
  * public class SIRModel implements Model {
- *
  *     public void run() {
  *         // perform model specific step here
  *     }
@@ -29,7 +28,7 @@ public abstract class Model {
 
     /**
      * Set the Model element from the configuration file.
-     * @param model the xml element corresponding to the Model element in the config.
+     * @param model the XML element corresponding to the Model element in the config.
      */
     public final void setModelConfiguration(final Models.Model model) {
         this.model = model;
@@ -38,7 +37,15 @@ public abstract class Model {
     }
 
     /**
-     * Create a list of the model's parameters from the model xml definition.
+     * Set the lookup object that allows access to the data files specified in the configuration file.
+     * @param lookup the XML element corresponding to the Model element in the config.
+     */
+    public final void setModelDataLookup(final Lookup lookup) {
+        this.lookup = lookup;
+    }
+
+    /**
+     * Create a list of the model's parameters from the model XML definition.
      */
     private void setParameters() {
         final Parameters params = this.getModel().getParameters();
@@ -53,7 +60,7 @@ public abstract class Model {
     }
 
     /**
-     * Create a list of the model's priors from the model xml definition.
+     * Create a list of the model's priors from the model XML definition.
      */
     private void setPriors() {
         final Priors prs = this.getModel().getPriors();
@@ -68,14 +75,18 @@ public abstract class Model {
     }
 
     /**
-     * Run the model. This is the entry point to the model from the framework, up til now
-     * the framework has read any configuration files and processed data mentioned therein.
+     * Run the model. This is the entry point to the model from the framework, up til now the framework has read any
+     * configuration files and processed data mentioned therein.
      */
     public abstract void run();
+
     @Getter
     private Models.Model model;
     @Getter
     private Map<String, Parameters.Parameter> parameters;
     @Getter
     private Map<String, Priors.Prior> priors;
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    @Getter
+    private Lookup lookup;
 }

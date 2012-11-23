@@ -106,7 +106,9 @@ public class PopulationsFileReader implements Callable<Integer> {
 
         try (FileInput fle = new FileInput(populationFile.getName(), populationFile.getSeparator())) {
             List<String> line;
+            //CHECKSTYLE:OFF
             while (!(line = fle.readLine()).isEmpty()) {
+                //CHECKSTYLE:ON
                 createDatabaseEntry(line);
                 readSoFar++;
             }
@@ -136,6 +138,7 @@ public class PopulationsFileReader implements Callable<Integer> {
         final Transaction tx = dataDb.getInternalDb().beginTx();
         try {
             node = dataDb.getNodeById(nodeId);
+            node.setProperty(MovementDatabaseFacade.TYPE, MovementDatabaseFacade.ANIMAL);
 
             for (Table.Cell<String, Integer, String> cell : populationDescr.cellSet()) {
                 final String property = cell.getRowKey();

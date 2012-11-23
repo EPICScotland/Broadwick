@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.StopWatch;
@@ -47,6 +48,7 @@ public class DataReader implements java.lang.AutoCloseable {
                 drDatabase.createLookupTables();
                 readDataSection();
             }
+            lookup = new Lookup(drDatabase);
         }
     }
 
@@ -299,6 +301,9 @@ public class DataReader implements java.lang.AutoCloseable {
         };
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    @Getter
+    private Lookup lookup;
     private Project.Data data;
     private MovementDatabaseFacade drDatabase;
     private String dbName;

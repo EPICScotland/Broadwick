@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -69,7 +70,9 @@ public class BatchedMovementsFileReader implements Callable<Integer> {
         // for each line of the batched movement section add the movement to the database.
         try (FileInput fle = new FileInput(movementFile.getName(), movementFile.getSeparator())) {
             List<String> line;
+            //CHECKSTYLE:OFF
             while (!(line = fle.readLine()).isEmpty()) {
+                //CHECKSTYLE:ON
 
                 createDatabaseEntry(line);
                 readSoFar++;
@@ -143,13 +146,21 @@ public class BatchedMovementsFileReader implements Callable<Integer> {
     private static final String DOUBLE = "DOUBLE";
     private static final String INT = "INT";
     private static final String DATE = "DATE";
+    @Getter
     private static final String BATCH_SIZE = "batchSize";
+    @Getter
     private static final String DEPARTURE_DATE = "DepartureDate";
+    @Getter
     private static final String DEPARTURE_ID = "DepartureId";
+    @Getter
     private static final String DESTINATION_DATE = "DestinationDate";
+    @Getter
     private static final String DESTINATION_ID = "DestinationId";
+    @Getter
     private static final String MARKET_ID = "MarketId";
+    @Getter
     private static final String MARKET_DATE = "MarketDate";
+    @Getter
     private static final String SPECIES = "Sprcies";
     private static final String NEWLINE = "\n";
     private static final String SECTION_NAME = "BatchedMovementFile";

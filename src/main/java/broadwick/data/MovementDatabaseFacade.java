@@ -32,8 +32,19 @@ public class MovementDatabaseFacade {
     protected final void openDatabase(final String dbName, final String lookupDbName) {
         log.debug("Opening internal databases {}, {}.", dbName, lookupDbName);
 
-        internalDb = new GraphDatabaseFactory().newEmbeddedDatabase(dbName);
+        internalDb = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(dbName).newGraphDatabase();
         nodeIndex = internalDb.index().forNodes("nodes");
+
+        // Registers a shutdown hook for the Neo4j instance so that it
+        // shuts down nicely when the VM exits (even if you "Ctrl-C" the
+        // running example before it's completed)
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                internalDb.shutdown();
+            }
+
+        });
 
         try {
             Class.forName("org.h2.Driver");
@@ -123,4 +134,7 @@ public class MovementDatabaseFacade {
     private String indexId = "index";
     @Getter
     private final DateTime zeroDate = new DateTime(1900, 1, 1, 0, 0);
+    public static final String TYPE = "TYPE";
+    public static final String LOCATION = "LOCATION";
+    public static final String ANIMAL = "ANIMAL";
 }
