@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
@@ -123,8 +124,11 @@ public class LocationsFileReader implements Callable<Integer> {
     private static final String DOUBLE = "DOUBLE";
     //private static final String DATE = "DATE";
     private static final String INT = "INT";
+    @Getter
     private static final String ID = "Id";
+    @Getter
     private static final String EASTING = "Easting";
+    @Getter
     private static final String NORTHING = "Northing";
     private static final String NEWLINE = "\n";
     private static final String SECTION_NAME = "LocationsFile";

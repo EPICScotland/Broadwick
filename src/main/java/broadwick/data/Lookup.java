@@ -7,10 +7,13 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.tooling.GlobalGraphOperations;
 
@@ -47,6 +50,85 @@ public final class Lookup {
             movements.add(movement);
         }
         return movements;
+    }
+
+    /**
+     * Get all the movements that have been read from the file(s) specified in the configuration file.
+     * @return a collection of movement events that have been recorded.
+     */
+    public Collection<Animal> getAnimals() {
+        final Collection<Animal> animals = new ArrayList<>();
+
+        final Iterable<Node> allNodes = ops.getAllNodes();
+        final Iterator<Node> animalNodes = Iterables.filter(allNodes, isAnimalPredicate).iterator();
+
+        while (animalNodes.hasNext()) {
+            final Node animalNode = animalNodes.next();
+
+            // create a Movement and add it to the collection...
+            final Animal animal = createAnimal(animalNode);
+            animals.add(animal);
+        }
+        return animals;
+    }
+
+    /**
+     * Get all the movements that have been read from the file(s) specified in the configuration file.
+     * @return a collection of movement events that have been recorded.
+     */
+    public Collection<Location> getLocations() {
+        final Collection<Location> locations = new ArrayList<>();
+
+        final Iterable<Node> allNodes = ops.getAllNodes();
+        final Iterator<Node> locationNodes = Iterables.filter(allNodes, isLocationPredicate).iterator();
+
+        while (locationNodes.hasNext()) {
+            final Node locationNode = locationNodes.next();
+
+            // create a Movement and add it to the collection...
+            final Location location = createLocation(locationNode);
+            locations.add(location);
+        }
+        return locations;
+    }
+
+    /**
+     * Create a location object from the node object defining it in the graph database.
+     * @param locationNode the node object from the database defining the location.
+     * @return the created location object.
+     */
+    private Location createLocation(final Node locationNode) {
+        log.trace("Creating location object from data node: {}", locationNode.getPropertyKeys());
+
+        final String id = (String) locationNode.getProperty(LocationsFileReader.getID());
+        final Double easting = (Double) locationNode.getProperty(LocationsFileReader.getEASTING());
+        final Double northing = (Double) locationNode.getProperty(LocationsFileReader.getNORTHING());
+        final Map<String, Integer> populations = new HashMap<>();
+
+        return new Location(id, easting, northing, populations);
+    }
+
+    /**
+     * Create an animal object from the node object defining it in the graph database. A node ma
+     * @param animalNode the node object from the database defining the animal.
+     * @return the created animal object.
+     */
+    private Animal createAnimal(final Node animalNode) {
+        log.trace("Creating animal object from data node: {}", animalNode.getPropertyKeys());
+
+        if (Iterables.contains(animalNode.getPropertyKeys(), PopulationsFileReader.getID())) {
+            final String id = (String) animalNode.getProperty(PopulationsFileReader.getID());
+            final String species = (String) animalNode.getProperty(PopulationsFileReader.getSPECIES());
+            final Integer dateOfBirth = (Integer) animalNode.getProperty(PopulationsFileReader.getDATE_OF_BIRTH());
+            final String locationOfBirth = (String) animalNode.getProperty(PopulationsFileReader.getLOCATION_OF_BIRTH());
+            final Integer dateOfDeath = (Integer) animalNode.getProperty(PopulationsFileReader.getDATE_OF_DEATH());
+            final String locationOfDeath = (String) animalNode.getProperty(PopulationsFileReader.getLOCATION_OF_DEATH());
+
+            return new Animal(id, species, dateOfBirth, locationOfBirth, dateOfDeath, locationOfDeath);
+        }
+
+
+        return null;
     }
 
     /**
@@ -167,6 +249,22 @@ public final class Lookup {
                             marketDate, marketId, species);
     }
 
+    private final Predicate<Node> isAnimalPredicate = new Predicate<Node>() {
+        @Override
+        public boolean apply(final Node node) {
+            return node.hasProperty(MovementDatabaseFacade.TYPE)
+                    && MovementDatabaseFacade.ANIMAL.equals(node.getProperty(MovementDatabaseFacade.TYPE));
+        }
+
+    };
+    private final Predicate<Node> isLocationPredicate = new Predicate<Node>() {
+        @Override
+        public boolean apply(final Node node) {
+            return node.hasProperty(MovementDatabaseFacade.TYPE)
+                    && MovementDatabaseFacade.LOCATION.equals(node.getProperty(MovementDatabaseFacade.TYPE));
+        }
+
+    };
     private final Predicate<Relationship> isMovementPredicate = new Predicate<Relationship>() {
         @Override
         public boolean apply(final Relationship input) {
