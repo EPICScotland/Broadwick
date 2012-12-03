@@ -1,17 +1,26 @@
 package broadwick.data;
 
+import broadwick.BroadwickException;
 import broadwick.data.MovementDatabaseFacade.MovementRelationship;
 import com.google.common.base.Predicate;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.TreeSet;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -19,7 +28,8 @@ import org.neo4j.tooling.GlobalGraphOperations;
 
 /**
  * This class works as an interface to the databases holding the movements, locations and animal data read from the
- * configuration file.
+ * configuration file. When the methods to retrieve all the data in the DB (e.g. getMovements()) are called the results
+ * are stored in a cache for speedier retrieval. This cache is not permanent however, freeing memory when required.
  */
 @Slf4j
 public final class Lookup {
@@ -29,6 +39,7 @@ public final class Lookup {
      * @param dbFacade the object that is responsible for accessing the internal databases.
      */
     public Lookup(final MovementDatabaseFacade dbFacade) {
+        this.dbFacade = dbFacade;
         this.db = dbFacade.getInternalDb();
         this.ops = GlobalGraphOperations.at(this.db);
     }
@@ -48,6 +59,16 @@ public final class Lookup {
             // create a Movement and add it to the collection...
             final Movement movement = createMovement(movementRelationship);
             movements.add(movement);
+
+            // store the movements for the animal in the cache.
+            Collection<Movement> movementsForAnimal = movementsCache.getIfPresent(movement.getId());
+            if (movementsForAnimal == null) {
+                movementsForAnimal = new TreeSet<>(new MovementsComparator());
+                movementsForAnimal.add(movement);
+                movementsCache.put(movement.getId(), movementsForAnimal);
+            } else {
+                movementsForAnimal.add(movement);
+            }
         }
         return movements;
     }
@@ -68,6 +89,9 @@ public final class Lookup {
             // create a Movement and add it to the collection...
             final Animal animal = createAnimal(animalNode);
             animals.add(animal);
+            if (animalsCache.getIfPresent(animal.getId()) == null) {
+                animalsCache.put(animal.getId(), animal);
+            }
         }
         return animals;
     }
@@ -88,8 +112,139 @@ public final class Lookup {
             // create a Movement and add it to the collection...
             final Location location = createLocation(locationNode);
             locations.add(location);
+            if (locationsCache.getIfPresent(location.getId()) == null) {
+                locationsCache.put(location.getId(), location);
+            }
         }
         return locations;
+    }
+
+    /**
+     * Get a location from the list of locations in the system. If there is no location matching the id a
+     * BroadwickException is thrown because we should only be looking for valid locations. Note, this method returns a
+     * live view of the movements so changes to one affect the other and in a worst case scenario can cause a
+     * ConcurrentModificationException. The returned collection isn't threadsafe or serializable, even if unfiltered is.
+     * @param locationId the id of the location we are looking for.
+     * @return the Location object with the required id.
+     */
+    public Location getLocation(final String locationId) {
+        Location location = locationsCache.getIfPresent(locationId);
+        if (location == null) {
+            try {
+                location = Iterables.find(getLocations(), new Predicate<Location>() {
+                    @Override
+                    public boolean apply(final Location loc) {
+                        return loc.getId().equals(locationId);
+                    }
+
+                });
+            } catch (NoSuchElementException e) {
+                // this is an error, we are looking for a location that does not exist.
+                log.error("No location with id {} exists.", locationId);
+                throw new BroadwickException("No location with id " + locationId + " exists.");
+            }
+        }
+        return location;
+    }
+
+    /**
+     * Get an animal from the list of animals in the system. If there is no animal matching the id a BroadwickException
+     * is thrown because we should only be looking for valid animals. Note, this method returns a live view of the
+     * movements so changes to one affect the other and in a worst case scenario can cause a
+     * ConcurrentModificationException. The returned collection isn't threadsafe or serializable, even if unfiltered is.
+     * @param animalId the id of the animal we are looking for.
+     * @return the Animal object with the required id.
+     */
+    public Animal getAnimal(final String animalId) {
+        Animal animal = animalsCache.getIfPresent(animalId);
+        if (animal == null) {
+            try {
+                animal = Iterables.find(getAnimals(), new Predicate<Animal>() {
+                    @Override
+                    public boolean apply(final Animal anm) {
+                        return anm.getId().equals(animalId);
+                    }
+
+                });
+            } catch (NoSuchElementException e) {
+                // this is an error, we are looking for a animal that does not exist.
+                log.error("No animal with id {} exists.", animalId);
+                throw new BroadwickException("No animal with id " + animalId + " exists.");
+            }
+        }
+        return animal;
+    }
+
+    /**
+     * Get all the recorded movements for a given animal. Note, this method returns a live view of the movements so
+     * changes to one affect the other and in a worst case scenario can cause a ConcurrentModificationException. The
+     * returned collection isn't threadsafe or serializable, even if unfiltered is.
+     * @param animalId the id of the animal whose movements are to be returned.
+     * @return a collection of movement events that have been recorded for the animal with the given id.
+     */
+    public Collection<Movement> getMovementsForAnimal(final String animalId) {
+
+        final Collection<Movement> movementsForAnimal = movementsCache.getIfPresent(animalId);
+        if (movementsForAnimal == null) {
+            // the cache have been destryed so do the long lookup
+            return Collections2.filter(getMovements(), new Predicate<Movement>() {
+                @Override
+                public boolean apply(final Movement movement) {
+                    return animalId.equals(movement.getId());
+                }
+
+            });
+        }
+
+        return movementsForAnimal;
+    }
+
+    /**
+     * Get an animals location at a specified date. If the animal does not have a specified location, e.g.
+     * if we are asking for its location before it's born or in the middle of a movement where the departure and 
+     * destination dates span several days then a null location will be returned.
+     * @param animalId the id of the animal.
+     * @param date the date for which we want the animals location.
+     * @return the location of the animal on date or Location.getNullLocation if there isn't a valid location.
+     */
+    public Location getAnimalLocationAtDate(final String animalId, final int date) {
+        final Collection<Movement> movements = getMovementsForAnimal(animalId);
+
+        String locationId = "";
+        // Simply iterate over all the movements up to and including this date setting the Location
+        // as we go. This should be ok since we are have ordered the movements 
+        for (Movement movement : movements) {
+            if (movement.getDestinationDate() <= date) {
+                final String departureId = movement.getDepartureId();
+                final String destinationId = movement.getDestinationId();
+
+                if (destinationId.isEmpty()) {
+                    locationId = departureId;
+                } else {
+                    locationId = destinationId;
+                }
+            } else if (movement.getDepartureDate() <= date) {
+                // we might have a movement that straddles the required date if so the animal moved off the departure
+                // location but not arrived at the destination so they have no location for this date.
+                locationId = "";
+            }
+        }
+        
+        if ("".equals(locationId)) {
+            return Location.getNullLocation();
+        }
+        
+        return getLocation(locationId);
+    }
+    
+    /**
+     * Convert a date object to an integer (number of days from a fixed start date, here 1/1/1900). All dates in the
+     * database are stored as integer values using this method.
+     * @param date the date object we are converting.
+     * @return the number of days from a fixed 'zero date'.
+     */
+    public int getDate(final DateTime date) {
+        return Days.daysBetween(dbFacade.getZeroDate(), date).getDays();
     }
 
     /**
@@ -296,6 +451,26 @@ public final class Lookup {
             BatchedMovementsFileReader.getMARKET_ID(),
             BatchedMovementsFileReader.getMARKET_DATE(),
             BatchedMovementsFileReader.getSPECIES());
+    Cache<String, Collection<Movement>> movementsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
+    Cache<String, Location> locationsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
+    Cache<String, Animal> animalsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
+    private final MovementDatabaseFacade dbFacade;
     private final GraphDatabaseService db;
     private final GlobalGraphOperations ops;
+}
+
+/**
+ * Implement a comparator for movements so that movements can be stored in ascending date order with OFF movements
+ * appearing before ON movements in the movements cache.
+ */
+class MovementsComparator implements Comparator<Movement> {
+
+    @Override
+    public int compare(final Movement m1, final Movement m2) {
+        // it's probably easiest to use the natural ordering determined by the toString() methods.
+        // The departure information appears in the string before the destination information so we, in effect are 
+        // ordering by departure date.
+        return m1.toString().compareTo(m2.toString());
+    }
+
 }
