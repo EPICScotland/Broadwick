@@ -14,14 +14,14 @@ public class SimulationEvent {
      * @param finalState the name and index of the bin of the final state.
      */
     public SimulationEvent(final SimulationState initialState, final SimulationState finalState) {
-        this.initalState = initialState;
+        this.initialState = initialState;
         this.finalState = finalState;
     }
 
     @Override
     public final String toString() {
         final StringBuilder sb = new StringBuilder(50);
-        sb.append(initalState.toString());
+        sb.append(initialState.toString());
         sb.append(" -->  ");
         sb.append(finalState.toString());
 
@@ -30,7 +30,7 @@ public class SimulationEvent {
 
     @Getter
     @Setter
-    private SimulationState initalState;
+    private SimulationState initialState;
     @Getter
     @Setter
     private SimulationState finalState;
