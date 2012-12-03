@@ -38,7 +38,7 @@ public final class Broadwick {
             final CliOptions cli = new CliOptions(args);
             readConfigFile(logFacade, cli.getConfigurationFileName());
         } catch (BroadwickException ex) {
-            log.error("Something went wrong starting project. See the error messages. {}", ex.getLocalizedMessage());
+            log.error("{}\nSomething went wrong starting project. See the error messages.", ex.getLocalizedMessage());
             log.trace(Throwables.getStackTraceAsString(ex));
         }
     }
