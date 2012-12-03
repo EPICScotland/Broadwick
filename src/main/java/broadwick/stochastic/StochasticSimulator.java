@@ -114,7 +114,7 @@ public abstract class StochasticSimulator {
      * <code>start</code>
      */
     public final void init() {
-        currentTime = 0;
+        currentTime = startTime;
     }
 
     /**
@@ -321,6 +321,8 @@ public abstract class StochasticSimulator {
      */
     public abstract void setRngSeed(final int seed);
 
+    @Setter
+    private int startTime = 0;
     @Setter
     @Getter
     private TransitionKernel transitionKernel;
