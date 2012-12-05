@@ -1,4 +1,6 @@
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<xsd:schema 
+    xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 
     <xsd:annotation>
         <xsd:documentation xml:lang="en">
@@ -144,10 +146,9 @@
         <xsd:sequence>
             <xsd:element name="model" minOccurs="1" maxOccurs="unbounded">
                 <xsd:complexType>
-                    <xsd:sequence>
+                    <xsd:sequence>                        
                         <xsd:element name="classname" minOccurs="1" maxOccurs="1" type="xsd:string"/>
-                        <xsd:element name="parameters" minOccurs="0" maxOccurs="1" type="Parameters"/>
-                        <xsd:element name="priors" minOccurs="0" maxOccurs="1" type="Priors"/>
+                        <xsd:any maxOccurs="unbounded" processContents="skip"/>
                     </xsd:sequence>
                     <xsd:attribute name="id" type="xsd:string" use="optional"/>
                 </xsd:complexType>

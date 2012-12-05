@@ -1,12 +1,6 @@
 package broadwick.model;
 
-import broadwick.config.generated.Models;
-import broadwick.config.generated.Parameters;
-import broadwick.config.generated.Priors;
 import broadwick.data.Lookup;
-import java.util.Collections;
-import java.util.Map;
-import java.util.TreeMap;
 import lombok.Getter;
 
 /**
@@ -27,13 +21,11 @@ import lombok.Getter;
 public abstract class Model {
 
     /**
-     * Set the Model element from the configuration file.
-     * @param model the XML element corresponding to the Model element in the config.
+     * Set the xml string for the <model> element in the configuration file.
+     * @param model a string representation of the xml section defining the configuration of the model.
      */
-    public final void setModelConfiguration(final Models.Model model) {
+    public final void setModelConfiguration(final String model) {
         this.model = model;
-        setParameters();
-        setPriors();
     }
 
     /**
@@ -45,34 +37,10 @@ public abstract class Model {
     }
 
     /**
-     * Create a list of the model's parameters from the model XML definition.
+     * Initialise the model. This method is called by the framework before calling the models run method to allow
+     * the implementation of the model to perform any initialisation required.
      */
-    private void setParameters() {
-        final Parameters params = this.getModel().getParameters();
-        if (params == null) {
-            parameters = Collections.EMPTY_MAP;
-        } else {
-            parameters = new TreeMap<>();
-            for (Parameters.Parameter par : params.getParameter()) {
-                parameters.put(par.getName(), par);
-            }
-        }
-    }
-
-    /**
-     * Create a list of the model's priors from the model XML definition.
-     */
-    private void setPriors() {
-        final Priors prs = this.getModel().getPriors();
-        if (prs == null) {
-            priors = Collections.EMPTY_MAP;
-        } else {
-            priors = new TreeMap<>();
-            for (Priors.Prior prior : prs.getPrior()) {
-                priors.put(prior.getName(), prior);
-            }
-        }
-    }
+    public abstract void init();
 
     /**
      * Run the model. This is the entry point to the model from the framework, up til now the framework has read any
@@ -81,11 +49,7 @@ public abstract class Model {
     public abstract void run();
 
     @Getter
-    private Models.Model model;
-    @Getter
-    private Map<String, Parameters.Parameter> parameters;
-    @Getter
-    private Map<String, Priors.Prior> priors;
+    private String model;
     @SuppressWarnings("PMD.UnusedPrivateField")
     @Getter
     private Lookup lookup;
