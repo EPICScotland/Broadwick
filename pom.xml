@@ -67,8 +67,7 @@
 
         <addjars-maven-plugin.version>1.0.4</addjars-maven-plugin.version>
         <buildnumber-maven-plugin.version>1.0</buildnumber-maven-plugin.version>
-        <ch.qos.logback.logback-classic.version>1.0.7</ch.qos.logback.logback-classic.version>
-        <ch.qos.logback.logback-core.version>1.0.7</ch.qos.logback.logback-core.version>
+        <ch.qos.logback.version>1.0.9</ch.qos.logback.version>
         <com.google.guava.version>13.0.1</com.google.guava.version>
         <jacoco-maven-plugin.version>0.5.10.201208310627</jacoco-maven-plugin.version>
         <jdk.version>1.7</jdk.version>
@@ -76,7 +75,7 @@
         <jre.version>1.7</jre.version>
         <junit.junit.version>4.11</junit.junit.version>
         <neo4j-version>1.9.M01</neo4j-version>
-        <org.h2.version>1.3.168</org.h2.version>
+        <org.h2.version>1.3.170</org.h2.version>
         <org.apache.mahout.commons.commons-cli.version>2.0-mahout</org.apache.mahout.commons.commons-cli.version>
         <org.apache.commons.lang3.version>3.1</org.apache.commons.lang3.version>  
         <org.apache.commons-math.version>2.2</org.apache.commons-math.version>
@@ -167,12 +166,12 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>${ch.qos.logback.logback-core.version}</version>
+            <version>${ch.qos.logback.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>${ch.qos.logback.logback-classic.version}</version>
+            <version>${ch.qos.logback.version}</version>
         </dependency>
 
         <!-- GUI dependencies -->
