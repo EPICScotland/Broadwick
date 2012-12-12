@@ -144,6 +144,12 @@
             <artifactId>joda-time</artifactId>
             <version>${joda-time.version}</version>
         </dependency>
+        <dependency>
+	    <!-- Adding JAXB here makes it avaiable to the implementing models -->
+            <groupId>org.jvnet.jaxb2.maven2</groupId>
+            <artifactId>maven-jaxb2-plugin</artifactId>
+            <version>${maven-jaxb2-plugin.version}</version>
+        </dependency>
 
         <!-- Database dependencies -->
         <dependency>
