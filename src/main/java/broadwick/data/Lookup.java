@@ -21,6 +21,8 @@ import java.util.TreeSet;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -41,7 +43,11 @@ public final class Lookup {
     public Lookup(final MovementDatabaseFacade dbFacade) {
         this.dbFacade = dbFacade;
         this.db = dbFacade.getInternalDb();
-        this.ops = GlobalGraphOperations.at(this.db);
+        if (this.db != null) {
+            this.ops = GlobalGraphOperations.at(this.db);
+        } else {
+            this.ops = null;
+        }
     }
 
     /**
@@ -200,11 +206,11 @@ public final class Lookup {
     }
 
     /**
-     * Get an animals location at a specified date. If the animal does not have a specified location, e.g.
-     * if we are asking for its location before it's born or in the middle of a movement where the departure and 
-     * destination dates span several days then a null location will be returned.
+     * Get an animals location at a specified date. If the animal does not have a specified location, e.g. if we are
+     * asking for its location before it's born or in the middle of a movement where the departure and destination dates
+     * span several days then a null location will be returned.
      * @param animalId the id of the animal.
-     * @param date the date for which we want the animals location.
+     * @param date     the date for which we want the animals location.
      * @return the location of the animal on date or Location.getNullLocation if there isn't a valid location.
      */
     public Location getAnimalLocationAtDate(final String animalId, final int date) {
@@ -212,9 +218,9 @@ public final class Lookup {
 
         String locationId = "";
         // Simply iterate over all the movements up to and including this date setting the Location
-        // as we go. This should be ok since we are have ordered the movements 
+        // as we go. This should be ok since we are have ordered the movements.
         for (Movement movement : movements) {
-            if (movement.getDestinationDate() <= date) {
+            if (movement.getDestinationDate() != null && movement.getDestinationDate() <= date) {
                 final String departureId = movement.getDepartureId();
                 final String destinationId = movement.getDestinationId();
 
@@ -223,20 +229,20 @@ public final class Lookup {
                 } else {
                     locationId = destinationId;
                 }
-            } else if (movement.getDepartureDate() <= date) {
+            } else if (movement.getDepartureDate() != null && movement.getDepartureDate() <= date) {
                 // we might have a movement that straddles the required date if so the animal moved off the departure
                 // location but not arrived at the destination so they have no location for this date.
                 locationId = "";
             }
         }
-        
+
         if ("".equals(locationId)) {
             return Location.getNullLocation();
         }
-        
+
         return getLocation(locationId);
     }
-    
+
     /**
      * Convert a date object to an integer (number of days from a fixed start date, here 1/1/1900). All dates in the
      * database are stored as integer values using this method.
@@ -245,6 +251,19 @@ public final class Lookup {
      */
     public int getDate(final DateTime date) {
         return Days.daysBetween(dbFacade.getZeroDate(), date).getDays();
+    }
+
+    /**
+     * Convert a date object to an integer (number of days from a fixed start date, here 1/1/1900). All dates in the
+     * database are stored as integer values using this method.
+     * @param date       the date object we are converting.
+     * @param dateFormat the format the date is in when doing the conversion.
+     * @return the number of days from a fixed 'zero date'.
+     */
+    public int getDate(final String date, final String dateFormat) {
+        final DateTimeFormatter pattern = DateTimeFormat.forPattern(dateFormat);
+        final DateTime dateTime = pattern.parseDateTime(date);
+        return this.getDate(dateTime);
     }
 
     /**

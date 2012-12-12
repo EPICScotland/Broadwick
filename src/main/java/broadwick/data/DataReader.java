@@ -48,8 +48,8 @@ public class DataReader implements java.lang.AutoCloseable {
                 drDatabase.createLookupTables();
                 readDataSection();
             }
-            lookup = new Lookup(drDatabase);
         }
+        lookup = new Lookup(drDatabase);
     }
 
     /**
