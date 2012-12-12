@@ -48,6 +48,11 @@ public abstract class Model {
      */
     public abstract void run();
 
+    /**
+     * End the model. This method is called by the framework after the model has finished running.
+     */
+    public abstract void finalise();
+
     @Getter
     private String model;
     @SuppressWarnings("PMD.UnusedPrivateField")
