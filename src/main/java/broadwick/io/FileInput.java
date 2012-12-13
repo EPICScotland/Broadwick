@@ -67,7 +67,7 @@ public class FileInput implements AutoCloseable {
             String line = reader.readLine();
             if (line != null) {
                 // we've not reached the end of the file, 
-                while (line.isEmpty()) {
+                while (line.isEmpty() || line.startsWith("#")) {
                     // read until the next non-empty line
                     line = reader.readLine();
                     if (line == null) {
