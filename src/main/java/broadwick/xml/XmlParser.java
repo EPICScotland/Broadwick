@@ -1,5 +1,6 @@
 package broadwick.xml;
 
+import broadwick.BroadwickException;
 import java.io.StringReader;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -39,7 +40,7 @@ public final class XmlParser {
             final Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             return unmarshaller.unmarshal(xmlSource, clazz).getValue();
         } else {
-            throw new RuntimeException("Cannot unmarshall xml. The supplied class does not correspond to the XML element.");
+            throw new BroadwickException("Cannot unmarshall xml. The supplied class does not correspond to the XML element.");
         }
     }
 
