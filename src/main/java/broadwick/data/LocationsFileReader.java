@@ -5,22 +5,19 @@ import broadwick.config.generated.CustomTags;
 import broadwick.config.generated.DataFiles;
 import broadwick.io.FileInput;
 import com.google.common.base.Throwables;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.concurrent.Callable;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Transaction;
 
 /**
  * Reader for the files describing the locations for the simulation.
  */
 @Slf4j
-public class LocationsFileReader implements Callable<Integer> {
+public class LocationsFileReader {
 
     /**
      * Create the locations file reader.
@@ -34,13 +31,13 @@ public class LocationsFileReader implements Callable<Integer> {
         this.dataDb = dataDb;
         final StringBuilder errors = new StringBuilder();
 
-        dataReader.addElement(ID, locationsFile.getLocationIdColumn(), VARCHAR, locationsDescr, errors, true, SECTION_NAME);
-        dataReader.addElement(EASTING, locationsFile.getEastingColumn(), DOUBLE, locationsDescr, errors, true, SECTION_NAME);
-        dataReader.addElement(NORTHING, locationsFile.getNorthingColumn(), DOUBLE, locationsDescr, errors, true, SECTION_NAME);
+        dataReader.updateSectionDefiniton(ID, locationsFile.getLocationIdColumn(), keyValuePairs, errors, true, SECTION_NAME);
+        dataReader.updateSectionDefiniton(EASTING, locationsFile.getEastingColumn(), keyValuePairs, errors, true, SECTION_NAME);
+        dataReader.updateSectionDefiniton(NORTHING, locationsFile.getNorthingColumn(), keyValuePairs, errors, true, SECTION_NAME);
 
         if (locationsFile.getCustomTags() != null) {
             for (CustomTags.CustomTag tag : locationsFile.getCustomTags().getCustomTag()) {
-                dataReader.addElement(tag.getName(), tag.getColumn(), tag.getType(), locationsDescr, errors, true, SECTION_NAME);
+                dataReader.updateSectionDefiniton(tag.getName(), tag.getColumn(), keyValuePairs, errors, true, SECTION_NAME);
             }
         }
 
@@ -49,17 +46,33 @@ public class LocationsFileReader implements Callable<Integer> {
         }
     }
 
-    @Override
-    public final Integer call() {
-        int readSoFar = 0;
-
+    /**
+     * Insert the data from the input file into the database. The data structure has been read and the database set up
+     * already so this method simply reads the file and extracts the relevant information, storing it in the database.
+     * @return the number of rows read
+     */
+    public final int insert() {
+        int inserted = 0;
         try (FileInput fle = new FileInput(locationsFile.getName(), locationsFile.getSeparator())) {
             List<String> line;
             //CHECKSTYLE:OFF
             while (!(line = fle.readLine()).isEmpty()) {
                 //CHECKSTYLE:ON
-                createDatabaseNode(line);
-                readSoFar++;
+                final String nodeId = line.get(locationsFile.getLocationIdColumn() - 1);
+                final Map<String, Object> properties = new HashMap<>();
+                properties.put("index", nodeId);
+
+                for (Map.Entry<String, Integer> entry : keyValuePairs.entrySet()) {
+                    final String value = line.get(entry.getValue() - 1);
+
+                    if (value != null && !value.isEmpty()) {
+                        final String property = entry.getKey();
+                        properties.put(property, value);
+                    }
+                }
+                final long node = dataDb.createNode(nodeId, properties);
+                dataDb.getIndex().add(node, properties);
+                inserted++;
             }
 
         } catch (IndexOutOfBoundsException | NoSuchElementException | NumberFormatException | BroadwickException e) {
@@ -71,59 +84,12 @@ public class LocationsFileReader implements Callable<Integer> {
             log.trace(String.format(errorMsg, locationsFile.getName()));
             throw new BroadwickException(String.format(errorMsg, locationsFile.getName()) + NEWLINE + Throwables.getStackTraceAsString(e));
         }
-        return readSoFar;
-    }
-
-    /**
-     * Create a database entry for a line read from a data file.
-     * @param line a list of tokens read from a locations data file.
-     */
-    private void createDatabaseNode(final List<String> line) {
-        // This is the code that actually add the data to the database, if the underlying database changes then
-        // this is the only method that need to be changed.
-        final String nodeId = line.get(locationsFile.getLocationIdColumn() - 1);
-        final Node node;
-        final Transaction tx = dataDb.getInternalDb().beginTx();
-        try {
-            node = dataDb.getNodeById(nodeId);
-            node.setProperty(MovementDatabaseFacade.TYPE, MovementDatabaseFacade.LOCATION);
-
-            for (Table.Cell<String, Integer, String> cell : locationsDescr.cellSet()) {
-                final String property = cell.getRowKey();
-                final String dataType = cell.getValue();
-                final String value = line.get(cell.getColumnKey() - 1);
-
-                if (value != null && !value.isEmpty()) {
-                    switch (dataType) {
-                        case DOUBLE:
-                            node.setProperty(property, Double.parseDouble(value));
-                            break;
-                        case INT:
-                            node.setProperty(property, Integer.parseInt(value));
-                            break;
-                        default:
-                            // add a string so we can catch VARCHAR here by default
-                            node.setProperty(property, value);
-                    }
-                }
-            }
-            tx.success();
-        } catch (org.neo4j.graphdb.NotFoundException e) {
-            final String errorMsg = "Could not find node %s";
-            log.trace(String.format(errorMsg, nodeId));
-            throw new BroadwickException(String.format(errorMsg, nodeId) + NEWLINE + Throwables.getStackTraceAsString(e));
-        } finally {
-            tx.finish();
-        }
+        return inserted;
     }
 
     private MovementDatabaseFacade dataDb;
     private DataFiles.LocationsFile locationsFile;
-    private Table<String, Integer, String> locationsDescr = HashBasedTable.create();
-    private static final String VARCHAR = "VARCHAR";
-    private static final String DOUBLE = "DOUBLE";
-    //private static final String DATE = "DATE";
-    private static final String INT = "INT";
+    private Map<String, Integer> keyValuePairs = new HashMap<>();
     @Getter
     private static final String ID = "Id";
     @Getter

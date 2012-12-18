@@ -5,27 +5,21 @@ import broadwick.config.generated.CustomTags;
 import broadwick.config.generated.DataFiles;
 import broadwick.io.FileInput;
 import com.google.common.base.Throwables;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
 import java.io.IOException;
-import java.text.ParseException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.concurrent.Callable;
+import java.util.Set;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Transaction;
 
 /**
  * Reader for the files describing the populations for the simulation.
  */
 @Slf4j
-public class PopulationsFileReader implements Callable<Integer> {
+public class PopulationsFileReader {
 
     /**
      * Create the populations file reader.
@@ -38,19 +32,20 @@ public class PopulationsFileReader implements Callable<Integer> {
         this.populationFile = populationFile;
         this.dataDb = dataDb;
         this.dataReader = dataReader;
-        dateFormat = DateTimeFormat.forPattern(populationFile.getDateFormat());
+
+        final StringBuilder errors = new StringBuilder();
 
         if (populationFile.getLifeHistory() != null) {
-            populationDescr.putAll(readLifeHistory());
+            keyValuePairs.putAll(readLifeHistory());
         } else if (populationFile.getPopulation() != null) {
-            populationDescr.putAll(readPopulation());
+            keyValuePairs.putAll(readPopulation());
         } else {
             throw new BroadwickException("Cannot read Populations section - No lifeHistory or population section found.");
         }
 
         if (populationFile.getCustomTags() != null) {
             for (CustomTags.CustomTag tag : populationFile.getCustomTags().getCustomTag()) {
-                populationDescr.put(tag.getName(), tag.getColumn(), tag.getType());
+                dataReader.updateSectionDefiniton(tag.getName(), tag.getColumn(), keyValuePairs, errors, true, SECTION_NAME);
             }
         }
     }
@@ -61,16 +56,22 @@ public class PopulationsFileReader implements Callable<Integer> {
      * @return A com.google.common.collect.Table element with a column name, location (i.e. column) in the data file and
      *         the database type of the element (VARCHAR, DATE, INT or DOUBLE).
      */
-    private Table<String, Integer, String> readLifeHistory() {
-        final Table<String, Integer, String> elements = HashBasedTable.create();
+    private Map<String, Integer> readLifeHistory() {
+        final Map<String, Integer> elements = new HashMap<>();
         final StringBuilder errors = new StringBuilder();
 
-        dataReader.addElement(ID, populationFile.getLifeHistory().getIdColumn(), VARCHAR, populationDescr, errors, true, SECTION_NAME);
-        dataReader.addElement(SPECIES, populationFile.getLifeHistory().getSpeciesColumn(), VARCHAR, populationDescr, errors, true, SECTION_NAME);
-        dataReader.addElement(DATE_OF_BIRTH, populationFile.getLifeHistory().getDateOfBirthColumn(), DATE, populationDescr, errors, true, SECTION_NAME);
-        dataReader.addElement(LOCATION_OF_BIRTH, populationFile.getLifeHistory().getLocationOfBirthColumn(), VARCHAR, populationDescr, errors, true, SECTION_NAME);
-        dataReader.addElement(DATE_OF_DEATH, populationFile.getLifeHistory().getDateOfDeathColumn(), DATE, populationDescr, errors, true, SECTION_NAME);
-        dataReader.addElement(LOCATION_OF_DEATH, populationFile.getLifeHistory().getLocationOfDeathColumn(), VARCHAR, populationDescr, errors, true, SECTION_NAME);
+        dataReader.updateSectionDefiniton(ID, populationFile.getLifeHistory().getIdColumn(), keyValuePairs, errors, true, SECTION_NAME);
+        dataReader.updateSectionDefiniton(DATE_OF_BIRTH, populationFile.getLifeHistory().getDateOfBirthColumn(), keyValuePairs, errors, true, SECTION_NAME);
+        dataReader.updateSectionDefiniton(LOCATION_OF_BIRTH, populationFile.getLifeHistory().getLocationOfBirthColumn(), keyValuePairs, errors, true, SECTION_NAME);
+        dataReader.updateSectionDefiniton(DATE_OF_DEATH, populationFile.getLifeHistory().getDateOfDeathColumn(), keyValuePairs, errors, true, SECTION_NAME);
+
+        if (populationFile.getLifeHistory().getSpeciesColumn() != null) {
+            dataReader.updateSectionDefiniton(SPECIES, populationFile.getLifeHistory().getSpeciesColumn(), keyValuePairs, errors, true, SECTION_NAME);
+        }
+
+        if (populationFile.getLifeHistory().getLocationOfDeathColumn() != null) {
+            dataReader.updateSectionDefiniton(LOCATION_OF_DEATH, populationFile.getLifeHistory().getLocationOfDeathColumn(), keyValuePairs, errors, true, SECTION_NAME);
+        }
 
         if (errors.length() > 0) {
             throw new BroadwickException(errors.toString());
@@ -85,14 +86,17 @@ public class PopulationsFileReader implements Callable<Integer> {
      * @return A com.google.common.collect.Table element with a column name, location (i.e. column) in the data file and
      *         the database type of the element (VARCHAR, DATE, INT or DOUBLE).
      */
-    private Table<String, Integer, String> readPopulation() {
-        final Table<String, Integer, String> elements = HashBasedTable.create();
+    private Map<String, Integer> readPopulation() {
+        final Map<String, Integer> elements = new HashMap<>();
         final StringBuilder errors = new StringBuilder();
 
-        dataReader.addElement(LOCATION, populationFile.getPopulation().getLocationIdColumn(), VARCHAR, elements, errors, true, SECTION_NAME);
-        dataReader.addElement(POPULATION, populationFile.getPopulation().getPopulationSizeColumn(), INT, elements, errors, true, SECTION_NAME);
-        dataReader.addElement(DATE_LC, populationFile.getPopulation().getPopulationDateColumn(), DATE, elements, errors, true, SECTION_NAME);
-        dataReader.addElement(SPECIES, populationFile.getPopulation().getSpeciesColumn(), VARCHAR, elements, errors, true, SECTION_NAME);
+        dataReader.updateSectionDefiniton(LOCATION, populationFile.getPopulation().getLocationIdColumn(), elements, errors, true, SECTION_NAME);
+        dataReader.updateSectionDefiniton(POPULATION, populationFile.getPopulation().getPopulationSizeColumn(), elements, errors, true, SECTION_NAME);
+        dataReader.updateSectionDefiniton(DATE_LC, populationFile.getPopulation().getPopulationDateColumn(), elements, errors, true, SECTION_NAME);
+
+        if (populationFile.getPopulation().getSpeciesColumn() != null) {
+            dataReader.updateSectionDefiniton(SPECIES, populationFile.getPopulation().getSpeciesColumn(), keyValuePairs, errors, true, SECTION_NAME);
+        }
 
         if (errors.length() > 0) {
             throw new BroadwickException(errors.toString());
@@ -101,19 +105,45 @@ public class PopulationsFileReader implements Callable<Integer> {
         return elements;
     }
 
-    @Override
-    public final Integer call() {
-        int readSoFar = 0;
-
+    /**
+     * Insert the data from the input file into the database. The data structure has been read and the database set up
+     * already so this method simply reads the file and extracts the relevant information, storing it in the database.
+     * @return the number of rows read
+     */
+    public final int insert() {
+        int inserted = 0;
         try (FileInput fle = new FileInput(populationFile.getName(), populationFile.getSeparator())) {
             List<String> line;
+            final Set<String> insertedIds = new HashSet<>();
             //CHECKSTYLE:OFF
             while (!(line = fle.readLine()).isEmpty()) {
                 //CHECKSTYLE:ON
-                createDatabaseEntry(line);
-                readSoFar++;
+
+                //TODO what about the populations? we only get the id from the LifeHistory.....
+                final String nodeId = line.get(populationFile.getLifeHistory().getIdColumn() - 1);
+                final Map<String, Object> properties = new HashMap<>();
+                properties.put("index", nodeId);
+
+                for (Map.Entry<String, Integer> entry : keyValuePairs.entrySet()) {
+                    final String value = line.get(entry.getValue() - 1);
+
+                    if (value != null && !value.isEmpty()) {
+                        final String property = entry.getKey();
+                        properties.put(property, value);
+                    }
+                }
+                final Long node = dataDb.createNode(nodeId, properties);
+                if (node != null && !insertedIds.contains(nodeId)) {
+                    dataDb.getIndex().add(node, properties);
+                    insertedIds.add(nodeId);
+                    inserted++;
+                    if (inserted % 100000 == 0) {
+                        dataDb.getIndex().flush();
+                    }
+                }
             }
-        } catch (NumberFormatException | ParseException | IndexOutOfBoundsException | NoSuchElementException | BroadwickException e) {
+
+        } catch (IndexOutOfBoundsException | NoSuchElementException | NumberFormatException | BroadwickException e) {
             final String errorMsg = "Adding to reading list for %s";
             log.trace(String.format(errorMsg, populationFile.getName()));
             throw new BroadwickException(String.format(errorMsg, populationFile.getName()) + NEWLINE + Throwables.getStackTraceAsString(e));
@@ -122,66 +152,13 @@ public class PopulationsFileReader implements Callable<Integer> {
             log.trace(String.format(errorMsg, populationFile.getName()));
             throw new BroadwickException(String.format(errorMsg, populationFile.getName()) + NEWLINE + Throwables.getStackTraceAsString(e));
         }
-        return readSoFar;
-    }
-
-    /**
-     * Create a database entry for a line read from a data file.
-     * @param line a list of tokens read from a populations data file.
-     * @throws ParseException if a date element cannot be parsed.
-     */
-    private void createDatabaseEntry(final List<String> line) throws ParseException {
-        // This is the code that actually add the data to the database, if the underlying database changes then
-        // this is the only method that need to be changed.
-
-        final String nodeId = line.get(populationFile.getLifeHistory().getIdColumn() - 1);
-        final Node node;
-        final Transaction tx = dataDb.getInternalDb().beginTx();
-        try {
-            node = dataDb.getNodeById(nodeId);
-            node.setProperty(MovementDatabaseFacade.TYPE, MovementDatabaseFacade.ANIMAL);
-
-            for (Table.Cell<String, Integer, String> cell : populationDescr.cellSet()) {
-                final String property = cell.getRowKey();
-                final String dataType = cell.getValue();
-                final String value = line.get(cell.getColumnKey() - 1);
-                if (value != null && !value.isEmpty()) {
-                    switch (dataType) {
-                        case DOUBLE:
-                            node.setProperty(property, Double.parseDouble(value));
-                            break;
-                        case INT:
-                            node.setProperty(property, Integer.parseInt(value));
-                            break;
-                        case DATE:
-                            final DateTime date = DateTime.parse(value, this.dateFormat);
-                            node.setProperty(property, Days.daysBetween(dataDb.getZeroDate(), date).getDays());
-                            break;
-                        default:
-                            // add a string so we can catch VARCHAR here by default
-                            node.setProperty(property, value);
-                    }
-                }
-            }
-            tx.success();
-        } catch (org.neo4j.graphdb.NotFoundException e) {
-            final String errorMsg = "Could not find node %s";
-            log.trace(String.format(errorMsg, nodeId));
-            throw new BroadwickException(String.format(errorMsg, nodeId) + NEWLINE + Throwables.getStackTraceAsString(e));
-        } finally {
-            tx.finish();
-        }
+        return inserted;
     }
 
     private MovementDatabaseFacade dataDb;
     private DataReader dataReader;
     private DataFiles.PopulationFile populationFile;
-    private Table<String, Integer, String> populationDescr = HashBasedTable.create();
-    private final DateTimeFormatter dateFormat;
-    private static final String VARCHAR = "VARCHAR";
-    private static final String DOUBLE = "DOUBLE";
-    private static final String DATE = "DATE";
-    private static final String INT = "INT";
+    private Map<String, Integer> keyValuePairs = new HashMap<>();
     @Getter
     private static final String ID = "Id";
     private static final String LOCATION = "Location";

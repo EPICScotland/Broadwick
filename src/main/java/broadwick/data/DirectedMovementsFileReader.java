@@ -5,29 +5,20 @@ import broadwick.config.generated.CustomTags;
 import broadwick.config.generated.DataFiles;
 import broadwick.io.FileInput;
 import com.google.common.base.Throwables;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
 import java.io.IOException;
-import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.concurrent.Callable;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.Transaction;
 
 /**
  * Reader for the files describing the directed movements (i.e. those that only have a location and a movement_ON or
  * movement_OFF flag)for the simulation. The movements are read and stored in internal databases for later use.
  */
 @Slf4j
-public class DirectedMovementsFileReader implements Callable<Integer> {
+public class DirectedMovementsFileReader {
 
     /**
      * Create the movement file reader.
@@ -39,19 +30,18 @@ public class DirectedMovementsFileReader implements Callable<Integer> {
                                        final DataReader dataReader, final MovementDatabaseFacade dataDb) {
         this.movementFile = movementFile;
         this.dataDb = dataDb;
-        dateFormat = DateTimeFormat.forPattern(movementFile.getDateFormat());
 
         try {
             final StringBuilder errors = new StringBuilder();
-            dataReader.addElement(ID, movementFile.getIdColumn(), VARCHAR, directedMvmtDescr, errors, true, SECTION_NAME);
-            dataReader.addElement(MOVEMENT_DATE, movementFile.getMovementDateColumn(), DATE, directedMvmtDescr, errors, true, SECTION_NAME);
-            dataReader.addElement(MOVEMENT_DIRECTION, movementFile.getMovementDirectionColumn(), VARCHAR, directedMvmtDescr, errors, true, SECTION_NAME);
-            dataReader.addElement(LOCATION_ID, movementFile.getLocationColumn(), VARCHAR, directedMvmtDescr, errors, true, SECTION_NAME);
-            dataReader.addElement(SPECIES, movementFile.getSpeciesColumn(), VARCHAR, directedMvmtDescr, errors, true, SECTION_NAME);
+            dataReader.updateSectionDefiniton(ID, movementFile.getIdColumn(), keyValuePairs, errors, true, SECTION_NAME);
+            dataReader.updateSectionDefiniton(MOVEMENT_DATE, movementFile.getMovementDateColumn(), keyValuePairs, errors, true, SECTION_NAME);
+            dataReader.updateSectionDefiniton(MOVEMENT_DIRECTION, movementFile.getMovementDirectionColumn(), keyValuePairs, errors, true, SECTION_NAME);
+            dataReader.updateSectionDefiniton(LOCATION_ID, movementFile.getLocationColumn(), keyValuePairs, errors, true, SECTION_NAME);
+            dataReader.updateSectionDefiniton(SPECIES, movementFile.getSpeciesColumn(), keyValuePairs, errors, true, SECTION_NAME);
 
             if (movementFile.getCustomTags() != null) {
                 for (CustomTags.CustomTag tag : movementFile.getCustomTags().getCustomTag()) {
-                    dataReader.addElement(tag.getName(), tag.getColumn(), tag.getType(), directedMvmtDescr, errors, true, SECTION_NAME);
+                    dataReader.updateSectionDefiniton(tag.getName(), tag.getColumn(), keyValuePairs, errors, true, SECTION_NAME);
                 }
             }
 
@@ -64,19 +54,38 @@ public class DirectedMovementsFileReader implements Callable<Integer> {
         }
     }
 
-    @Override
-    public final Integer call() {
-        int readSoFar = 0;
+    /**
+     * Insert the data from the input file into the database. The data structure has been read and the database set up
+     * already so this method simply reads the file and extracts the relevant information, storing it in the database.
+     * @return the number of rows read
+     */
+    public final int insert() {
+        int inserted = 0;
 
         try (FileInput fle = new FileInput(movementFile.getName(), movementFile.getSeparator())) {
             List<String> line;
             //CHECKSTYLE:OFF
             while (!(line = fle.readLine()).isEmpty()) {
                 //CHECKSTYLE:ON
-                createDatabaseEntry(line);
-                readSoFar++;
+
+                final long animalNode = dataDb.getNodeById(line.get(movementFile.getIdColumn()));
+                final long locationNode = dataDb.getNodeById(line.get(movementFile.getLocationColumn()));
+
+                final Map<String, Object> properties = new HashMap<>();
+                for (Map.Entry<String, Integer> entry : keyValuePairs.entrySet()) {
+                    final String value = line.get(entry.getValue() - 1);
+
+                    if (value != null && !value.isEmpty()) {
+                        final String property = entry.getKey();
+                        properties.put(property, value);
+                    }
+                }
+
+                dataDb.getInternalDb().createRelationship(animalNode, locationNode, MovementDatabaseFacade.MovementRelationship.MOVES, properties);
+                inserted++;
             }
-        } catch (IndexOutOfBoundsException | NoSuchElementException | ParseException | NumberFormatException | BroadwickException e) {
+
+        } catch (IndexOutOfBoundsException | NoSuchElementException | NumberFormatException | BroadwickException e) {
             final String errorMsg = "Adding to reading list for %s";
             log.trace(String.format(errorMsg, movementFile.getName()));
             throw new BroadwickException(String.format(errorMsg, movementFile.getName()) + NEWLINE + Throwables.getStackTraceAsString(e));
@@ -85,54 +94,12 @@ public class DirectedMovementsFileReader implements Callable<Integer> {
             log.trace(String.format(errorMsg, movementFile.getName()));
             throw new BroadwickException(String.format(errorMsg, movementFile.getName()) + NEWLINE + Throwables.getStackTraceAsString(e));
         }
-        return readSoFar;
-    }
-
-    /**
-     * Create a database entry for a line read from a data file.
-     * @param line a list of tokens read from a movement data file.
-     * @throws ParseException if a date element cannot be parsed.
-     */
-    private void createDatabaseEntry(final List<String> line) throws ParseException {
-
-        final Transaction tx = dataDb.getInternalDb().beginTx();
-        try {
-
-            final Node animalNode = dataDb.getNodeById(line.get(movementFile.getIdColumn()));
-            final Node locationNode = dataDb.getNodeById(line.get(movementFile.getLocationColumn()));
-            final Relationship relationship = animalNode.createRelationshipTo(locationNode,
-                                                                              MovementDatabaseFacade.MovementRelationship.MOVES);
-
-            for (Table.Cell<String, Integer, String> cell : directedMvmtDescr.cellSet()) {
-                final String property = cell.getRowKey();
-                final String dataType = cell.getValue();
-                final String value = line.get(cell.getColumnKey() - 1);
-
-                if (value != null && !value.isEmpty()) {
-                    switch (dataType) {
-                        case DATE:
-                            final DateTime date = DateTime.parse(value, this.dateFormat);
-                            relationship.setProperty(property, Days.daysBetween(dataDb.getZeroDate(), date).getDays());
-                            break;
-                        default:
-                            // add a string so we can catch VARCHAR here by default
-                            relationship.setProperty(property, value);
-                    }
-                }
-            }
-            tx.success();
-
-        } finally {
-            tx.finish();
-        }
+        return inserted;
     }
 
     private MovementDatabaseFacade dataDb;
     private DataFiles.DirectedMovementFile movementFile;
-    private Table<String, Integer, String> directedMvmtDescr = HashBasedTable.create();
-    private final DateTimeFormatter dateFormat;
-    private static final String VARCHAR = "VARCHAR";
-    private static final String DATE = "DATE";
+    private Map<String, Integer> keyValuePairs = new HashMap<>();
     @Getter
     private static final String ID = "Id";
     @Getter

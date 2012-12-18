@@ -23,7 +23,6 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.tooling.GlobalGraphOperations;
@@ -42,12 +41,14 @@ public final class Lookup {
      */
     public Lookup(final MovementDatabaseFacade dbFacade) {
         this.dbFacade = dbFacade;
-        this.db = dbFacade.getInternalDb();
-        if (this.db != null) {
-            this.ops = GlobalGraphOperations.at(this.db);
-        } else {
+//        this.db = dbFacade.getInternalDb();
+        
+        //TODO fix this
+        //if (this.db != null) {
+            //this.ops = GlobalGraphOperations.at(this.db);
+        //} else {
             this.ops = null;
-        }
+        //}
     }
 
     /**
@@ -474,7 +475,7 @@ public final class Lookup {
     Cache<String, Location> locationsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
     Cache<String, Animal> animalsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
     private final MovementDatabaseFacade dbFacade;
-    private final GraphDatabaseService db;
+//    private final BatchInserter db;
     private final GlobalGraphOperations ops;
 }
 

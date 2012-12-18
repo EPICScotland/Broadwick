@@ -4,18 +4,20 @@ import broadwick.BroadwickException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.NoSuchElementException;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
+import org.neo4j.helpers.collection.MapUtil;
+import org.neo4j.index.lucene.unsafe.batchinsert.LuceneBatchInserterIndexProvider;
+import org.neo4j.unsafe.batchinsert.BatchInserter;
+import org.neo4j.unsafe.batchinsert.BatchInserterIndex;
+import org.neo4j.unsafe.batchinsert.BatchInserterIndexProvider;
+import org.neo4j.unsafe.batchinsert.BatchInserters;
 
 /**
  * All the classes required to read the data section of the configuration file save data to a database. The database
@@ -32,8 +34,10 @@ public class MovementDatabaseFacade {
     protected final void openDatabase(final String dbName, final String lookupDbName) {
         log.debug("Opening internal databases {}, {}.", dbName, lookupDbName);
 
-        internalDb = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(dbName).newGraphDatabase();
-        nodeIndex = internalDb.index().forNodes("nodes");
+        internalDb = BatchInserters.inserter(dbName);
+        indexProvider = new LuceneBatchInserterIndexProvider(internalDb);
+        index = indexProvider.nodeIndex("actors", MapUtil.stringMap("type", "exact"));
+        index.setCacheCapacity("name", 100000);
 
         // Registers a shutdown hook for the Neo4j instance so that it
         // shuts down nicely when the VM exits (even if you "Ctrl-C" the
@@ -41,6 +45,7 @@ public class MovementDatabaseFacade {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
+                indexProvider.shutdown();
                 internalDb.shutdown();
             }
 
@@ -63,6 +68,8 @@ public class MovementDatabaseFacade {
 
         try {
             if (internalDb != null) {
+                // shutdown the index provide so that the indexes are written to disk...
+                indexProvider.shutdown();
                 internalDb.shutdown();
             }
 
@@ -92,30 +99,47 @@ public class MovementDatabaseFacade {
      *         this id.
      */
     @Synchronized
-    protected final Node getNodeById(final String id) {
-        Node node = null;
-        final Transaction tx = internalDb.beginTx();
-        try {
-            final IndexHits<Node> hits = nodeIndex.get(indexId, id);
-            node = hits.getSingle();
-            if (node == null) {
-                //log.trace("Could not find node with id {} in database so creating new one", id);
+    protected final Long getNodeById(final String id) {
+        Long node;
 
-                node = internalDb.createNode();
-                node.setProperty(indexId, id);
-                nodeIndex.add(node, indexId, id);
+        final IndexHits<Long> hits = index.get(indexId, id);
+        if (hits.size() > 1) {
+            log.error("Found the following nodes with id = {}\n", id);
+            for (long hit : hits) {
+                log.error("{}", hit);
             }
-
-            // Make things persistent
-            tx.success();
-        } catch (NoSuchElementException e) {
-            log.error("Could not get unique node with this id from the network - node ids MUST be unique within the network. {}",
-                      e.getLocalizedMessage());
-            throw new BroadwickException(e);
-        } finally {
-            tx.finish();
+            throw new BroadwickException("More than one node exists with id = " + id);
         }
+
+        node = hits.getSingle();
+        if (node == null) {
+            //log.trace("Could not find node with id {} in database so creating new one", id);
+
+            final Map<String, Object> properties = new HashMap<>();
+            properties.put(indexId, id);
+
+            node = internalDb.createNode(properties);
+        }
+
         return node;
+    }
+
+    /**
+     * Create a node in the database with the given id returning it's automatically generated index or, if the id is
+     * already in the database, return the index for the node with the given id.
+     * @param id the id of the node we wish to create
+     * @param properties the properties we are assigning to the created node.
+     * @return the index (auomatically generated id) of the created node.
+     */
+    @Synchronized
+    protected final Long createNode(final String id, final Map<String, Object> properties) {
+        final IndexHits<Long> hits = index.get(indexId, id);
+        if (hits.size() == 0) {
+            return internalDb.createNode(properties);
+        } else if (hits.size() == 1) {
+            return hits.getSingle();
+        }
+        return null;
     }
 
     /**
@@ -128,9 +152,10 @@ public class MovementDatabaseFacade {
     @Getter
     private Connection lookupDb = null;
     @Getter
-    private GraphDatabaseService internalDb;
+    private BatchInserter internalDb;
     @Getter
-    private Index<Node> nodeIndex;
+    private BatchInserterIndex index;
+    private BatchInserterIndexProvider indexProvider;
     private String indexId = "index";
     @Getter
     private final DateTime zeroDate = new DateTime(1900, 1, 1, 0, 0);
