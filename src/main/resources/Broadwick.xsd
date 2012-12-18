@@ -78,7 +78,7 @@
                         <xsd:element name="destinationLocationIdColumn" type="xsd:int"/>
                         <xsd:element name="marketIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
                         <xsd:element name="marketDateColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
-                        <xsd:element name="speciesColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="speciesColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
                         <xsd:element name="dateFormat" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="customTags" minOccurs="0" maxOccurs="1" type="CustomTags"/>
                     </xsd:sequence>
@@ -98,7 +98,7 @@
                         <xsd:element name="destinationLocationIdColumn" type="xsd:int"/>
                         <xsd:element name="marketIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
                         <xsd:element name="marketDateColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
-                        <xsd:element name="speciesColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="speciesColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
                         <xsd:element name="dateFormat" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="customTags" minOccurs="0" maxOccurs="1" type="CustomTags"/>
                     </xsd:sequence>
@@ -205,8 +205,8 @@
             <xsd:element name="dateOfBirthColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
             <xsd:element name="locationOfBirthColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
             <xsd:element name="dateOfDeathColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
-            <xsd:element name="locationOfDeathColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
-            <xsd:element name="speciesColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+            <xsd:element name="locationOfDeathColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+            <xsd:element name="speciesColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -215,7 +215,7 @@
             <xsd:element name="locationIdColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
             <xsd:element name="populationSizeColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
             <xsd:element name="populationDateColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
-            <xsd:element name="speciesColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+            <xsd:element name="speciesColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
         </xsd:sequence>
     </xsd:complexType>
 </xsd:schema>
