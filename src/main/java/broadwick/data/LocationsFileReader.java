@@ -6,10 +6,13 @@ import broadwick.config.generated.DataFiles;
 import broadwick.io.FileInput;
 import com.google.common.base.Throwables;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,8 +56,11 @@ public class LocationsFileReader {
      */
     public final int insert() {
         int inserted = 0;
+        
+        List<String> line = Collections.EMPTY_LIST;
         try (FileInput fle = new FileInput(locationsFile.getName(), locationsFile.getSeparator())) {
-            List<String> line;
+                        final Set<String> insertedIds = new HashSet<>();
+
             //CHECKSTYLE:OFF
             while (!(line = fle.readLine()).isEmpty()) {
                 //CHECKSTYLE:ON
@@ -70,15 +76,22 @@ public class LocationsFileReader {
                         properties.put(property, value);
                     }
                 }
-                final long node = dataDb.createNode(nodeId, properties);
-                dataDb.getIndex().add(node, properties);
-                inserted++;
+                
+                final Long node = dataDb.createNode(nodeId, properties);
+                if (node != null && !insertedIds.contains(nodeId)) {
+                    dataDb.getIndex().add(node, properties);
+                    insertedIds.add(nodeId);
+                    inserted++;
+                    if (inserted % 100000 == 0) {
+                        dataDb.getIndex().flush();
+                    }
+                }
             }
 
         } catch (IndexOutOfBoundsException | NoSuchElementException | NumberFormatException | BroadwickException e) {
-            final String errorMsg = "Adding to reading list for %s";
-            log.trace(String.format(errorMsg, locationsFile.getName()));
-            throw new BroadwickException(String.format(errorMsg, locationsFile.getName()) + NEWLINE + Throwables.getStackTraceAsString(e));
+            final String errorMsg = "Could not read file %s; last line read %s";
+            log.trace(String.format(errorMsg, locationsFile.getName(), line));
+            throw new BroadwickException(String.format(errorMsg, locationsFile.getName(), line) + NEWLINE + Throwables.getStackTraceAsString(e));
         } catch (IOException e) {
             final String errorMsg = "Could not open file %s";
             log.trace(String.format(errorMsg, locationsFile.getName()));
