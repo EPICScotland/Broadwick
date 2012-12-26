@@ -56,10 +56,10 @@ public class LocationsFileReader {
      */
     public final int insert() {
         int inserted = 0;
-        
+
         List<String> line = Collections.EMPTY_LIST;
         try (FileInput fle = new FileInput(locationsFile.getName(), locationsFile.getSeparator())) {
-                        final Set<String> insertedIds = new HashSet<>();
+            final Set<String> insertedIds = new HashSet<>();
 
             //CHECKSTYLE:OFF
             while (!(line = fle.readLine()).isEmpty()) {
@@ -76,7 +76,8 @@ public class LocationsFileReader {
                         properties.put(property, value);
                     }
                 }
-                
+                properties.put(MovementDatabaseFacade.TYPE, MovementDatabaseFacade.LOCATION);
+
                 final Long node = dataDb.createNode(nodeId, properties);
                 if (node != null && !insertedIds.contains(nodeId)) {
                     dataDb.getIndex().add(node, properties);

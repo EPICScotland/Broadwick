@@ -6,6 +6,7 @@ import broadwick.config.generated.DataFiles;
 import broadwick.io.FileInput;
 import com.google.common.base.Throwables;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +16,10 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Reader for the files describing the populations for the simulation.
@@ -35,6 +40,7 @@ public class PopulationsFileReader {
         this.dataReader = dataReader;
 
         final StringBuilder errors = new StringBuilder();
+        dateFormat = populationFile.getDateFormat();
 
         if (populationFile.getLifeHistory() != null) {
             keyValuePairs.putAll(readLifeHistory());
@@ -116,6 +122,10 @@ public class PopulationsFileReader {
         List<String> line = Collections.EMPTY_LIST;
         try (FileInput fle = new FileInput(populationFile.getName(), populationFile.getSeparator())) {
             final Set<String> insertedIds = new HashSet<>();
+
+            final List<String> dateKeys = Arrays.asList(DATE_OF_BIRTH, DATE_OF_DEATH);
+            final DateTimeFormatter pattern = DateTimeFormat.forPattern(dateFormat);
+
             //CHECKSTYLE:OFF
             while (!(line = fle.readLine()).isEmpty()) {
                 //CHECKSTYLE:ON
@@ -130,9 +140,15 @@ public class PopulationsFileReader {
 
                     if (value != null && !value.isEmpty()) {
                         final String property = entry.getKey();
-                        properties.put(property, value);
+                        if (dateKeys.contains(property)) {
+                            final DateTime date = pattern.parseDateTime(value);
+                            properties.put(property, Days.daysBetween(this.dataDb.getZeroDate(), date).getDays());
+                        } else {
+                            properties.put(property, value);
+                        }
                     }
                 }
+                properties.put(MovementDatabaseFacade.TYPE, MovementDatabaseFacade.ANIMAL);
                 final Long node = dataDb.createNode(nodeId, properties);
                 if (node != null && !insertedIds.contains(nodeId)) {
                     dataDb.getIndex().add(node, properties);
@@ -159,6 +175,7 @@ public class PopulationsFileReader {
     private MovementDatabaseFacade dataDb;
     private DataReader dataReader;
     private DataFiles.PopulationFile populationFile;
+    private String dateFormat;
     private Map<String, Integer> keyValuePairs = new HashMap<>();
     @Getter
     private static final String ID = "Id";
