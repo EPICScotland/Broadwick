@@ -1,5 +1,6 @@
 package broadwick.data;
 
+import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -7,7 +8,7 @@ import lombok.Data;
  */
 @Data
 @SuppressWarnings("PMD.UnusedPrivateField")
-public class Movement {
+public class Movement implements Serializable {
 // TODO what about cutom tags??????
 
     private final String id;
