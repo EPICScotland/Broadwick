@@ -1,6 +1,7 @@
 package broadwick.data;
 
 import broadwick.BroadwickException;
+import com.google.common.base.Throwables;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -10,10 +11,12 @@ import lombok.Getter;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.index.lucene.unsafe.batchinsert.LuceneBatchInserterIndexProvider;
+import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserterIndex;
 import org.neo4j.unsafe.batchinsert.BatchInserterIndexProvider;
@@ -27,29 +30,72 @@ import org.neo4j.unsafe.batchinsert.BatchInserters;
 public class MovementDatabaseFacade {
 
     /**
+     * Open the connection to the internal database. This method uses a batch inserter to do the inserting.
+     * @param dbName       the name of the database to use as the internal database.
+     * @param lookupDbName the name of the lookup table.
+     */
+    protected final void openDatabaseForInserting(final String dbName, final String lookupDbName) {
+        try {
+            dbService = null;
+            dbInserter = BatchInserters.inserter(dbName);
+
+            indexProvider = new LuceneBatchInserterIndexProvider(dbInserter);
+            index = indexProvider.nodeIndex("actors", MapUtil.stringMap("type", "exact"));
+            index.setCacheCapacity("name", 100000);
+
+            // Registers a shutdown hook for the Neo4j instance so that it
+            // shuts down nicely when the VM exits (even if you "Ctrl-C" the
+            // running example before it's completed)
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    closeDb();
+                }
+
+            });
+        } catch (Exception e) {
+            log.error("Error setting up databases.\n{}", Throwables.getStackTraceAsString(e));
+            closeDb();
+        }
+
+        try {
+            Class.forName("org.h2.Driver");
+            lookupDb = DriverManager.getConnection("jdbc:h2:" + lookupDbName);
+            lookupDb.setAutoCommit(false);
+        } catch (ClassNotFoundException | SQLException ex) {
+            log.error("Could not open database for internal data. {}", ex.getLocalizedMessage());
+        }
+    }
+
+    /**
      * Open the connection to the internal database.
      * @param dbName       the name of the database to use as the internal database.
      * @param lookupDbName the name of the lookup table.
      */
     protected final void openDatabase(final String dbName, final String lookupDbName) {
+
+        // first close any open hooks used for batch inserting.
+        closeDb();
+
         log.debug("Opening internal databases {}, {}.", dbName, lookupDbName);
+        try {
+            dbInserter = null;
+            dbService = new EmbeddedGraphDatabase(dbName);
 
-        internalDb = BatchInserters.inserter(dbName);
-        indexProvider = new LuceneBatchInserterIndexProvider(internalDb);
-        index = indexProvider.nodeIndex("actors", MapUtil.stringMap("type", "exact"));
-        index.setCacheCapacity("name", 100000);
+            // Registers a shutdown hook for the Neo4j instance so that it
+            // shuts down nicely when the VM exits (even if you "Ctrl-C" the
+            // running example before it's completed)
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    closeDb();
+                }
 
-        // Registers a shutdown hook for the Neo4j instance so that it
-        // shuts down nicely when the VM exits (even if you "Ctrl-C" the
-        // running example before it's completed)
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                indexProvider.shutdown();
-                internalDb.shutdown();
-            }
-
-        });
+            });
+        } catch (Exception e) {
+            log.error("Error setting up databases.\n{}", Throwables.getStackTraceAsString(e));
+            closeDb();
+        }
 
         try {
             Class.forName("org.h2.Driver");
@@ -64,13 +110,17 @@ public class MovementDatabaseFacade {
      * Close the connection to the internal database.
      */
     protected final void closeDb() {
-        log.debug("Closing internal database.");
+        log.trace("Closing internal database.");
 
         try {
-            if (internalDb != null) {
+            if (dbInserter != null) {
                 // shutdown the index provide so that the indexes are written to disk...
                 indexProvider.shutdown();
-                internalDb.shutdown();
+                dbInserter.shutdown();
+            }
+
+            if (dbService != null) {
+                dbService.shutdown();
             }
 
             if (lookupDb != null) {
@@ -118,7 +168,7 @@ public class MovementDatabaseFacade {
             final Map<String, Object> properties = new HashMap<>();
             properties.put(indexId, id);
 
-            node = internalDb.createNode(properties);
+            node = dbInserter.createNode(properties);
         }
 
         return node;
@@ -127,7 +177,7 @@ public class MovementDatabaseFacade {
     /**
      * Create a node in the database with the given id returning it's automatically generated index or, if the id is
      * already in the database, return the index for the node with the given id.
-     * @param id the id of the node we wish to create
+     * @param id         the id of the node we wish to create
      * @param properties the properties we are assigning to the created node.
      * @return the index (auomatically generated id) of the created node.
      */
@@ -135,7 +185,7 @@ public class MovementDatabaseFacade {
     protected final Long createNode(final String id, final Map<String, Object> properties) {
         final IndexHits<Long> hits = index.get(indexId, id);
         if (hits.size() == 0) {
-            return internalDb.createNode(properties);
+            return dbInserter.createNode(properties);
         } else if (hits.size() == 1) {
             return hits.getSingle();
         }
@@ -152,7 +202,9 @@ public class MovementDatabaseFacade {
     @Getter
     private Connection lookupDb = null;
     @Getter
-    private BatchInserter internalDb;
+    private GraphDatabaseService dbService;
+    @Getter
+    private BatchInserter dbInserter;
     @Getter
     private BatchInserterIndex index;
     private BatchInserterIndexProvider indexProvider;

@@ -6,6 +6,7 @@ import broadwick.config.generated.DataFiles;
 import broadwick.io.FileInput;
 import com.google.common.base.Throwables;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,10 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Reader for the files describing the directed movements (i.e. those that only have a location and a movement_ON or
@@ -34,6 +39,8 @@ public class DirectedMovementsFileReader {
 
         try {
             final StringBuilder errors = new StringBuilder();
+            dateFormat = movementFile.getDateFormat();
+            
             dataReader.updateSectionDefiniton(ID, movementFile.getIdColumn(), keyValuePairs, errors, true, SECTION_NAME);
             dataReader.updateSectionDefiniton(MOVEMENT_DATE, movementFile.getMovementDateColumn(), keyValuePairs, errors, true, SECTION_NAME);
             dataReader.updateSectionDefiniton(MOVEMENT_DIRECTION, movementFile.getMovementDirectionColumn(), keyValuePairs, errors, true, SECTION_NAME);
@@ -65,6 +72,9 @@ public class DirectedMovementsFileReader {
 
         List<String> line = Collections.EMPTY_LIST;
         try (FileInput fle = new FileInput(movementFile.getName(), movementFile.getSeparator())) { 
+            
+            final List<String> dateKeys = Arrays.asList(MOVEMENT_DATE);
+            final DateTimeFormatter pattern = DateTimeFormat.forPattern(dateFormat);
 
             //CHECKSTYLE:OFF
             while (!(line = fle.readLine()).isEmpty()) {
@@ -79,11 +89,16 @@ public class DirectedMovementsFileReader {
 
                     if (value != null && !value.isEmpty()) {
                         final String property = entry.getKey();
-                        properties.put(property, value);
+                        if (dateKeys.contains(property)) {
+                            final DateTime date = pattern.parseDateTime(value);
+                            properties.put(property, Days.daysBetween(this.dataDb.getZeroDate(), date).getDays());
+                        } else {
+                            properties.put(property, value);
+                        }
                     }
                 }
 
-                dataDb.getInternalDb().createRelationship(animalNode, locationNode, MovementDatabaseFacade.MovementRelationship.MOVES, properties);
+                dataDb.getDbInserter().createRelationship(animalNode, locationNode, MovementDatabaseFacade.MovementRelationship.MOVES, properties);
                 inserted++;
             }
 
@@ -101,6 +116,7 @@ public class DirectedMovementsFileReader {
 
     private MovementDatabaseFacade dataDb;
     private DataFiles.DirectedMovementFile movementFile;
+    private String dateFormat;
     private Map<String, Integer> keyValuePairs = new HashMap<>();
     @Getter
     private static final String ID = "Id";

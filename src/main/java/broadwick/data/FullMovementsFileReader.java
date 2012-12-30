@@ -6,6 +6,7 @@ import broadwick.config.generated.DataFiles;
 import broadwick.io.FileInput;
 import com.google.common.base.Throwables;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,10 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Reader for the files describing the full movements (i.e. those that specify both the departure location and the
@@ -35,6 +40,7 @@ public class FullMovementsFileReader {
 
         try {
             final StringBuilder errors = new StringBuilder();
+            dateFormat = movementFile.getDateFormat();
 
             dataReader.updateSectionDefiniton(ID, movementFile.getIdColumn(), keyValuePairs, errors, true, SECTION_NAME);
             dataReader.updateSectionDefiniton(DEPARTURE_DATE, movementFile.getDepartureDateColumn(), keyValuePairs, errors, true, SECTION_NAME);
@@ -78,6 +84,9 @@ public class FullMovementsFileReader {
         List<String> line = Collections.EMPTY_LIST;
         try (FileInput fle = new FileInput(movementFile.getName(), movementFile.getSeparator())) {
 
+            final List<String> dateKeys = Arrays.asList(DEPARTURE_DATE, DESTINATION_DATE, MARKET_DATE);
+            final DateTimeFormatter pattern = DateTimeFormat.forPattern(dateFormat);
+
             //CHECKSTYLE:OFF
             while (!(line = fle.readLine()).isEmpty()) {
                 //CHECKSTYLE:ON
@@ -91,11 +100,16 @@ public class FullMovementsFileReader {
 
                     if (value != null && !value.isEmpty()) {
                         final String property = entry.getKey();
-                        properties.put(property, value);
+                        if (dateKeys.contains(property)) {
+                            final DateTime date = pattern.parseDateTime(value);
+                            properties.put(property, Days.daysBetween(this.dataDb.getZeroDate(), date).getDays());
+                        } else {
+                            properties.put(property, value);
+                        }
                     }
                 }
 
-                dataDb.getInternalDb().createRelationship(departureNode, destinationNode, MovementDatabaseFacade.MovementRelationship.MOVES, properties);
+                dataDb.getDbInserter().createRelationship(departureNode, destinationNode, MovementDatabaseFacade.MovementRelationship.MOVES, properties);
                 inserted++;
             }
 
@@ -113,6 +127,7 @@ public class FullMovementsFileReader {
 
     private MovementDatabaseFacade dataDb;
     private DataFiles.FullMovementFile movementFile;
+    private String dateFormat;
     private Map<String, Integer> keyValuePairs = new HashMap<>();
     @Getter
     private static final String ID = "Id";

@@ -43,9 +43,10 @@ public class DataReader implements java.lang.AutoCloseable {
                 final String db = "broadwick_" + RandomStringUtils.randomAlphanumeric(8);
                 dbName = db + "_db";
                 lookupDbName = db + "_lookup_db";
-                drDatabase.openDatabase(dbName, lookupDbName);
+                drDatabase.openDatabaseForInserting(dbName, lookupDbName);
                 drDatabase.createLookupTables();
                 readDataSection();
+                drDatabase.openDatabase(dbName, lookupDbName);
             } else {
                 throw new BroadwickException("There is a <data> section in the configuration file but neither a <database> nor <datafiles> section.");
             }

@@ -17,12 +17,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.TreeSet;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.tooling.GlobalGraphOperations;
@@ -41,14 +42,13 @@ public final class Lookup {
      */
     public Lookup(final MovementDatabaseFacade dbFacade) {
         this.dbFacade = dbFacade;
-//        this.db = dbFacade.getInternalDb();
-        
-        //TODO fix this
-        //if (this.db != null) {
-            //this.ops = GlobalGraphOperations.at(this.db);
-        //} else {
+        final GraphDatabaseService internalDb = dbFacade.getDbService();
+
+        if (internalDb != null) {
+            this.ops = GlobalGraphOperations.at(internalDb);
+        } else {
             this.ops = null;
-        //}
+        }
     }
 
     /**
@@ -68,14 +68,14 @@ public final class Lookup {
             movements.add(movement);
 
             // store the movements for the animal in the cache.
-            Collection<Movement> movementsForAnimal = movementsCache.getIfPresent(movement.getId());
-            if (movementsForAnimal == null) {
-                movementsForAnimal = new TreeSet<>(new MovementsComparator());
-                movementsForAnimal.add(movement);
-                movementsCache.put(movement.getId(), movementsForAnimal);
-            } else {
-                movementsForAnimal.add(movement);
-            }
+//            Collection<Movement> movementsForAnimal = movementsCache.getIfPresent(movement.getId());
+//            if (movementsForAnimal == null) {
+//                movementsForAnimal = new TreeSet<>(new MovementsComparator());
+//                movementsForAnimal.add(movement);
+//                movementsCache.put(movement.getId(), movementsForAnimal);
+//            } else {
+//                movementsForAnimal.add(movement);
+//            }
         }
         return movements;
     }
@@ -93,13 +93,14 @@ public final class Lookup {
         while (animalNodes.hasNext()) {
             final Node animalNode = animalNodes.next();
 
-            // create a Movement and add it to the collection...
+            // create an animal and add it to the collection...
             final Animal animal = createAnimal(animalNode);
             animals.add(animal);
             if (animalsCache.getIfPresent(animal.getId()) == null) {
                 animalsCache.put(animal.getId(), animal);
             }
         }
+        log.trace("Found {} animals.", animals.size());
         return animals;
     }
 
@@ -166,7 +167,8 @@ public final class Lookup {
         Animal animal = animalsCache.getIfPresent(animalId);
         if (animal == null) {
             try {
-                animal = Iterables.find(getAnimals(), new Predicate<Animal>() {
+                final Collection<Animal> animals = getAnimals();
+                animal = Iterables.find(animals, new Predicate<Animal>() {
                     @Override
                     public boolean apply(final Animal anm) {
                         return anm.getId().equals(animalId);
@@ -176,7 +178,7 @@ public final class Lookup {
             } catch (NoSuchElementException e) {
                 // this is an error, we are looking for a animal that does not exist.
                 log.error("No animal with id {} exists.", animalId);
-                throw new BroadwickException("No animal with id " + animalId + " exists.");
+                return null;
             }
         }
         return animal;
@@ -255,6 +257,16 @@ public final class Lookup {
     }
 
     /**
+     * Convert an integer (number of days from a fixed start date, here 1/1/1900) to a DateTime object. All dates in the
+     * database are stored as integer values, this method converts that integer to a DateTime object.
+     * @param date the integer date offset.
+     * @return the datetime object corresponding to the 'zero date' plus date.
+     */
+    public DateTime toDate(final int date) {
+        return dbFacade.getZeroDate().plus(date);
+    }
+
+    /**
      * Convert a date object to an integer (number of days from a fixed start date, here 1/1/1900). All dates in the
      * database are stored as integer values using this method.
      * @param date       the date object we are converting.
@@ -289,19 +301,28 @@ public final class Lookup {
      * @return the created animal object.
      */
     private Animal createAnimal(final Node animalNode) {
-        log.trace("Creating animal object from data node: {}", animalNode.getPropertyKeys());
+        log.trace("Creating animal object for {} using {}", animalNode.getProperty(PopulationsFileReader.getID()), animalNode.getPropertyKeys());
 
         if (Iterables.contains(animalNode.getPropertyKeys(), PopulationsFileReader.getID())) {
             final String id = (String) animalNode.getProperty(PopulationsFileReader.getID());
-            final String species = (String) animalNode.getProperty(PopulationsFileReader.getSPECIES());
             final Integer dateOfBirth = (Integer) animalNode.getProperty(PopulationsFileReader.getDATE_OF_BIRTH());
             final String locationOfBirth = (String) animalNode.getProperty(PopulationsFileReader.getLOCATION_OF_BIRTH());
-            final Integer dateOfDeath = (Integer) animalNode.getProperty(PopulationsFileReader.getDATE_OF_DEATH());
-            final String locationOfDeath = (String) animalNode.getProperty(PopulationsFileReader.getLOCATION_OF_DEATH());
+
+            String species = StringUtils.EMPTY;
+            if (animalNode.hasProperty(PopulationsFileReader.getSPECIES())) {
+                species = (String) animalNode.getProperty(PopulationsFileReader.getSPECIES());
+            }
+            String locationOfDeath = StringUtils.EMPTY;
+            if (animalNode.hasProperty(PopulationsFileReader.getLOCATION_OF_DEATH())) {
+                locationOfDeath = (String) animalNode.getProperty(PopulationsFileReader.getLOCATION_OF_DEATH());
+            }
+            Integer dateOfDeath = Integer.MAX_VALUE;
+            if (animalNode.hasProperty(PopulationsFileReader.getDATE_OF_DEATH())) {
+                dateOfDeath = (Integer) animalNode.getProperty(PopulationsFileReader.getDATE_OF_DEATH());
+            }
 
             return new Animal(id, species, dateOfBirth, locationOfBirth, dateOfDeath, locationOfDeath);
         }
-
 
         return null;
     }
@@ -328,7 +349,7 @@ public final class Lookup {
             //is a batched movement so read the elements.
             return createMovementFromBatchedMovementData(relationship);
         } else {
-            log.error("Could not determine type of movement for {}", relationship.toString());
+            log.error("Could not determine type of movement for {}. Properties {} do not match known list.", relationship.toString(), relationship.getPropertyKeys());
         }
 
         try {
@@ -416,10 +437,21 @@ public final class Lookup {
         final Integer departureDate = (Integer) relationship.getProperty(FullMovementsFileReader.getDEPARTURE_DATE());
         final String destinationId = (String) relationship.getProperty(FullMovementsFileReader.getDESTINATION_ID());
         final Integer destinationDate = (Integer) relationship.getProperty(FullMovementsFileReader.getDESTINATION_DATE());
-        final String marketId = (String) relationship.getProperty(FullMovementsFileReader.getMARKET_ID());
-        final Integer marketDate = (Integer) relationship.getProperty(FullMovementsFileReader.getMARKET_DATE());
-        final String species = (String) relationship.getProperty(FullMovementsFileReader.getSPECIES());
 
+        Integer marketDate = 0;
+        if (relationship.hasProperty(FullMovementsFileReader.getMARKET_DATE())) {
+            marketDate = (Integer) relationship.getProperty(FullMovementsFileReader.getMARKET_DATE());
+        }
+
+        String marketId = "";
+        if (relationship.hasProperty(FullMovementsFileReader.getMARKET_ID())) {
+            marketId = (String) relationship.getProperty(FullMovementsFileReader.getMARKET_ID());
+        }
+
+        String species = "";
+        if (relationship.hasProperty(FullMovementsFileReader.getSPECIES())) {
+            species = (String) relationship.getProperty(FullMovementsFileReader.getSPECIES());
+        }
         return new Movement(id, 1, departureDate, departureId, destinationDate, destinationId,
                             marketDate, marketId, species);
     }
@@ -458,10 +490,7 @@ public final class Lookup {
             FullMovementsFileReader.getDEPARTURE_DATE(),
             FullMovementsFileReader.getDEPARTURE_ID(),
             FullMovementsFileReader.getDESTINATION_DATE(),
-            FullMovementsFileReader.getDESTINATION_ID(),
-            FullMovementsFileReader.getMARKET_ID(),
-            FullMovementsFileReader.getMARKET_DATE(),
-            FullMovementsFileReader.getSPECIES());
+            FullMovementsFileReader.getDESTINATION_ID());
     private final List<String> batchedMovementKeys = Arrays.asList(
             BatchedMovementsFileReader.getBATCH_SIZE(),
             BatchedMovementsFileReader.getDEPARTURE_DATE(),
@@ -475,7 +504,6 @@ public final class Lookup {
     Cache<String, Location> locationsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
     Cache<String, Animal> animalsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
     private final MovementDatabaseFacade dbFacade;
-//    private final BatchInserter db;
     private final GlobalGraphOperations ops;
 }
 
