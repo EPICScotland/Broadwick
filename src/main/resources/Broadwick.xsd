@@ -131,6 +131,25 @@
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
+            <xsd:element name="TestsFile" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="alias" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="separator" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <!--<xsd:choice minOccurs="1" maxOccurs="3">-->
+                            <xsd:element name="idColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                            <xsd:element name="groupIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                            <xsd:element name="locationIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <!--</xsd:choice>-->
+                        <xsd:element name="testDateColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="postiveResultColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="negativeResultColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/> 
+                        <xsd:element name="dateFormat" minOccurs="0" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="customTags" minOccurs="0" maxOccurs="1" type="CustomTags"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
         </xsd:sequence>
     </xsd:complexType>
 

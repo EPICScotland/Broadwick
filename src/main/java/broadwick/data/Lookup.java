@@ -58,7 +58,7 @@ public final class Lookup {
     public Collection<Movement> getMovements() {
         final Iterable<Relationship> allRelationships = ops.getAllRelationships();
         final Iterator<Relationship> movementRelationships = Iterables.filter(allRelationships,
-                                                                              isMovementPredicate).iterator();
+                                                                              MOVEMENT_PREDICATE).iterator();
         final Collection<Movement> movements = new ArrayList<>();
         while (movementRelationships.hasNext()) {
             final Relationship movementRelationship = movementRelationships.next();
@@ -84,11 +84,36 @@ public final class Lookup {
      * Get all the movements that have been read from the file(s) specified in the configuration file.
      * @return a collection of movement events that have been recorded.
      */
+    public Collection<Test> getTests() {
+        final Collection<Test> tests = new ArrayList<>();
+
+        final Iterable<Node> allNodes = ops.getAllNodes();
+        final Iterator<Node> testNodes = Iterables.filter(allNodes, TEST_PREDICATE).iterator();
+
+        while (testNodes.hasNext()) {
+            final Node testNode = testNodes.next();
+
+            // create an animal and add it to the collection...
+            final Test test = createTest(testNode);
+            tests.add(test);
+            if (testsCache.getIfPresent(test.getId()) == null) {
+                testsCache.put(test.getId(), test);
+            }
+        }
+        log.trace("Found {} tests.", tests.size());
+
+        return tests;
+    }
+
+    /**
+     * Get all the movements that have been read from the file(s) specified in the configuration file.
+     * @return a collection of movement events that have been recorded.
+     */
     public Collection<Animal> getAnimals() {
         final Collection<Animal> animals = new ArrayList<>();
 
         final Iterable<Node> allNodes = ops.getAllNodes();
-        final Iterator<Node> animalNodes = Iterables.filter(allNodes, isAnimalPredicate).iterator();
+        final Iterator<Node> animalNodes = Iterables.filter(allNodes, ANIMAL_PREDICATE).iterator();
 
         while (animalNodes.hasNext()) {
             final Node animalNode = animalNodes.next();
@@ -112,7 +137,7 @@ public final class Lookup {
         final Collection<Location> locations = new ArrayList<>();
 
         final Iterable<Node> allNodes = ops.getAllNodes();
-        final Iterator<Node> locationNodes = Iterables.filter(allNodes, isLocationPredicate).iterator();
+        final Iterator<Node> locationNodes = Iterables.filter(allNodes, LOCATION_PREDICATE).iterator();
 
         while (locationNodes.hasNext()) {
             final Node locationNode = locationNodes.next();
@@ -296,7 +321,7 @@ public final class Lookup {
     }
 
     /**
-     * Create an animal object from the node object defining it in the graph database. A node ma
+     * Create an animal object from the node object defining it in the graph database.
      * @param animalNode the node object from the database defining the animal.
      * @return the created animal object.
      */
@@ -322,6 +347,47 @@ public final class Lookup {
             }
 
             return new Animal(id, species, dateOfBirth, locationOfBirth, dateOfDeath, locationOfDeath);
+        }
+
+        return null;
+    }
+
+    /**
+     * Create a Test object from the node object defining it in the graph database.
+     * @param testNode the node object from the database defining the test.
+     * @return the created test object.
+     */
+    private Test createTest(final Node testNode) {
+        log.trace("Creating test object for {} using {}", testNode.getProperty(PopulationsFileReader.getID()), testNode.getPropertyKeys());
+
+        if (Iterables.contains(testNode.getPropertyKeys(), PopulationsFileReader.getID())) {
+
+            String id = StringUtils.EMPTY;
+            if (testNode.hasProperty(TestsFileReader.getID())) {
+                id = (String) testNode.getProperty(TestsFileReader.getID());
+            }
+            String groupId = StringUtils.EMPTY;
+            if (testNode.hasProperty(TestsFileReader.getGROUP_ID())) {
+                groupId = (String) testNode.getProperty(TestsFileReader.getGROUP_ID());
+            }
+            String locationId = StringUtils.EMPTY;
+            if (testNode.hasProperty(TestsFileReader.getLOCATION_ID())) {
+                locationId = (String) testNode.getProperty(TestsFileReader.getLOCATION_ID());
+            }
+            Integer dateOfTest = Integer.MAX_VALUE;
+            if (testNode.hasProperty(TestsFileReader.getTEST_DATE())) {
+                dateOfTest = (Integer) testNode.getProperty(TestsFileReader.getTEST_DATE());
+            }
+            Boolean positiveResult = Boolean.FALSE;
+            if (testNode.hasProperty(TestsFileReader.getPOSITIVE_RESULT())) {
+                positiveResult = (Boolean) testNode.getProperty(TestsFileReader.getPOSITIVE_RESULT());
+            }
+            Boolean negativeResult = Boolean.FALSE;
+            if (testNode.hasProperty(TestsFileReader.getNEGATIVE_RESULT())) {
+                negativeResult = (Boolean) testNode.getProperty(TestsFileReader.getNEGATIVE_RESULT());
+            }
+
+            return new Test(id, groupId, locationId, dateOfTest, positiveResult, negativeResult);
         }
 
         return null;
@@ -456,7 +522,7 @@ public final class Lookup {
                             marketDate, marketId, species);
     }
 
-    private final Predicate<Node> isAnimalPredicate = new Predicate<Node>() {
+    public static final Predicate<Node> ANIMAL_PREDICATE = new Predicate<Node>() {
         @Override
         public boolean apply(final Node node) {
             return node.hasProperty(MovementDatabaseFacade.TYPE)
@@ -464,7 +530,15 @@ public final class Lookup {
         }
 
     };
-    private final Predicate<Node> isLocationPredicate = new Predicate<Node>() {
+    public static final Predicate<Node> TEST_PREDICATE = new Predicate<Node>() {
+        @Override
+        public boolean apply(final Node node) {
+            return node.hasProperty(MovementDatabaseFacade.TYPE)
+                    && MovementDatabaseFacade.TEST.equals(node.getProperty(MovementDatabaseFacade.TYPE));
+        }
+
+    };
+    public static final Predicate<Node> LOCATION_PREDICATE = new Predicate<Node>() {
         @Override
         public boolean apply(final Node node) {
             return node.hasProperty(MovementDatabaseFacade.TYPE)
@@ -472,7 +546,7 @@ public final class Lookup {
         }
 
     };
-    private final Predicate<Relationship> isMovementPredicate = new Predicate<Relationship>() {
+    public static final Predicate<Relationship> MOVEMENT_PREDICATE = new Predicate<Relationship>() {
         @Override
         public boolean apply(final Relationship input) {
             return input.isType(MovementRelationship.MOVES);
@@ -503,6 +577,7 @@ public final class Lookup {
     Cache<String, Collection<Movement>> movementsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
     Cache<String, Location> locationsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
     Cache<String, Animal> animalsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
+    Cache<String, Test> testsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
     private final MovementDatabaseFacade dbFacade;
     private final GlobalGraphOperations ops;
 }

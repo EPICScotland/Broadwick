@@ -7,14 +7,19 @@ import broadwick.config.generated.DataFiles.DirectedMovementFile;
 import broadwick.config.generated.DataFiles.FullMovementFile;
 import broadwick.config.generated.DataFiles.LocationsFile;
 import broadwick.config.generated.DataFiles.PopulationFile;
+import broadwick.config.generated.DataFiles.TestsFile;
 import broadwick.config.generated.Project;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Iterables;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.StopWatch;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.tooling.GlobalGraphOperations;
 
 /**
  * Utility class to read, store and manipulate the data files.
@@ -37,6 +42,7 @@ public class DataReader implements java.lang.AutoCloseable {
                 dbName = data.getDatabases().getName();
                 lookupDbName = data.getDatabases().getLookupDatabase();
                 drDatabase.openDatabase(dbName, lookupDbName);
+                logDbStatistics();
             } else if (data.getDatafiles() != null) {
                 // there is a datafiles section in the config file so we will read them and create a randomly named 
                 // database.
@@ -76,6 +82,30 @@ public class DataReader implements java.lang.AutoCloseable {
     }
 
     /**
+     * Save a message giving the numbers of elements in the database.
+     */
+    private void logDbStatistics() {
+
+        if (drDatabase.getDbService() != null) {
+            final GlobalGraphOperations ops = GlobalGraphOperations.at(drDatabase.getDbService());
+            final Iterable<Node> allNodes = ops.getAllNodes();
+
+            final Iterable<Node> animals = Iterables.filter(allNodes, Lookup.ANIMAL_PREDICATE);
+            log.info("Read {} population data from the database.", Iterables.size(animals));
+
+            final Iterable<Node> locations = Iterables.filter(allNodes, Lookup.LOCATION_PREDICATE);
+            log.info("Read {} locations data from the database.", Iterables.size(locations));
+
+            final Iterable<Node> tests = Iterables.filter(allNodes, Lookup.TEST_PREDICATE);
+            log.info("Read {} tests data from the database.", Iterables.size(tests));
+
+            final Iterable<Relationship> allRelationships = ops.getAllRelationships();
+            final Iterable<Relationship> movements = Iterables.filter(allRelationships, Lookup.MOVEMENT_PREDICATE);
+            log.info("Read {} movements data from the database.", Iterables.size(movements));
+        }
+    }
+
+    /**
      * Read the datafiles, each section type of the <datafiles/> element (e.g. all the <MovementFile/>s) are read in
      * parallel and each individual element is its read in parallel with the data saved to an internal database. Once
      * the datafiles have been read some post-processing is run to determine the locations of individuals at each time
@@ -100,6 +130,9 @@ public class DataReader implements java.lang.AutoCloseable {
             drDatabase.getIndex().flush();
 
             readAllBatchedMovementSections(files.getBatchMovementFile(), addingFileMsg);
+            drDatabase.getIndex().flush();
+
+            readAllTestSections(files.getTestsFile(), addingFileMsg);
             drDatabase.getIndex().flush();
 
         } catch (Exception e) {
@@ -133,10 +166,10 @@ public class DataReader implements java.lang.AutoCloseable {
     }
 
     /**
-     * Create a new callable object to read the directed movements.
+     * Read the directed movements sections of the configuration file.
      * @param directedMovementFiles a collection of directedMovement sections.
      * @param addingFileMsg         formatted string (in the form "Adding %s to reading list") to be added to log files.
-     * @return a Callable object that will read and save the section.
+     * @return the number of movements read.
      */
     private int readAllDirectedMovementSections(final List<DirectedMovementFile> directedMovementFiles, final String addingFileMsg) {
         final DataReader reader = this;
@@ -150,16 +183,16 @@ public class DataReader implements java.lang.AutoCloseable {
         }
 
         if (elementsRead > 0) {
-            log.info("Read {} locations from {} files.", elementsRead, directedMovementFiles.size());
+            log.info("Read {} directed movements from {} files.", elementsRead, directedMovementFiles.size());
         }
         return elementsRead;
     }
 
     /**
-     * Create a new callable object to read the full movements.
+     * Read the full movements sections of the configuration file.
      * @param fullMovementFiles a collection of fullMovement sections.
      * @param addingFileMsg     formatted string (in the form "Adding %s to reading list") to be added to log files.
-     * @return a Callable object that will read and save the section.
+     * @return the number of movements read.
      */
     private int readAllFullMovementSections(final List<FullMovementFile> fullMovementFiles, final String addingFileMsg) {
         final DataReader reader = this;
@@ -173,16 +206,16 @@ public class DataReader implements java.lang.AutoCloseable {
         }
 
         if (elementsRead > 0) {
-            log.info("Read {} locations from {} files.", elementsRead, fullMovementFiles.size());
+            log.info("Read {} full movementss from {} files.", elementsRead, fullMovementFiles.size());
         }
         return elementsRead;
     }
 
     /**
-     * Create a new callable object to read the batched movements.
+     * Read the batched movements sections of the configuration file.
      * @param batchMovementFiles a collection of batchMovement sections.
      * @param addingFileMsg      formatted string (in the form "Adding %s to reading list") to be added to log files.
-     * @return a Callable object that will read and save the section.
+     * @return the number of movements read.
      */
     private int readAllBatchedMovementSections(final List<BatchMovementFile> batchMovementFiles, final String addingFileMsg) {
         final DataReader reader = this;
@@ -196,16 +229,16 @@ public class DataReader implements java.lang.AutoCloseable {
         }
 
         if (elementsRead > 0) {
-            log.info("Read {} locations from {} files.", elementsRead, batchMovementFiles.size());
+            log.info("Read {} batched ovements from {} files.", elementsRead, batchMovementFiles.size());
         }
         return elementsRead;
     }
 
     /**
-     * Create a new callable object to read the locations section.
+     * Read the location sections of the configuration file.
      * @param locationsFile a collection of locations sections.
      * @param addingFileMsg formatted string (in the form "Adding %s to reading list") to be added to log files.
-     * @return a Callable object that will read and save the section.
+     * @return the number of locations read.
      */
     private int readAllLocationSections(final List<LocationsFile> locationsFile, final String addingFileMsg) {
         final DataReader reader = this;
@@ -225,10 +258,33 @@ public class DataReader implements java.lang.AutoCloseable {
     }
 
     /**
-     * Create a new callable object to read the populations section.
+     * Read the test sections of the configuration file.
+     * @param testsFile a collection of locations sections.
+     * @param addingFileMsg formatted string (in the form "Adding %s to reading list") to be added to log files.
+     * @return the number of tests read.
+     */
+    private int readAllTestSections(final List<TestsFile> testsFile, final String addingFileMsg) {
+        final DataReader reader = this;
+
+        int elementsRead = 0;
+
+        for (DataFiles.TestsFile file : testsFile) {
+            log.trace(String.format(addingFileMsg, file.getName()));
+            final TestsFileReader testsFileReader = new TestsFileReader(file, reader, drDatabase);
+            elementsRead += testsFileReader.insert();
+        }
+
+        if (elementsRead > 0) {
+            log.info("Read {} tests from {} files.", elementsRead, testsFile.size());
+        }
+        return elementsRead;
+    }
+
+    /**
+     * Read the populations sections of the configuration file.
      * @param populationsFiles a collection of populations sections.
      * @param addingFileMsg    formatted string (in the form "Adding %s to reading list") to be added to log files.
-     * @return a Callable object that will read and save the section.
+     * @return the number of populations read.
      */
     private int readAllPopulationSections(final List<PopulationFile> populationsFiles, final String addingFileMsg) {
         final DataReader reader = this;

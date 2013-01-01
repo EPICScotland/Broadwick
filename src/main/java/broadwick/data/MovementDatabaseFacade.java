@@ -214,4 +214,5 @@ public class MovementDatabaseFacade {
     public static final String TYPE = "TYPE";
     public static final String LOCATION = "LOCATION";
     public static final String ANIMAL = "ANIMAL";
+    public static final String TEST = "TEST";
 }
