@@ -91,19 +91,19 @@ public class FileInputTest {
         try (FileInput instance = new FileInput(testsFileName)) {
 
             List<String> line = instance.readLine();
-            assertTrue(Arrays.asList("token1","token2","token3").equals(line));
+            assertTrue(Arrays.asList("token1", "token2", "token3").equals(line));
 
             line = instance.readLine();
-            assertTrue(Arrays.asList("apples","oranges","pears").equals(line));
+            assertTrue(Arrays.asList("apples", "oranges", "pears").equals(line));
 
             line = instance.readLine();
-            assertTrue(Arrays.asList("one","two","three").equals(line));
+            assertTrue(Arrays.asList("one", "two", "three").equals(line));
 
             line = instance.readLine();
-            assertTrue(Arrays.asList("a","b","c","d","e","f").equals(line));
+            assertTrue(Arrays.asList("a", "b", "c", "d", "e", "f").equals(line));
 
             line = instance.readLine();
-            assertTrue(Arrays.asList("last","complete","line").equals(line));
+            assertTrue(Arrays.asList("last", "complete", "line").equals(line));
 
             line = instance.readLine();
             assertTrue(line.isEmpty());
@@ -134,6 +134,19 @@ public class FileInputTest {
 
             line = instance.readNextLine();
             assertNull(line);
+
+        } catch (IOException ex) {
+            fail("Caught IOException in testReadNextLine()");
+        }
+    }
+
+    @Test
+    public void testRead() {
+        try (FileInput instance = new FileInput(testsFileName)) {
+
+            String str = "token1,token2,token3\n\napples, oranges, pears\none , two , three\na,b,c,d,e,f\n\nlast, complete, line,\n# comment1, comment2, comment3\n\n";
+            String contents = instance.read();
+            assertTrue(str.equals(contents));
 
         } catch (IOException ex) {
             fail("Caught IOException in testReadNextLine()");

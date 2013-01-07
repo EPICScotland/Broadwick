@@ -74,7 +74,7 @@ public class FileInput implements AutoCloseable {
                 }
             }
 
-            if (line != null && !line.isEmpty() ) {
+            if (line != null && !line.isEmpty()) {
                 tokens = tokeniseLine(line);
             }
 
@@ -112,6 +112,22 @@ public class FileInput implements AutoCloseable {
             line = line.trim();
         }
         return line;
+    }
+
+    /**
+     * Read the contents of the file into a single string object.
+     * @return the contents of the file.
+     * @throws IOException if a line cannot be read, e.g if the object was closed.
+     */
+    public final String read() throws IOException {
+        StringBuilder sb = new StringBuilder();
+
+        String line = reader.readLine();
+        while (line != null) {
+            sb.append(line).append("\n");
+            line = reader.readLine();
+        }
+        return sb.toString();
     }
 
     /**
