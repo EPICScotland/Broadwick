@@ -65,20 +65,19 @@ public class FileInput implements AutoCloseable {
         List<String> tokens = new LinkedList<>();
         try {
             String line = reader.readLine();
-            if (line != null) {
-                // we've not reached the end of the file, 
-                while (line.isEmpty() || line.charAt(0) == '#') {
-                    // read until the next non-empty line
-                    line = reader.readLine();
-                    if (line == null) {
-                        return tokens;
-                    }
-                }
-
-                if (!line.isEmpty()) {
-                    tokens = tokeniseLine(line);
+            // we've not reached the end of the file, 
+            while (line != null && (line.isEmpty() || line.charAt(0) == '#')) {
+                // read until the next non-empty line
+                line = reader.readLine();
+                if (line == null) {
+                    return tokens;
                 }
             }
+
+            if (line != null && !line.isEmpty() ) {
+                tokens = tokeniseLine(line);
+            }
+
         } catch (IOException e) {
             final StringBuilder sb = new StringBuilder("Unable to read from ").append(path.getFileName());
             sb.append(", Reason : ").append(e.getLocalizedMessage());
@@ -90,6 +89,32 @@ public class FileInput implements AutoCloseable {
     }
 
     /**
+     * Get the next (non-comment) line from the file.
+     * @return a string of the next non-comment line in the file.
+     * @throws IOException if a line cannot be read, e.g if the object was closed.
+     */
+    public final String readNextLine() throws IOException {
+
+        String line = reader.readLine();
+        try {
+            // we've not reached the end of the file, 
+            while (line != null && (line.isEmpty() || line.charAt(0) == '#')) {
+                line = reader.readLine();
+            }
+        } catch (IOException e) {
+            final StringBuilder sb = new StringBuilder("Unable to read from ").append(path.getFileName());
+            sb.append(", Reason : ").append(e.getLocalizedMessage());
+            log.error(sb.toString());
+            sb.append("\n").append(Throwables.getStackTraceAsString(e));
+            throw new IOException(sb.toString());
+        }
+        if (line != null) {
+            line = line.trim();
+        }
+        return line;
+    }
+
+    /**
      * Split a string (a line read from a file into tokens.
      * @param line the line that is to be tokenised.
      * @return a list of [string] tokens.
@@ -98,10 +123,12 @@ public class FileInput implements AutoCloseable {
         final List<String> tokens = new LinkedList<>();
         if (line != null && !line.isEmpty()) {
             for (String token : Splitter.on(fieldSep).split(line)) {
-                if (token.indexOf(COMMENT_CHAR) < 0) {
-                    tokens.add(token);
-                } else {
-                    tokens.add(token.substring(0, token.indexOf(COMMENT_CHAR)).trim());
+                if (token.trim().length() > 0) {
+                    if (token.indexOf(COMMENT_CHAR) < 0) {
+                        tokens.add(token);
+                    } else {
+                        tokens.add(token.substring(0, token.indexOf(COMMENT_CHAR)).trim());
+                    }
                 }
             }
         }

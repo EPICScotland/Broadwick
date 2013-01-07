@@ -1,6 +1,8 @@
 package broadwick.io;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -68,8 +70,7 @@ public class FileInputTest {
     };
     @Test
     public void testclose() {
-        try {
-            FileInput instance = new FileInput(testsFileName);
+        try (FileInput instance = new FileInput(testsFileName)) {
             instance.readLine();
             instance.readLine();
             instance.close();
@@ -82,6 +83,60 @@ public class FileInputTest {
             }
         } catch (IOException ex) {
             fail("Caught IOException in testClose()");
+        }
+    }
+
+    @Test
+    public void testReadNextLineAsTokens() {
+        try (FileInput instance = new FileInput(testsFileName)) {
+
+            List<String> line = instance.readLine();
+            assertTrue(Arrays.asList("token1","token2","token3").equals(line));
+
+            line = instance.readLine();
+            assertTrue(Arrays.asList("apples","oranges","pears").equals(line));
+
+            line = instance.readLine();
+            assertTrue(Arrays.asList("one","two","three").equals(line));
+
+            line = instance.readLine();
+            assertTrue(Arrays.asList("a","b","c","d","e","f").equals(line));
+
+            line = instance.readLine();
+            assertTrue(Arrays.asList("last","complete","line").equals(line));
+
+            line = instance.readLine();
+            assertTrue(line.isEmpty());
+
+        } catch (IOException ex) {
+            fail("Caught IOException in testReadNextLine()");
+        }
+    }
+
+    @Test
+    public void testReadNextLine() {
+        try (FileInput instance = new FileInput(testsFileName)) {
+
+            String line = instance.readNextLine();
+            assertTrue("token1,token2,token3".equals(line));
+
+            line = instance.readNextLine();
+            assertTrue("apples, oranges, pears".equals(line));
+
+            line = instance.readNextLine();
+            assertTrue("one , two , three".equals(line));
+
+            line = instance.readNextLine();
+            assertTrue("a,b,c,d,e,f".equals(line));
+
+            line = instance.readNextLine();
+            assertTrue("last, complete, line,".equals(line));
+
+            line = instance.readNextLine();
+            assertNull(line);
+
+        } catch (IOException ex) {
+            fail("Caught IOException in testReadNextLine()");
         }
     }
 
