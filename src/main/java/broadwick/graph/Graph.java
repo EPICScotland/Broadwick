@@ -9,7 +9,7 @@ import java.util.Collection;
  * <code>E</code>. Edges of this graph type have exactly two endpoints; whether these endpoints must be distinct depends
  * on the implementation. <p> This implementation is shamelessly copied from the Jung graph library which is used as the
  * implementation for all the classes in this package.
- * @param <V> the vertex type. 
+ * @param <V> the vertex type.
  * @param <E> the edge type.
  */
 public interface Graph<V, E> {
@@ -150,8 +150,7 @@ public interface Graph<V, E> {
      * <code>EdgeType</code> is
      * <code>DIRECTED</code>.
      * @param directedEdge the edge for which we want the corresponding destination.
-     * @return the destination of <code>directed_edge</code> if it is a directed edge in this graph,
-     *         or <code>null</code> otherwise
+     * @return the destination of <code>directed_edge</code> if it is a directed edge in this graph,      *         or <code>null</code> otherwise
      */
     V getDest(E directedEdge);
 
@@ -241,5 +240,19 @@ public interface Graph<V, E> {
      * @return the vertex at the other end of <code>edge</code> from <code>vertex</code>
      */
     V getOpposite(V vertex, E edge);
+
+    /**
+     * Returns the number of vertices in this graph.
+     * @return the number of vertices in this graph
+     */
+    int getVertexCount();
+
+    /**
+     * Returns a view of all vertices in this graph. In general, this obeys the
+     * <code>Collection</code> contract, and therefore makes no guarantees about the ordering of the vertices within the
+     * set.
+     * @return a <code>Collection</code> view of all vertices in this graph
+     */
+    Collection<V> getVertices();
 
 }

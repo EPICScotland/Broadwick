@@ -48,6 +48,15 @@ public class Tree<V, E> implements broadwick.graph.Graph<V, E> {
         return tree.getDepth(vertex);
     }
 
+    /**
+     * Will set the root of the Tree, only if the Tree is empty and the root is currently unset.
+     * @param vertex the tree root to set
+     * @return true if this call mutates the underlying graph
+     */
+    public final boolean addVertex(final V vertex) {
+        return tree.addVertex(vertex);
+    }
+
     @Override
     public final Collection<E> getInEdges(final V vertex) {
         return tree.getInEdges(vertex);
@@ -141,6 +150,16 @@ public class Tree<V, E> implements broadwick.graph.Graph<V, E> {
     @Override
     public final V getOpposite(final V vertex, final E edge) {
         return tree.getOpposite(vertex, edge);
+    }
+
+    @Override
+    public final int getVertexCount() {
+        return tree.getVertexCount();
+    }
+
+    @Override
+    public final Collection<V> getVertices() {
+        return tree.getVertices();
     }
 
     private DelegateTree<V, E> tree;
