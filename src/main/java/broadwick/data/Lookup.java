@@ -81,6 +81,50 @@ public final class Lookup {
     }
 
     /**
+     * Get all the movements that have been read from the file(s) specified in the configuration file filtered on a date
+     * range.
+     * @param startDate the first date in the range with which we will filter the movements
+     * @param endDate the final date in the range with which we will filter the movements
+     * @return a collection of movement events that have been recorded.
+     */
+    public Collection<Movement> getMovements(final int startDate, final int endDate) {
+        
+        final Iterable<Relationship> allRelationships = ops.getAllRelationships();
+        final Iterator<Relationship> movementRelationships = Iterables.filter(allRelationships, 
+                                                                              MOVEMENT_PREDICATE).iterator();
+        
+        Integer date = null;
+        final Collection<Movement> movements = new ArrayList<>();
+        while (movementRelationships.hasNext()) {
+            final Relationship movementRelationship = movementRelationships.next();
+            final ArrayList<String> relationshipProperties = Lists.newArrayList(movementRelationship.getPropertyKeys());
+            if (relationshipProperties.size() == directedMovementKeys.size()
+                    && relationshipProperties.containsAll(directedMovementKeys)) {
+                //is a directed movement so read the date.
+                date = (Integer) movementRelationship.getProperty(DirectedMovementsFileReader.getMOVEMENT_DATE());
+            } else if (relationshipProperties.size() == fullMovementKeys.size()
+                    && relationshipProperties.containsAll(fullMovementKeys)) {
+                //is a full movement so read the departure date.
+                date = (Integer) movementRelationship.getProperty(FullMovementsFileReader.getDEPARTURE_DATE());
+            } else if (relationshipProperties.size() == batchedMovementKeys.size()
+                    && relationshipProperties.containsAll(batchedMovementKeys)) {
+                //is a batched movement so read the departure date.
+                date = (Integer) movementRelationship.getProperty(BatchedMovementsFileReader.getDEPARTURE_DATE());
+            } else {
+                log.error("Could not determine type of movement for {}. Properties {} do not match known list.", 
+                          movementRelationship.toString(), movementRelationship.getPropertyKeys());
+            }
+
+            if ((date != null) && (date <= endDate) && (date >= startDate)) {
+                // create a Movement and add it to the collection...
+                final Movement movement = createMovement(movementRelationship);
+                movements.add(movement);
+            }
+        }
+        return movements;
+    }
+
+    /**
      * Get all the movements that have been read from the file(s) specified in the configuration file.
      * @return a collection of movement events that have been recorded.
      */
