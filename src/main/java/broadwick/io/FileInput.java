@@ -120,7 +120,7 @@ public class FileInput implements AutoCloseable {
      * @throws IOException if a line cannot be read, e.g if the object was closed.
      */
     public final String read() throws IOException {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
 
         String line = reader.readLine();
         while (line != null) {

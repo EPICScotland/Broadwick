@@ -1,5 +1,6 @@
 package broadwick.graph;
 
+import lombok.Getter;
 import lombok.Setter;
 
 /**
@@ -7,11 +8,15 @@ import lombok.Setter;
  */
 public class Vertex {
 
+    /**
+     * A generic vertex for a graph object.
+     * @param id an id for the vertex.
+     */
     public Vertex(final String id) {
         this.id = id;
     }
 
     @Setter
-    private String id = null;
-    
+    @Getter
+    protected String id = null;
 }
