@@ -6,6 +6,7 @@ import broadwick.config.generated.DataFiles;
 import broadwick.io.FileInput;
 import com.google.common.base.Throwables;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,6 +62,8 @@ public class LocationsFileReader {
         try (FileInput fle = new FileInput(locationsFile.getName(), locationsFile.getSeparator())) {
             final Set<String> insertedIds = new HashSet<>();
 
+                        final List<String> doubleKeys = Arrays.asList(EASTING, NORTHING);
+
             //CHECKSTYLE:OFF
             while (!(line = fle.readLine()).isEmpty()) {
                 //CHECKSTYLE:ON
@@ -73,7 +76,13 @@ public class LocationsFileReader {
 
                     if (value != null && !value.isEmpty()) {
                         final String property = entry.getKey();
-                        properties.put(property, value);
+                        
+                        if (doubleKeys.contains(property)) {
+                            final Double result = Double.parseDouble(value);
+                            properties.put(property, result);
+                        } else {
+                            properties.put(property, value);
+                        }   
                     }
                 }
                 properties.put(MovementDatabaseFacade.TYPE, MovementDatabaseFacade.LOCATION);
