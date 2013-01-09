@@ -1,13 +1,11 @@
 package broadwick.phylo;
 
 import broadwick.graph.Vertex;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 /**
  * A node object for phylogenetic trees. Each node contains the id and the distance from the previous branching point.
  */
-@EqualsAndHashCode(callSuper=false)
 public class PhyloNode extends Vertex {
 
     /**
@@ -24,6 +22,30 @@ public class PhyloNode extends Vertex {
     public final String toString() {
         return String.format("<%s:%f>", id, distance);
     }
+
+    @Override
+    public final boolean equals(final Object other) {
+        if (other == null) {
+            return false;
+        }
+        if (other == this) {
+            return true;
+        }
+        if (!(other instanceof PhyloNode)) {
+            return false;
+        }
+
+        final PhyloNode otherNode = (PhyloNode) other;
+
+        return this.id.equals(otherNode.id) && this.distance == otherNode.distance;
+    }
+    @Override
+    public final int hashCode() {
+        int hash = 7;
+        hash = 61 * hash + (int) (Double.doubleToLongBits(this.distance) ^ (Double.doubleToLongBits(this.distance) >>> 32));
+        return hash;
+    }
+    
 
     @Getter
     private double distance;
