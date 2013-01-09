@@ -3,6 +3,8 @@ package broadwick.phylo;
 import broadwick.graph.Tree;
 import broadwick.io.FileInput;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -39,11 +41,12 @@ public class NewickTreeParser {
      * @return a Tree created from the parsed string.
      */
     public final Tree<PhyloNode, String> parse(final String newickStr) {
+        branchLabel = 0;
 
         final Tree<PhyloNode, String> phyloTree = new Tree<>();
         // first remove the trailing ; if any
         String stringToParse = StringUtils.removeEnd(newickStr.trim(), ";").trim();
-
+       
         if (stringToParse.charAt(0) == '(' && getClosingParenthesis(stringToParse) == stringToParse.length() - 1) {
             stringToParse = stringToParse.substring(1, stringToParse.length() - 1);
         }
@@ -62,6 +65,7 @@ public class NewickTreeParser {
 
         // create a new node for this root and add it to the tree.
         final PhyloNode root = new PhyloNode(rootName, distance);
+        log.trace("Parsing Newick file: Adding root node {}", root);
         phyloTree.addVertex(root);
 
         // if we don't have a comma we are just have the root node
@@ -95,63 +99,41 @@ public class NewickTreeParser {
      *                      this method is called recursively).
      * @param tree          the tree to which the created nodes will be attached.
      */
-    private void parseString(String stringToParse, PhyloNode parent, final Tree tree) {
+    private void parseString(final String stringToParse, final PhyloNode parent, final Tree tree) {
+        for (String node : findNodes(stringToParse)) {
+            parseNode(node, tree, parent);
+        }
+    }
 
-        stringToParse = removeLeadingComma(stringToParse);
+    /**
+     * Parse a tree splitting it into top level nodes and subtrees.
+     * @param tree the tree tp be parsed.
+     * @return a collection of nodes and subtrees contained in the parsed string
+     */
+    private Collection<String> findNodes(final String tree) {
+        final Collection<String> nodes = new ArrayList<>();
 
-        if (stringToParse.charAt(0) == '(') {
-            // We have a new branch, create one and process the subtree
-            final int lparen = stringToParse.indexOf('(');
-            final int rparen = getClosingParenthesis(stringToParse);
-
-            String branchNodeName = String.format("branch-%s", parent.getId());
-            double branchnodeDistance = 0.0;
-            if (rparen != stringToParse.length() - 1) {
-                char nextChar = stringToParse.charAt(rparen + 1);
-                if (!(nextChar == ',' || nextChar == ')')) {
-                    // the branch is named so find the name
-                    String branchDetails = ":";
-                    for (int i = rparen + 1; i < stringToParse.length(); i++) {
-                        nextChar = stringToParse.charAt(i);
-                        if (nextChar == ',' || nextChar == ')' || i == stringToParse.length() - 1) {
-                            branchDetails = stringToParse.substring(rparen + 1, i + 1);
-                            break;
-                        }
-                    }
-                    final int lcolon = branchDetails.indexOf(':');
-                    branchnodeDistance = Double.parseDouble(branchDetails.substring(lcolon + 1));
-                    branchNodeName = branchDetails.substring(0, lcolon);
-                    stringToParse = stringToParse.substring(0, rparen + 1);
-
-                }
+        int start = 0;
+        int depth = 0;
+        boolean isOk = true;
+        for (int i = 0; i < tree.length(); i++) {
+            final char charAt = tree.charAt(i);
+            if (charAt == '(') {
+                depth++;
+                isOk = false;
+            }
+            if (charAt == ')' && --depth == 0) {
+                    isOk = true;
             }
 
-            // Create a new branching point (a new node) on which to hang this sub tree.
-            final PhyloNode phyloNode = new PhyloNode(branchNodeName, branchnodeDistance);
-            tree.addEdge(String.format("[%s]-[%s]", parent.getId(), phyloNode.getId()), parent, phyloNode);
-            parent = phyloNode;
-
-            // Create the string for the subtree
-            final String subtree = stringToParse.substring(lparen + 1, rparen);
-
-            // now remove the subtree from the rest of the string that needs to be parsed.
-            stringToParse = stringToParse.substring(rparen + 1);
-
-            parseString(subtree, parent, tree);
+            if ((charAt == ',' && isOk)) {
+                nodes.add(tree.substring(start, i).trim());
+                start = i + 1;
+            }
         }
+        nodes.add(tree.substring(start).trim());
 
-        final int rcomma = stringToParse.indexOf(',');
-        if (rcomma != -1) {
-            final String node = stringToParse.substring(0, rcomma);
-            parseNode(node, tree, parent);
-
-            stringToParse = stringToParse.substring(node.length());
-            parseString(stringToParse, parent, tree);
-
-        } else if (stringToParse.length() > 0) {
-            // all we have left is a node
-            parseNode(stringToParse, tree, parent);
-        }
+        return nodes;
     }
 
     /**
@@ -174,47 +156,71 @@ public class NewickTreeParser {
             if (strng.charAt(i) == '(') {
                 depth++;
             }
-            if (strng.charAt(i) == ')') {
-                depth--;
-                if (depth == 0) {
+            if (strng.charAt(i) == ')' && (--depth == 0)) {
                     return i;
-                }
             }
         }
         return -1;
     }
 
     /**
-     * Trim a given string and remove any leading commas.
-     * @param stringToTrim the string to be modified.
-     * @return a copy of the supplied string with leading/trailing whitespaces removed and leading commas removed.
+     * Parse a string containing information on a node in Newick format and attach it to a given tree.
+     * @param node   the string containing the node information.
+     * @param tree   the tree to which the created node will be attached.
+     * @param parent the node on the tree to which the new node will be created.
      */
-    private String removeLeadingComma(String stringToTrim) {
-        // firstly trim any whitespaces
-        stringToTrim = stringToTrim.trim();
-
-        // ... and strip any leading commas
-        if (stringToTrim.charAt(0) == ',') {
-            return stringToTrim.substring(1);
+    private void parseNode(final String node, final Tree tree, final PhyloNode parent) {
+        log.trace("parsing {} from parent node {} ", node, parent.getId());
+        if (node.charAt(0) == '(') {
+            // this is a branch so create a branch node and set the parent
+            final int rparen = node.lastIndexOf(')');
+            final PhyloNode branchNode = addNodeToTree(node.substring(rparen + 1), tree, parent);
+            for (String nd : findNodes(node.substring(1, rparen))) {
+                parseNode(nd, tree, branchNode);
+            }
+        } else if (node.indexOf(',') != -1) {
+            for (String nd : findNodes(node)) {
+                parseNode(nd, tree, parent);
+            }
+        } else {
+            // this is a single node
+            addNodeToTree(node, tree, parent);
         }
-
-        return stringToTrim;
     }
 
     /**
-     * Parse a string containing information on a node in Newick format and attach it to a given tree.
-     * @param nodeStr the string containing the node information.
-     * @param tree    the tree to which the created node will be attached.
-     * @param parent  the node on the tree to which the new node will be created.
+     * Given a string that represents a node in the tree, split in into its constituent name and distance components
+     * and add it to the tree. If the string is empty then a dummy node is added, this is useful fro creating (unnamed) 
+     * branches.
+     * @param node the string representing the node.
+     * @param tree the tree object on which the node will be placed.
+     * @param parent the parent node to which this node is attached.
+     * @return the node added to the tree.
      */
-    private void parseNode(final String nodeStr, final Tree tree, final PhyloNode parent) {
-        final int lcolon = nodeStr.indexOf(':');
-        final double distance = Double.parseDouble(nodeStr.substring(lcolon + 1));
-        final String nodeName = nodeStr.substring(0, lcolon);
+    private PhyloNode addNodeToTree(final String node, final Tree tree, final PhyloNode parent) {
+        log.trace("Adding {} to tree at {}.",node,parent);
+        PhyloNode phyloNode;
+        if (node.isEmpty()) {
+            phyloNode = new PhyloNode(String.format("branch-%d", branchLabel++), 0.0);
+        } else {
+            final int lcolon = node.indexOf(':');
+            double distance;
+            String nodeName;
+            if (lcolon == -1) {
+                // we just have a node name and no distance.
+                distance = 0.0;
+                nodeName = node;
+            } else {
+                distance = Double.parseDouble(node.substring(lcolon + 1));
+                nodeName = node.substring(0, lcolon);
+            }
 
-        final PhyloNode phyloNode = new PhyloNode(nodeName, distance);
+            phyloNode = new PhyloNode(nodeName, distance);
+        }
         tree.addEdge(String.format("[%s]-[%s]", parent.getId(), phyloNode.getId()), parent, phyloNode);
+        return phyloNode;
     }
 
     private String newickString;
+    private int branchLabel = 0;
 }
