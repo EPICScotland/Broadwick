@@ -46,7 +46,7 @@ public class NewickTreeParser {
         final Tree<PhyloNode, String> phyloTree = new Tree<>();
         // first remove the trailing ; if any
         String stringToParse = StringUtils.removeEnd(newickStr.trim(), ";").trim();
-       
+
         if (stringToParse.charAt(0) == '(' && getClosingParenthesis(stringToParse) == stringToParse.length() - 1) {
             stringToParse = stringToParse.substring(1, stringToParse.length() - 1);
         }
@@ -123,7 +123,7 @@ public class NewickTreeParser {
                 isOk = false;
             }
             if (charAt == ')' && --depth == 0) {
-                    isOk = true;
+                isOk = true;
             }
 
             if ((charAt == ',' && isOk)) {
@@ -157,7 +157,7 @@ public class NewickTreeParser {
                 depth++;
             }
             if (strng.charAt(i) == ')' && (--depth == 0)) {
-                    return i;
+                return i;
             }
         }
         return -1;
@@ -174,7 +174,7 @@ public class NewickTreeParser {
         if (node.charAt(0) == '(') {
             // this is a branch so create a branch node and set the parent
             final int rparen = node.lastIndexOf(')');
-            final PhyloNode branchNode = addNodeToTree(node.substring(rparen + 1), tree, parent);
+            final PhyloNode branchNode = addNodeToTree(node.substring(rparen + 1), tree, parent, true);
             for (String nd : findNodes(node.substring(1, rparen))) {
                 parseNode(nd, tree, branchNode);
             }
@@ -184,40 +184,57 @@ public class NewickTreeParser {
             }
         } else {
             // this is a single node
-            addNodeToTree(node, tree, parent);
+            addNodeToTree(node, tree, parent, false);
         }
     }
 
     /**
-     * Given a string that represents a node in the tree, split in into its constituent name and distance components
-     * and add it to the tree. If the string is empty then a dummy node is added, this is useful fro creating (unnamed) 
+     * Given a string that represents a node in the tree, split in into its constituent name and distance components and
+     * add it to the tree. If the string is empty then a dummy node is added, this is useful fro creating (unnamed)
      * branches.
-     * @param node the string representing the node.
-     * @param tree the tree object on which the node will be placed.
-     * @param parent the parent node to which this node is attached.
+     * @param node             the string representing the node.
+     * @param tree             the tree object on which the node will be placed.
+     * @param parent           the parent node to which this node is attached.
+     * @param createUniqueName if the name of the node is not unique then add create a unique one if this is true.
      * @return the node added to the tree.
      */
-    private PhyloNode addNodeToTree(final String node, final Tree tree, final PhyloNode parent) {
-        log.trace("Adding {} to tree at {}.",node,parent);
+    private PhyloNode addNodeToTree(final String node, final Tree tree, final PhyloNode parent, final boolean createUniqueName) {
+        log.trace("Adding {} to tree at {}.", node, parent);
         PhyloNode phyloNode;
-        if (node.isEmpty()) {
-            phyloNode = new PhyloNode(String.format("branch-%d", branchLabel++), 0.0);
-        } else {
-            final int lcolon = node.indexOf(':');
-            double distance;
-            String nodeName;
-            if (lcolon == -1) {
-                // we just have a node name and no distance.
-                distance = 0.0;
-                nodeName = node;
-            } else {
-                distance = Double.parseDouble(node.substring(lcolon + 1));
-                nodeName = node.substring(0, lcolon);
-            }
 
-            phyloNode = new PhyloNode(nodeName, distance);
+        final int lcolon = node.indexOf(':');
+        String nodeName = StringUtils.EMPTY;
+        double distance = 0.0;
+
+        if (node.isEmpty()) {
+            // no details so use default values.
+            nodeName = String.format("branch-%d", branchLabel++);
+            distance = 0.0;
+        } else if (lcolon == -1) {
+            // we just have a node name and no distance.
+            distance = 0.0;
+            nodeName = node;
+        } else {
+            // we have a node name and a distance.
+            distance = Double.parseDouble(node.substring(lcolon + 1));
+            nodeName = node.substring(0, lcolon);
         }
-        tree.addEdge(String.format("[%s]-[%s]", parent.getId(), phyloNode.getId()), parent, phyloNode);
+
+        phyloNode = new PhyloNode(nodeName, distance);
+
+        try {
+            tree.addEdge(String.format("[%s]-[%s]", parent.getId(), phyloNode.getId()), parent, phyloNode);
+        } catch (IllegalArgumentException e) {
+            // we may have non-unique branch names in the data file, if we encounter one here and we want to rename
+            // it we do it now. This is not very good as we are searching for an error message but it's the best as can
+            // be done.
+            if (e.getLocalizedMessage().contains("already exists in this graph") && createUniqueName) {
+                nodeName = String.format("branch-%d", branchLabel++);
+                phyloNode = new PhyloNode(nodeName, distance);
+                tree.addEdge(String.format("[%s]-[%s]", parent.getId(), phyloNode.getId()), parent, phyloNode);
+            }
+        }
+
         return phyloNode;
     }
 
