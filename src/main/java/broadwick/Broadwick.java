@@ -119,12 +119,11 @@ public final class Broadwick {
         if (project != null) {
             // initialise the data, by reading the data files and/or the database.
 
-            try (DataReader dr = new DataReader(project.getData())) {
+            log.info("Running broadwick {}", BroadwickVersion.getVersionAndTimeStamp());
 
+            try (DataReader dr = new DataReader(project.getData())) {
                 final Map<String, Model> registeredModels = registerModels(project, dr.getLookup());
-                log.info("Running broadwick ({}) for the following models {}",
-                         BroadwickVersion.getVersionAndTimeStamp(),
-                         registeredModels.keySet());
+                log.info("Running broadwick for the following models {}", registeredModels.keySet());
 
                 // Run the models, each on a separate thread.
                 // TODO in a single-threaded grid environment we cannot do this - need to think again here....
@@ -185,9 +184,7 @@ public final class Broadwick {
                 newInstance.setModelDataLookup(lookup);
                 registeredModels.put(model.getId(), newInstance);
             }
-        } catch (ParserConfigurationException | SAXException | IOException  
-                | ClassNotFoundException | InstantiationException 
-                | IllegalAccessException | IllegalArgumentException ex) {
+        } catch (ParserConfigurationException | SAXException | IOException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException ex) {
             log.error("Could not create model ; {}", ex.getLocalizedMessage());
             registeredModels.clear();
         }
@@ -197,10 +194,10 @@ public final class Broadwick {
 
     /**
      * Get a collection of XML elements one for each <model> section.
-     * @return a collection of XML elements of each <model>. 
+     * @return a collection of XML elements of each <model>.
      * @throws ParserConfigurationException if the nodes for the configured models cannot be found.
-     * @throws SAXException if the nodes for the configured models cannot be found.
-     * @throws IOException  if the nodes for the configured models cannot be found.
+     * @throws SAXException                 if the nodes for the configured models cannot be found.
+     * @throws IOException                  if the nodes for the configured models cannot be found.
      */
     private NodeList getAllModelConfigurations() throws ParserConfigurationException, SAXException, IOException {
         final DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
@@ -211,7 +208,7 @@ public final class Broadwick {
 
     /**
      * Get the XML string of the model with the given id from a list of configured models.
-     * @param id the id of the model to be found.
+     * @param id     the id of the model to be found.
      * @param models a list of XML <model> nodes.
      * @return the XML string for the model.
      */

@@ -3,12 +3,20 @@ package broadwick;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * This is a simple class to obtain the version number of the project from SCM.
+ * This is a simple class to obtain the version number of the project from the manifest file of the packaged jar.
+ * To locate the version and build information of the framework, we locate the jar in which this object resides and
+ * interrogate the Manifest.MF file of that jar for the build info. This approach depends very much on how the jar 
+ * file is used, for example, if the project using the jar in which this framework is delivered uses one-jar (and the 
+ * maven plug-in top use this) then the framework jar is contained neatly with the other dependent jars. Using the
+ * maven assembly plug-in though expands the dependent jar files (and overwrites the manifest files and any other 
+ * files with duplicate names it finds) so that at best the manifest file that is found will be the one of the project
+ * using the framework and it is that build info that will be displayed and NOT the frameworks.
  */
 @Slf4j
 public final class BroadwickVersion {
@@ -25,8 +33,7 @@ public final class BroadwickVersion {
 
     /**
      * Get the implementation number defined in the Manifest.MF of the jar. The build process get the label/tag of the
-     * most recent commit to the SCM
-     * and adds it as the implementation number to the jars manifest.
+     * most recent commit to the SCM and adds it as the implementation number to the jars manifest.
      * @return the project version number that is obtained from the SCM.
      */
     public static String getImplementationVersion() {
@@ -49,13 +56,24 @@ public final class BroadwickVersion {
     private static Manifest getManifest() {
         Manifest manifest = null;
         try {
+            // First find the jar that contains this object.
             final String className = version.getClass().getSimpleName() + ".class";
             final String classPath = version.getClass().getResource(className).toString();
-            if (!classPath.startsWith("jar")) {
-                return null;
-            }
             final String manifestPath = classPath.substring(0, classPath.lastIndexOf('!') + 1) + "/META-INF/MANIFEST.MF";
-            manifest = new Manifest(new URL(manifestPath).openStream());
+
+            if (classPath.startsWith("jar")) {
+
+                // Find the manifest path in the list of resources in the current jar file.
+                final Enumeration<URL> allManifestFilesInJar = version.getClass().getClassLoader().getResources(java.util.jar.JarFile.MANIFEST_NAME);
+                while (allManifestFilesInJar.hasMoreElements()) {
+                    final URL element = allManifestFilesInJar.nextElement();
+
+                    if (element.toString().equals(manifestPath)) {
+                        manifest = new Manifest(element.openStream());
+                        break;
+                    }
+                }
+            }
         } catch (IOException ex) {
             log.error("Cannot read manifest file, {}", ex.getLocalizedMessage());
         }
@@ -95,9 +113,8 @@ public final class BroadwickVersion {
      * Get the build version number and timestamp. This gets the following attributes in the manifest file
      * <code>Implementation-Version</code>
      * <code>Implementation-Build</code>
-     * <code>Build-timestamp</code>
-     * If the manifest file is NOT the one for the framework (i.e. a model that utilises the framework) then
-     * it will report the versions of both.
+     * <code>Build-timestamp</code> If the manifest file is NOT the one for the framework (i.e. a model that utilises
+     * the framework) then it will report the versions of both.
      * @return a string containing the version and timestamp.
      */
     public static String getVersionAndTimeStamp() {
@@ -106,19 +123,15 @@ public final class BroadwickVersion {
             final StringBuilder sb = new StringBuilder();
             final Attributes attr = manifest.getMainAttributes();
 
-            //TODO this will get the info form the main manifest file.
-            // HOWEVER, this framework is packaged as an executable jar and when added to a project
-            // the manifest is overwritten so the build information for the framework is lost - this needs to
-            // be fixed
-
-            sb.append(String.format("Version %s ", attr.getValue(IMPL_VERSION)) );
+            sb.append(String.format("Version %s ", attr.getValue(IMPL_VERSION)));
             sb.append(String.format("Build (%s - %s : %s) ", InetAddress.getLocalHost().getHostName(),
-                    attr.getValue(IMPL_BUILD), attr.getValue(BUILD_TIMESTAMP)) );
+                                    attr.getValue(IMPL_BUILD), attr.getValue(BUILD_TIMESTAMP)));
             return sb.toString();
         } catch (Exception e) {
             return "UNKNOWN VERSION";
         }
     }
+
     private static BroadwickVersion version;
     private static final String BUILD_STRING_FORMAT = " : build %s ";
     private static final String IMPL_VERSION = "Implementation-Version";
