@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -229,6 +230,7 @@ public abstract class StochasticSimulator {
          * @param obs   the observers.
          * @param theta the theta event.
          */
+        @Synchronized
         public void pushTheta(final double time, final Observer obs, final Object theta) {
 
             log.trace("Adding new theta event {} at t={}", theta, time);
@@ -325,11 +327,13 @@ public abstract class StochasticSimulator {
     private int startTime = 0;
     @Setter
     @Getter
+    @SuppressWarnings("PMD.UnusedPrivateField")
     private TransitionKernel transitionKernel;
     @Getter
     private AmountManager amountManager;
     @Setter
     @Getter
+    @SuppressWarnings("PMD.UnusedPrivateField")
     private double currentTime = 0;
     @Getter
     @Setter
