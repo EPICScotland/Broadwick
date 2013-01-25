@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.format.DateTimeFormat;
@@ -56,18 +57,21 @@ public final class Lookup {
      * @return a collection of movement events that have been recorded.
      */
     public Collection<Movement> getMovements() {
-        final Iterable<Relationship> allRelationships = ops.getAllRelationships();
-        final Iterator<Relationship> movementRelationships = Iterables.filter(allRelationships,
-                                                                              MOVEMENT_PREDICATE).iterator();
+        final Iterator<Relationship> allRelationships = ops.getAllRelationships().iterator();
+
+        final StopWatch sw = new StopWatch();
+        sw.start();
+
         final Collection<Movement> movements = new ArrayList<>();
-        while (movementRelationships.hasNext()) {
-            final Relationship movementRelationship = movementRelationships.next();
+        while (allRelationships.hasNext()) {
+            final Relationship relationship = allRelationships.next();
 
-            // create a Movement and add it to the collection...
-            final Movement movement = createMovement(movementRelationship);
-            movements.add(movement);
+            if (relationship.isType(MovementRelationship.MOVES)) {
+                // create a Movement and add it to the collection...
+                final Movement movement = createMovement(relationship);
+                movements.add(movement);
 
-            // store the movements for the animal in the cache.
+                // store the movements for the animal in the cache.
 //            Collection<Movement> movementsForAnimal = movementsCache.getIfPresent(movement.getId());
 //            if (movementsForAnimal == null) {
 //                movementsForAnimal = new TreeSet<>(new MovementsComparator());
@@ -76,7 +80,10 @@ public final class Lookup {
 //            } else {
 //                movementsForAnimal.add(movement);
 //            }
+            }
         }
+        sw.stop();
+        log.debug("Found {} movements in {}.", movements.size(), sw.toString());
         return movements;
     }
 
@@ -84,43 +91,50 @@ public final class Lookup {
      * Get all the movements that have been read from the file(s) specified in the configuration file filtered on a date
      * range.
      * @param startDate the first date in the range with which we will filter the movements
-     * @param endDate the final date in the range with which we will filter the movements
+     * @param endDate   the final date in the range with which we will filter the movements
      * @return a collection of movement events that have been recorded.
      */
     public Collection<Movement> getMovements(final int startDate, final int endDate) {
-        
-        final Iterable<Relationship> allRelationships = ops.getAllRelationships();
-        final Iterator<Relationship> movementRelationships = Iterables.filter(allRelationships, 
-                                                                              MOVEMENT_PREDICATE).iterator();
-        
+
+        final Iterator<Relationship> allRelationships = ops.getAllRelationships().iterator();
+
+        final StopWatch sw = new StopWatch();
+        sw.start();
+
         Integer date = null;
         final Collection<Movement> movements = new ArrayList<>();
-        while (movementRelationships.hasNext()) {
-            final Relationship movementRelationship = movementRelationships.next();
-            final ArrayList<String> relationshipProperties = Lists.newArrayList(movementRelationship.getPropertyKeys());
-            if (relationshipProperties.size() == directedMovementKeys.size()
-                    && relationshipProperties.containsAll(directedMovementKeys)) {
-                //is a directed movement so read the date.
-                date = (Integer) movementRelationship.getProperty(DirectedMovementsFileReader.getMOVEMENT_DATE());
-            } else if (relationshipProperties.size() == fullMovementKeys.size()
-                    && relationshipProperties.containsAll(fullMovementKeys)) {
-                //is a full movement so read the departure date.
-                date = (Integer) movementRelationship.getProperty(FullMovementsFileReader.getDEPARTURE_DATE());
-            } else if (relationshipProperties.size() == batchedMovementKeys.size()
-                    && relationshipProperties.containsAll(batchedMovementKeys)) {
-                //is a batched movement so read the departure date.
-                date = (Integer) movementRelationship.getProperty(BatchedMovementsFileReader.getDEPARTURE_DATE());
-            } else {
-                log.error("Could not determine type of movement for {}. Properties {} do not match known list.", 
-                          movementRelationship.toString(), movementRelationship.getPropertyKeys());
-            }
+        while (allRelationships.hasNext()) {
+            final Relationship relationship = allRelationships.next();
 
-            if ((date != null) && (date <= endDate) && (date >= startDate)) {
-                // create a Movement and add it to the collection...
-                final Movement movement = createMovement(movementRelationship);
-                movements.add(movement);
+            if (relationship.isType(MovementRelationship.MOVES)) {
+                final ArrayList<String> relationshipProperties = Lists.newArrayList(relationship.getPropertyKeys());
+                if (relationshipProperties.size() == directedMovementKeys.size()
+                        && relationshipProperties.containsAll(directedMovementKeys)) {
+                    //is a directed movement so read the date.
+                    date = (Integer) relationship.getProperty(DirectedMovementsFileReader.getMOVEMENT_DATE());
+                } else if (relationshipProperties.size() == fullMovementKeys.size()
+                        && relationshipProperties.containsAll(fullMovementKeys)) {
+                    //is a full movement so read the departure date.
+                    date = (Integer) relationship.getProperty(FullMovementsFileReader.getDEPARTURE_DATE());
+                } else if (relationshipProperties.size() == batchedMovementKeys.size()
+                        && relationshipProperties.containsAll(batchedMovementKeys)) {
+                    //is a batched movement so read the departure date.
+                    date = (Integer) relationship.getProperty(BatchedMovementsFileReader.getDEPARTURE_DATE());
+                } else {
+                    log.error("Could not determine type of movement for {}. Properties {} do not match known list.",
+                              relationship.toString(), relationship.getPropertyKeys());
+                }
+
+                if ((date != null) && (date <= endDate) && (date >= startDate)) {
+                    // create a Movement and add it to the collection...
+                    final Movement movement = createMovement(relationship);
+                    movements.add(movement);
+                }
             }
         }
+
+        sw.stop();
+        log.debug("Found {} movements in {}.", movements.size(), sw.toString());
         return movements;
     }
 
@@ -131,21 +145,25 @@ public final class Lookup {
     public Collection<Test> getTests() {
         final Collection<Test> tests = new ArrayList<>();
 
-        final Iterable<Node> allNodes = ops.getAllNodes();
-        final Iterator<Node> testNodes = Iterables.filter(allNodes, TEST_PREDICATE).iterator();
+        final StopWatch sw = new StopWatch();
+        sw.start();
 
-        while (testNodes.hasNext()) {
-            final Node testNode = testNodes.next();
+        final Iterator<Node> allNodes = ops.getAllNodes().iterator();
+        while (allNodes.hasNext()) {
+            final Node node = allNodes.next();
 
-            // create an animal and add it to the collection...
-            final Test test = createTest(testNode);
-            tests.add(test);
-            if (testsCache.getIfPresent(test.getId()) == null) {
-                testsCache.put(test.getId(), test);
+            if (node.hasProperty(MovementDatabaseFacade.TYPE)
+                    && MovementDatabaseFacade.TEST.equals(node.getProperty(MovementDatabaseFacade.TYPE))) {
+                // create an animal and add it to the collection...
+                final Test test = createTest(node);
+                tests.add(test);
+//            if (testsCache.getIfPresent(test.getId()) == null) {
+//                testsCache.put(test.getId(), test);
+//            }
             }
         }
-        log.trace("Found {} tests.", tests.size());
-
+        sw.stop();
+        log.debug("Found {} tests in {}.", tests.size(), sw.toString());
         return tests;
     }
 
@@ -156,20 +174,23 @@ public final class Lookup {
     public Collection<Animal> getAnimals() {
         final Collection<Animal> animals = new ArrayList<>();
 
-        final Iterable<Node> allNodes = ops.getAllNodes();
-        final Iterator<Node> animalNodes = Iterables.filter(allNodes, ANIMAL_PREDICATE).iterator();
+        final StopWatch sw = new StopWatch();
+        sw.start();
 
-        while (animalNodes.hasNext()) {
-            final Node animalNode = animalNodes.next();
-
-            // create an animal and add it to the collection...
-            final Animal animal = createAnimal(animalNode);
-            animals.add(animal);
-            if (animalsCache.getIfPresent(animal.getId()) == null) {
-                animalsCache.put(animal.getId(), animal);
+        final Iterator<Node> allNodes = ops.getAllNodes().iterator();
+        while (allNodes.hasNext()) {
+            final Node node = allNodes.next();
+            if (node.hasProperty(MovementDatabaseFacade.TYPE)
+                    && MovementDatabaseFacade.ANIMAL.equals(node.getProperty(MovementDatabaseFacade.TYPE))) {
+                final Animal animal = createAnimal(node);
+                animals.add(animal);
             }
+//            if (animalsCache.getIfPresent(animal.getId()) == null) {
+//                animalsCache.put(animal.getId(), animal);
+//            }
         }
-        log.trace("Found {} animals.", animals.size());
+        sw.stop();
+        log.debug("Found {} animals in {}.", animals.size(), sw.toString());
         return animals;
     }
 
@@ -180,19 +201,25 @@ public final class Lookup {
     public Collection<Location> getLocations() {
         final Collection<Location> locations = new ArrayList<>();
 
-        final Iterable<Node> allNodes = ops.getAllNodes();
-        final Iterator<Node> locationNodes = Iterables.filter(allNodes, LOCATION_PREDICATE).iterator();
+        final StopWatch sw = new StopWatch();
+        sw.start();
 
-        while (locationNodes.hasNext()) {
-            final Node locationNode = locationNodes.next();
+        final Iterator<Node> allNodes = ops.getAllNodes().iterator();
+        while (allNodes.hasNext()) {
+            final Node node = allNodes.next();
 
-            // create a Movement and add it to the collection...
-            final Location location = createLocation(locationNode);
-            locations.add(location);
-            if (locationsCache.getIfPresent(location.getId()) == null) {
-                locationsCache.put(location.getId(), location);
+            if (node.hasProperty(MovementDatabaseFacade.TYPE)
+                    && MovementDatabaseFacade.LOCATION.equals(node.getProperty(MovementDatabaseFacade.TYPE))) {
+                // create a Movement and add it to the collection...
+                final Location location = createLocation(node);
+                locations.add(location);
+//                if (locationsCache.getIfPresent(location.getId()) == null) {
+//                    locationsCache.put(location.getId(), location);
+//                }
             }
         }
+        sw.stop();
+        log.debug("Found {} locations in {}.", locations.size(), sw.toString());
         return locations;
     }
 
@@ -568,7 +595,7 @@ public final class Lookup {
 
     public static final Predicate<Node> ANIMAL_PREDICATE = new Predicate<Node>() {
         @Override
-        public boolean apply(final Node node) {
+    public boolean apply(final Node node) {
             return node.hasProperty(MovementDatabaseFacade.TYPE)
                     && MovementDatabaseFacade.ANIMAL.equals(node.getProperty(MovementDatabaseFacade.TYPE));
         }
