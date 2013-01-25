@@ -76,5 +76,6 @@ public abstract class Observer implements Comparable {
     public abstract void performEvent(final SimulationEvent event, final double tau, final int times);
 
     @Getter
+    @SuppressWarnings("PMD.UnusedPrivateField")
     private StochasticSimulator process;
 }

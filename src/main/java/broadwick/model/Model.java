@@ -54,6 +54,7 @@ public abstract class Model {
     public abstract void finalise();
 
     @Getter
+    @SuppressWarnings("PMD.UnusedPrivateField")
     private String model;
     @SuppressWarnings("PMD.UnusedPrivateField")
     @Getter

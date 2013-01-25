@@ -210,6 +210,7 @@ public class MovementDatabaseFacade {
     private BatchInserterIndexProvider indexProvider;
     private String indexId = "index";
     @Getter
+    @SuppressWarnings("PMD.UnusedPrivateField")
     private final DateTime zeroDate = new DateTime(1900, 1, 1, 0, 0);
     public static final String TYPE = "TYPE";
     public static final String LOCATION = "LOCATION";
