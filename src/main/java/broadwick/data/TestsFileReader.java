@@ -1,5 +1,6 @@
 package broadwick.data;
 
+import broadwick.BroadwickConstants;
 import broadwick.BroadwickException;
 import broadwick.config.generated.CustomTags;
 import broadwick.config.generated.DataFiles;
@@ -111,7 +112,7 @@ public class TestsFileReader {
                                 throw new BroadwickException(String.format("Date column set but no date format in configuration for file %s ", testsFile.getName()));
                             } else {
                                 final DateTime date = pattern.parseDateTime(value);
-                                properties.put(property, Days.daysBetween(this.dataDb.getZeroDate(), date).getDays());
+                                properties.put(property, Days.daysBetween(BroadwickConstants.getZERO_DATE(), date).getDays());
                             }
                         } else if (booleanKeys.contains(property)) {
                             final Boolean result = Integer.parseInt(value) == 0 ? Boolean.TRUE : Boolean.FALSE;

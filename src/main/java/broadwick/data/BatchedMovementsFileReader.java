@@ -1,5 +1,6 @@
 package broadwick.data;
 
+import broadwick.BroadwickConstants;
 import broadwick.BroadwickException;
 import broadwick.config.generated.CustomTags;
 import broadwick.config.generated.DataFiles;
@@ -41,7 +42,7 @@ public class BatchedMovementsFileReader {
         try {
             final StringBuilder errors = new StringBuilder();
             dateFormat = movementFile.getDateFormat();
-            
+
             dataReader.updateSectionDefiniton(BATCH_SIZE, movementFile.getBatchSizeColumn(), keyValuePairs, errors, true, SECTION_NAME);
             dataReader.updateSectionDefiniton(DEPARTURE_DATE, movementFile.getDepartureDateColumn(), keyValuePairs, errors, true, SECTION_NAME);
             dataReader.updateSectionDefiniton(DEPARTURE_ID, movementFile.getDepartureLocationIdColumn(), keyValuePairs, errors, true, SECTION_NAME);
@@ -71,7 +72,7 @@ public class BatchedMovementsFileReader {
 
         List<String> line = Collections.EMPTY_LIST;
         try (FileInput fle = new FileInput(movementFile.getName(), movementFile.getSeparator())) {
-            
+
             final List<String> dateKeys = Arrays.asList(DEPARTURE_DATE, DESTINATION_DATE, MARKET_DATE);
             final DateTimeFormatter pattern = DateTimeFormat.forPattern(dateFormat);
 
@@ -90,7 +91,7 @@ public class BatchedMovementsFileReader {
                         final String property = entry.getKey();
                         if (dateKeys.contains(property)) {
                             final DateTime date = pattern.parseDateTime(value);
-                            properties.put(property, Days.daysBetween(this.dataDb.getZeroDate(), date).getDays());
+                            properties.put(property, Days.daysBetween(BroadwickConstants.getZERO_DATE(), date).getDays());
                         } else {
                             properties.put(property, value);
                         }

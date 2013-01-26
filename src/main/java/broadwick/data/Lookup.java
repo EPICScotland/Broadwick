@@ -20,10 +20,6 @@ import java.util.NoSuchElementException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -42,7 +38,6 @@ public final class Lookup {
      * @param dbFacade the object that is responsible for accessing the internal databases.
      */
     public Lookup(final MovementDatabaseFacade dbFacade) {
-        this.dbFacade = dbFacade;
         final GraphDatabaseService internalDb = dbFacade.getDbService();
 
         if (internalDb != null) {
@@ -343,39 +338,6 @@ public final class Lookup {
     }
 
     /**
-     * Convert a date object to an integer (number of days from a fixed start date, here 1/1/1900). All dates in the
-     * database are stored as integer values using this method.
-     * @param date the date object we are converting.
-     * @return the number of days from a fixed 'zero date'.
-     */
-    public int getDate(final DateTime date) {
-        return Days.daysBetween(dbFacade.getZeroDate(), date).getDays();
-    }
-
-    /**
-     * Convert an integer (number of days from a fixed start date, here 1/1/1900) to a DateTime object. All dates in the
-     * database are stored as integer values, this method converts that integer to a DateTime object.
-     * @param date the integer date offset.
-     * @return the datetime object corresponding to the 'zero date' plus date.
-     */
-    public DateTime toDate(final int date) {
-        return dbFacade.getZeroDate().plus(date);
-    }
-
-    /**
-     * Convert a date object to an integer (number of days from a fixed start date, here 1/1/1900). All dates in the
-     * database are stored as integer values using this method.
-     * @param date       the date object we are converting.
-     * @param dateFormat the format the date is in when doing the conversion.
-     * @return the number of days from a fixed 'zero date'.
-     */
-    public int getDate(final String date, final String dateFormat) {
-        final DateTimeFormatter pattern = DateTimeFormat.forPattern(dateFormat);
-        final DateTime dateTime = pattern.parseDateTime(date);
-        return this.getDate(dateTime);
-    }
-
-    /**
      * Create a location object from the node object defining it in the graph database.
      * @param locationNode the node object from the database defining the location.
      * @return the created location object.
@@ -595,7 +557,7 @@ public final class Lookup {
 
     public static final Predicate<Node> ANIMAL_PREDICATE = new Predicate<Node>() {
         @Override
-    public boolean apply(final Node node) {
+        public boolean apply(final Node node) {
             return node.hasProperty(MovementDatabaseFacade.TYPE)
                     && MovementDatabaseFacade.ANIMAL.equals(node.getProperty(MovementDatabaseFacade.TYPE));
         }
@@ -649,7 +611,6 @@ public final class Lookup {
     Cache<String, Location> locationsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
     Cache<String, Animal> animalsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
     Cache<String, Test> testsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
-    private final MovementDatabaseFacade dbFacade;
     private final GlobalGraphOperations ops;
 }
 

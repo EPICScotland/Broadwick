@@ -10,7 +10,6 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.index.IndexHits;
@@ -209,9 +208,6 @@ public class MovementDatabaseFacade {
     private BatchInserterIndex index;
     private BatchInserterIndexProvider indexProvider;
     private String indexId = "index";
-    @Getter
-    @SuppressWarnings("PMD.UnusedPrivateField")
-    private final DateTime zeroDate = new DateTime(1900, 1, 1, 0, 0);
     public static final String TYPE = "TYPE";
     public static final String LOCATION = "LOCATION";
     public static final String ANIMAL = "ANIMAL";

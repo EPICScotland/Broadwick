@@ -1,5 +1,6 @@
 package broadwick.data;
 
+import broadwick.BroadwickConstants;
 import broadwick.BroadwickException;
 import broadwick.config.generated.CustomTags;
 import broadwick.config.generated.DataFiles;
@@ -142,7 +143,7 @@ public class PopulationsFileReader {
                         final String property = entry.getKey();
                         if (dateKeys.contains(property)) {
                             final DateTime date = pattern.parseDateTime(value);
-                            properties.put(property, Days.daysBetween(this.dataDb.getZeroDate(), date).getDays());
+                            properties.put(property, Days.daysBetween(BroadwickConstants.getZERO_DATE(), date).getDays());
                         } else {
                             properties.put(property, value);
                         }
