@@ -138,15 +138,17 @@ public class FileInput implements AutoCloseable {
     private List<String> tokeniseLine(final String line) {
         final List<String> tokens = new LinkedList<>();
         if (line != null && !line.isEmpty()) {
-            for (String token : Splitter.on(fieldSep).split(line)) {
-                if (token.trim().length() > 0) {
-                    if (token.indexOf(COMMENT_CHAR) < 0) {
-                        tokens.add(token);
-                    } else {
-                        tokens.add(token.substring(0, token.indexOf(COMMENT_CHAR)).trim());
-                    }
-                }
+            String trimmedLine = line.trim();
+            final int indexOfCommentchar = trimmedLine.indexOf(COMMENT_CHAR);
+
+            if (indexOfCommentchar > 0) {
+                trimmedLine = trimmedLine.substring(0, indexOfCommentchar);
             }
+
+            for (String token : Splitter.on(fieldSep).trimResults().split(trimmedLine)) {
+                tokens.add(token.trim());
+            }
+
         }
         return tokens;
     }
