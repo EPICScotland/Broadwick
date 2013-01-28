@@ -3,11 +3,13 @@ package broadwick.stochastic;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import lombok.ToString;
 
 /**
  * Class that holds the transition kernel for a stochastic simulation. The kernel comprises of a map of SimulationEvents
  * to the probability of that event occurring. This is NOT thread safe.
  */
+@ToString
 public class TransitionKernel implements Cloneable {
 
     /**
