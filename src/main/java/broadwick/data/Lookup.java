@@ -163,8 +163,8 @@ public final class Lookup {
     }
 
     /**
-     * Get all the movements that have been read from the file(s) specified in the configuration file.
-     * @return a collection of movement events that have been recorded.
+     * Get all the animals that have been read from the file(s) specified in the configuration file.
+     * @return a collection of animal events that have been recorded.
      */
     public Collection<Animal> getAnimals() {
         final Collection<Animal> animals = new ArrayList<>();
@@ -177,6 +177,40 @@ public final class Lookup {
             final Node node = allNodes.next();
             if (node.hasProperty(MovementDatabaseFacade.TYPE)
                     && MovementDatabaseFacade.ANIMAL.equals(node.getProperty(MovementDatabaseFacade.TYPE))) {
+                final Animal animal = createAnimal(node);
+                animals.add(animal);
+            }
+//            if (animalsCache.getIfPresent(animal.getId()) == null) {
+//                animalsCache.put(animal.getId(), animal);
+//            }
+        }
+        sw.stop();
+        log.debug("Found {} animals in {}.", animals.size(), sw.toString());
+        return animals;
+    }
+
+    /**
+     * Get all the animals that have been read from the file(s) specified in the configuration file whose date of birth
+     * is before or on a given date and whose date of death (it there is any) is on or after the same date.
+     * @param date the date for which we reuqire the animals in the system.
+     * @return a collection of animals that have been recorded whose DoB &ge; date and DoD &ge; date
+     */
+    public Collection<Animal> getAnimals(final int date) {
+        final Collection<Animal> animals = new ArrayList<>();
+
+        final StopWatch sw = new StopWatch();
+        sw.start();
+
+        final Iterator<Node> allNodes = ops.getAllNodes().iterator();
+        while (allNodes.hasNext()) {
+            final Node node = allNodes.next();
+            if (node.hasProperty(MovementDatabaseFacade.TYPE)
+                    && MovementDatabaseFacade.ANIMAL.equals(node.getProperty(MovementDatabaseFacade.TYPE))
+                    && node.hasProperty(PopulationsFileReader.getDATE_OF_BIRTH())
+                    && ((Integer) node.getProperty(PopulationsFileReader.getDATE_OF_BIRTH())) <= date
+                    && node.hasProperty(PopulationsFileReader.getDATE_OF_DEATH())
+                    && (node.getProperty(PopulationsFileReader.getDATE_OF_DEATH()) == null
+                        || ((Integer) node.getProperty(PopulationsFileReader.getDATE_OF_DEATH())) >= date)) {
                 final Animal animal = createAnimal(node);
                 animals.add(animal);
             }
