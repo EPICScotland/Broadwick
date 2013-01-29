@@ -33,6 +33,7 @@
                         <xsd:element name="name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="level" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="pattern" minOccurs="0" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="overwrite" minOccurs="0" maxOccurs="1" type="xsd:boolean"/>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>

@@ -12,6 +12,7 @@ import ch.qos.logback.core.FileAppender;
 import ch.qos.logback.core.encoder.Encoder;
 import ch.qos.logback.core.filter.Filter;
 import lombok.Getter;
+import org.h2.store.fs.FileUtils;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -67,11 +68,17 @@ public final class LoggingFacade {
 
     /**
      * Add a file logger to the list of loggers of the project.
-     * @param file    the name of the file to which the logging messages will be added.
-     * @param level   the logging level to be applied.
-     * @param pattern the pattern for the logger.
+     * @param file      the name of the file to which the logging messages will be added.
+     * @param level     the logging level to be applied.
+     * @param pattern   the pattern for the logger.
+     * @param overwrite if true, the contents of any previous log are overwritten. If false, the logs are appended.
      */
-    public void addFileLogger(final String file, final String level, final String pattern) {
+    public void addFileLogger(final String file, final String level, final String pattern, final Boolean overwrite) {
+
+        // Delete the old log file.
+        if (overwrite != null && overwrite.booleanValue()) {
+            FileUtils.delete(file);
+        }
 
         final FileAppender<ILoggingEvent> appender = new FileAppender<>();
         appender.setFile(file);

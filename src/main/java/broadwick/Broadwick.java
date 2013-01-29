@@ -90,7 +90,7 @@ public final class Broadwick {
                 // BEFORE writing the results of validation
                 final Logs.File file = project.getLogs().getFile();
                 if (file != null) {
-                    logFacade.addFileLogger(file.getName(), file.getLevel(), file.getPattern());
+                    logFacade.addFileLogger(file.getName(), file.getLevel(), file.getPattern(), file.isOverwrite());
                 }
                 final Logs.Console console = project.getLogs().getConsole();
                 if (console != null) {
