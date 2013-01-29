@@ -38,29 +38,50 @@ public class Edge {
      * @param destination the destination of the edge.
      */
     public Edge(final String id, final Vertex source, final Vertex destination) {
-        this.id = id;
-        this.source = source;
-        this.destination = destination;
+        this(id, source, destination, 0.0);
+
     }
-    
+
     /**
      * A generic edge for a graph object.
      * @param source      the source of the edge.
      * @param destination the destination of the edge.
      */
     public Edge(final Vertex source, final Vertex destination) {
-        this.id = String.format("%s-%s", source.getId(), destination.getId());
-        this.source = source;
-        this.destination = destination;
+        this(String.format("%s-%s", source.getId(), destination.getId()), source, destination, 0.0);
     }
 
-    @Setter
+    /**
+     * A generic edge for a graph object.
+     * @param source      the source of the edge.
+     * @param destination the destination of the edge.
+     * @param weight      the weight attached to the edge.
+     */
+    public Edge(final Vertex source, final Vertex destination, final Double weight) {
+        this(String.format("%s-%s", source.getId(), destination.getId()), source, destination, weight);
+    }
+
+    /**
+     * A generic edge for a graph object.
+     * @param id          an id for the edge.
+     * @param source      the source of the edge.
+     * @param destination the destination of the edge.
+     * @param weight      the weight attached to the edge.
+     */
+    public Edge(final String id, final Vertex source, final Vertex destination, final Double weight) {
+        this.id = id;
+        this.source = source;
+        this.destination = destination;
+        this.weight = weight;
+    }
+
     @Getter
     protected String id = null;
-    @Setter
     @Getter
     protected Vertex source = null;
-    @Setter
     @Getter
     protected Vertex destination = null;
+    @Setter
+    @Getter
+    protected Double weight = 0.0;
 }
