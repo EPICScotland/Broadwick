@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -57,14 +58,17 @@ public final class Lookup {
         final StopWatch sw = new StopWatch();
         sw.start();
 
-        final Collection<Movement> movements = new ArrayList<>();
+        final Collection<Movement> movements = new HashSet<>();
         while (allRelationships.hasNext()) {
             final Relationship relationship = allRelationships.next();
 
             if (relationship.isType(MovementRelationship.MOVES)) {
                 // create a Movement and add it to the collection...
                 final Movement movement = createMovement(relationship);
-                movements.add(movement);
+                if (!movements.add(movement)) {
+                    log.info("Could not add movement [{}] to collection - duplicate detected. {}", movement.getId(),
+                             "Check you input file for duplicate entries.");
+                }
 
                 // store the movements for the animal in the cache.
 //            Collection<Movement> movementsForAnimal = movementsCache.getIfPresent(movement.getId());
@@ -97,7 +101,7 @@ public final class Lookup {
         sw.start();
 
         Integer date = null;
-        final Collection<Movement> movements = new ArrayList<>();
+        final Collection<Movement> movements = new HashSet<>();
         while (allRelationships.hasNext()) {
             final Relationship relationship = allRelationships.next();
 
@@ -123,7 +127,10 @@ public final class Lookup {
                 if ((date != null) && (date <= endDate) && (date >= startDate)) {
                     // create a Movement and add it to the collection...
                     final Movement movement = createMovement(relationship);
-                    movements.add(movement);
+                    if (!movements.add(movement)) {
+                        log.info("Could not add movement [{}] to collection - duplicate detected. {}", movement.getId(),
+                                 "Check you input file for duplicate entries.");
+                    }
                 }
             }
         }
@@ -167,7 +174,7 @@ public final class Lookup {
      * @return a collection of animal events that have been recorded.
      */
     public Collection<Animal> getAnimals() {
-        final Collection<Animal> animals = new ArrayList<>();
+        final Collection<Animal> animals = new HashSet<>();
 
         final StopWatch sw = new StopWatch();
         sw.start();
@@ -178,7 +185,10 @@ public final class Lookup {
             if (node.hasProperty(MovementDatabaseFacade.TYPE)
                     && MovementDatabaseFacade.ANIMAL.equals(node.getProperty(MovementDatabaseFacade.TYPE))) {
                 final Animal animal = createAnimal(node);
-                animals.add(animal);
+                if (!animals.add(animal)) {
+                    log.info("Could not add animal [{}] to collection - duplicate detected. {}", animal.getId(),
+                             "Check you input file for duplicate entries.");
+                }
             }
 //            if (animalsCache.getIfPresent(animal.getId()) == null) {
 //                animalsCache.put(animal.getId(), animal);
@@ -196,7 +206,7 @@ public final class Lookup {
      * @return a collection of animals that have been recorded whose DoB &ge; date and DoD &ge; date
      */
     public Collection<Animal> getAnimals(final int date) {
-        final Collection<Animal> animals = new ArrayList<>();
+        final Collection<Animal> animals = new HashSet<>();
 
         final StopWatch sw = new StopWatch();
         sw.start();
@@ -212,7 +222,10 @@ public final class Lookup {
                     && (node.getProperty(PopulationsFileReader.getDATE_OF_DEATH()) == null
                         || ((Integer) node.getProperty(PopulationsFileReader.getDATE_OF_DEATH())) >= date)) {
                 final Animal animal = createAnimal(node);
-                animals.add(animal);
+                if (!animals.add(animal)) {
+                    log.info("Could not add animal [{}] to collection - duplicate detected. {}", animal.getId(),
+                             "Check you input file for duplicate entries.");
+                }
             }
 //            if (animalsCache.getIfPresent(animal.getId()) == null) {
 //                animalsCache.put(animal.getId(), animal);
