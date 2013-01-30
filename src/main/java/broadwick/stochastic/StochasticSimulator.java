@@ -150,7 +150,7 @@ public abstract class StochasticSimulator {
      */
     protected final void doThetaEvent() {
         final double nextThetaEventTime = thetaQueue.getNextThetaEventTime();
-        log.trace("Performing theta events at t =  {}", nextThetaEventTime);
+        log.trace("Performing theta events at t = {}", nextThetaEventTime);
 
         final Map<Observer, Collection<Object>> nextEvents = thetaQueue.getNextEventDataAndRemove();
         for (Map.Entry<Observer, Collection<Object>> entry : nextEvents.entrySet()) {

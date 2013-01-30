@@ -31,7 +31,7 @@ public class TauLeapingFixedStep extends AbstractTauLeapingBase {
     @Override
     public final void performStep() {
 
-        log.trace("TauLeapingFixedStep: performStep at {}", getCurrentTime() + tau);
+        log.trace("TauLeapingFixedStep: performStep at {}", getCurrentTime());
         while (isThetaEventInCurrentStep(tau)) {
             doThetaEvent();
         }
