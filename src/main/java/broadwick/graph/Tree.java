@@ -13,7 +13,7 @@ import java.util.Collection;
  * @param <V> the vertex type.
  * @param <E> the edge type.
  */
-public class Tree<V, E> implements broadwick.graph.Graph<V, E> {
+public class Tree<V extends Vertex, E extends Edge> implements broadwick.graph.Graph<V, E> {
 
     /**
      * Creates an instance of the tree.

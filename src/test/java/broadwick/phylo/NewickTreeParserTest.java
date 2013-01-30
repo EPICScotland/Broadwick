@@ -1,31 +1,17 @@
-/*
- * Copyright 2013 .
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package broadwick.phylo;
 
+import broadwick.graph.Edge;
 import broadwick.graph.Tree;
 import java.util.Collection;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -84,7 +70,7 @@ public class NewickTreeParserTest {
     @Test
     public void testParse() {
         NewickTreeParser newickTreeParser = new NewickTreeParser(testFileName);
-        Tree<PhyloNode, String> tree = newickTreeParser.parse();
+        Tree<PhyloNode, Edge> tree = newickTreeParser.parse();
         checkTree(tree);
     }
 
@@ -93,7 +79,7 @@ public class NewickTreeParserTest {
         NewickTreeParser newickTreeParser = new NewickTreeParser();
 
         // Test the trees we've already tested
-        Tree<PhyloNode, String> tree = newickTreeParser.parse("A:0.1,B:0.2,(C:0.3,D:0.4):0.5");
+        Tree<PhyloNode, Edge> tree = newickTreeParser.parse("A:0.1,B:0.2,(C:0.3,D:0.4):0.5");
         checkTree(tree);
 
         // now test the same tree with optional braces, semicolon
@@ -143,7 +129,7 @@ public class NewickTreeParserTest {
      * this method tests the outcomes.
      * @param tree
      */
-    private void checkTree(final Tree<PhyloNode, String> tree) {
+    private void checkTree(final Tree<PhyloNode, Edge> tree) {
         assertEquals(6, tree.getVertexCount());
         assertEquals(2, tree.getHeight());
 
@@ -188,7 +174,7 @@ public class NewickTreeParserTest {
         assertEquals(2, tree.outDegree(branchNode));
     }
 
-    private void checkTreeWithBranchName(final Tree<PhyloNode, String> tree) {
+    private void checkTreeWithBranchName(final Tree<PhyloNode, Edge> tree) {
         // This is the newwick string we're checking 
         // (A:0.1,B:0.2,(C:0.3,D:0.4)E:0.5)F:0.0;
         // i.e. it is the same as before but the branch name and root are specified.
@@ -237,7 +223,7 @@ public class NewickTreeParserTest {
         assertEquals(2, tree.outDegree(branchNode));
     }
 
-    private void checkTreeWithOnlyRootNode(final Tree<PhyloNode, String> tree) {
+    private void checkTreeWithOnlyRootNode(final Tree<PhyloNode, Edge> tree) {
         assertEquals(1, tree.getVertexCount());
         assertEquals(0, tree.getHeight());
         PhyloNode rootNode = new PhyloNode("A", 0.1);
@@ -247,7 +233,7 @@ public class NewickTreeParserTest {
         assertEquals(0, tree.outDegree(rootNode));
     }
     
-    private void checkTreeWithNoBranchLengths(Tree<PhyloNode, String> tree) {
+    private void checkTreeWithNoBranchLengths(Tree<PhyloNode, Edge> tree) {
         
         assertEquals(6, tree.getVertexCount());
         assertEquals(2, tree.getHeight());
@@ -293,7 +279,7 @@ public class NewickTreeParserTest {
         assertEquals(2, tree.outDegree(branchNode));
     } 
     
-    private void checkTreeWithWithBranchNamesWithoutBranchLengths(Tree<PhyloNode, String> tree) {
+    private void checkTreeWithWithBranchNamesWithoutBranchLengths(Tree<PhyloNode, Edge> tree) {
         assertEquals(6, tree.getVertexCount());
         assertEquals(2, tree.getHeight());
 
@@ -338,7 +324,7 @@ public class NewickTreeParserTest {
         assertEquals(2, tree.outDegree(branchNode));
     }
     
-    private void checkTreeWithNestedBranches(final Tree<PhyloNode, String> tree) {
+    private void checkTreeWithNestedBranches(final Tree<PhyloNode, Edge> tree) {
         assertEquals(15, tree.getVertexCount());
         assertEquals(3, tree.getHeight());
         

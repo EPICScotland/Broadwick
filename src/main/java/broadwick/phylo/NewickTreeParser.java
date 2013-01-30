@@ -1,5 +1,6 @@
 package broadwick.phylo;
 
+import broadwick.graph.Edge;
 import broadwick.graph.Tree;
 import broadwick.io.FileInput;
 import java.io.IOException;
@@ -40,10 +41,10 @@ public class NewickTreeParser {
      * @param newickStr the string to parse.
      * @return a Tree created from the parsed string.
      */
-    public final Tree<PhyloNode, String> parse(final String newickStr) {
+    public final Tree<PhyloNode, Edge> parse(final String newickStr) {
         branchLabel = 0;
 
-        final Tree<PhyloNode, String> phyloTree = new Tree<>();
+        final Tree<PhyloNode, Edge> phyloTree = new Tree<>();
         // first remove the trailing ; if any
         String stringToParse = StringUtils.removeEnd(newickStr.trim(), ";").trim();
 
@@ -85,7 +86,7 @@ public class NewickTreeParser {
      * Parse a string from a Newick file.
      * @return a generated Tree object.
      */
-    public final Tree<PhyloNode, String> parse() {
+    public final Tree<PhyloNode, Edge> parse() {
         if (newickString == null) {
             throw new IllegalArgumentException("NewickParser created but no string to parse found. Did you create the parser without specifying a file?");
         }
@@ -223,7 +224,7 @@ public class NewickTreeParser {
         phyloNode = new PhyloNode(nodeName, distance);
 
         try {
-            tree.addEdge(String.format("[%s]-[%s]", parent.getId(), phyloNode.getId()), parent, phyloNode);
+            tree.addEdge(new Edge(parent, phyloNode), parent, phyloNode);
         } catch (IllegalArgumentException e) {
             // we may have non-unique branch names in the data file, if we encounter one here and we want to rename
             // it we do it now. This is not very good as we are searching for an error message but it's the best as can
@@ -231,7 +232,7 @@ public class NewickTreeParser {
             if (e.getLocalizedMessage().contains("already exists in this graph") && createUniqueName) {
                 nodeName = String.format("branch-%d", branchLabel++);
                 phyloNode = new PhyloNode(nodeName, distance);
-                tree.addEdge(String.format("[%s]-[%s]", parent.getId(), phyloNode.getId()), parent, phyloNode);
+                tree.addEdge(new Edge(parent, phyloNode), parent, phyloNode);
             }
         }
 
