@@ -37,7 +37,7 @@ public class PhyloNode extends Vertex {
 
         final PhyloNode otherNode = (PhyloNode) other;
 
-        return this.id.equals(otherNode.id) && this.distance == otherNode.distance;
+        return this.id.equals(otherNode.id);// && this.distance == otherNode.distance;
     }
     @Override
     public final int hashCode() {
