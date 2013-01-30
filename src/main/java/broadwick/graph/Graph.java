@@ -255,4 +255,11 @@ public interface Graph<V, E> {
      */
     Collection<V> getVertices();
 
+    /**
+     * Returns a view of all edges in this graph. In general, this obeys the
+     * <code>Collection</code> contract, and therefore makes no guarantees about the ordering of the edges within the
+     * set.
+     * @return a <code>Collection</code> view of all edges in this graph
+     */
+    Collection<E> getEdges();
 }

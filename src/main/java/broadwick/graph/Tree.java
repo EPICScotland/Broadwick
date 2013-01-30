@@ -161,6 +161,11 @@ public class Tree<V, E> implements broadwick.graph.Graph<V, E> {
     public final Collection<V> getVertices() {
         return tree.getVertices();
     }
+    
+    @Override
+    public final Collection<E> getEdges() {
+        return tree.getEdges();
+    }
 
     private DelegateTree<V, E> tree;
 }
