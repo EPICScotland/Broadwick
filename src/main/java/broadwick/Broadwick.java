@@ -143,7 +143,7 @@ public final class Broadwick {
                                     entry.getValue().run();
                                     entry.getValue().finalise();
                                 } catch (Exception ex) {
-                                    log.error("Failed to create instance of model {}", modelName);
+                                    log.error("Error running model {}. see stack trace from details.", modelName);
                                     log.error("{}", Throwables.getStackTraceAsString(ex));
                                 }
                             }

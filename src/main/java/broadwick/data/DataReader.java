@@ -137,7 +137,7 @@ public class DataReader implements java.lang.AutoCloseable {
 
         } catch (Exception e) {
             log.error("Failure reading data file section. {}", e.getLocalizedMessage());
-            throw new BroadwickException(Throwables.getStackTraceAsString(e));
+            throw new BroadwickException(String.format("Failure reading data file section. %s", e.getLocalizedMessage()));
         }
     }
 
