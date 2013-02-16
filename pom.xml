@@ -74,12 +74,12 @@
         <jre.version>1.7</jre.version>
         <junit.junit.version>4.11</junit.junit.version>
         <jung.version>2.0.2-SNAPSHOT</jung.version>	
-        <neo4j-version>1.9.M04</neo4j-version>
         <onejar-plugin.version>1.4.5</onejar-plugin.version>
         <org.h2.version>1.3.170</org.h2.version>
         <org.apache.mahout.commons.commons-cli.version>2.0-mahout</org.apache.mahout.commons.commons-cli.version>
         <org.apache.commons.lang3.version>3.1</org.apache.commons.lang3.version>  
         <org.apache.commons-math.version>2.2</org.apache.commons-math.version>
+	<org.jooq.version>2.6.0</org.jooq.version>
         <org.projectlombok.lombok.version>0.11.6</org.projectlombok.lombok.version>
         <org.slf4j.slf4j-api.version>1.7.2</org.slf4j.slf4j-api.version>
         <org.swinglabs.swing-layout.version>1.0.3</org.swinglabs.swing-layout.version>
@@ -175,57 +175,57 @@
         </dependency>
 
         <!-- Database dependencies -->
-        <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j</artifactId>
-            <version>${neo4j-version}</version>
-        </dependency>
-        <dependency>
+	<dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <version>${org.h2.version}</version>
         </dependency>
+	<dependency>
+	    <groupId>org.jooq</groupId>
+	    <artifactId>jooq</artifactId>
+	    <version>${org.jooq.version}</version>
+	</dependency>
 
-        <!-- Logging dependencies -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${org.slf4j.slf4j-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>${ch.qos.logback.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${ch.qos.logback.version}</version>
-        </dependency>
+	<!-- Logging dependencies -->
+	<dependency>
+	    <groupId>org.slf4j</groupId>
+	    <artifactId>slf4j-api</artifactId>
+	    <version>${org.slf4j.slf4j-api.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>ch.qos.logback</groupId>
+	    <artifactId>logback-core</artifactId>
+	    <version>${ch.qos.logback.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>ch.qos.logback</groupId>
+	    <artifactId>logback-classic</artifactId>
+	    <version>${ch.qos.logback.version}</version>
+	</dependency>
 
-        <!-- GUI dependencies -->
-        <dependency>
-            <groupId>org.swinglabs</groupId>
-            <artifactId>swing-layout</artifactId>
-            <version>${org.swinglabs.swing-layout.version}</version>
-        </dependency>
+	<!-- GUI dependencies -->
+	<dependency>
+	    <groupId>org.swinglabs</groupId>
+	    <artifactId>swing-layout</artifactId>
+	    <version>${org.swinglabs.swing-layout.version}</version>
+	</dependency>
     </dependencies>
 
     <build>
-        <pluginManagement>
-        </pluginManagement>
-        <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
-                <configuration>
-                    <source>${jdk.version}</source>
-                    <target>${jre.version}</target>
-                    <testSource>${jdk.version}</testSource>
-                    <testTarget>${jre.version}</testTarget>
-                    <showDeprecation>true</showDeprecation>
-                    <showWarnings>true</showWarnings>
-                    <compilerArgument>-Xlint:all</compilerArgument>
+	<pluginManagement>
+	</pluginManagement>
+	<plugins>
+	    <plugin>
+		<artifactId>maven-compiler-plugin</artifactId>
+		<version>${maven-compiler-plugin.version}</version>
+		<configuration>
+		    <source>${jdk.version}</source>
+		    <target>${jre.version}</target>
+		    <testSource>${jdk.version}</testSource>
+		    <testTarget>${jre.version}</testTarget>
+		    <showDeprecation>true</showDeprecation>
+		    <showWarnings>true</showWarnings>
+		    <compilerArgument>-Xlint:all</compilerArgument>
                 </configuration>
             </plugin>
             <!-- generate the java classes from the xsd definition -->
@@ -275,7 +275,7 @@
                             <addClasspath>true</addClasspath>
                         </manifest>
                         <manifestEntries>
-                            <Implementation-Version>${version}</Implementation-Version>
+                            <Implementation-Version>${project.version}</Implementation-Version>
                             <Implementation-Build>${buildNumber}</Implementation-Build>
                             <Build-timestamp>${timestamp}</Build-timestamp>
                         </manifestEntries>

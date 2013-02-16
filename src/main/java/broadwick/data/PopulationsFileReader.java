@@ -1,183 +1,198 @@
 package broadwick.data;
 
-import broadwick.BroadwickConstants;
 import broadwick.BroadwickException;
 import broadwick.config.generated.CustomTags;
 import broadwick.config.generated.DataFiles;
-import broadwick.io.FileInput;
 import com.google.common.base.Throwables;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
+import java.sql.Connection;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.TreeMap;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 /**
- * Reader for the files describing the populations for the simulation.
+ * Read a file containing the population data.
  */
 @Slf4j
-public class PopulationsFileReader {
+public class PopulationsFileReader extends DataFileReader {
 
     /**
      * Create the populations file reader.
      * @param populationFile the [xml] tag of the config file that is to be read.
-     * @param dataReader     the reader object that contains some useful functionality.
-     * @param dataDb         the database facade object used to save the data in the populations file section.
+     * @param dbImpl         the implementation of the database object.
      */
     public PopulationsFileReader(final DataFiles.PopulationFile populationFile,
-                                 final DataReader dataReader, final MovementDatabaseFacade dataDb) {
-        this.populationFile = populationFile;
-        this.dataDb = dataDb;
-        this.dataReader = dataReader;
+                                 final DatabaseImpl dbImpl) {
 
-        final StringBuilder errors = new StringBuilder();
-        dateFormat = populationFile.getDateFormat();
+        super();
+        this.database = dbImpl;
+        this.dataFile = populationFile.getName();
+        this.dateFields = new HashSet<>();
+        this.dateFormat = populationFile.getDateFormat();
+        this.insertedColInfo = new TreeMap<>();
+        this.populationFile = populationFile;
 
         if (populationFile.getLifeHistory() != null) {
-            keyValuePairs.putAll(readLifeHistory());
+            readLifeHistory();
         } else if (populationFile.getPopulation() != null) {
-            keyValuePairs.putAll(readPopulation());
+            readPopulation();
         } else {
             throw new BroadwickException("Cannot read Populations section - No lifeHistory or population section found.");
-        }
-
-        if (populationFile.getCustomTags() != null) {
-            for (CustomTags.CustomTag tag : populationFile.getCustomTags().getCustomTag()) {
-                dataReader.updateSectionDefiniton(tag.getName(), tag.getColumn(), keyValuePairs, errors, true, SECTION_NAME);
-            }
         }
     }
 
     /**
      * Read the life history declarations of a population file section in the configuration file, if there are errors,
      * they are noted and and exception is thrown with ALL the errors at the end of the method.
-     * @return A com.google.common.collect.Table element with a column name, location (i.e. column) in the data file and
-     *         the database type of the element (VARCHAR, DATE, INT or DOUBLE).
      */
-    private Map<String, Integer> readLifeHistory() {
-        final Map<String, Integer> elements = new HashMap<>();
+    private void readLifeHistory() {
+        tableName = LIFE_HISTORIES_TABLE_NAME;
         final StringBuilder errors = new StringBuilder();
+        this.createTableCommand = new StringBuilder();
+        updateCreateTableCommand(ID, populationFile.getLifeHistory().getIdColumn(), " VARCHAR(128), ",
+                                 insertedColInfo, createTableCommand, LIFE_HISTORIES_TABLE_NAME, SECTION_NAME, errors);
+        updateCreateTableCommand(DATE_OF_BIRTH, populationFile.getLifeHistory().getDateOfBirthColumn(),
+                                 " VARCHAR(128), ", insertedColInfo, createTableCommand, LIFE_HISTORIES_TABLE_NAME,
+                                 SECTION_NAME, errors);
+        updateCreateTableCommand(LOCATION_OF_BIRTH, populationFile.getLifeHistory().getLocationOfBirthColumn(),
+                                 " VARCHAR(128), ", insertedColInfo, createTableCommand, LIFE_HISTORIES_TABLE_NAME,
+                                 SECTION_NAME, errors);
+        updateCreateTableCommand(DATE_OF_DEATH, populationFile.getLifeHistory().getDateOfDeathColumn(), " INT, ",
+                                 insertedColInfo, createTableCommand, LIFE_HISTORIES_TABLE_NAME, SECTION_NAME, errors);
+        updateCreateTableCommand(LOCATION_OF_DEATH, populationFile.getLifeHistory().getLocationOfDeathColumn(),
+                                 " VARCHAR(128), ", insertedColInfo, createTableCommand, LIFE_HISTORIES_TABLE_NAME,
+                                 SECTION_NAME, errors);
+        updateCreateTableCommand(SPECIES, populationFile.getLifeHistory().getSpeciesColumn(),
+                                 " VARCHAR(32), ", insertedColInfo, createTableCommand, LIFE_HISTORIES_TABLE_NAME,
+                                 SECTION_NAME, errors);
 
-        dataReader.updateSectionDefiniton(ID, populationFile.getLifeHistory().getIdColumn(), keyValuePairs, errors, true, SECTION_NAME);
-        dataReader.updateSectionDefiniton(DATE_OF_BIRTH, populationFile.getLifeHistory().getDateOfBirthColumn(), keyValuePairs, errors, true, SECTION_NAME);
-        dataReader.updateSectionDefiniton(LOCATION_OF_BIRTH, populationFile.getLifeHistory().getLocationOfBirthColumn(), keyValuePairs, errors, true, SECTION_NAME);
-        dataReader.updateSectionDefiniton(DATE_OF_DEATH, populationFile.getLifeHistory().getDateOfDeathColumn(), keyValuePairs, errors, true, SECTION_NAME);
-
-        if (populationFile.getLifeHistory().getSpeciesColumn() != null) {
-            dataReader.updateSectionDefiniton(SPECIES, populationFile.getLifeHistory().getSpeciesColumn(), keyValuePairs, errors, true, SECTION_NAME);
+        if (populationFile.getCustomTags() != null) {
+            for (CustomTags.CustomTag tag : populationFile.getCustomTags().getCustomTag()) {
+                updateCreateTableCommand(tag.getName(), tag.getColumn(), " VARCHAR(128), ",
+                                         insertedColInfo, createTableCommand, LIFE_HISTORIES_TABLE_NAME, SECTION_NAME, errors);
+                if ("date".equals(tag.getType())) {
+                    dateFields.add(tag.getColumn());
+                }
+            }
         }
 
-        if (populationFile.getLifeHistory().getLocationOfDeathColumn() != null) {
-            dataReader.updateSectionDefiniton(LOCATION_OF_DEATH, populationFile.getLifeHistory().getLocationOfDeathColumn(), keyValuePairs, errors, true, SECTION_NAME);
+        if (populationFile.getLifeHistory().getDateOfBirthColumn() > 0) {
+            dateFields.add(populationFile.getLifeHistory().getDateOfBirthColumn());
         }
+
+        if (populationFile.getLifeHistory().getDateOfDeathColumn() > 0) {
+            dateFields.add(populationFile.getLifeHistory().getDateOfDeathColumn());
+        }
+
+        final StringBuilder createIndexCommand = new StringBuilder();
+        createTableCommand.deleteCharAt(createTableCommand.length() - 1);
+        createTableCommand.append(");");
+
+        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_POP_ID ON %s (%s);",
+                                                LIFE_HISTORIES_TABLE_NAME, ID));
+        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_POP_DATE ON %s (%s,%s,%s);",
+                                                LIFE_HISTORIES_TABLE_NAME, ID, DATE_OF_BIRTH, DATE_OF_DEATH));
+
+        createTableCommand.append(createIndexCommand.toString());
+
+        insertString = String.format("INSERT INTO %s (%s) VALUES (%s)",
+                                     LIFE_HISTORIES_TABLE_NAME, asCsv(insertedColInfo.keySet()), asQuestionCsv(insertedColInfo.keySet()));
 
         if (errors.length() > 0) {
+            log.error(errors.toString());
             throw new BroadwickException(errors.toString());
         }
-
-        return elements;
     }
 
     /**
      * Read the populations declarations of a population file section in the configuration file, if there are errors,
      * they are noted and and exception is thrown with ALL the errors at the end of the method.
-     * @return A com.google.common.collect.Table element with a column name, location (i.e. column) in the data file and
-     *         the database type of the element (VARCHAR, DATE, INT or DOUBLE).
      */
-    private Map<String, Integer> readPopulation() {
-        final Map<String, Integer> elements = new HashMap<>();
+    private void readPopulation() {
+        tableName = POPULATIONS_TABLE_NAME;
         final StringBuilder errors = new StringBuilder();
+        this.createTableCommand = new StringBuilder();
+        updateCreateTableCommand(LOCATION, populationFile.getPopulation().getLocationIdColumn(), " VARCHAR(128), ",
+                                 insertedColInfo, createTableCommand, POPULATIONS_TABLE_NAME, SECTION_NAME, errors);
+        updateCreateTableCommand(POPULATION, populationFile.getPopulation().getPopulationSizeColumn(), " VARCHAR(128), ",
+                                 insertedColInfo, createTableCommand, POPULATIONS_TABLE_NAME, SECTION_NAME, errors);
+        updateCreateTableCommand(DATE_LC, populationFile.getPopulation().getPopulationDateColumn(), " VARCHAR(128), ",
+                                 insertedColInfo, createTableCommand, POPULATIONS_TABLE_NAME, SECTION_NAME, errors);
 
-        dataReader.updateSectionDefiniton(LOCATION, populationFile.getPopulation().getLocationIdColumn(), elements, errors, true, SECTION_NAME);
-        dataReader.updateSectionDefiniton(POPULATION, populationFile.getPopulation().getPopulationSizeColumn(), elements, errors, true, SECTION_NAME);
-        dataReader.updateSectionDefiniton(DATE_LC, populationFile.getPopulation().getPopulationDateColumn(), elements, errors, true, SECTION_NAME);
+
+        dateFields.add(populationFile.getPopulation().getPopulationDateColumn());
 
         if (populationFile.getPopulation().getSpeciesColumn() != null) {
-            dataReader.updateSectionDefiniton(SPECIES, populationFile.getPopulation().getSpeciesColumn(), keyValuePairs, errors, true, SECTION_NAME);
+            if (populationFile.getPopulation().getSpeciesColumn() != 0) {
+                updateCreateTableCommand(SPECIES, populationFile.getPopulation().getSpeciesColumn(),
+                                         " VARCHAR(32), ", insertedColInfo, createTableCommand, POPULATIONS_TABLE_NAME,
+                                         SECTION_NAME, errors);
+            } else {
+                errors.append("No ").append(SPECIES).append(" column set in ").append(SECTION_NAME).append(" section\n");
+            }
         }
 
-        if (errors.length() > 0) {
-            throw new BroadwickException(errors.toString());
-        }
-
-        return elements;
-    }
-
-    /**
-     * Insert the data from the input file into the database. The data structure has been read and the database set up
-     * already so this method simply reads the file and extracts the relevant information, storing it in the database.
-     * @return the number of rows read
-     */
-    public final int insert() {
-        int inserted = 0;
-        List<String> line = Collections.EMPTY_LIST;
-        try (FileInput fle = new FileInput(populationFile.getName(), populationFile.getSeparator())) {
-            final Set<String> insertedIds = new HashSet<>();
-
-            final List<String> dateKeys = Arrays.asList(DATE_OF_BIRTH, DATE_OF_DEATH);
-            final DateTimeFormatter pattern = DateTimeFormat.forPattern(dateFormat);
-
-            //CHECKSTYLE:OFF
-            while (!(line = fle.readLine()).isEmpty()) {
-                //CHECKSTYLE:ON
-
-                //TODO what about the populations? we only get the id from the LifeHistory.....
-                final String nodeId = line.get(populationFile.getLifeHistory().getIdColumn() - 1);
-                final Map<String, Object> properties = new HashMap<>();
-                properties.put("index", nodeId);
-
-                for (Map.Entry<String, Integer> entry : keyValuePairs.entrySet()) {
-                    final String value = line.get(entry.getValue() - 1);
-
-                    if (value != null && !value.isEmpty()) {
-                        final String property = entry.getKey();
-                        if (dateKeys.contains(property)) {
-                            final DateTime date = pattern.parseDateTime(value);
-                            properties.put(property, Days.daysBetween(BroadwickConstants.getZERO_DATE(), date).getDays());
-                        } else {
-                            properties.put(property, value);
-                        }
-                    }
-                }
-                properties.put(MovementDatabaseFacade.TYPE, MovementDatabaseFacade.ANIMAL);
-                final Long node = dataDb.createNode(nodeId, properties);
-                if (node != null && !insertedIds.contains(nodeId)) {
-                    dataDb.getIndex().add(node, properties);
-                    insertedIds.add(nodeId);
-                    inserted++;
-                    if (inserted % 100000 == 0) {
-                        dataDb.getIndex().flush();
-                    }
+        if (populationFile.getCustomTags() != null) {
+            for (CustomTags.CustomTag tag : populationFile.getCustomTags().getCustomTag()) {
+                if (populationFile.getPopulation().getSpeciesColumn() != 0) {
+                    updateCreateTableCommand(tag.getName(), tag.getColumn(), " VARCHAR(128), ",
+                                             insertedColInfo, createTableCommand, POPULATIONS_TABLE_NAME, SECTION_NAME, errors);
+                } else {
+                    errors.append("No ").append(tag.getName()).append(" column set in ").append(SECTION_NAME).append(" section\n");
                 }
             }
+        }
 
-        } catch (IndexOutOfBoundsException | NoSuchElementException | NumberFormatException | BroadwickException e) {
-            final String errorMsg = "Could not read file %s; last line read %s";
-            log.trace(String.format(errorMsg, populationFile.getName(), line));
-            throw new BroadwickException(String.format(errorMsg, populationFile.getName(), line) + NEWLINE + Throwables.getStackTraceAsString(e));
-        } catch (IOException e) {
-            final String errorMsg = "Could not open file %s";
-            log.trace(String.format(errorMsg, populationFile.getName()));
-            throw new BroadwickException(String.format(errorMsg, populationFile.getName()) + NEWLINE + Throwables.getStackTraceAsString(e));
+        if (populationFile.getPopulation().getPopulationDateColumn() > 0) {
+            dateFields.add(populationFile.getPopulation().getPopulationDateColumn());
+        }
+
+        final StringBuilder createIndexCommand = new StringBuilder();
+        createTableCommand.deleteCharAt(createTableCommand.length() - 1);
+        createTableCommand.append(");");
+
+        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_POP_LOCATION ON %s (%s);",
+                                                POPULATIONS_TABLE_NAME, LOCATION));
+
+        createTableCommand.append(createIndexCommand.toString());
+
+        insertString = String.format("INSERT INTO %s (%s) VALUES (%s)",
+                                     POPULATIONS_TABLE_NAME, asCsv(insertedColInfo.keySet()), asQuestionCsv(insertedColInfo.keySet()));
+
+        if (errors.length() > 0) {
+            log.error(errors.toString());
+            throw new BroadwickException(errors.toString());
+        }
+    }
+
+    @Override
+    public final int insert() {
+        log.trace("PopulationFileReader insert");
+
+        int inserted = 0;
+        try (Connection connection = database.getConnection()) {
+            createTable(tableName, createTableCommand.toString(), connection);
+
+            inserted = insert(connection, tableName, insertString, dataFile, dateFormat, insertedColInfo, dateFields);
+        } catch (Exception ex) {
+            log.error("Error reading population data {}. {}", ex.getLocalizedMessage(), Throwables.getStackTraceAsString(ex));
+            throw new BroadwickException(ex);
         }
         return inserted;
     }
 
-    private MovementDatabaseFacade dataDb;
-    private DataReader dataReader;
-    private DataFiles.PopulationFile populationFile;
+    private DatabaseImpl database;
+    private String dataFile;
     private String dateFormat;
-    private Map<String, Integer> keyValuePairs = new HashMap<>();
+    private StringBuilder createTableCommand;
+    private String insertString;
+    private Map<String, Integer> insertedColInfo;
+    private Collection<Integer> dateFields;
+    private DataFiles.PopulationFile populationFile;
+    @Getter
+    private static String tableName;
     @Getter
     private static final String ID = "Id";
     private static final String LOCATION = "Location";
@@ -193,6 +208,9 @@ public class PopulationsFileReader {
     private static final String DATE_OF_DEATH = "DateOfDeath";
     @Getter
     private static final String LOCATION_OF_DEATH = "LocationOfDeath";
-    private static final String NEWLINE = "\n";
     private static final String SECTION_NAME = "PopulationsFile";
+    @Getter
+    private static final String POPULATIONS_TABLE_NAME = "Populations";
+    @Getter
+    private static final String LIFE_HISTORIES_TABLE_NAME = "LifeHistories";
 }

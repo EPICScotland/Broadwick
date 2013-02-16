@@ -1,24 +1,16 @@
 package broadwick.data;
 
-import broadwick.BroadwickConstants;
 import broadwick.BroadwickException;
 import broadwick.config.generated.CustomTags;
 import broadwick.config.generated.DataFiles;
-import broadwick.io.FileInput;
 import com.google.common.base.Throwables;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.sql.Connection;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.TreeMap;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Reader for the files describing the full movements (i.e. those that specify both the departure location and the
@@ -26,110 +18,108 @@ import org.joda.time.format.DateTimeFormatter;
  * later use.
  */
 @Slf4j
-public class FullMovementsFileReader {
+public class FullMovementsFileReader extends DataFileReader {
 
     /**
      * Create the movement file reader.
      * @param movementFile the [XML] tag of the config file that is to be read.
-     * @param dataReader   the reader object that contains some useful functionality.
-     * @param dataDb       the database facade object used to save the data in the movements file section.
+     * @param dbImpl       the implementation of the database object.
      */
     public FullMovementsFileReader(final DataFiles.FullMovementFile movementFile,
-                                   final DataReader dataReader, final MovementDatabaseFacade dataDb) {
-        this.movementFile = movementFile;
-        this.dataDb = dataDb;
+                                   final DatabaseImpl dbImpl) {
 
-        try {
-            final StringBuilder errors = new StringBuilder();
-            dateFormat = movementFile.getDateFormat();
+        super();
+        this.database = dbImpl;
+        this.dataFile = movementFile.getName();
+        this.dateFields = new HashSet<>();
+        this.dateFormat = movementFile.getDateFormat();
+        this.insertedColInfo = new TreeMap<>();
+        final StringBuilder errors = new StringBuilder();
 
-            dataReader.updateSectionDefiniton(ID, movementFile.getIdColumn(), keyValuePairs, errors, true, SECTION_NAME);
-            dataReader.updateSectionDefiniton(DEPARTURE_DATE, movementFile.getDepartureDateColumn(), keyValuePairs, errors, true, SECTION_NAME);
-            dataReader.updateSectionDefiniton(DEPARTURE_ID, movementFile.getDepartureLocationIdColumn(), keyValuePairs, errors, true, SECTION_NAME);
-            dataReader.updateSectionDefiniton(DESTINATION_DATE, movementFile.getDestinationDateColumn(), keyValuePairs, errors, true, SECTION_NAME);
-            dataReader.updateSectionDefiniton(DESTINATION_ID, movementFile.getDestinationLocationIdColumn(), keyValuePairs, errors, true, SECTION_NAME);
+        this.createTableCommand = new StringBuilder();
+        updateCreateTableCommand(ID, movementFile.getIdColumn(), " VARCHAR(128), ",
+                                 insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+        updateCreateTableCommand(DEPARTURE_DATE, movementFile.getDepartureDateColumn(), " INT, ",
+                                 insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+        updateCreateTableCommand(DEPARTURE_ID, movementFile.getDepartureLocationIdColumn(), " VARCHAR(32), ",
+                                 insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+        updateCreateTableCommand(DESTINATION_DATE, movementFile.getDestinationDateColumn(), " INT, ",
+                                 insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+        updateCreateTableCommand(DESTINATION_ID, movementFile.getDestinationLocationIdColumn(), " VARCHAR(32), ",
+                                 insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+        updateCreateTableCommand(SPECIES, movementFile.getSpeciesColumn(), " VARCHAR(32), ",
+                                 insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+        updateCreateTableCommand(MARKET_ID, movementFile.getMarketIdColumn(), " VARCHAR(32), ",
+                                 insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+        updateCreateTableCommand(MARKET_DATE, movementFile.getMarketDateColumn(), " INT, ",
+                                 insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
 
-            if (movementFile.getSpeciesColumn() != null) {
-                dataReader.updateSectionDefiniton(SPECIES, movementFile.getSpeciesColumn(), keyValuePairs, errors, true, SECTION_NAME);
-            }
-
-            if (movementFile.getMarketIdColumn() != null) {
-                dataReader.updateSectionDefiniton(MARKET_ID, movementFile.getMarketIdColumn(), keyValuePairs, errors, true, SECTION_NAME);
-            }
-            if (movementFile.getMarketDateColumn() != null) {
-                dataReader.updateSectionDefiniton(MARKET_DATE, movementFile.getMarketDateColumn(), keyValuePairs, errors, true, SECTION_NAME);
-            }
-
-            if (movementFile.getCustomTags() != null) {
-                for (CustomTags.CustomTag tag : movementFile.getCustomTags().getCustomTag()) {
-                    dataReader.updateSectionDefiniton(tag.getName(), tag.getColumn(), keyValuePairs, errors, true, SECTION_NAME);
+        if (movementFile.getCustomTags() != null) {
+            for (CustomTags.CustomTag tag : movementFile.getCustomTags().getCustomTag()) {
+                updateCreateTableCommand(tag.getName(), tag.getColumn(), " VARCHAR(128), ",
+                                         insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+                if ("date".equals(tag.getType())) {
+                    dateFields.add(tag.getColumn());
                 }
             }
+        }
+        createTableCommand.deleteCharAt(createTableCommand.length() - 1);
+        createTableCommand.append(");");
 
-            if (errors.length() > 0) {
-                throw new BroadwickException(errors.toString());
-            }
-        } catch (BroadwickException e) {
-            log.error("Cannot read Movements section correctly.\n{}", e.getLocalizedMessage());
+        if (movementFile.getDepartureDateColumn() > 0) {
+            dateFields.add(movementFile.getDepartureDateColumn());
+        }
+        if (movementFile.getDestinationDateColumn() > 0) {
+            dateFields.add(movementFile.getDestinationDateColumn());
+        }
+        if (movementFile.getMarketDateColumn() != null) {
+            dateFields.add(movementFile.getMarketDateColumn());
+        }
+
+        final StringBuilder createIndexCommand = new StringBuilder();
+        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_FULL_MVMT_ID ON %s (%s);",
+                                                TABLE_NAME, ID));
+        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_FULL_MVMT_ALL ON %s (%s,%s,%s,%s,%s);",
+                                                TABLE_NAME, ID, DEPARTURE_ID, DEPARTURE_DATE, DESTINATION_ID, DESTINATION_DATE));
+
+        createTableCommand.append(createIndexCommand.toString());
+
+        insertString = String.format("INSERT INTO %s (%s) VALUES (%s)",
+                                     TABLE_NAME,
+                                     asCsv(insertedColInfo.keySet()), asQuestionCsv(insertedColInfo.keySet()));
+
+        if (errors.length() > 0) {
+            log.error(errors.toString());
+            throw new BroadwickException(errors.toString());
         }
     }
 
-    /**
-     * Insert the data from the input file into the database. The data structure has been read and the database set up
-     * already so this method simply reads the file and extracts the relevant information, storing it in the database.
-     * @return the number of rows read
-     */
+    @Override
     public final int insert() {
+        log.trace("FullMovementsFileReader insert");
+
         int inserted = 0;
+         try (Connection connection = database.getConnection()) {  
+         createTable(TABLE_NAME, createTableCommand.toString(), connection);
 
-        List<String> line = Collections.EMPTY_LIST;
-        try (FileInput fle = new FileInput(movementFile.getName(), movementFile.getSeparator())) {
-
-            final List<String> dateKeys = Arrays.asList(DEPARTURE_DATE, DESTINATION_DATE, MARKET_DATE);
-            final DateTimeFormatter pattern = DateTimeFormat.forPattern(dateFormat);
-
-            //CHECKSTYLE:OFF
-            while (!(line = fle.readLine()).isEmpty()) {
-                //CHECKSTYLE:ON
-
-                final long departureNode = dataDb.getNodeById(line.get(movementFile.getDepartureLocationIdColumn()));
-                final long destinationNode = dataDb.getNodeById(line.get(movementFile.getDestinationLocationIdColumn()));
-
-                final Map<String, Object> properties = new HashMap<>();
-                for (Map.Entry<String, Integer> entry : keyValuePairs.entrySet()) {
-                    final String value = line.get(entry.getValue() - 1);
-
-                    if (value != null && !value.isEmpty()) {
-                        final String property = entry.getKey();
-                        if (dateKeys.contains(property)) {
-                            final DateTime date = pattern.parseDateTime(value);
-                            properties.put(property, Days.daysBetween(BroadwickConstants.getZERO_DATE(), date).getDays());
-                        } else {
-                            properties.put(property, value);
-                        }
-                    }
-                }
-
-                dataDb.getDbInserter().createRelationship(departureNode, destinationNode, MovementDatabaseFacade.MovementRelationship.MOVES, properties);
-                inserted++;
-            }
-
-        } catch (IndexOutOfBoundsException | NoSuchElementException | NumberFormatException | BroadwickException e) {
-            final String errorMsg = "Could not read file %s; last line read %s";
-            log.trace(String.format(errorMsg, movementFile.getName(), line));
-            throw new BroadwickException(String.format(errorMsg, movementFile.getName(), line) + NEWLINE + Throwables.getStackTraceAsString(e));
-        } catch (IOException e) {
-            final String errorMsg = "Could not open file %s";
-            log.trace(String.format(errorMsg, movementFile.getName()));
-            throw new BroadwickException(String.format(errorMsg, movementFile.getName()) + NEWLINE + Throwables.getStackTraceAsString(e));
+         inserted = insert(connection, TABLE_NAME, insertString, dataFile, dateFormat,  insertedColInfo, dateFields);
+         } catch (Exception ex) {
+            log.error("{}", ex.getLocalizedMessage());
+            log.error("Error reading movement data. {}", Throwables.getStackTraceAsString(ex));
+            throw new BroadwickException(ex);
         }
         return inserted;
     }
 
-    private MovementDatabaseFacade dataDb;
-    private DataFiles.FullMovementFile movementFile;
+    private DatabaseImpl database;
+    private String dataFile;
     private String dateFormat;
-    private Map<String, Integer> keyValuePairs = new HashMap<>();
+    @Getter
+    private static final String TABLE_NAME = "FullMovements";
+    private StringBuilder createTableCommand;
+    private String insertString;
+    private Map<String, Integer> insertedColInfo;
+    private Collection<Integer> dateFields;
     @Getter
     private static final String ID = "Id";
     @Getter
@@ -146,6 +136,5 @@ public class FullMovementsFileReader {
     private static final String MARKET_DATE = "MarketDate";
     @Getter
     private static final String SPECIES = "Species";
-    private static final String NEWLINE = "\n";
     private static final String SECTION_NAME = "FullMovementsFile";
 }

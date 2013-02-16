@@ -9,17 +9,12 @@ import broadwick.config.generated.DataFiles.LocationsFile;
 import broadwick.config.generated.DataFiles.PopulationFile;
 import broadwick.config.generated.DataFiles.TestsFile;
 import broadwick.config.generated.Project;
-import com.google.common.base.Throwables;
-import com.google.common.collect.Iterables;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.tooling.GlobalGraphOperations;
 
 /**
  * Utility class to read, store and manipulate the data files.
@@ -33,31 +28,27 @@ public class DataReader implements java.lang.AutoCloseable {
      */
     public DataReader(final Project.Data data) {
         this.data = data;
-        drDatabase = new MovementDatabaseFacade();
 
         // if there is a data section in the config file let's read it.
         if (data != null) {
             if (data.getDatabases() != null) {
                 // there is a database mentioned in the config file so let's use it
                 dbName = data.getDatabases().getName();
-                lookupDbName = data.getDatabases().getLookupDatabase();
-                drDatabase.openDatabase(dbName, lookupDbName);
-                logDbStatistics();
+                dbImpl = new H2Database(dbName, false);
             } else if (data.getDatafiles() != null) {
                 // there is a datafiles section in the config file so we will read them and create a randomly named 
                 // database.
                 final String db = "broadwick_" + RandomStringUtils.randomAlphanumeric(8);
                 dbName = db + "_db";
-                lookupDbName = db + "_lookup_db";
-                drDatabase.openDatabaseForInserting(dbName, lookupDbName);
-                drDatabase.createLookupTables();
+                dbImpl = new H2Database(dbName, true);
                 readDataSection();
-                drDatabase.openDatabase(dbName, lookupDbName);
             } else {
                 throw new BroadwickException("There is a <data> section in the configuration file but neither a <database> nor <datafiles> section.");
             }
         }
-        lookup = new Lookup(drDatabase);
+        lookup = new Lookup(dbImpl);
+
+        logDbStatistics();
     }
 
     /**
@@ -78,31 +69,18 @@ public class DataReader implements java.lang.AutoCloseable {
 
     @Override
     public final void close() {
-        drDatabase.closeDb();
+        log.trace("Closing database connection");
+        dbImpl.close();
     }
 
     /**
      * Save a message giving the numbers of elements in the database.
      */
     private void logDbStatistics() {
-
-        if (drDatabase.getDbService() != null) {
-            final GlobalGraphOperations ops = GlobalGraphOperations.at(drDatabase.getDbService());
-            final Iterable<Node> allNodes = ops.getAllNodes();
-
-            final Iterable<Node> animals = Iterables.filter(allNodes, Lookup.ANIMAL_PREDICATE);
-            log.info("Read {} population data from the database.", Iterables.size(animals));
-
-            final Iterable<Node> locations = Iterables.filter(allNodes, Lookup.LOCATION_PREDICATE);
-            log.info("Read {} locations data from the database.", Iterables.size(locations));
-
-            final Iterable<Node> tests = Iterables.filter(allNodes, Lookup.TEST_PREDICATE);
-            log.info("Read {} tests data from the database.", Iterables.size(tests));
-
-            final Iterable<Relationship> allRelationships = ops.getAllRelationships();
-            final Iterable<Relationship> movements = Iterables.filter(allRelationships, Lookup.MOVEMENT_PREDICATE);
-            log.info("Read {} movements data from the database.", Iterables.size(movements));
-        }
+        log.info("Read {} population data from the database.", lookup.getNumAnimals());
+        log.info("Read {} locations data from the database.", lookup.getNumLocations());
+        log.info("Read {} tests data from the database.", lookup.getNumTests());
+        log.info("Read {} movements data from the database.", lookup.getNumMovements());
     }
 
     /**
@@ -118,23 +96,11 @@ public class DataReader implements java.lang.AutoCloseable {
             final String addingFileMsg = "Reading %s ...";
 
             readAllLocationSections(files.getLocationsFile(), addingFileMsg);
-            drDatabase.getIndex().flush();
-
             readAllPopulationSections(files.getPopulationFile(), addingFileMsg);
-            drDatabase.getIndex().flush();
-
-            readAllFullMovementSections(files.getFullMovementFile(), addingFileMsg);
-            drDatabase.getIndex().flush();
-
-            readAllDirectedMovementSections(files.getDirectedMovementFile(), addingFileMsg);
-            drDatabase.getIndex().flush();
-
-            readAllBatchedMovementSections(files.getBatchMovementFile(), addingFileMsg);
-            drDatabase.getIndex().flush();
-
             readAllTestSections(files.getTestsFile(), addingFileMsg);
-            drDatabase.getIndex().flush();
-
+            readAllFullMovementSections(files.getFullMovementFile(), addingFileMsg);
+            readAllDirectedMovementSections(files.getDirectedMovementFile(), addingFileMsg);
+            readAllBatchedMovementSections(files.getBatchMovementFile(), addingFileMsg);
         } catch (Exception e) {
             log.error("Failure reading data file section. {}", e.getLocalizedMessage());
             throw new BroadwickException(String.format("Failure reading data file section. %s", e.getLocalizedMessage()));
@@ -172,13 +138,11 @@ public class DataReader implements java.lang.AutoCloseable {
      * @return the number of movements read.
      */
     private int readAllDirectedMovementSections(final List<DirectedMovementFile> directedMovementFiles, final String addingFileMsg) {
-        final DataReader reader = this;
-
         int elementsRead = 0;
 
         for (DataFiles.DirectedMovementFile file : directedMovementFiles) {
             log.trace(String.format(addingFileMsg, file.getName()));
-            final DirectedMovementsFileReader movementsFileReader = new DirectedMovementsFileReader(file, reader, drDatabase);
+            final DirectedMovementsFileReader movementsFileReader = new DirectedMovementsFileReader(file, dbImpl);
             elementsRead += movementsFileReader.insert();
         }
 
@@ -195,18 +159,16 @@ public class DataReader implements java.lang.AutoCloseable {
      * @return the number of movements read.
      */
     private int readAllFullMovementSections(final List<FullMovementFile> fullMovementFiles, final String addingFileMsg) {
-        final DataReader reader = this;
-
         int elementsRead = 0;
 
         for (DataFiles.FullMovementFile file : fullMovementFiles) {
             log.trace(String.format(addingFileMsg, file.getName()));
-            final FullMovementsFileReader movementsFileReader = new FullMovementsFileReader(file, reader, drDatabase);
+            final FullMovementsFileReader movementsFileReader = new FullMovementsFileReader(file, dbImpl);
             elementsRead += movementsFileReader.insert();
         }
 
         if (elementsRead > 0) {
-            log.info("Read {} full movementss from {} files.", elementsRead, fullMovementFiles.size());
+            log.info("Read {} full movements from {} files.", elementsRead, fullMovementFiles.size());
         }
         return elementsRead;
     }
@@ -218,13 +180,11 @@ public class DataReader implements java.lang.AutoCloseable {
      * @return the number of movements read.
      */
     private int readAllBatchedMovementSections(final List<BatchMovementFile> batchMovementFiles, final String addingFileMsg) {
-        final DataReader reader = this;
-
         int elementsRead = 0;
 
         for (DataFiles.BatchMovementFile file : batchMovementFiles) {
             log.trace(String.format(addingFileMsg, file.getName()));
-            final BatchedMovementsFileReader movementsFileReader = new BatchedMovementsFileReader(file, reader, drDatabase);
+            final BatchedMovementsFileReader movementsFileReader = new BatchedMovementsFileReader(file, dbImpl);
             elementsRead += movementsFileReader.insert();
         }
 
@@ -241,13 +201,11 @@ public class DataReader implements java.lang.AutoCloseable {
      * @return the number of locations read.
      */
     private int readAllLocationSections(final List<LocationsFile> locationsFile, final String addingFileMsg) {
-        final DataReader reader = this;
-
         int elementsRead = 0;
 
         for (DataFiles.LocationsFile file : locationsFile) {
             log.trace(String.format(addingFileMsg, file.getName()));
-            final LocationsFileReader locationsFileReader = new LocationsFileReader(file, reader, drDatabase);
+            final LocationsFileReader locationsFileReader = new LocationsFileReader(file, dbImpl);
             elementsRead += locationsFileReader.insert();
         }
 
@@ -259,18 +217,16 @@ public class DataReader implements java.lang.AutoCloseable {
 
     /**
      * Read the test sections of the configuration file.
-     * @param testsFile a collection of locations sections.
+     * @param testsFile     a collection of locations sections.
      * @param addingFileMsg formatted string (in the form "Adding %s to reading list") to be added to log files.
      * @return the number of tests read.
      */
     private int readAllTestSections(final List<TestsFile> testsFile, final String addingFileMsg) {
-        final DataReader reader = this;
-
         int elementsRead = 0;
 
         for (DataFiles.TestsFile file : testsFile) {
             log.trace(String.format(addingFileMsg, file.getName()));
-            final TestsFileReader testsFileReader = new TestsFileReader(file, reader, drDatabase);
+            final TestsFileReader testsFileReader = new TestsFileReader(file, dbImpl);
             elementsRead += testsFileReader.insert();
         }
 
@@ -287,13 +243,11 @@ public class DataReader implements java.lang.AutoCloseable {
      * @return the number of populations read.
      */
     private int readAllPopulationSections(final List<PopulationFile> populationsFiles, final String addingFileMsg) {
-        final DataReader reader = this;
-
         int elementsRead = 0;
 
         for (DataFiles.PopulationFile file : populationsFiles) {
             log.trace(String.format(addingFileMsg, file.getName()));
-            final PopulationsFileReader populationsFileReader = new PopulationsFileReader(file, reader, drDatabase);
+            final PopulationsFileReader populationsFileReader = new PopulationsFileReader(file, dbImpl);
             elementsRead += populationsFileReader.insert();
         }
 
@@ -307,7 +261,6 @@ public class DataReader implements java.lang.AutoCloseable {
     @Getter
     private Lookup lookup;
     private Project.Data data;
-    private MovementDatabaseFacade drDatabase;
+    private H2Database dbImpl;
     private String dbName;
-    private String lookupDbName;
 }

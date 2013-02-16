@@ -3,17 +3,12 @@ package broadwick.data;
 import broadwick.BroadwickException;
 import broadwick.config.generated.CustomTags;
 import broadwick.config.generated.DataFiles;
-import broadwick.io.FileInput;
 import com.google.common.base.Throwables;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
+import java.sql.Connection;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.TreeMap;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,104 +16,94 @@ import lombok.extern.slf4j.Slf4j;
  * Reader for the files describing the locations for the simulation.
  */
 @Slf4j
-public class LocationsFileReader {
+public class LocationsFileReader extends DataFileReader {
 
     /**
      * Create the locations file reader.
      * @param locationsFile the [xml] tag of the config file that is to be read.
-     * @param dataReader    the reader object that contains some useful functionality.
-     * @param dataDb        the database facade object used to save the data in the locations file section.
+     * @param dbImpl        the implementation of the database object.
      */
     public LocationsFileReader(final DataFiles.LocationsFile locationsFile,
-                               final DataReader dataReader, final MovementDatabaseFacade dataDb) {
-        this.locationsFile = locationsFile;
-        this.dataDb = dataDb;
+                               final DatabaseImpl dbImpl) {
+
+        super();
+        this.database = dbImpl;
+        this.dataFile = locationsFile.getName();
+        this.dateFields = new HashSet<>();
+        this.dateFormat = locationsFile.getDateFormat();
+        this.insertedColInfo = new TreeMap<>();
         final StringBuilder errors = new StringBuilder();
 
-        dataReader.updateSectionDefiniton(ID, locationsFile.getLocationIdColumn(), keyValuePairs, errors, true, SECTION_NAME);
-        dataReader.updateSectionDefiniton(EASTING, locationsFile.getEastingColumn(), keyValuePairs, errors, true, SECTION_NAME);
-        dataReader.updateSectionDefiniton(NORTHING, locationsFile.getNorthingColumn(), keyValuePairs, errors, true, SECTION_NAME);
+        this.createTableCommand = new StringBuilder();
+        updateCreateTableCommand(ID, locationsFile.getLocationIdColumn(), " VARCHAR(128) NOT NULL, ",
+                                 insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+        updateCreateTableCommand(EASTING, locationsFile.getEastingColumn(), " INT, ",
+                                 insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+        updateCreateTableCommand(NORTHING, locationsFile.getNorthingColumn(), " INT, ",
+                                 insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
 
         if (locationsFile.getCustomTags() != null) {
             for (CustomTags.CustomTag tag : locationsFile.getCustomTags().getCustomTag()) {
-                dataReader.updateSectionDefiniton(tag.getName(), tag.getColumn(), keyValuePairs, errors, true, SECTION_NAME);
+                updateCreateTableCommand(tag.getName(), tag.getColumn(), " VARCHAR(128), ",
+                                         insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+                if ("date".equals(tag.getType())) {
+                    dateFields.add(tag.getColumn());
+                }
             }
         }
 
+        final StringBuilder createIndexCommand = new StringBuilder();
+
+        createTableCommand.deleteCharAt(createTableCommand.length() - 1);
+        createTableCommand.append(");");
+
+        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_LOC_ID ON %s (%s);",
+                                                TABLE_NAME, ID));
+        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_LOC_ALL ON %s (%s,%s,%s);",
+                                                TABLE_NAME, ID, EASTING, NORTHING));
+
+        createTableCommand.append(createIndexCommand.toString());
+
+        insertString = String.format("INSERT INTO %s (%s) VALUES (%s)",
+                                     TABLE_NAME, asCsv(insertedColInfo.keySet()), asQuestionCsv(insertedColInfo.keySet()));
+
         if (errors.length() > 0) {
+            log.error(errors.toString());
             throw new BroadwickException(errors.toString());
         }
     }
 
-    /**
-     * Insert the data from the input file into the database. The data structure has been read and the database set up
-     * already so this method simply reads the file and extracts the relevant information, storing it in the database.
-     * @return the number of rows read
-     */
+    @Override
     public final int insert() {
+        log.trace("LocationsFileReader insert");
+
         int inserted = 0;
+        try (Connection connection = database.getConnection()) {
+            createTable(TABLE_NAME, createTableCommand.toString(), connection);
 
-        List<String> line = Collections.EMPTY_LIST;
-        try (FileInput fle = new FileInput(locationsFile.getName(), locationsFile.getSeparator())) {
-            final Set<String> insertedIds = new HashSet<>();
-
-                        final List<String> doubleKeys = Arrays.asList(EASTING, NORTHING);
-
-            //CHECKSTYLE:OFF
-            while (!(line = fle.readLine()).isEmpty()) {
-                //CHECKSTYLE:ON
-                final String nodeId = line.get(locationsFile.getLocationIdColumn() - 1);
-                final Map<String, Object> properties = new HashMap<>();
-                properties.put("index", nodeId);
-
-                for (Map.Entry<String, Integer> entry : keyValuePairs.entrySet()) {
-                    final String value = line.get(entry.getValue() - 1);
-
-                    if (value != null && !value.isEmpty()) {
-                        final String property = entry.getKey();
-                        
-                        if (doubleKeys.contains(property)) {
-                            final Double result = Double.parseDouble(value);
-                            properties.put(property, result);
-                        } else {
-                            properties.put(property, value);
-                        }   
-                    }
-                }
-                properties.put(MovementDatabaseFacade.TYPE, MovementDatabaseFacade.LOCATION);
-
-                final Long node = dataDb.createNode(nodeId, properties);
-                if (node != null && !insertedIds.contains(nodeId)) {
-                    dataDb.getIndex().add(node, properties);
-                    insertedIds.add(nodeId);
-                    inserted++;
-                    if (inserted % 100000 == 0) {
-                        dataDb.getIndex().flush();
-                    }
-                }
-            }
-
-        } catch (IndexOutOfBoundsException | NoSuchElementException | NumberFormatException | BroadwickException e) {
-            final String errorMsg = "Could not read file %s; last line read %s";
-            log.trace(String.format(errorMsg, locationsFile.getName(), line));
-            throw new BroadwickException(String.format(errorMsg, locationsFile.getName(), line) + NEWLINE + Throwables.getStackTraceAsString(e));
-        } catch (IOException e) {
-            final String errorMsg = "Could not open file %s";
-            log.trace(String.format(errorMsg, locationsFile.getName()));
-            throw new BroadwickException(String.format(errorMsg, locationsFile.getName()) + NEWLINE + Throwables.getStackTraceAsString(e));
+            inserted = insert(connection, TABLE_NAME, insertString, dataFile, dateFormat, insertedColInfo, dateFields);
+        } catch (Exception ex) {
+            log.error("{}", ex.getLocalizedMessage());
+            log.error("Error reading location data. {}", Throwables.getStackTraceAsString(ex));
+            throw new BroadwickException(ex);
         }
         return inserted;
     }
 
-    private MovementDatabaseFacade dataDb;
-    private DataFiles.LocationsFile locationsFile;
-    private Map<String, Integer> keyValuePairs = new HashMap<>();
+    private DatabaseImpl database;
+    private String dataFile;
+    private String dateFormat;
+    private StringBuilder createTableCommand;
+    private String insertString;
+    private Map<String, Integer> insertedColInfo;
+    private Collection<Integer> dateFields;
+    @Getter
+    private static final String TABLE_NAME = "Locations";
     @Getter
     private static final String ID = "Id";
     @Getter
     private static final String EASTING = "Easting";
     @Getter
     private static final String NORTHING = "Northing";
-    private static final String NEWLINE = "\n";
     private static final String SECTION_NAME = "LocationsFile";
 }

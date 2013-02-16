@@ -56,10 +56,10 @@
                         <xsd:element name="name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="alias" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="separator" minOccurs="1" maxOccurs="1" type="xsd:string"/>
-                        <xsd:element name="idColumn" type="xsd:int"/>
-                        <xsd:element name="movementDateColumn" type="xsd:int"/>
-                        <xsd:element name="movementDirectionColumn" type="xsd:int"/>
-                        <xsd:element name="locationColumn" type="xsd:int"/>
+                        <xsd:element name="idColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="movementDateColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="movementDirectionColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="locationColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
                         <xsd:element name="speciesColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
                         <xsd:element name="dateFormat" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="customTags" minOccurs="0" maxOccurs="1" type="CustomTags"/>
@@ -72,11 +72,11 @@
                         <xsd:element name="name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="alias" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="separator" minOccurs="1" maxOccurs="1" type="xsd:string"/>
-                        <xsd:element name="idColumn" type="xsd:int"/>
-                        <xsd:element name="departureDateColumn" type="xsd:int"/>
-                        <xsd:element name="departureLocationIdColumn" type="xsd:int"/>
-                        <xsd:element name="destinationDateColumn" type="xsd:int"/>
-                        <xsd:element name="destinationLocationIdColumn" type="xsd:int"/>
+                        <xsd:element name="idColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="departureDateColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="departureLocationIdColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="destinationDateColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="destinationLocationIdColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
                         <xsd:element name="marketIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
                         <xsd:element name="marketDateColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
                         <xsd:element name="speciesColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
@@ -91,11 +91,11 @@
                         <xsd:element name="name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="alias" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="separator" minOccurs="1" maxOccurs="1" type="xsd:string"/>
-                        <xsd:element name="batchSizeColumn" type="xsd:int"/>
-                        <xsd:element name="departureDateColumn" type="xsd:int"/>
-                        <xsd:element name="departureLocationIdColumn" type="xsd:int"/>
-                        <xsd:element name="destinationDateColumn" type="xsd:int"/>
-                        <xsd:element name="destinationLocationIdColumn" type="xsd:int"/>
+                        <xsd:element name="batchSizeColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="departureDateColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="departureLocationIdColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="destinationDateColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="destinationLocationIdColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
                         <xsd:element name="marketIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
                         <xsd:element name="marketDateColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
                         <xsd:element name="speciesColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
@@ -126,8 +126,9 @@
                         <xsd:element name="alias" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="separator" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="locationIdColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
-                        <xsd:element name="eastingColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
-                        <xsd:element name="northingColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="eastingColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="northingColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="dateFormat" minOccurs="0" maxOccurs="1" type="xsd:string"/>			
                         <xsd:element name="customTags" minOccurs="0" maxOccurs="1" type="CustomTags"/>
                     </xsd:sequence>
                 </xsd:complexType>
@@ -143,9 +144,9 @@
                             <xsd:element name="groupIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
                             <xsd:element name="locationIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
                         <!--</xsd:choice>-->
-                        <xsd:element name="testDateColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
-                        <xsd:element name="postiveResultColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
-                        <xsd:element name="negativeResultColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/> 
+                        <xsd:element name="testDateColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="postiveResultColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="negativeResultColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/> 
                         <xsd:element name="dateFormat" minOccurs="0" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="customTags" minOccurs="0" maxOccurs="1" type="CustomTags"/>
                     </xsd:sequence>
@@ -157,7 +158,6 @@
     <xsd:complexType name="Databases">
         <xsd:sequence>
             <xsd:element name="name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
-            <xsd:element name="lookupDatabase" minOccurs="1" maxOccurs="1" type="xsd:string"/>
         </xsd:sequence>
     </xsd:complexType>
 
