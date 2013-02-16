@@ -94,13 +94,13 @@ public final class Lookup {
             log.trace("Could not get number of movements from {} - perhaps the table hasn't been created.",
                       BatchedMovementsFileReader.getTABLE_NAME());
         }
-           try {
-             numMovements += jooq.selectCount().from(FullMovementsFileReader.getTABLE_NAME()).fetch().get(0).getValueAsInteger(0);
+        try {
+            numMovements += jooq.selectCount().from(FullMovementsFileReader.getTABLE_NAME()).fetch().get(0).getValueAsInteger(0);
         } catch (org.jooq.exception.DataAccessException e) {
             log.trace("Could not get number of movements from {} - perhaps the table hasn't been created.",
                       FullMovementsFileReader.getTABLE_NAME());
         }
-            try {
+        try {
             numMovements += jooq.selectCount().from(DirectedMovementsFileReader.getTABLE_NAME()).fetch().get(0).getValueAsInteger(0);
         } catch (org.jooq.exception.DataAccessException e) {
             log.trace("Could not get number of movements from {} - perhaps the table hasn't been created.",
@@ -118,19 +118,35 @@ public final class Lookup {
         final StopWatch sw = new StopWatch();
         sw.start();
 
-        Result<Record> records = jooq.select().from(BatchedMovementsFileReader.getTABLE_NAME()).fetch();
-        for (Record r : records) {
-            movements.add(createMovement(r));
+        Result<Record> records;
+        try {
+            records = jooq.select().from(BatchedMovementsFileReader.getTABLE_NAME()).fetch();
+            for (Record r : records) {
+                movements.add(createMovement(r));
+            }
+        } catch (org.jooq.exception.DataAccessException e) {
+            log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
+                      BatchedMovementsFileReader.getTABLE_NAME());
         }
 
-        records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME()).fetch();
-        for (Record r : records) {
-            movements.add(createMovement(r));
+        try {
+            records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME()).fetch();
+            for (Record r : records) {
+                movements.add(createMovement(r));
+            }
+        } catch (org.jooq.exception.DataAccessException e) {
+            log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
+                      FullMovementsFileReader.getTABLE_NAME());
         }
 
-        records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME()).fetch();
-        for (Record r : records) {
-            movements.add(createMovement(r));
+        try {
+            records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME()).fetch();
+            for (Record r : records) {
+                movements.add(createMovement(r));
+            }
+        } catch (org.jooq.exception.DataAccessException e) {
+            log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
+                      DirectedMovementsFileReader.getTABLE_NAME());
         }
 
         sw.stop();
@@ -152,27 +168,44 @@ public final class Lookup {
 
         try {
             // try directed movements
-            Result<Record> records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())
-                    .where("MovementDate >= " + startDate + " and MovementDate <= endDate")
-                    .fetch();
-            for (Record r : records) {
-                movements.add(createMovement(r));
+            Result<Record> records;
+
+            try {
+                records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())
+                        .where("MovementDate >= " + startDate + " and MovementDate <= endDate")
+                        .fetch();
+                for (Record r : records) {
+                    movements.add(createMovement(r));
+                }
+            } catch (org.jooq.exception.DataAccessException e) {
+                log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
+                          DirectedMovementsFileReader.getTABLE_NAME());
             }
 
-            // try full movements
-            records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME())
-                    .where("DepartureDate >= " + startDate + " and DestinationDate <= endDate")
-                    .fetch();
-            for (Record r : records) {
-                movements.add(createMovement(r));
+            try {
+                // try full movements
+                records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME())
+                        .where("DepartureDate >= " + startDate + " and DestinationDate <= endDate")
+                        .fetch();
+                for (Record r : records) {
+                    movements.add(createMovement(r));
+                }
+            } catch (org.jooq.exception.DataAccessException e) {
+                log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
+                          FullMovementsFileReader.getTABLE_NAME());
             }
 
-            // try batched movements
-            records = jooq.select().from(BatchedMovementsFileReader.getTABLE_NAME())
-                    .where("DepartureDate >= " + startDate + " and DestinationDate <= endDate")
-                    .fetch();
-            for (Record r : records) {
-                movements.add(createMovement(r));
+            try {
+                // try batched movements
+                records = jooq.select().from(BatchedMovementsFileReader.getTABLE_NAME())
+                        .where("DepartureDate >= " + startDate + " and DestinationDate <= endDate")
+                        .fetch();
+                for (Record r : records) {
+                    movements.add(createMovement(r));
+                }
+            } catch (org.jooq.exception.DataAccessException e) {
+                log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
+                          BatchedMovementsFileReader.getTABLE_NAME());
             }
 
         } catch (org.jooq.exception.DataAccessException e) {
@@ -325,18 +358,29 @@ public final class Lookup {
         final StopWatch sw = new StopWatch();
         sw.start();
 
-        Result<Record> records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME())
-                .where("Id = " + animalId)
-                .fetch();
-        for (Record r : records) {
-            movements.add(createMovement(r));
+        Result<Record> records;
+        try {
+            records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME())
+                    .where("Id = " + animalId)
+                    .fetch();
+            for (Record r : records) {
+                movements.add(createMovement(r));
+            }
+        } catch (org.jooq.exception.DataAccessException e) {
+            log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
+                      FullMovementsFileReader.getTABLE_NAME());
         }
 
-        records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())
-                .where("Id = " + animalId)
-                .fetch();
-        for (Record r : records) {
-            movements.add(createMovement(r));
+        try {
+            records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())
+                    .where("Id = " + animalId)
+                    .fetch();
+            for (Record r : records) {
+                movements.add(createMovement(r));
+            }
+        } catch (org.jooq.exception.DataAccessException e) {
+            log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
+                      DirectedMovementsFileReader.getTABLE_NAME());
         }
 
         sw.stop();
