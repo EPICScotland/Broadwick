@@ -161,10 +161,25 @@ public class Tree<V extends Vertex, E extends Edge> implements broadwick.graph.G
     public final Collection<V> getVertices() {
         return tree.getVertices();
     }
-    
+
     @Override
     public final Collection<E> getEdges() {
         return tree.getEdges();
+    }
+
+    /**
+     * Get the
+     * <code>vertex</code> in this graph that is the source of the (single) edge that is incident on this vertex. A
+     * vertex on a tree has only one incodent edge but several
+     * @param vertex the vertex whose predecessor is to be returned
+     * @return a <code>Collection</code> view of the predecessors of <code>vertex</code> in this graph
+     */
+    public final V getPredecessor(final V vertex) {
+        final Collection<E> inEdges = tree.getInEdges(vertex);
+        if (inEdges.size() != 1) {
+            throw new IllegalArgumentException("Vertex in tree has incorrect number of in edges.");
+        }
+        return (V) inEdges.iterator().next().source;
     }
 
     private DelegateTree<V, E> tree;
