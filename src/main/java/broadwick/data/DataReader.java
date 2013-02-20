@@ -1,5 +1,11 @@
 package broadwick.data;
 
+import broadwick.data.readers.FullMovementsFileReader;
+import broadwick.data.readers.PopulationsFileReader;
+import broadwick.data.readers.BatchedMovementsFileReader;
+import broadwick.data.readers.LocationsFileReader;
+import broadwick.data.readers.DirectedMovementsFileReader;
+import broadwick.data.readers.TestsFileReader;
 import broadwick.BroadwickException;
 import broadwick.config.generated.DataFiles;
 import broadwick.config.generated.DataFiles.BatchMovementFile;

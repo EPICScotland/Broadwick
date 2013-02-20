@@ -1,8 +1,9 @@
-package broadwick.data;
+package broadwick.data.readers;
 
 import broadwick.BroadwickException;
 import broadwick.config.generated.CustomTags;
 import broadwick.config.generated.DataFiles;
+import broadwick.data.DatabaseImpl;
 import com.google.common.base.Throwables;
 import java.sql.Connection;
 import java.util.Collection;
@@ -13,20 +14,21 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Reader for the files describing the batched movements (i.e. those that do not specify an individual but rather the
- * number of individuals moved)for the simulation. The movements are read and stored in internal databases for later
- * use.
+ * Reader for the files describing the full movements (i.e. those that specify both the departure location and the
+ * destination location of a movement)for the simulation. The movements are read and stored in internal databases for
+ * later use.
  */
 @Slf4j
-public class BatchedMovementsFileReader extends DataFileReader {
+public class FullMovementsFileReader extends DataFileReader {
 
     /**
      * Create the movement file reader.
-     * @param movementFile the [xml] tag of the config file that is to be read.
-     * @param dbImpl    the implementation of the database object.
+     * @param movementFile the [XML] tag of the config file that is to be read.
+     * @param dbImpl       the implementation of the database object.
      */
-    public BatchedMovementsFileReader(final DataFiles.BatchMovementFile movementFile,
-                                      final DatabaseImpl dbImpl) {
+    public FullMovementsFileReader(final DataFiles.FullMovementFile movementFile,
+                                   final DatabaseImpl dbImpl) {
+
         super();
         this.database = dbImpl;
         this.dataFile = movementFile.getName();
@@ -36,21 +38,21 @@ public class BatchedMovementsFileReader extends DataFileReader {
         final StringBuilder errors = new StringBuilder();
 
         this.createTableCommand = new StringBuilder();
-        updateCreateTableCommand(BATCH_SIZE, movementFile.getBatchSizeColumn(), " VARCHAR(128), ",
+        updateCreateTableCommand(ID, movementFile.getIdColumn(), " VARCHAR(128), ",
                                  insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
-        updateCreateTableCommand(DEPARTURE_DATE, movementFile.getDepartureDateColumn(), " VARCHAR(128), ",
+        updateCreateTableCommand(DEPARTURE_DATE, movementFile.getDepartureDateColumn(), " INT, ",
                                  insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
-        updateCreateTableCommand(DEPARTURE_ID, movementFile.getDepartureLocationIdColumn(), " VARCHAR(128), ",
+        updateCreateTableCommand(DEPARTURE_ID, movementFile.getDepartureLocationIdColumn(), " VARCHAR(32), ",
                                  insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
         updateCreateTableCommand(DESTINATION_DATE, movementFile.getDestinationDateColumn(), " INT, ",
                                  insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
-        updateCreateTableCommand(DESTINATION_ID, movementFile.getDestinationLocationIdColumn(), " VARCHAR(128), ",
+        updateCreateTableCommand(DESTINATION_ID, movementFile.getDestinationLocationIdColumn(), " VARCHAR(32), ",
                                  insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
-        updateCreateTableCommand(MARKET_ID, movementFile.getMarketIdColumn(), " VARCHAR(128), ",
+        updateCreateTableCommand(SPECIES, movementFile.getSpeciesColumn(), " VARCHAR(32), ",
                                  insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
-        updateCreateTableCommand(MARKET_DATE, movementFile.getMarketDateColumn(), " VARCHAR(128), ",
+        updateCreateTableCommand(MARKET_ID, movementFile.getMarketIdColumn(), " VARCHAR(32), ",
                                  insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
-        updateCreateTableCommand(SPECIES, movementFile.getSpeciesColumn(), " VARCHAR(128), ",
+        updateCreateTableCommand(MARKET_DATE, movementFile.getMarketDateColumn(), " INT, ",
                                  insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
 
         if (movementFile.getCustomTags() != null) {
@@ -62,7 +64,6 @@ public class BatchedMovementsFileReader extends DataFileReader {
                 }
             }
         }
-
         createTableCommand.deleteCharAt(createTableCommand.length() - 1);
         createTableCommand.append(");");
 
@@ -72,13 +73,15 @@ public class BatchedMovementsFileReader extends DataFileReader {
         if (movementFile.getDestinationDateColumn() > 0) {
             dateFields.add(movementFile.getDestinationDateColumn());
         }
-        if (movementFile.getMarketDateColumn() > 0) {
+        if (movementFile.getMarketDateColumn() != null) {
             dateFields.add(movementFile.getMarketDateColumn());
         }
 
         final StringBuilder createIndexCommand = new StringBuilder();
-        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_BATCH_ID ON %s (%s,%s,%s,%s,%s);",
-                                                TABLE_NAME, DEPARTURE_ID, DEPARTURE_DATE, DESTINATION_ID, DESTINATION_DATE, BATCH_SIZE));
+        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_FULL_MVMT_ID ON %s (%s);",
+                                                TABLE_NAME, ID));
+        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_FULL_MVMT_ALL ON %s (%s,%s,%s,%s,%s);",
+                                                TABLE_NAME, ID, DEPARTURE_ID, DEPARTURE_DATE, DESTINATION_ID, DESTINATION_DATE));
 
         createTableCommand.append(createIndexCommand.toString());
 
@@ -94,7 +97,7 @@ public class BatchedMovementsFileReader extends DataFileReader {
 
     @Override
     public final int insert() {
-        log.trace("BatchedMovementsFileReader insert");
+        log.trace("FullMovementsFileReader insert");
 
         int inserted = 0;
          try (Connection connection = database.getConnection()) {  
@@ -113,26 +116,26 @@ public class BatchedMovementsFileReader extends DataFileReader {
     private String dataFile;
     private String dateFormat;
     @Getter
-    private static final String TABLE_NAME = "BatchedMovements";
+    private static final String TABLE_NAME = "FullMovements";
     private StringBuilder createTableCommand;
     private String insertString;
     private Map<String, Integer> insertedColInfo;
     private Collection<Integer> dateFields;
     @Getter
-    private static final String BATCH_SIZE = "batchSize";
+    private static final String ID = "ID";
     @Getter
-    private static final String DEPARTURE_DATE = "DepartureDate";
+    private static final String DEPARTURE_DATE = "DEPARTUREDATE";
     @Getter
-    private static final String DEPARTURE_ID = "DepartureId";
+    private static final String DEPARTURE_ID = "DEPERTUREID";
     @Getter
-    private static final String DESTINATION_DATE = "DestinationDate";
+    private static final String DESTINATION_DATE = "DESTINATIONDATE";
     @Getter
-    private static final String DESTINATION_ID = "DestinationId";
+    private static final String DESTINATION_ID = "DESTINATIONID";
     @Getter
-    private static final String MARKET_ID = "MarketId";
+    private static final String MARKET_ID = "MARKETID";
     @Getter
-    private static final String MARKET_DATE = "MarketDate";
+    private static final String MARKET_DATE = "MARKETDATE";
     @Getter
-    private static final String SPECIES = "Species";
-    private static final String SECTION_NAME = "BatchedMovementFile";
+    private static final String SPECIES = "SPECIES";
+    private static final String SECTION_NAME = "FullMovementsFile";
 }

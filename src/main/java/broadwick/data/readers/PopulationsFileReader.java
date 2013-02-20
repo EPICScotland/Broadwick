@@ -1,8 +1,9 @@
-package broadwick.data;
+package broadwick.data.readers;
 
 import broadwick.BroadwickException;
 import broadwick.config.generated.CustomTags;
 import broadwick.config.generated.DataFiles;
+import broadwick.data.DatabaseImpl;
 import com.google.common.base.Throwables;
 import java.sql.Connection;
 import java.util.Collection;
@@ -53,8 +54,8 @@ public class PopulationsFileReader extends DataFileReader {
         this.createTableCommand = new StringBuilder();
         updateCreateTableCommand(ID, populationFile.getLifeHistory().getIdColumn(), " VARCHAR(128), ",
                                  insertedColInfo, createTableCommand, LIFE_HISTORIES_TABLE_NAME, SECTION_NAME, errors);
-        updateCreateTableCommand(DATE_OF_BIRTH, populationFile.getLifeHistory().getDateOfBirthColumn(),
-                                 " VARCHAR(128), ", insertedColInfo, createTableCommand, LIFE_HISTORIES_TABLE_NAME,
+        updateCreateTableCommand(DATE_OF_BIRTH, populationFile.getLifeHistory().getDateOfBirthColumn()," INT, ", 
+                                 insertedColInfo, createTableCommand, LIFE_HISTORIES_TABLE_NAME,
                                  SECTION_NAME, errors);
         updateCreateTableCommand(LOCATION_OF_BIRTH, populationFile.getLifeHistory().getLocationOfBirthColumn(),
                                  " VARCHAR(128), ", insertedColInfo, createTableCommand, LIFE_HISTORIES_TABLE_NAME,
@@ -118,7 +119,7 @@ public class PopulationsFileReader extends DataFileReader {
                                  insertedColInfo, createTableCommand, POPULATIONS_TABLE_NAME, SECTION_NAME, errors);
         updateCreateTableCommand(POPULATION, populationFile.getPopulation().getPopulationSizeColumn(), " VARCHAR(128), ",
                                  insertedColInfo, createTableCommand, POPULATIONS_TABLE_NAME, SECTION_NAME, errors);
-        updateCreateTableCommand(DATE_LC, populationFile.getPopulation().getPopulationDateColumn(), " VARCHAR(128), ",
+        updateCreateTableCommand(DATE_LC, populationFile.getPopulation().getPopulationDateColumn(), " INT, ",
                                  insertedColInfo, createTableCommand, POPULATIONS_TABLE_NAME, SECTION_NAME, errors);
 
 
@@ -191,26 +192,25 @@ public class PopulationsFileReader extends DataFileReader {
     private Map<String, Integer> insertedColInfo;
     private Collection<Integer> dateFields;
     private DataFiles.PopulationFile populationFile;
-    @Getter
     private static String tableName;
     @Getter
-    private static final String ID = "Id";
-    private static final String LOCATION = "Location";
-    private static final String POPULATION = "Population";
-    private static final String DATE_LC = "Date";
+    private static final String ID = "ID";
+    private static final String LOCATION = "LOCATION";
+    private static final String POPULATION = "POPULATION";
+    private static final String DATE_LC = "DATE";
     @Getter
-    private static final String SPECIES = "Species";
+    private static final String SPECIES = "SPECIES";
     @Getter
-    private static final String DATE_OF_BIRTH = "DateOfBirth";
+    private static final String DATE_OF_BIRTH = "DATEOFBIRTH";
     @Getter
-    private static final String LOCATION_OF_BIRTH = "LocationOfBirth";
+    private static final String LOCATION_OF_BIRTH = "LOCATIONOFBIRTH";
     @Getter
-    private static final String DATE_OF_DEATH = "DateOfDeath";
+    private static final String DATE_OF_DEATH = "DATEOFDEATH";
     @Getter
-    private static final String LOCATION_OF_DEATH = "LocationOfDeath";
+    private static final String LOCATION_OF_DEATH = "LOCATIONOFDEATH";
     private static final String SECTION_NAME = "PopulationsFile";
     @Getter
-    private static final String POPULATIONS_TABLE_NAME = "Populations";
+    private static final String POPULATIONS_TABLE_NAME = "POPULATIONS";
     @Getter
-    private static final String LIFE_HISTORIES_TABLE_NAME = "LifeHistories";
+    private static final String LIFE_HISTORIES_TABLE_NAME = "LIFEHISTORIES";
 }

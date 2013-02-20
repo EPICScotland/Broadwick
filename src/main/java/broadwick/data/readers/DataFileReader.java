@@ -1,4 +1,4 @@
-package broadwick.data;
+package broadwick.data.readers;
 
 import broadwick.BroadwickConstants;
 import broadwick.BroadwickException;

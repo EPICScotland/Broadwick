@@ -1,5 +1,11 @@
 package broadwick.data;
 
+import broadwick.data.readers.FullMovementsFileReader;
+import broadwick.data.readers.PopulationsFileReader;
+import broadwick.data.readers.BatchedMovementsFileReader;
+import broadwick.data.readers.LocationsFileReader;
+import broadwick.data.readers.DirectedMovementsFileReader;
+import broadwick.data.readers.TestsFileReader;
 import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -122,7 +128,10 @@ public final class Lookup {
         try {
             records = jooq.select().from(BatchedMovementsFileReader.getTABLE_NAME()).fetch();
             for (Record r : records) {
-                movements.add(createMovement(r));
+                final Movement movement = createMovement(r);
+                if (movement != null) {
+                    movements.add(movement);
+                }
             }
         } catch (org.jooq.exception.DataAccessException e) {
             log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
@@ -132,7 +141,10 @@ public final class Lookup {
         try {
             records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME()).fetch();
             for (Record r : records) {
-                movements.add(createMovement(r));
+                final Movement movement = createMovement(r);
+                if (movement != null) {
+                    movements.add(movement);
+                }
             }
         } catch (org.jooq.exception.DataAccessException e) {
             log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
@@ -142,7 +154,10 @@ public final class Lookup {
         try {
             records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME()).fetch();
             for (Record r : records) {
-                movements.add(createMovement(r));
+                final Movement movement = createMovement(r);
+                if (movement != null) {
+                    movements.add(movement);
+                }
             }
         } catch (org.jooq.exception.DataAccessException e) {
             log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
@@ -172,10 +187,14 @@ public final class Lookup {
 
             try {
                 records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())
-                        .where("MovementDate >= " + startDate + " and MovementDate <= endDate")
+                        .where(String.format("%s >= %d and %s <= %d",
+                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate, DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate))
                         .fetch();
                 for (Record r : records) {
-                    movements.add(createMovement(r));
+                    final Movement movement = createMovement(r);
+                    if (movement != null) {
+                        movements.add(movement);
+                    }
                 }
             } catch (org.jooq.exception.DataAccessException e) {
                 log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
@@ -185,10 +204,14 @@ public final class Lookup {
             try {
                 // try full movements
                 records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME())
-                        .where("DepartureDate >= " + startDate + " and DestinationDate <= endDate")
+                        .where(String.format("%s >= %d and %s <= %d",
+                                             FullMovementsFileReader.getDEPARTURE_DATE(), startDate, FullMovementsFileReader.getDESTINATION_DATE(), endDate))
                         .fetch();
                 for (Record r : records) {
-                    movements.add(createMovement(r));
+                    final Movement movement = createMovement(r);
+                    if (movement != null) {
+                        movements.add(movement);
+                    }
                 }
             } catch (org.jooq.exception.DataAccessException e) {
                 log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
@@ -198,10 +221,14 @@ public final class Lookup {
             try {
                 // try batched movements
                 records = jooq.select().from(BatchedMovementsFileReader.getTABLE_NAME())
-                        .where("DepartureDate >= " + startDate + " and DestinationDate <= endDate")
+                        .where(String.format("%s >= %d and %s <= %d",
+                                             BatchedMovementsFileReader.getDEPARTURE_DATE(), startDate, BatchedMovementsFileReader.getDESTINATION_DATE(), endDate))
                         .fetch();
                 for (Record r : records) {
-                    movements.add(createMovement(r));
+                    final Movement movement = createMovement(r);
+                    if (movement != null) {
+                        movements.add(movement);
+                    }
                 }
             } catch (org.jooq.exception.DataAccessException e) {
                 log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
@@ -219,7 +246,7 @@ public final class Lookup {
     }
 
     /**
-     * Get all the movements that have been read from the file(s) specified in the configuration file.
+     * Get all the tests that have been read from the file(s) specified in the configuration file.
      * @return a collection of movement events that have been recorded.
      */
     public Collection<Test> getTests() {
@@ -229,7 +256,37 @@ public final class Lookup {
 
         final Result<Record> records = jooq.select().from(TestsFileReader.getTABLE_NAME()).fetch();
         for (Record r : records) {
-            tests.add(createTest(r));
+            final Test test = createTest(r);
+            if (test != null) {
+                tests.add(test);
+            }
+        }
+
+        sw.stop();
+        log.debug("Found {} tests in {}.", tests.size(), sw.toString());
+        return tests;
+    }
+
+    /**
+     * Get all the tests that have been read from the file(s) specified in the configuration file.
+     * @param startDate the first date in the range with which we will filter the tests.
+     * @param endDate   the final date in the range with which we will filter the tests.
+     * @return a collection of movement events that have been recorded.
+     */
+    public Collection<Test> getTests(final int startDate, final int endDate) {
+        final Collection<Test> tests = new ArrayList<>();
+        final StopWatch sw = new StopWatch();
+        sw.start();
+
+        final Result<Record> records = jooq.select().from(TestsFileReader.getTABLE_NAME())
+                .where(String.format("%s >= %d and %s <= %d",
+                                     TestsFileReader.getTEST_DATE(), startDate, TestsFileReader.getTEST_DATE(), endDate))
+                .fetch();
+        for (Record r : records) {
+            final Test test = createTest(r);
+            if (test != null) {
+                tests.add(test);
+            }
         }
 
         sw.stop();
@@ -246,9 +303,12 @@ public final class Lookup {
         final StopWatch sw = new StopWatch();
         sw.start();
 
-        final Result<Record> records = jooq.select().from("LifeHistories").fetch();
+        final Result<Record> records = jooq.select().from(PopulationsFileReader.getLIFE_HISTORIES_TABLE_NAME()).fetch();
         for (Record r : records) {
-            animals.add(createAnimal(r));
+            final Animal animal = createAnimal(r);
+            if (animal != null) {
+                animals.add(animal);
+            }
         }
 
         sw.stop();
@@ -264,20 +324,21 @@ public final class Lookup {
      */
     public Collection<Animal> getAnimals(final int date) {
         final Collection<Animal> animals = new HashSet<>();
-        final StringBuilder sb = new StringBuilder();
-        sb.append(PopulationsFileReader.getDATE_OF_BIRTH()).append(" <= ").append(date);
-        sb.append(" and (").append(PopulationsFileReader.getDATE_OF_DEATH()).append(" IS NULL or");
-        sb.append(PopulationsFileReader.getDATE_OF_DEATH()).append(" >= ").append(date);
-        sb.append(")");
+        final String whereClause = String.format("%s <= %d and (%s IS NULL or %s >= %d)",
+                                                 PopulationsFileReader.getDATE_OF_BIRTH(), date,
+                                                 PopulationsFileReader.getDATE_OF_DEATH(),
+                                                 PopulationsFileReader.getDATE_OF_DEATH(), date);
 
         final StopWatch sw = new StopWatch();
         sw.start();
 
-        // TODO add filter
-        final Result<Record> records = jooq.select().from(PopulationsFileReader.getTableName())
-                .where(sb.toString()).fetch();
+        final Result<Record> records = jooq.select().from(PopulationsFileReader.getLIFE_HISTORIES_TABLE_NAME()).where(whereClause)
+                .fetch();
         for (Record r : records) {
-            animals.add(createAnimal(r));
+            final Animal animal = createAnimal(r);
+            if (animal != null) {
+                animals.add(animal);
+            }
         }
 
         sw.stop();
@@ -296,7 +357,10 @@ public final class Lookup {
 
         final Result<Record> records = jooq.select().from(LocationsFileReader.getTABLE_NAME()).fetch();
         for (Record r : records) {
-            locations.add(createLocation(r));
+            final Location location = createLocation(r);
+            if (location != null) {
+                locations.add(location);
+            }
         }
 
         sw.stop();
@@ -316,7 +380,7 @@ public final class Lookup {
         Location location = locationsCache.getIfPresent(locationId);
         if (location == null) {
             final Result<Record> records = jooq.select().from(LocationsFileReader.getTABLE_NAME())
-                    .where(LocationsFileReader.getID() + " = " + locationId).fetch();
+                    .where(String.format("%s = '%s'", LocationsFileReader.getID(), locationId)).fetch();
             for (Record r : records) {
                 location = createLocation(r);
                 locationsCache.put(location.getId(), location);
@@ -336,8 +400,8 @@ public final class Lookup {
     public Animal getAnimal(final String animalId) {
         Animal animal = animalsCache.getIfPresent(animalId);
         if (animal == null) {
-            final Result<Record> records = jooq.select().from(PopulationsFileReader.getTableName())
-                    .where("ID = " + animalId).fetch();
+            final Result<Record> records = jooq.select().from(PopulationsFileReader.getLIFE_HISTORIES_TABLE_NAME())
+                    .where(String.format("ID = '%s'", animalId)).fetch();
             for (Record r : records) {
                 animal = createAnimal(r);
                 animalsCache.put(animal.getId(), animal);
@@ -361,7 +425,7 @@ public final class Lookup {
         Result<Record> records;
         try {
             records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME())
-                    .where("Id = " + animalId)
+                    .where(String.format("%s = '%s'", FullMovementsFileReader.getID(), animalId))
                     .fetch();
             for (Record r : records) {
                 movements.add(createMovement(r));
@@ -373,7 +437,7 @@ public final class Lookup {
 
         try {
             records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())
-                    .where("Id = " + animalId)
+                    .where(String.format("%s = '%s'", DirectedMovementsFileReader.getID(), animalId))
                     .fetch();
             for (Record r : records) {
                 movements.add(createMovement(r));
@@ -396,9 +460,66 @@ public final class Lookup {
      * @param date     the date for which we want the animals location.
      * @return the location of the animal on date or Location.getNullLocation if there isn't a valid location.
      */
-    public Location getAnimalLocationAtDate(final String animalId, final int date) {
+    public String getAnimalLocationIdAtDate(final String animalId, final int date) {
 
-        //TODO
+        String locationId = "";
+        int locationDate = Integer.MIN_VALUE;
+        Result<Record> records;
+        try {
+            // get the destination id of the last movement BEFORE the given date.
+            records = jooq.select(Factory.fieldByName(FullMovementsFileReader.getDESTINATION_ID()),
+                                  Factory.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()))
+                    .from(FullMovementsFileReader.getTABLE_NAME())
+                    .where(String.format("%s = '%s' and (%s <= %d or %s <= %d)", FullMovementsFileReader.getID(), animalId,
+                                         FullMovementsFileReader.getDEPARTURE_DATE(), date,
+                                         FullMovementsFileReader.getDESTINATION_DATE(), date))
+                    .orderBy(Factory.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()).asc())
+                    .limit(1)
+                    .fetch();
+            if (records.isNotEmpty()) {
+                final int thisDate = (int) records.getValue(0, Factory.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()));
+                if (thisDate > locationDate) {
+                    locationDate = (int) records.getValue(0, Factory.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()));
+                    locationId = (String) records.getValue(0, Factory.fieldByName(FullMovementsFileReader.getDESTINATION_ID()));
+                }
+            }
+        } catch (org.jooq.exception.DataAccessException e) {
+            log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
+                      FullMovementsFileReader.getTABLE_NAME());
+        }
+
+        try {
+            records = jooq.select(Factory.fieldByName(DirectedMovementsFileReader.getLOCATION_ID()),
+                                  Factory.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()))
+                    .from(DirectedMovementsFileReader.getTABLE_NAME())
+                    .where(String.format("%s = '%s' and %s <= %d", DirectedMovementsFileReader.getID(), animalId,
+                                         DirectedMovementsFileReader.getMOVEMENT_DATE(), date))
+                    .orderBy(Factory.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()).asc())
+                    .limit(1)
+                    .fetch();
+            if (records.isNotEmpty()) {
+                final int thisDate = (int) records.getValue(0, Factory.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()));
+                if (thisDate > locationDate) {
+                    locationDate = (int) records.getValue(0, Factory.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()));
+                    locationId = (String) records.getValue(0, Factory.fieldByName(DirectedMovementsFileReader.getLOCATION_ID()));
+                }
+            }
+        } catch (org.jooq.exception.DataAccessException e) {
+            log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
+                      DirectedMovementsFileReader.getTABLE_NAME());
+        }
+
+        if (locationDate > Integer.MIN_VALUE) {
+            return locationId;
+        } else {
+            // else no movement => it is still on it's location of birth.
+            final Animal animal = getAnimal(animalId);
+            if (animal != null) {
+                return animal.getLocationOfBirth();
+            } else {
+                log.error("Could not find location for {} at {}", animalId, date);
+            }
+        }
         return null;
     }
 
@@ -410,9 +531,26 @@ public final class Lookup {
     private Location createLocation(final Record locationRecord) {
         log.trace("Creating location object for {}", locationRecord.getField(LocationsFileReader.getID()));
 
-        final String id = (String) locationRecord.getValue(LocationsFileReader.getID());
-        final Double easting = (Double) locationRecord.getValue(LocationsFileReader.getEASTING());
-        final Double northing = (Double) locationRecord.getValue(LocationsFileReader.getNORTHING());
+        String id = "";
+        Double easting = null;
+        Double northing = null;
+
+        try {
+            id = (String) locationRecord.getValue(LocationsFileReader.getID());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            easting = (Double) locationRecord.getValue(LocationsFileReader.getEASTING());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            northing = (Double) locationRecord.getValue(LocationsFileReader.getNORTHING());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+
         // TODO add custom tags
 //        for (int i = 6; i < locationRecord.size(); i++) {
 //            locationRecord.getValue(i);
@@ -427,20 +565,53 @@ public final class Lookup {
      * @return the created animal object.
      */
     private Animal createAnimal(final Record animalRecord) {
-        log.trace("Creating animal object for {}", animalRecord.getField(PopulationsFileReader.getID()));
+        log.trace("Creating animal object for {}", animalRecord.toString());
 
-        final String id = (String) animalRecord.getValue(PopulationsFileReader.getID());
-        final Integer dob = (Integer) animalRecord.getValue(PopulationsFileReader.getDATE_OF_BIRTH());
-        final String lob = (String) animalRecord.getValue(PopulationsFileReader.getLOCATION_OF_BIRTH());
-        final Integer dod = (Integer) animalRecord.getValue(PopulationsFileReader.getDATE_OF_DEATH());
-        final String lod = (String) animalRecord.getValue(PopulationsFileReader.getLOCATION_OF_DEATH());
-        final String species = (String) animalRecord.getValue(PopulationsFileReader.getSPECIES());
+        String id = "";
+        Integer dob = null;
+        String lob = "";
+        Integer dod = null;
+        String lod = "";
+        String species = "";
+
+        try {
+            id = (String) animalRecord.getValue(PopulationsFileReader.getID());
+        } catch (IllegalArgumentException e) {
+            log.trace("error {}", e.getLocalizedMessage());
+            // ignore - the field was not in the record.
+        }
+        try {
+            dob = (Integer) animalRecord.getValue(PopulationsFileReader.getDATE_OF_BIRTH());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            lob = (String) animalRecord.getValue(PopulationsFileReader.getLOCATION_OF_BIRTH());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            dod = (Integer) animalRecord.getValue(PopulationsFileReader.getDATE_OF_DEATH());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            lod = (String) animalRecord.getValue(PopulationsFileReader.getLOCATION_OF_DEATH());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            species = (String) animalRecord.getValue(PopulationsFileReader.getSPECIES());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
 
         // TODO add custom tags
 //        for (int i = 6; i < animalRecord.size(); i++) {
 //            animalRecord.getValue(i);
 //        }
         return new Animal(id, species, dob, lob, dod, lod);
+
     }
 
     /**
@@ -449,14 +620,55 @@ public final class Lookup {
      * @return the created test object.
      */
     private Test createTest(final Record testRecord) {
-        log.trace("Creating test object for {}", testRecord.getField(TestsFileReader.getID()));
+        log.trace("Creating test object for {}", testRecord.toString());
 
-        final String id = (String) testRecord.getValue(TestsFileReader.getID());
-        final String group = (String) testRecord.getValue(TestsFileReader.getGROUP_ID());
-        final String location = (String) testRecord.getValue(TestsFileReader.getLOCATION_ID());
-        final Integer testDate = (Integer) testRecord.getValue(TestsFileReader.getTEST_DATE());
-        final Boolean positiveResult = (Boolean) testRecord.getValue(TestsFileReader.getPOSITIVE_RESULT());
-        final Boolean negativeResult = (Boolean) testRecord.getValue(TestsFileReader.getNEGATIVE_RESULT());
+        String id = "";
+        String group = "";
+        String location = "";
+        Integer testDate = null;
+        Boolean positiveResult = null;
+        Boolean negativeResult = null;
+
+        try {
+            id = (String) testRecord.getValue(TestsFileReader.getID());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            group = (String) testRecord.getValue(TestsFileReader.getGROUP_ID());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            location = (String) testRecord.getValue(TestsFileReader.getLOCATION_ID());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            testDate = (Integer) testRecord.getValue(TestsFileReader.getTEST_DATE());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            final Integer val = (Integer) testRecord.getValue(TestsFileReader.getPOSITIVE_RESULT());
+            if (val == 0) {
+                positiveResult = Boolean.FALSE;
+            } else {
+                positiveResult = Boolean.TRUE;
+            }
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            final Integer val = (Integer) testRecord.getValue(TestsFileReader.getNEGATIVE_RESULT());
+            if (val == 0) {
+                negativeResult = Boolean.FALSE;
+            } else {
+                negativeResult = Boolean.TRUE;
+            }
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
 
         // TODO add custom tags
 //        for (int i = 6; i < testRecord.size(); i++) {
@@ -473,15 +685,61 @@ public final class Lookup {
     private Movement createMovement(final Record movementRecord) {
         log.trace("Creating movement object for {}", movementRecord.toString());
 
-        final String id = (String) movementRecord.getValue(FullMovementsFileReader.getID());
-        final Integer batchSize = (Integer) movementRecord.getValue(BatchedMovementsFileReader.getBATCH_SIZE());
-        final Integer departureDate = (Integer) movementRecord.getValue(FullMovementsFileReader.getDEPARTURE_DATE());
-        final String departureId = (String) movementRecord.getValue(FullMovementsFileReader.getDEPARTURE_ID());
-        final Integer destinationDate = (Integer) movementRecord.getValue(FullMovementsFileReader.getDESTINATION_DATE());
-        final String destinationId = (String) movementRecord.getValue(FullMovementsFileReader.getDESTINATION_ID());
-        final Integer marketDate = (Integer) movementRecord.getValue(BatchedMovementsFileReader.getMARKET_DATE());
-        final String marketId = (String) movementRecord.getValue(BatchedMovementsFileReader.getMARKET_ID());
-        final String species = (String) movementRecord.getValue(DirectedMovementsFileReader.getSPECIES());
+        String id = "";
+        Integer batchSize = null;
+        Integer departureDate = null;
+        String departureId = "";
+        Integer destinationDate = null;
+        String destinationId = "";
+        Integer marketDate = null;
+        String marketId = "";
+        String species = "";
+
+        try {
+            id = (String) movementRecord.getValue(FullMovementsFileReader.getID());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            batchSize = (Integer) movementRecord.getValue(BatchedMovementsFileReader.getBATCH_SIZE());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            departureDate = (Integer) movementRecord.getValue(FullMovementsFileReader.getDEPARTURE_DATE());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            departureId = (String) movementRecord.getValue(FullMovementsFileReader.getDEPARTURE_ID());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            destinationDate = (Integer) movementRecord.getValue(FullMovementsFileReader.getDESTINATION_DATE());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            destinationId = (String) movementRecord.getValue(FullMovementsFileReader.getDESTINATION_ID());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            marketDate = (Integer) movementRecord.getValue(BatchedMovementsFileReader.getMARKET_DATE());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            marketId = (String) movementRecord.getValue(BatchedMovementsFileReader.getMARKET_ID());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
+        try {
+            species = (String) movementRecord.getValue(DirectedMovementsFileReader.getSPECIES());
+        } catch (IllegalArgumentException e) {
+            // ignore - the field was not in the record.
+        }
 
         // TODO add custom tags
 //        for (int i = 6; i < testRecord.size(); i++) {

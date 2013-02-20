@@ -1,8 +1,9 @@
-package broadwick.data;
+package broadwick.data.readers;
 
 import broadwick.BroadwickException;
 import broadwick.config.generated.CustomTags;
 import broadwick.config.generated.DataFiles;
+import broadwick.data.DatabaseImpl;
 import com.google.common.base.Throwables;
 import java.sql.Connection;
 import java.util.Collection;
@@ -43,9 +44,9 @@ public class TestsFileReader extends DataFileReader {
                                  insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
         updateCreateTableCommand(TEST_DATE, testsFile.getTestDateColumn(), " INT, ",
                                  insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
-        updateCreateTableCommand(POSITIVE_RESULT, testsFile.getPostiveResultColumn(), " VARCHAR(128), ",
+        updateCreateTableCommand(POSITIVE_RESULT, testsFile.getPostiveResultColumn(), " INT, ",
                                  insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
-        updateCreateTableCommand(NEGATIVE_RESULT, testsFile.getNegativeResultColumn(), " VARCHAR(128), ",
+        updateCreateTableCommand(NEGATIVE_RESULT, testsFile.getNegativeResultColumn(), " INT, ",
                                  insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
 
         if (testsFile.getTestDateColumn() > 0) {
@@ -121,16 +122,16 @@ public class TestsFileReader extends DataFileReader {
     private Map<String, Integer> insertedColInfo;
     private Collection<Integer> dateFields;
     @Getter
-    private static final String ID = "Id";
+    private static final String ID = "ID";
     @Getter
-    private static final String GROUP_ID = "GroupId";
+    private static final String GROUP_ID = "GROUPID";
     @Getter
-    private static final String LOCATION_ID = "LocationId";
+    private static final String LOCATION_ID = "LOCATIONID";
     @Getter
-    private static final String TEST_DATE = "TestDate";
+    private static final String TEST_DATE = "TESTDATE";
     @Getter
-    private static final String POSITIVE_RESULT = "PositiveResult";
+    private static final String POSITIVE_RESULT = "POSITIVERESULT";
     @Getter
-    private static final String NEGATIVE_RESULT = "NegativeResult";
+    private static final String NEGATIVE_RESULT = "NEGATIVERESULT";
     private static final String SECTION_NAME = "TestsFile";
 }

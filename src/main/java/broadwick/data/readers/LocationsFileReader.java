@@ -1,8 +1,9 @@
-package broadwick.data;
+package broadwick.data.readers;
 
 import broadwick.BroadwickException;
 import broadwick.config.generated.CustomTags;
 import broadwick.config.generated.DataFiles;
+import broadwick.data.DatabaseImpl;
 import com.google.common.base.Throwables;
 import java.sql.Connection;
 import java.util.Collection;
@@ -37,9 +38,9 @@ public class LocationsFileReader extends DataFileReader {
         this.createTableCommand = new StringBuilder();
         updateCreateTableCommand(ID, locationsFile.getLocationIdColumn(), " VARCHAR(128) NOT NULL, ",
                                  insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
-        updateCreateTableCommand(EASTING, locationsFile.getEastingColumn(), " INT, ",
+        updateCreateTableCommand(EASTING, locationsFile.getEastingColumn(), " DOUBLE, ",
                                  insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
-        updateCreateTableCommand(NORTHING, locationsFile.getNorthingColumn(), " INT, ",
+        updateCreateTableCommand(NORTHING, locationsFile.getNorthingColumn(), " DOUBLE, ",
                                  insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
 
         if (locationsFile.getCustomTags() != null) {
@@ -98,12 +99,12 @@ public class LocationsFileReader extends DataFileReader {
     private Map<String, Integer> insertedColInfo;
     private Collection<Integer> dateFields;
     @Getter
-    private static final String TABLE_NAME = "Locations";
+    private static final String TABLE_NAME = "LOCATIONS";
     @Getter
-    private static final String ID = "Id";
+    private static final String ID = "ID";
     @Getter
-    private static final String EASTING = "Easting";
+    private static final String EASTING = "EASTING";
     @Getter
-    private static final String NORTHING = "Northing";
+    private static final String NORTHING = "NORTHING";
     private static final String SECTION_NAME = "LocationsFile";
 }
