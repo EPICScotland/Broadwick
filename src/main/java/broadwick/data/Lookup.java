@@ -19,8 +19,12 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 import org.jooq.Record;
+import org.jooq.Record1;
+import org.jooq.Record2;
 import org.jooq.Result;
+import org.jooq.conf.Settings;
 import org.jooq.impl.Factory;
+import org.jooq.impl.Executor;
 
 /**
  * This class works as an interface to the databases holding the movements, locations and animal data read from the
@@ -36,7 +40,9 @@ public final class Lookup {
      */
     public Lookup(final DatabaseImpl dbFacade) {
         try {
-            jooq = new Factory(dbFacade.getConnection(), dbFacade.getDialect());
+            final Settings settings = new Settings();
+            settings.setExecuteLogging(Boolean.FALSE);
+            jooq = new Executor(dbFacade.getConnection(), dbFacade.getDialect(), settings);
         } catch (SQLException e) {
             log.error("Could not create database lookup object. {}", Throwables.getStackTraceAsString(e));
         }
@@ -49,8 +55,8 @@ public final class Lookup {
     public int getNumTests() {
         int numTests = 0;
         try {
-            final Result<Record> fetch = jooq.selectCount().from(TestsFileReader.getTABLE_NAME()).fetch();
-            numTests = fetch.get(0).getValueAsInteger(0);
+            final Result<Record1<Integer>> fetch = jooq.selectCount().from(TestsFileReader.getTABLE_NAME()).fetch();
+            numTests = fetch.get(0).value1();
         } catch (org.jooq.exception.DataAccessException e) {
             log.trace("Could not get number of tests - perhaps the table hasn't been created.");
         }
@@ -64,8 +70,8 @@ public final class Lookup {
     public int getNumAnimals() {
         int numAnimals = 0;
         try {
-            final Result<Record> fetch = jooq.selectCount().from(PopulationsFileReader.getLIFE_HISTORIES_TABLE_NAME()).fetch();
-            numAnimals = fetch.get(0).getValueAsInteger(0);
+            final Result<Record1<Integer>> fetch = jooq.selectCount().from(PopulationsFileReader.getLIFE_HISTORIES_TABLE_NAME()).fetch();
+            numAnimals = fetch.get(0).value1();
         } catch (org.jooq.exception.DataAccessException e) {
             log.trace("Could not get number of animals - perhaps the table hasn't been created.");
         }
@@ -79,8 +85,8 @@ public final class Lookup {
     public int getNumLocations() {
         int numLocations = 0;
         try {
-            final Result<Record> fetch = jooq.selectCount().from(LocationsFileReader.getTABLE_NAME()).fetch();
-            numLocations = fetch.get(0).getValueAsInteger(0);
+            final Result<Record1<Integer>> fetch = jooq.selectCount().from(LocationsFileReader.getTABLE_NAME()).fetch();
+            numLocations = fetch.get(0).value1();
         } catch (org.jooq.exception.DataAccessException e) {
             log.trace("Could not get number of locations - perhaps the table hasn't been created.");
         }
@@ -95,19 +101,19 @@ public final class Lookup {
         int numMovements = 0;
 
         try {
-            numMovements = jooq.selectCount().from(BatchedMovementsFileReader.getTABLE_NAME()).fetch().get(0).getValueAsInteger(0);
+            numMovements = jooq.selectCount().from(BatchedMovementsFileReader.getTABLE_NAME()).fetch().get(0).value1();
         } catch (org.jooq.exception.DataAccessException e) {
             log.trace("Could not get number of movements from {} - perhaps the table hasn't been created.",
                       BatchedMovementsFileReader.getTABLE_NAME());
         }
         try {
-            numMovements += jooq.selectCount().from(FullMovementsFileReader.getTABLE_NAME()).fetch().get(0).getValueAsInteger(0);
+            numMovements += jooq.selectCount().from(FullMovementsFileReader.getTABLE_NAME()).fetch().get(0).value1();
         } catch (org.jooq.exception.DataAccessException e) {
             log.trace("Could not get number of movements from {} - perhaps the table hasn't been created.",
                       FullMovementsFileReader.getTABLE_NAME());
         }
         try {
-            numMovements += jooq.selectCount().from(DirectedMovementsFileReader.getTABLE_NAME()).fetch().get(0).getValueAsInteger(0);
+            numMovements += jooq.selectCount().from(DirectedMovementsFileReader.getTABLE_NAME()).fetch().get(0).value1();
         } catch (org.jooq.exception.DataAccessException e) {
             log.trace("Could not get number of movements from {} - perhaps the table hasn't been created.",
                       DirectedMovementsFileReader.getTABLE_NAME());
@@ -464,7 +470,7 @@ public final class Lookup {
 
         String locationId = "";
         int locationDate = Integer.MIN_VALUE;
-        Result<Record> records;
+        Result<Record2<Object,Object>> records;
         try {
             // get the destination id of the last movement BEFORE the given date.
             records = jooq.select(Factory.fieldByName(FullMovementsFileReader.getDESTINATION_ID()),
@@ -529,7 +535,7 @@ public final class Lookup {
      * @return the created location object.
      */
     private Location createLocation(final Record locationRecord) {
-        log.trace("Creating location object for {}", locationRecord.getField(LocationsFileReader.getID()));
+        log.trace("Creating location object for {}", locationRecord.toString());
 
         String id = "";
         Double easting = null;
@@ -537,17 +543,17 @@ public final class Lookup {
 
         try {
             id = (String) locationRecord.getValue(LocationsFileReader.getID());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             easting = (Double) locationRecord.getValue(LocationsFileReader.getEASTING());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             northing = (Double) locationRecord.getValue(LocationsFileReader.getNORTHING());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
 
@@ -576,33 +582,33 @@ public final class Lookup {
 
         try {
             id = (String) animalRecord.getValue(PopulationsFileReader.getID());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             log.trace("error {}", e.getLocalizedMessage());
             // ignore - the field was not in the record.
         }
         try {
             dob = (Integer) animalRecord.getValue(PopulationsFileReader.getDATE_OF_BIRTH());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             lob = (String) animalRecord.getValue(PopulationsFileReader.getLOCATION_OF_BIRTH());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             dod = (Integer) animalRecord.getValue(PopulationsFileReader.getDATE_OF_DEATH());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             lod = (String) animalRecord.getValue(PopulationsFileReader.getLOCATION_OF_DEATH());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             species = (String) animalRecord.getValue(PopulationsFileReader.getSPECIES());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
 
@@ -631,22 +637,22 @@ public final class Lookup {
 
         try {
             id = (String) testRecord.getValue(TestsFileReader.getID());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             group = (String) testRecord.getValue(TestsFileReader.getGROUP_ID());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             location = (String) testRecord.getValue(TestsFileReader.getLOCATION_ID());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             testDate = (Integer) testRecord.getValue(TestsFileReader.getTEST_DATE());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
@@ -656,7 +662,7 @@ public final class Lookup {
             } else {
                 positiveResult = Boolean.TRUE;
             }
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
@@ -666,7 +672,7 @@ public final class Lookup {
             } else {
                 negativeResult = Boolean.TRUE;
             }
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
 
@@ -697,47 +703,47 @@ public final class Lookup {
 
         try {
             id = (String) movementRecord.getValue(FullMovementsFileReader.getID());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             batchSize = (Integer) movementRecord.getValue(BatchedMovementsFileReader.getBATCH_SIZE());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             departureDate = (Integer) movementRecord.getValue(FullMovementsFileReader.getDEPARTURE_DATE());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             departureId = (String) movementRecord.getValue(FullMovementsFileReader.getDEPARTURE_ID());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             destinationDate = (Integer) movementRecord.getValue(FullMovementsFileReader.getDESTINATION_DATE());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             destinationId = (String) movementRecord.getValue(FullMovementsFileReader.getDESTINATION_ID());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             marketDate = (Integer) movementRecord.getValue(BatchedMovementsFileReader.getMARKET_DATE());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             marketId = (String) movementRecord.getValue(BatchedMovementsFileReader.getMARKET_ID());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             species = (String) movementRecord.getValue(DirectedMovementsFileReader.getSPECIES());
-        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
 
@@ -752,7 +758,7 @@ public final class Lookup {
     Cache<String, Location> locationsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
     Cache<String, Animal> animalsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
     Cache<String, Test> testsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
-    private Factory jooq;
+    private Executor jooq;
 }
 
 /**
