@@ -1,11 +1,13 @@
 package broadwick.stochastic;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
  * A class containing all the details of an event in the stochastic ODE model.
  */
+@EqualsAndHashCode
 public class SimulationEvent {
 
     /**

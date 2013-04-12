@@ -4,12 +4,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Class that holds the transition kernel for a stochastic simulation. The kernel comprises of a map of SimulationEvents
  * to the probability of that event occurring. This is NOT thread safe.
  */
 @ToString
+@Slf4j
 public class TransitionKernel implements Cloneable {
 
     /**
@@ -40,7 +42,12 @@ public class TransitionKernel implements Cloneable {
      */
     public final void addToKernel(final SimulationEvent event, final Double rate) {
         if (rate > 0.0) {
-            kernel.put(event, rate);
+            double eventRate = rate;
+            if (kernel.containsKey(event)) {
+                eventRate += kernel.get(event);
+                log.debug("Kernel already contains event {}, updating rate", event, eventRate);
+            } 
+            kernel.put(event, eventRate);
         }
     }
 
