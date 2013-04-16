@@ -32,14 +32,14 @@ public abstract class AbstractTauLeapingBase extends StochasticSimulator {
         log.trace("AbstractTauLeapingBase: Updating states at {} using a step size of {}", getCurrentTime(), tau);
         final Set<SimulationEvent> transitionEvents = new LinkedHashSet<>();
         transitionEvents.addAll(getTransitionKernel().getTransitionEvents());
-
+        
         for (SimulationEvent event : transitionEvents) {
             if (getTransitionKernel().getTransitionEvents().contains(event)) {
                 final double rate = getTransitionKernel().getTransitionProbability(event);
                 final double times = GENERATOR.getPoisson(rate * tau);
                 if (times > 0) {
                     log.trace("Updating states {}", new StringBuilder()
-                            .append(" for event ").append(event.toString())
+                            .append("for event ").append(event.toString())
                             .append(", rate = ").append(rate)
                             .append(", times = ").append(times)
                             .toString());

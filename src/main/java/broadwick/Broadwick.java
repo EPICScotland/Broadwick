@@ -39,12 +39,15 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- * Broadwick: Project for Scientific Computing. The Broadwick framework allows for rapid epidemic modelling.
+ * Broadwick: Project for Scientific Computing. The Broadwick framework allows
+ * for rapid epidemic modelling.
  */
 public final class Broadwick {
 
     /**
-     * Create the Broadwick project to read and verify the configuration files and initialise the project.
+     * Create the Broadwick project to read and verify the configuration files
+     * and initialise the project.
+     *
      * @param args the command line arguments supplied to the project.
      */
     public Broadwick(final String[] args) {
@@ -62,7 +65,8 @@ public final class Broadwick {
 
     /**
      * Read the configuration file from the configuration file.
-     * @param logFacade  the LoggingFacade object used to log any messages.
+     *
+     * @param logFacade the LoggingFacade object used to log any messages.
      * @param configFile the name of the configuration file.
      */
     private void readConfigFile(final LoggingFacade logFacade, final String configFile) {
@@ -147,30 +151,31 @@ public final class Broadwick {
                                     log.error("{}", Throwables.getStackTraceAsString(ex));
                                 }
                             }
-
                         });
                     }
                     es.shutdown();
                     while (!es.isTerminated()) {
-                        es.awaitTermination(1, TimeUnit.SECONDS);
+                        es.awaitTermination(10, TimeUnit.SECONDS);
                     }
                     //sw.stop();
                     //log.trace("Finished {} simulations in {}.", maxSimulations, sw);
-
-                    log.info("Simulation complete.");
                 }
             } catch (InterruptedException | BroadwickException ex) {
                 log.trace("{}", Throwables.getStackTraceAsString(ex));
                 log.error("Something went wrong. See previous messages for details.");
             }
+
+            log.info("Simulation complete.");
         }
     }
 
     /**
-     * Create and register the models internally. If there was a problem registering the models an empty cache is
-     * returned.
+     * Create and register the models internally. If there was a problem
+     * registering the models an empty cache is returned.
+     *
      * @param project the unmarshalled configuration file.
-     * @param lookup  the Lookuup object that allows the model to access the data specified in the data files.
+     * @param lookup the Lookuup object that allows the model to access the data
+     * specified in the data files.
      * @return the registered models.
      */
     private Map<String, Model> registerModels(final Project project, final Lookup lookup) {
@@ -194,10 +199,14 @@ public final class Broadwick {
 
     /**
      * Get a collection of XML elements one for each <model> section.
+     *
      * @return a collection of XML elements of each <model>.
-     * @throws ParserConfigurationException if the nodes for the configured models cannot be found.
-     * @throws SAXException                 if the nodes for the configured models cannot be found.
-     * @throws IOException                  if the nodes for the configured models cannot be found.
+     * @throws ParserConfigurationException if the nodes for the configured
+     * models cannot be found.
+     * @throws SAXException if the nodes for the configured models cannot be
+     * found.
+     * @throws IOException if the nodes for the configured models cannot be
+     * found.
      */
     private NodeList getAllModelConfigurations() throws ParserConfigurationException, SAXException, IOException {
         final DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
@@ -207,8 +216,10 @@ public final class Broadwick {
     }
 
     /**
-     * Get the XML string of the model with the given id from a list of configured models.
-     * @param id     the id of the model to be found.
+     * Get the XML string of the model with the given id from a list of
+     * configured models.
+     *
+     * @param id the id of the model to be found.
      * @param models a list of XML <model> nodes.
      * @return the XML string for the model.
      */
@@ -224,7 +235,7 @@ public final class Broadwick {
                     final StringWriter buffer = new StringWriter();
                     transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
                     transformer.transform(new DOMSource(models.item(i)),
-                                          new StreamResult(buffer));
+                            new StreamResult(buffer));
                     return buffer.toString();
                 }
             }
@@ -236,6 +247,7 @@ public final class Broadwick {
 
     /**
      * Invocation point.
+     *
      * @param args the command line arguments passed to Broadwick.
      */
     public static void main(final String[] args) {
@@ -243,7 +255,6 @@ public final class Broadwick {
         final Broadwick broadwick = new Broadwick(args);
         broadwick.run();
     }
-
     private Project project;
     private Logger log;
     private String configXml;

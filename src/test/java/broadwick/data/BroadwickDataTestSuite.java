@@ -11,6 +11,7 @@ import org.junit.runners.Suite;
  * Test Suite for broadwick.data package.
  */
 @RunWith(Suite.class)
+//@Suite.SuiteClasses({broadwick.data.DataReader.class})
 @Suite.SuiteClasses({})
 public class BroadwickDataTestSuite {
     
