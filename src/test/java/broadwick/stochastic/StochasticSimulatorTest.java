@@ -1,5 +1,6 @@
 package broadwick.stochastic;
 
+import com.google.common.collect.Iterables;
 import java.util.Collection;
 import java.util.HashSet;
 import lombok.Getter;
@@ -16,7 +17,6 @@ import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
-import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.MarkerFactory;
 
 /**
@@ -237,7 +237,7 @@ public class StochasticSimulatorTest {
         simulatorImpl.doThetaEvent();
         thetas = observerImpl.getThetas();
         assertEquals(1, thetas.size());
-        assertTrue("Event 1.0".equals(Iterables.first(thetas)));
+        assertTrue("Event 1.0".equals(Iterables.getFirst(thetas, this)));
 
         simulatorImpl.doThetaEvent();
         thetas = observerImpl.getThetas();
