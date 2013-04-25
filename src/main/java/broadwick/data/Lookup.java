@@ -183,6 +183,7 @@ public final class Lookup {
      * @return a collection of movement events that have been recorded.
      */
     public Collection<Movement> getMovements(final int startDate, final int endDate) {
+        log.trace("Getting all movements between {} and {}", startDate, endDate);
         final Collection<Movement> movements = new HashSet<>();
         final StopWatch sw = new StopWatch();
         sw.start();
@@ -194,7 +195,8 @@ public final class Lookup {
             try {
                 records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())
                         .where(String.format("%s >= %d and %s <= %d",
-                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate, DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate))
+                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate, 
+                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate))
                         .fetch();
                 for (Record r : records) {
                     final Movement movement = createMovement(r);
@@ -211,7 +213,8 @@ public final class Lookup {
                 // try full movements
                 records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME())
                         .where(String.format("%s >= %d and %s <= %d",
-                                             FullMovementsFileReader.getDEPARTURE_DATE(), startDate, FullMovementsFileReader.getDESTINATION_DATE(), endDate))
+                                             FullMovementsFileReader.getDEPARTURE_DATE(), startDate, 
+                                             FullMovementsFileReader.getDESTINATION_DATE(), endDate))
                         .fetch();
                 for (Record r : records) {
                     final Movement movement = createMovement(r);
@@ -228,7 +231,8 @@ public final class Lookup {
                 // try batched movements
                 records = jooq.select().from(BatchedMovementsFileReader.getTABLE_NAME())
                         .where(String.format("%s >= %d and %s <= %d",
-                                             BatchedMovementsFileReader.getDEPARTURE_DATE(), startDate, BatchedMovementsFileReader.getDESTINATION_DATE(), endDate))
+                                             BatchedMovementsFileReader.getDEPARTURE_DATE(), startDate, 
+                                             BatchedMovementsFileReader.getDESTINATION_DATE(), endDate))
                         .fetch();
                 for (Record r : records) {
                     final Movement movement = createMovement(r);
@@ -248,6 +252,166 @@ public final class Lookup {
 
         sw.stop();
         log.debug("Found {} movements in {}.", movements.size(), sw.toString());
+        return movements;
+    }
+
+    /**
+     * Get all the OFF movements that have been read from the file(s) specified in the configuration file filtered on a
+     * date range.
+     * @param startDate the first date in the range with which we will filter the movements
+     * @param endDate   the final date in the range with which we will filter the movements
+     * @return a collection of movement events that have been recorded.
+     */
+    public Collection<Movement> getOffMovements(final int startDate, final int endDate) {
+        log.trace("Getting off movements between {} and {}", startDate, endDate);
+        final Collection<Movement> movements = new HashSet<>();
+        final StopWatch sw = new StopWatch();
+        sw.start();
+
+        try {
+            // try directed movements
+            Result<Record> records;
+
+            try {
+                records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())
+                        .where(String.format("%s >= %d AND %s <= %d AND MOVEMENT_DIRECTION='OFF'",
+                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate, 
+                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate))
+                        .fetch();
+                for (Record r : records) {
+                    final Movement movement = createMovement(r);
+                    if (movement != null) {
+                        movements.add(movement);
+                    }
+                }
+            } catch (org.jooq.exception.DataAccessException e) {
+                log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
+                          DirectedMovementsFileReader.getTABLE_NAME());
+            }
+
+            try {
+                // try full movements
+                records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME())
+                        .where(String.format("%s >= %d and %s <= %d",
+                                             FullMovementsFileReader.getDEPARTURE_DATE(), startDate, 
+                                             FullMovementsFileReader.getDEPARTURE_DATE(), endDate))
+                        .fetch();
+                for (Record r : records) {
+                    final Movement movement = createMovement(r);
+                    if (movement != null) {
+                        movements.add(movement);
+                    }
+                }
+            } catch (org.jooq.exception.DataAccessException e) {
+                log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
+                          FullMovementsFileReader.getTABLE_NAME());
+            }
+
+            try {
+                // try batched movements
+                records = jooq.select().from(BatchedMovementsFileReader.getTABLE_NAME())
+                        .where(String.format("%s >= %d and %s <= %d",
+                                             BatchedMovementsFileReader.getDEPARTURE_DATE(), startDate, 
+                                             BatchedMovementsFileReader.getDEPARTURE_DATE(), endDate))
+                        .fetch();
+                for (Record r : records) {
+                    final Movement movement = createMovement(r);
+                    if (movement != null) {
+                        movements.add(movement);
+                    }
+                }
+            } catch (org.jooq.exception.DataAccessException e) {
+                log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
+                          BatchedMovementsFileReader.getTABLE_NAME());
+            }
+
+        } catch (org.jooq.exception.DataAccessException e) {
+            // We WILL get an error here - we don't know the type of table here so we try directed, batched and full
+            // movements. We can ignore the errors.
+        }
+
+        sw.stop();
+        log.debug("Found {} off movements in {}.", movements.size(), sw.toString());
+        return movements;
+    }
+
+    /**
+     * Get all the ON movements that have been read from the file(s) specified in the configuration file filtered on a
+     * date range.
+     * @param startDate the first date in the range with which we will filter the movements
+     * @param endDate   the final date in the range with which we will filter the movements
+     * @return a collection of movement events that have been recorded.
+     */
+    public Collection<Movement> getOnMovements(final int startDate, final int endDate) {
+        log.trace("Getting on movements between {} and {}", startDate, endDate);
+        final Collection<Movement> movements = new HashSet<>();
+        final StopWatch sw = new StopWatch();
+        sw.start();
+
+        try {
+            // try directed movements
+            Result<Record> records;
+
+            try {
+                records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())
+                        .where(String.format("%s >= %d AND %s <= %d AND MOVEMENT_DIRECTION='ON'",
+                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate,
+                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate))
+                        .fetch();
+                for (Record r : records) {
+                    final Movement movement = createMovement(r);
+                    if (movement != null) {
+                        movements.add(movement);
+                    }
+                }
+            } catch (org.jooq.exception.DataAccessException e) {
+                log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
+                          DirectedMovementsFileReader.getTABLE_NAME());
+            }
+
+            try {
+                // try full movements
+                records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME())
+                        .where(String.format("%s >= %d and %s <= %d",
+                                             FullMovementsFileReader.getDESTINATION_DATE(), startDate,
+                                             FullMovementsFileReader.getDESTINATION_DATE(), endDate))
+                        .fetch();
+                for (Record r : records) {
+                    final Movement movement = createMovement(r);
+                    if (movement != null) {
+                        movements.add(movement);
+                    }
+                }
+            } catch (org.jooq.exception.DataAccessException e) {
+                log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
+                          FullMovementsFileReader.getTABLE_NAME());
+            }
+
+            try {
+                // try batched movements
+                records = jooq.select().from(BatchedMovementsFileReader.getTABLE_NAME())
+                        .where(String.format("%s >= %d and %s <= %d",
+                                             BatchedMovementsFileReader.getDESTINATION_DATE(), startDate,
+                                             BatchedMovementsFileReader.getDESTINATION_DATE(), endDate))
+                        .fetch();
+                for (Record r : records) {
+                    final Movement movement = createMovement(r);
+                    if (movement != null) {
+                        movements.add(movement);
+                    }
+                }
+            } catch (org.jooq.exception.DataAccessException e) {
+                log.trace("Could not get movements from {} - this is not an error; the project might be configutred with one.",
+                          BatchedMovementsFileReader.getTABLE_NAME());
+            }
+
+        } catch (org.jooq.exception.DataAccessException e) {
+            // We WILL get an error here - we don't know the type of table here so we try directed, batched and full
+            // movements. We can ignore the errors.
+        }
+
+        sw.stop();
+        log.debug("Found {} on movements in {}.", movements.size(), sw.toString());
         return movements;
     }
 
@@ -470,7 +634,7 @@ public final class Lookup {
 
         String locationId = "";
         int locationDate = Integer.MIN_VALUE;
-        Result<Record2<Object,Object>> records;
+        Result<Record2<Object, Object>> records;
         try {
             // get the destination id of the last movement BEFORE the given date.
             records = jooq.select(Factory.fieldByName(FullMovementsFileReader.getDESTINATION_ID()),
@@ -753,7 +917,6 @@ public final class Lookup {
 //        }
         return new Movement(id, batchSize, departureDate, departureId, destinationDate, destinationId, marketDate, marketId, species);
     }
-
     Cache<String, Collection<Movement>> movementsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
     Cache<String, Location> locationsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
     Cache<String, Animal> animalsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
@@ -774,5 +937,4 @@ class MovementsComparator implements Comparator<Movement> {
         // ordering by departure date.
         return m1.toString().compareTo(m2.toString());
     }
-
 }
