@@ -52,6 +52,7 @@ public class LocalPoolExecutor implements Executor {
         // when eah submitted job is finished. If any of the jobs throws an exception,
         // it will be wrapped in an ExecutionException by the Future and we will check for it later.
         for (int i = 0; i < numRuns; i++) {
+            final int taskId = i;
             log.trace("Adding task {} to the executor service.", i);
             tasks.add(service.submit(new Runnable() {
                 @Override
@@ -61,6 +62,7 @@ public class LocalPoolExecutor implements Executor {
                     } catch (Exception e) {
                         throw new BroadwickException(e);
                     } finally {
+                        log.debug("Completed task {}", taskId);
                         latch.countDown();
                     }
                 }
