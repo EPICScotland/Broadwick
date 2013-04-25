@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 
 /**
  * Base class for stochastic simulators. Extending classes just have to implement
@@ -79,33 +80,42 @@ public abstract class StochasticSimulator {
      */
     public final void start() {
 
-        // If we haven't set a controller for the process then set the default one with a max time of 5
-        // (unknonw  units).
-        if (controller == null) {
-            controller = new DefaultController(5);
-        }
-
-        init();
-
-        // tell our observers that the simulation has started
-        for (Observer observer : observers) {
-            observer.started();
-        }
-
-        while (controller.goOn(this)) {
-
-            // The performStep() method is implemented by the specifc stochastic algorithm (e.g. Gillespie's)
-            performStep();
-
-            // tell our observers that the step has been completed.
-            for (Observer observer : observers) {
-                observer.step();
+        try {
+            // If we haven't set a controller for the process then set the default one with a max time of 5
+            // (unknonw  units).
+            if (controller == null) {
+                controller = new DefaultController(5);
             }
-        }
 
-        // tell our observers that the simulation has finished.
-        for (Observer observer : observers) {
-            observer.finished();
+            init();
+
+            // tell our observers that the simulation has started
+            for (Observer observer : observers) {
+                observer.started();
+            }
+
+            final StopWatch sw = new StopWatch();
+            sw.start();
+            while (controller.goOn(this)) {
+
+
+                // The performStep() method is implemented by the specifc stochastic algorithm (e.g. Gillespie's)
+                performStep();
+
+                // tell our observers that the step has been completed.
+                for (Observer observer : observers) {
+                    observer.step();
+                }
+                sw.split();
+                log.trace("Performed step in {}", sw.toSplitString());
+            }
+
+            // tell our observers that the simulation has finished.
+            for (Observer observer : observers) {
+                observer.finished();
+            }
+        } catch (Exception e) {
+            log.error("Error running stochastic simulation. {}", e.getLocalizedMessage());
         }
     }
 
@@ -292,12 +302,12 @@ public abstract class StochasticSimulator {
 
             return eventData;
         }
-
         @Getter
         private Table<Double, Observer, Collection<Object>> thetas;
         @Getter
         private double nextThetaEventTime;
     }
+
     /**
      * Reset propensities when a event has been executed.
      */
@@ -322,7 +332,6 @@ public abstract class StochasticSimulator {
      * @param seed the RNG seed.
      */
     public abstract void setRngSeed(final int seed);
-
     @Setter
     private int startTime = 0;
     @Setter
