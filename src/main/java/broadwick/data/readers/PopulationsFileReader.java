@@ -6,6 +6,7 @@ import broadwick.config.generated.DataFiles;
 import broadwick.data.DatabaseImpl;
 import com.google.common.base.Throwables;
 import java.sql.Connection;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -50,9 +51,10 @@ public class PopulationsFileReader extends DataFileReader {
      */
     private void readLifeHistory() {
         tableName = LIFE_HISTORIES_TABLE_NAME;
+        final Collection<String> primaryKeys = Arrays.asList(ID);
         final StringBuilder errors = new StringBuilder();
         this.createTableCommand = new StringBuilder();
-        updateCreateTableCommand(ID, populationFile.getLifeHistory().getIdColumn(), " VARCHAR(128), ",
+        updateCreateTableCommand(ID, populationFile.getLifeHistory().getIdColumn(), " VARCHAR(128) NOT NULL, ",
                                  insertedColInfo, createTableCommand, LIFE_HISTORIES_TABLE_NAME, SECTION_NAME, errors);
         updateCreateTableCommand(DATE_OF_BIRTH, populationFile.getLifeHistory().getDateOfBirthColumn()," INT, ", 
                                  insertedColInfo, createTableCommand, LIFE_HISTORIES_TABLE_NAME,
@@ -88,7 +90,7 @@ public class PopulationsFileReader extends DataFileReader {
         }
 
         final StringBuilder createIndexCommand = new StringBuilder();
-        createTableCommand.deleteCharAt(createTableCommand.length() - 1);
+        createTableCommand.append("PRIMARY KEY (").append(asCsv(primaryKeys)).append(")");
         createTableCommand.append(");");
 
         createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_POP_ID ON %s (%s);",
@@ -98,8 +100,11 @@ public class PopulationsFileReader extends DataFileReader {
 
         createTableCommand.append(createIndexCommand.toString());
 
-        insertString = String.format("INSERT INTO %s (%s) VALUES (%s)",
-                                     LIFE_HISTORIES_TABLE_NAME, asCsv(insertedColInfo.keySet()), asQuestionCsv(insertedColInfo.keySet()));
+        insertString = String.format("MERGE INTO %s (%s) KEY (%S) VALUES (%s)",
+                                     LIFE_HISTORIES_TABLE_NAME, 
+                                     asCsv(insertedColInfo.keySet()), 
+                                     asCsv(primaryKeys), 
+                                     asQuestionCsv(insertedColInfo.keySet()));
 
         if (errors.length() > 0) {
             log.error(errors.toString());
