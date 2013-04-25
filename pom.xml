@@ -66,9 +66,9 @@
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 
         <buildnumber-maven-plugin.version>1.2</buildnumber-maven-plugin.version>
-        <ch.qos.logback.version>1.0.10</ch.qos.logback.version>
+        <ch.qos.logback.version>1.0.11</ch.qos.logback.version>
         <com.google.guava.version>14.0.1</com.google.guava.version>
-        <jacoco-maven-plugin.version>0.5.10.201208310627</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.6.2.201302030002</jacoco-maven-plugin.version>
         <jdk.version>1.7</jdk.version>
         <joda-time.version>2.2</joda-time.version>
         <jre.version>1.7</jre.version>
@@ -80,14 +80,14 @@
         <org.apache.commons.lang3.version>3.1</org.apache.commons.lang3.version>  
         <org.apache.commons-math.version>2.2</org.apache.commons-math.version>
 	<org.jooq.version>3.0.0-RC2</org.jooq.version>
-        <org.projectlombok.lombok.version>0.11.6</org.projectlombok.lombok.version>
-        <org.slf4j.slf4j-api.version>1.7.4</org.slf4j.slf4j-api.version>
+        <org.projectlombok.lombok.version>0.11.8</org.projectlombok.lombok.version>
+        <org.slf4j.slf4j-api.version>1.7.5</org.slf4j.slf4j-api.version>
         <org.swinglabs.swing-layout.version>1.0.3</org.swinglabs.swing-layout.version>
         <taglist-maven-plugin.version>2.4</taglist-maven-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.0.3</maven.min-version>
         <maven-changes-plugin.version>2.7.1</maven-changes-plugin.version>
-        <maven-compiler-plugin.version>3.0</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
         <maven-fluido-skin.version>1.2.1</maven-fluido-skin.version>
         <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
         <maven-javadoc-plugin.version>2.8.1</maven-javadoc-plugin.version>
@@ -95,7 +95,7 @@
         <maven-jxr-plugin.version>2.3</maven-jxr-plugin.version>
         <maven-project-info-reports-plugin.version>2.4</maven-project-info-reports-plugin.version>
         <maven-site-plugin.version>3.2</maven-site-plugin.version>
-        <maven-surefire-plugin.version>2.14</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>2.14.1</maven-surefire-plugin.version>
     </properties>
 
     <pluginRepositories>
