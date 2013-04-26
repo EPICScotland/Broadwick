@@ -51,10 +51,11 @@ public class DataReader implements java.lang.AutoCloseable {
             } else {
                 throw new BroadwickException("There is a <data> section in the configuration file but neither a <database> nor <datafiles> section.");
             }
-        }
-        lookup = new Lookup(dbImpl);
 
-        logDbStatistics();
+            lookup = new Lookup(dbImpl);
+            logDbStatistics();
+        }
+
     }
 
     /**
@@ -76,7 +77,9 @@ public class DataReader implements java.lang.AutoCloseable {
     @Override
     public final void close() {
         log.trace("Closing database connection");
-        dbImpl.close();
+        if (dbImpl != null) {
+            dbImpl.close();
+        }
     }
 
     /**
@@ -262,7 +265,6 @@ public class DataReader implements java.lang.AutoCloseable {
         }
         return elementsRead;
     }
-
     @SuppressWarnings("PMD.UnusedPrivateField")
     @Getter
     private Lookup lookup;
