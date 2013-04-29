@@ -150,7 +150,7 @@ public interface Graph<V, E> {
      * <code>EdgeType</code> is
      * <code>DIRECTED</code>.
      * @param directedEdge the edge for which we want the corresponding destination.
-     * @return the destination of <code>directed_edge</code> if it is a directed edge in this graph,      *         or <code>null</code> otherwise
+     * @return the destination of <code>directed_edge</code> if it is a directed edge in this graph, * or <code>null</code> otherwise
      */
     V getDest(E directedEdge);
 
@@ -262,4 +262,10 @@ public interface Graph<V, E> {
      * @return a <code>Collection</code> view of all edges in this graph
      */
     Collection<E> getEdges();
+    
+    /**
+     * Get the type of edge (directed/undirected employed in the graph.
+     * @return either EdgeType.DIRECTED or EdgeType.UNDIRECTED
+     */
+    EdgeType getEdgeType();
 }

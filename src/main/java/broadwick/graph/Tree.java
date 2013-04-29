@@ -181,6 +181,10 @@ public class Tree<V extends Vertex, E extends Edge> implements broadwick.graph.G
         }
         return (V) inEdges.iterator().next().source;
     }
+    @Override
+    public final EdgeType getEdgeType() {
+        return EdgeType.DIRECTED;
+    }
 
     private DelegateTree<V, E> tree;
 }
