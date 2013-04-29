@@ -23,6 +23,7 @@ import org.jooq.Record1;
 import org.jooq.Record2;
 import org.jooq.Result;
 import org.jooq.conf.Settings;
+import org.jooq.exception.DataAccessException;
 import org.jooq.impl.Factory;
 import org.jooq.impl.Executor;
 
@@ -195,7 +196,7 @@ public final class Lookup {
             try {
                 records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())
                         .where(String.format("%s >= %d and %s <= %d",
-                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate, 
+                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate,
                                              DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate))
                         .fetch();
                 for (Record r : records) {
@@ -213,7 +214,7 @@ public final class Lookup {
                 // try full movements
                 records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME())
                         .where(String.format("%s >= %d and %s <= %d",
-                                             FullMovementsFileReader.getDEPARTURE_DATE(), startDate, 
+                                             FullMovementsFileReader.getDEPARTURE_DATE(), startDate,
                                              FullMovementsFileReader.getDESTINATION_DATE(), endDate))
                         .fetch();
                 for (Record r : records) {
@@ -231,7 +232,7 @@ public final class Lookup {
                 // try batched movements
                 records = jooq.select().from(BatchedMovementsFileReader.getTABLE_NAME())
                         .where(String.format("%s >= %d and %s <= %d",
-                                             BatchedMovementsFileReader.getDEPARTURE_DATE(), startDate, 
+                                             BatchedMovementsFileReader.getDEPARTURE_DATE(), startDate,
                                              BatchedMovementsFileReader.getDESTINATION_DATE(), endDate))
                         .fetch();
                 for (Record r : records) {
@@ -275,7 +276,7 @@ public final class Lookup {
             try {
                 records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())
                         .where(String.format("%s >= %d AND %s <= %d AND MOVEMENT_DIRECTION='OFF'",
-                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate, 
+                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate,
                                              DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate))
                         .fetch();
                 for (Record r : records) {
@@ -293,7 +294,7 @@ public final class Lookup {
                 // try full movements
                 records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME())
                         .where(String.format("%s >= %d and %s <= %d",
-                                             FullMovementsFileReader.getDEPARTURE_DATE(), startDate, 
+                                             FullMovementsFileReader.getDEPARTURE_DATE(), startDate,
                                              FullMovementsFileReader.getDEPARTURE_DATE(), endDate))
                         .fetch();
                 for (Record r : records) {
@@ -311,7 +312,7 @@ public final class Lookup {
                 // try batched movements
                 records = jooq.select().from(BatchedMovementsFileReader.getTABLE_NAME())
                         .where(String.format("%s >= %d and %s <= %d",
-                                             BatchedMovementsFileReader.getDEPARTURE_DATE(), startDate, 
+                                             BatchedMovementsFileReader.getDEPARTURE_DATE(), startDate,
                                              BatchedMovementsFileReader.getDEPARTURE_DATE(), endDate))
                         .fetch();
                 for (Record r : records) {
@@ -691,6 +692,22 @@ public final class Lookup {
             }
         }
         return null;
+    }
+
+    /**
+     * Run a custom query against the database. This method is not intended to be used in general situations as it
+     * exposed the underlying jooq data structures but in some situations it may be used as a last resort.
+     * @param query the SQL query to be run.
+     * @return a Result set of records that were returned by the database.
+     */
+    public Result<Record> runCustomQuery(final String query) {
+        Result<Record> records = null;
+        try {
+            records = jooq.fetch(query);
+        } catch (DataAccessException e) {
+            log.error("Could not execute SQL {}. {}", query, e.getLocalizedMessage());
+        }
+        return records;
     }
 
     /**
