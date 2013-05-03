@@ -44,7 +44,7 @@ public final class H2Database implements DatabaseImpl {
             if (connection == null) {
                 Class.forName("org.h2.Driver");
                 connectionPool = JdbcConnectionPool.create(
-                        String.format("jdbc:h2:%s;IGNORECASE=TRUE;LOG=0;QUERY_CACHE_SIZE=0", database),
+                        String.format("jdbc:h2:%s;IGNORECASE=TRUE;LOG=0;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;QUERY_CACHE_SIZE=0", database),
                         "", "");
             }
 
