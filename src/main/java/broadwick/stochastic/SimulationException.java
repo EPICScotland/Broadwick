@@ -3,6 +3,7 @@ package broadwick.stochastic;
 /**
  * A RuntimeException for stochastic solvers.
  */
+@SuppressWarnings("serial")
 public class SimulationException extends RuntimeException {
 
     /**

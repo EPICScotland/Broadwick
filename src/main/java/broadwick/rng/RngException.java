@@ -3,6 +3,7 @@ package broadwick.rng;
 /**
  * A RuntimeException for random number generators.
  */
+@SuppressWarnings("serial")
 public class RngException extends RuntimeException {
 
     /**

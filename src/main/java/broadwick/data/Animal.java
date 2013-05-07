@@ -7,7 +7,7 @@ import lombok.Data;
  * Utility class for location data.
  */
 @Data
-@SuppressWarnings("PMD.UnusedPrivateField")
+@SuppressWarnings({"PMD.UnusedPrivateField","serial"})
 public class Animal implements Serializable {
 // TODO what about cutom tags??????
 

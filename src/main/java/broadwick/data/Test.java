@@ -7,7 +7,7 @@ import lombok.Data;
  * Utility class for test data.
  */
 @Data
-@SuppressWarnings("PMD.UnusedPrivateField")
+@SuppressWarnings({"PMD.UnusedPrivateField","serial"})
 public class Test implements Serializable {
 // TODO what about custom tags??????
 
