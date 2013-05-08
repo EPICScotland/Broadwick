@@ -9,6 +9,7 @@ import broadwick.data.readers.TestsFileReader;
 import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,16 +17,17 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
+import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.Record2;
 import org.jooq.Result;
 import org.jooq.conf.Settings;
 import org.jooq.exception.DataAccessException;
-import org.jooq.impl.Factory;
-import org.jooq.impl.Executor;
+import org.jooq.impl.DSL;
 
 /**
  * This class works as an interface to the databases holding the movements, locations and animal data read from the
@@ -41,9 +43,10 @@ public final class Lookup {
      */
     public Lookup(final DatabaseImpl dbFacade) {
         try {
+            connection = dbFacade.getConnection();
             final Settings settings = new Settings();
             settings.setExecuteLogging(Boolean.FALSE);
-            jooq = new Executor(dbFacade.getConnection(), dbFacade.getDialect(), settings);
+            jooq = DSL.using(dbFacade.getConnection(), dbFacade.getDialect(), settings);
         } catch (SQLException e) {
             log.error("Could not create database lookup object. {}", Throwables.getStackTraceAsString(e));
         }
@@ -638,20 +641,20 @@ public final class Lookup {
         Result<Record2<Object, Object>> records;
         try {
             // get the destination id of the last movement BEFORE the given date.
-            records = jooq.select(Factory.fieldByName(FullMovementsFileReader.getDESTINATION_ID()),
-                                  Factory.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()))
+            records = jooq.select(DSL.fieldByName(FullMovementsFileReader.getDESTINATION_ID()),
+                                  DSL.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()))
                     .from(FullMovementsFileReader.getTABLE_NAME())
                     .where(String.format("%s = '%s' and (%s <= %d or %s <= %d)", FullMovementsFileReader.getID(), animalId,
                                          FullMovementsFileReader.getDEPARTURE_DATE(), date,
                                          FullMovementsFileReader.getDESTINATION_DATE(), date))
-                    .orderBy(Factory.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()).asc())
+                    .orderBy(DSL.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()).asc())
                     .limit(1)
                     .fetch();
             if (records.isNotEmpty()) {
-                final int thisDate = (int) records.getValue(0, Factory.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()));
+                final int thisDate = (int) records.getValue(0, DSL.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()));
                 if (thisDate > locationDate) {
-                    locationDate = (int) records.getValue(0, Factory.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()));
-                    locationId = (String) records.getValue(0, Factory.fieldByName(FullMovementsFileReader.getDESTINATION_ID()));
+                    locationDate = (int) records.getValue(0, DSL.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()));
+                    locationId = (String) records.getValue(0, DSL.fieldByName(FullMovementsFileReader.getDESTINATION_ID()));
                 }
             }
         } catch (org.jooq.exception.DataAccessException e) {
@@ -660,19 +663,19 @@ public final class Lookup {
         }
 
         try {
-            records = jooq.select(Factory.fieldByName(DirectedMovementsFileReader.getLOCATION_ID()),
-                                  Factory.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()))
+            records = jooq.select(DSL.fieldByName(DirectedMovementsFileReader.getLOCATION_ID()),
+                                  DSL.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()))
                     .from(DirectedMovementsFileReader.getTABLE_NAME())
                     .where(String.format("%s = '%s' and %s <= %d", DirectedMovementsFileReader.getID(), animalId,
                                          DirectedMovementsFileReader.getMOVEMENT_DATE(), date))
-                    .orderBy(Factory.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()).asc())
+                    .orderBy(DSL.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()).asc())
                     .limit(1)
                     .fetch();
             if (records.isNotEmpty()) {
-                final int thisDate = (int) records.getValue(0, Factory.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()));
+                final int thisDate = (int) records.getValue(0, DSL.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()));
                 if (thisDate > locationDate) {
-                    locationDate = (int) records.getValue(0, Factory.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()));
-                    locationId = (String) records.getValue(0, Factory.fieldByName(DirectedMovementsFileReader.getLOCATION_ID()));
+                    locationDate = (int) records.getValue(0, DSL.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()));
+                    locationId = (String) records.getValue(0, DSL.fieldByName(DirectedMovementsFileReader.getLOCATION_ID()));
                 }
             }
         } catch (org.jooq.exception.DataAccessException e) {
@@ -716,8 +719,6 @@ public final class Lookup {
      * @return the created location object.
      */
     private Location createLocation(final Record locationRecord) {
-        log.trace("Creating location object for {}", locationRecord.toString());
-
         String id = "";
         Double easting = null;
         Double northing = null;
@@ -743,6 +744,9 @@ public final class Lookup {
 //            locationRecord.getValue(i);
 //        }
         final Map<String, Integer> populations = new HashMap<>();
+        log.trace("Creating location object for {}",
+                  String.format("%s %f,%f %s", id, easting, northing, populations));
+
         return new Location(id, easting, northing, populations);
     }
 
@@ -752,7 +756,6 @@ public final class Lookup {
      * @return the created animal object.
      */
     private Animal createAnimal(final Record animalRecord) {
-        log.trace("Creating animal object for {}", animalRecord.toString());
 
         String id = "";
         Integer dob = null;
@@ -797,6 +800,10 @@ public final class Lookup {
 //        for (int i = 6; i < animalRecord.size(); i++) {
 //            animalRecord.getValue(i);
 //        }
+
+        log.trace("Creating animal object for {}",
+                  String.format("%s (%s) dob:%d[%s] dod:%d[%s]", id, species, dob, lob, dod, lod));
+
         return new Animal(id, species, dob, lob, dod, lod);
 
     }
@@ -807,7 +814,6 @@ public final class Lookup {
      * @return the created test object.
      */
     private Test createTest(final Record testRecord) {
-        log.trace("Creating test object for {}", testRecord.toString());
 
         String id = "";
         String group = "";
@@ -861,6 +867,10 @@ public final class Lookup {
 //        for (int i = 6; i < testRecord.size(); i++) {
 //            testRecord.getValue(i);
 //        }
+        
+        log.trace("Creating test object for {}", 
+                  String.format("%s group:%s location:%s date:%d pos:%s neg:%s", id, group, location, testDate, positiveResult, negativeResult));
+
         return new Test(id, group, location, testDate, positiveResult, negativeResult);
     }
 
@@ -870,7 +880,6 @@ public final class Lookup {
      * @return the created movement object.
      */
     private Movement createMovement(final Record movementRecord) {
-        log.trace("Creating movement object for {}", movementRecord.toString());
 
         String id = "";
         Integer batchSize = null;
@@ -932,13 +941,20 @@ public final class Lookup {
 //        for (int i = 6; i < testRecord.size(); i++) {
 //            testRecord.getValue(i);
 //        }
+        
+        log.trace("Creating movement object for {}", 
+                  String.format("%s batchSize:%d departureDate:%d departureId:%s destinationDate:%d destinationId:%s marketDate:%s marketId:%s species:%s", 
+                                id, batchSize, departureDate, departureId, destinationDate, destinationId, marketDate, marketId, species));
+        
         return new Movement(id, batchSize, departureDate, departureId, destinationDate, destinationId, marketDate, marketId, species);
     }
     Cache<String, Collection<Movement>> movementsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
     Cache<String, Location> locationsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
     Cache<String, Animal> animalsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
     Cache<String, Test> testsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
-    private Executor jooq;
+    private DSLContext jooq;
+    @Getter
+    private Connection connection;
 }
 
 /**
