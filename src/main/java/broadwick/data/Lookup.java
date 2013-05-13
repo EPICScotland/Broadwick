@@ -954,6 +954,7 @@ public final class Lookup {
     Cache<String, Test> testsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
     private DSLContext jooq;
     @Getter
+    @SuppressWarnings("PMD.UnusedPrivateField")
     private Connection connection;
 }
 
