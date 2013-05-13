@@ -1,7 +1,7 @@
 <!-- Recipe: You want to download javadocs for your depenencies into local
-       	repository to be able to use them ie. in Netbeans
-       	mvn dependency:resolve -Dclassifier=javadoc
-       	mvn dependency:resolve -Dclassifier=sources
+        repository to be able to use them ie. in Netbeans
+        mvn dependency:resolve -Dclassifier=javadoc
+        mvn dependency:resolve -Dclassifier=sources
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -16,6 +16,10 @@
     <name>Broadwick</name>
     <url>http://maven.apache.org</url>
     <description>Framework for mathematical modelling of epidemics.</description>
+
+    <prerequisites>
+        <maven>3.0.0</maven>
+    </prerequisites>
 
     <organization>
         <name/>
@@ -42,8 +46,8 @@
 
     <!--
     <issueManagement>
-       	<system>JIRA</system>
-       	<url>http://jira.company.com/</url>
+        <system>JIRA</system>
+        <url>http://jira.company.com/</url>
     </issueManagement>
     -->
 
@@ -58,7 +62,7 @@
 
     <properties>
         <!-- Sonar exclusions. [CSV] List of files for sonar to ignore (this will 
-     			be exclusively 3rd party files. -->
+        be exclusively 3rd party files. -->
         <sonar.exclusions>broadwick/config/generated/*.java, broadwick/BroadwickGui.java
         </sonar.exclusions>
 
@@ -79,7 +83,7 @@
         <org.apache.mahout.commons.commons-cli.version>2.0-mahout</org.apache.mahout.commons.commons-cli.version>
         <org.apache.commons.lang3.version>3.1</org.apache.commons.lang3.version>  
         <org.apache.commons-math.version>2.2</org.apache.commons-math.version>
-	<org.jooq.version>3.0.0</org.jooq.version>
+        <org.jooq.version>3.0.0</org.jooq.version>
         <org.projectlombok.lombok.version>0.11.8</org.projectlombok.lombok.version>
         <org.slf4j.slf4j-api.version>1.7.5</org.slf4j.slf4j-api.version>
         <org.swinglabs.swing-layout.version>1.0.3</org.swinglabs.swing-layout.version>
@@ -175,57 +179,57 @@
         </dependency>
 
         <!-- Database dependencies -->
-	<dependency>
+        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <version>${org.h2.version}</version>
         </dependency>
-	<dependency>
-	    <groupId>org.jooq</groupId>
-	    <artifactId>jooq</artifactId>
-	    <version>${org.jooq.version}</version>
-	</dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+            <version>${org.jooq.version}</version>
+        </dependency>
 
-	<!-- Logging dependencies -->
-	<dependency>
-	    <groupId>org.slf4j</groupId>
-	    <artifactId>slf4j-api</artifactId>
-	    <version>${org.slf4j.slf4j-api.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>ch.qos.logback</groupId>
-	    <artifactId>logback-core</artifactId>
-	    <version>${ch.qos.logback.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>ch.qos.logback</groupId>
-	    <artifactId>logback-classic</artifactId>
-	    <version>${ch.qos.logback.version}</version>
-	</dependency>
+        <!-- Logging dependencies -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${org.slf4j.slf4j-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${ch.qos.logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${ch.qos.logback.version}</version>
+        </dependency>
 
-	<!-- GUI dependencies -->
-	<dependency>
-	    <groupId>org.swinglabs</groupId>
-	    <artifactId>swing-layout</artifactId>
-	    <version>${org.swinglabs.swing-layout.version}</version>
-	</dependency>
+        <!-- GUI dependencies -->
+        <dependency>
+            <groupId>org.swinglabs</groupId>
+            <artifactId>swing-layout</artifactId>
+            <version>${org.swinglabs.swing-layout.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
-	<pluginManagement>
-	</pluginManagement>
-	<plugins>
-	    <plugin>
-		<artifactId>maven-compiler-plugin</artifactId>
-		<version>${maven-compiler-plugin.version}</version>
-		<configuration>
-		    <source>${jdk.version}</source>
-		    <target>${jre.version}</target>
-		    <testSource>${jdk.version}</testSource>
-		    <testTarget>${jre.version}</testTarget>
-		    <showDeprecation>true</showDeprecation>
-		    <showWarnings>true</showWarnings>
-		    <compilerArgument>-Xlint:all</compilerArgument>
+        <pluginManagement>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jre.version}</target>
+                    <testSource>${jdk.version}</testSource>
+                    <testTarget>${jre.version}</testTarget>
+                    <showDeprecation>true</showDeprecation>
+                    <showWarnings>true</showWarnings>
+                    <compilerArgument>-Xlint:all</compilerArgument>
                 </configuration>
             </plugin>
             <!-- generate the java classes from the xsd definition -->
@@ -261,6 +265,8 @@
                 <configuration>
                     <doCheck>false</doCheck>
                     <doUpdate>false</doUpdate>
+                    <getRevisionOnlyOnce>false</getRevisionOnlyOnce>
+                    <revisionOnScmFailure>unknown</revisionOnScmFailure>
                 </configuration>
             </plugin>
 
@@ -355,15 +361,15 @@
                             <configuration>
                                 <show>private</show>
                                 <nohelp>true</nohelp>
-				<doclet>org.umlgraph.doclet.UmlGraphDoc</doclet>                         
+                                <doclet>org.umlgraph.doclet.UmlGraphDoc</doclet>                         
                                 <docletArtifact>
-				    <groupId>org.umlgraph</groupId>                                      
-				    <artifactId>umlgraph</artifactId>                                    
-				    <version>5.6</version>                                               
+                                    <groupId>org.umlgraph</groupId>                                      
+                                    <artifactId>umlgraph</artifactId>                                    
+                                    <version>5.6</version>                                               
                                 </docletArtifact>
-				<useStandardDocletOptions>true</useStandardDocletOptions>                
+                                <useStandardDocletOptions>true</useStandardDocletOptions>                
                                 <additionalparam>
-				    -views -all
+                                    -views -all
                                     -inferrel -inferdep -quiet -hide java.*
                                     -collpackages java.util.* -qualify
                                     -postfixpackage -nodefontsize 9
