@@ -11,13 +11,17 @@ import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.FileAppender;
 import ch.qos.logback.core.encoder.Encoder;
 import ch.qos.logback.core.filter.Filter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import lombok.Getter;
-import org.h2.store.fs.FileUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 
 /**
  * Facade class to the underlying logger to allow the loggers to be configured programmatically.
  */
+@Slf4j
 public final class LoggingFacade {
 
     /**
@@ -76,8 +80,12 @@ public final class LoggingFacade {
     public void addFileLogger(final String file, final String level, final String pattern, final Boolean overwrite) {
 
         // Delete the old log file.
-        if (overwrite != null && overwrite.booleanValue()) {
-            FileUtils.delete(file);
+        try {
+            if (overwrite != null && overwrite.booleanValue()) {
+                Files.delete(Paths.get(file));
+            }
+        } catch (IOException ex) {
+            log.error("Could not delete ol log file; {}", ex.getLocalizedMessage());
         }
 
         final FileAppender<ILoggingEvent> appender = new FileAppender<>();
@@ -120,7 +128,6 @@ public final class LoggingFacade {
         filter.start();
         return (Filter<ILoggingEvent>) filter;
     }
-
     @Getter
     private Logger rootLogger;
     private LoggerContext loggerContext;
