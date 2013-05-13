@@ -40,12 +40,18 @@ public class DataReader implements java.lang.AutoCloseable {
             if (data.getDatabases() != null) {
                 // there is a database mentioned in the config file so let's use it
                 dbName = data.getDatabases().getName();
+//                dbImpl = new FirebirdDatabase(dbName, false);
+//                dbImpl = new DerbyDatabase(dbName, false);
+//                dbImpl = new HyperSqlDatabase(dbName, false);
                 dbImpl = new H2Database(dbName, false);
             } else if (data.getDatafiles() != null) {
                 // there is a datafiles section in the config file so we will read them and create a randomly named 
                 // database.
                 final String db = "broadwick_" + RandomStringUtils.randomAlphanumeric(8);
                 dbName = db + "_db";
+//                dbImpl = new FirebirdDatabase(dbName, true);
+//                dbImpl = new DerbyDatabase(dbName, true);
+//                dbImpl = new HyperSqlDatabase(dbName, true);
                 dbImpl = new H2Database(dbName, true);
                 readDataSection();
             } else {
@@ -269,6 +275,6 @@ public class DataReader implements java.lang.AutoCloseable {
     @Getter
     private Lookup lookup;
     private Project.Data data;
-    private H2Database dbImpl;
+    private DatabaseImpl dbImpl;
     private String dbName;
 }
