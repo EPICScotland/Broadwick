@@ -82,9 +82,9 @@ public class FullMovementsFileReader extends DataFileReader {
                                                 TABLE_NAME, ID));
         createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_FULL_MVMT_ALL ON %s (%s,%s,%s,%s,%s);",
                                                 TABLE_NAME, ID, DEPARTURE_ID, DEPARTURE_DATE, DESTINATION_ID, DESTINATION_DATE));
-        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_FULL_MVMT_DEP ON %s ();",
+        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_FULL_MVMT_DEP ON %s (%s);",
                                                 TABLE_NAME, DEPARTURE_DATE));
-        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_FULL_MVMT_DE SON %s ();",
+        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_FULL_MVMT_DES ON %s (%s);",
                                                 TABLE_NAME, DESTINATION_DATE));
 
         createTableCommand.append(createIndexCommand.toString());
