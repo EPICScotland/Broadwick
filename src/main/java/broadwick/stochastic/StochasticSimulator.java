@@ -98,7 +98,6 @@ public abstract class StochasticSimulator {
             sw.start();
             while (controller.goOn(this)) {
 
-
                 // The performStep() method is implemented by the specifc stochastic algorithm (e.g. Gillespie's)
                 performStep();
 
@@ -116,6 +115,7 @@ public abstract class StochasticSimulator {
             }
         } catch (Exception e) {
             log.error("Error running stochastic simulation. {}", e.getLocalizedMessage());
+            throw (e);
         }
     }
 
