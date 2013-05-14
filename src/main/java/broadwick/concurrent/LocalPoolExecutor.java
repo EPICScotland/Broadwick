@@ -1,6 +1,7 @@
 package broadwick.concurrent;
 
 import broadwick.BroadwickException;
+import com.google.common.base.Throwables;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -60,6 +62,7 @@ public class LocalPoolExecutor implements Executor {
                     try {
                         job.call();
                     } catch (Exception e) {
+                        ok = false;
                         throw new BroadwickException(e);
                     } finally {
                         log.debug("Completed task {}", taskId);
@@ -90,11 +93,15 @@ public class LocalPoolExecutor implements Executor {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 status = Executor.Status.TERMINATED;
+                ok = false;
                 break;
             } catch (ExecutionException e) {
                 // One of the submitted jobs threw an exception, we need to stop all the currently running threads.
+                log.error("{}", Throwables.getStackTraceAsString(e));
                 stopAllTasks(tasks);
                 service.shutdown();
+                status = Executor.Status.TERMINATED;
+                ok = false;
                 break;
             }
         }
@@ -113,8 +120,8 @@ public class LocalPoolExecutor implements Executor {
     }
 
     /**
-     * Send a message to all the futures to cancel their execution. On completion the status of the executor is
-     * set to Executor.Status.TERMINATED.
+     * Send a message to all the futures to cancel their execution. On completion the status of the executor is set to
+     * Executor.Status.TERMINATED.
      * @param tasks a collection of future object that are to be stopped.
      */
     private void stopAllTasks(final List<Future<?>> tasks) {
@@ -132,6 +139,10 @@ public class LocalPoolExecutor implements Executor {
         try {
             service.shutdown();
             service.awaitTermination(1000, TimeUnit.MILLISECONDS);
+
+            log.trace("LocalPoolExecutor succesfully shutdown");
+            status = Executor.Status.COMPLETED;
+
         } catch (InterruptedException e) {
             // Nothing to do - we are shuting done the service
             Thread.currentThread().interrupt();
@@ -139,16 +150,13 @@ public class LocalPoolExecutor implements Executor {
         } catch (Exception e) {
             // Nothing to do - we are shuting done the service
             status = Executor.Status.TERMINATED;
-
         }
-
-        log.trace("LocalPoolExecutor succesfully shutdown");
-
-        status = Executor.Status.COMPLETED;
     }
     private final int poolSize;
     private final int numRuns;
     private final Callable<?> job;
     private final ExecutorService service;
     private Status status = Executor.Status.NOT_STARTED;
+    @Getter
+    private boolean ok = true; /// true if the underlying task completed without error, false otherwise
 }
