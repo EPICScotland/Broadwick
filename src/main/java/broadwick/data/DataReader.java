@@ -82,8 +82,8 @@ public class DataReader implements java.lang.AutoCloseable {
 
     @Override
     public final void close() {
-        log.trace("Closing database connection");
         if (dbImpl != null) {
+            log.trace("Closing database connection");
             dbImpl.close();
         }
     }
