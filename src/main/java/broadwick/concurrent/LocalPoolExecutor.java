@@ -158,5 +158,6 @@ public class LocalPoolExecutor implements Executor {
     private final ExecutorService service;
     private Status status = Executor.Status.NOT_STARTED;
     @Getter
+    @SuppressWarnings("PMD.UnusedPrivateField")
     private boolean ok = true; /// true if the underlying task completed without error, false otherwise
 }
