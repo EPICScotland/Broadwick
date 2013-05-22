@@ -108,7 +108,7 @@ public final class Broadwick {
                 }
 
             } catch (JAXBException ex) {
-                log.error("Could not read configuration file. {}", ex.getLocalizedMessage());
+                log.error("Could not read configuration file. {}", ex.toString());
                 log.trace(com.google.common.base.Throwables.getStackTraceAsString(ex));
             }
         } else {
