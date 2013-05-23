@@ -1,0 +1,29 @@
+<xsd:schema 
+    xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            File schema for the model section of the BTB IBM Cluster dynamics project.
+        </xsd:documentation>
+    </xsd:annotation>
+
+
+    <xsd:element name="model">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="initialStep" minOccurs="1" maxOccurs="1" type="Step"/>
+                <xsd:element name="chainLength" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+                <xsd:element name="output" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:complexType name="Step">
+            <xsd:sequence>
+                <xsd:element name="x" type="xsd:double"/>
+                <xsd:element name="y" type="xsd:double"/>
+            </xsd:sequence>
+    </xsd:complexType>
+
+</xsd:schema>

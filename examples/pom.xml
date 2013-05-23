@@ -1,0 +1,155 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>BroadwickExamples</groupId>
+    <artifactId>BroadwickExamples</artifactId>
+    <version>0.0</version>
+    <packaging>jar</packaging>
+
+    <name>BroadwickExamples</name>
+    <url>http://maven.apache.org</url>
+
+    <scm>
+        <connection>scm:hg:.</connection>
+        <developerConnection>scm:hg:.</developerConnection>
+        <tag>HEAD</tag>
+    </scm> 
+    
+    <prerequisites>
+        <maven>3.0.0</maven>
+    </prerequisites>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <broadwick.version>0.0</broadwick.version>
+	<exec-maven-plugin.version>1.2.1</exec-maven-plugin.version>
+        <junit.junit.version>4.11</junit.junit.version>
+        <onejar-plugin.version>1.4.5</onejar-plugin.version>
+        <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
+        <maven-jaxb2-plugin.version>0.8.3</maven-jaxb2-plugin.version>
+    </properties>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>onejar-maven-plugin.googlecode.com</id>
+            <url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
+        </pluginRepository>
+    </pluginRepositories>
+    <dependencies>
+
+        <dependency>
+            <groupId>broadwick</groupId>
+            <artifactId>broadwick</artifactId>
+            <version>${broadwick.version}</version>
+        </dependency>
+
+
+        <!-- Testing dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Useful dependencies -->
+
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Package all the jars into a single executable jar -->
+            <plugin>
+                <groupId>org.dstovall</groupId>
+                <artifactId>onejar-maven-plugin</artifactId>
+                <version>${onejar-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <mainClass>broadwick.Broadwick</mainClass>
+                            <attachToBuild>false</attachToBuild>
+                            <classifier>onejar</classifier>
+                        </configuration>
+                        <goals>
+                            <goal>one-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+		<version>${exec-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <mainClass>broadwick.Broadwick</mainClass>
+                            <classpathScope>test</classpathScope>
+                            <includePluginDependencies>true</includePluginDependencies>
+                            <includeProjectDependencies>true</includeProjectDependencies>
+                            <!--<commandlineArgs> - - port 9876</commandlineArgs>-->
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>broadwick</groupId>
+                        <artifactId>broadwick</artifactId>
+                        <version>0.0</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+            
+            <!-- generate the java classes from the xsd definition -->
+            <plugin>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
+                <version>${maven-jaxb2-plugin.version}</version>
+                <configuration>
+                    <quiet>true</quiet>
+                    <verbose>false</verbose>
+                    <readOnly>true</readOnly>
+                    <arguments>-mark-generated</arguments>
+                    <removeOldOutput>false</removeOldOutput>
+                    <clearOutputDir>false</clearOutputDir>
+                    <forceRegenerate>true</forceRegenerate>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>markovchain-generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaDirectory>src/main/resources/markovchain</schemaDirectory>
+                            <schemaIncludes>
+                                <include>markovchain.xsd</include>
+                            </schemaIncludes>
+                            <generatePackage>markovchain.config.generated</generatePackage>
+                            <generateDirectory>${project.build.directory}/generated-sources/xjc</generateDirectory>
+                        </configuration>
+                    </execution>
+                    
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
