@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project>
+    <logs>
+	<console>
+	    <level>trace</level> 
+	    <pattern>[%thread] %-5level %msg %n</pattern>
+	</console>
+	<file>
+	    <name>abc.log</name> 
+	    <level>trace</level> 
+	    <pattern>[%thread] %-5level %msg %n</pattern>
+	    <overwrite>true</overwrite>
+	</file>
+    </logs>
+
+    <models>
+	<model id="Example of an abc calculation">
+	    <classname>abc.AbcExample</classname>
+	</model>
+    </models>
+</project>

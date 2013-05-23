@@ -21,6 +21,11 @@
     </prerequisites>
 
     <properties>
+	<!-- Sonar exclusions. [CSV] List of files for sonar to ignore (this will 
+	be exclusively 3rd party files. -->
+        <sonar.exclusions>markovchain/config/generated/*.java
+	</sonar.exclusions>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <broadwick.version>0.0</broadwick.version>
 	<exec-maven-plugin.version>1.2.1</exec-maven-plugin.version>
