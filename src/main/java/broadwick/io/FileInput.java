@@ -161,12 +161,22 @@ public class FileInput implements AutoCloseable {
             log.error("Failed to close file {}.", path.getFileName());
         }
     }
-
+    
+    /**
+     * Obtain an iterator for this input file.
+     * @return the FileInputIterator for this file.
+     */
+    public final FileInputIterator iterator() {
+        // the reader object will be instantiated by now so we should not have a NullPointerException.
+        return new FileInputIterator(this);
+    }
+    
     private Path path;
-    private BufferedReader reader;
+    protected BufferedReader reader;
     private Pattern fieldSep;
     private Charset fileEncoding;
     private static final String DEFAULT_SEP = "[\\s,]";
     private static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
     private static final char COMMENT_CHAR = '#';
+
 }
