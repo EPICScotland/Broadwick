@@ -1,6 +1,7 @@
 package broadwick.rng;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -125,8 +126,7 @@ public class RNG {
      * <li><code>lower < upper</code> (otherwise an IllegalArgumentException is thrown.)</li> </ul></p>
      * @param lower lower bound for generated integer
      * @param upper upper bound for generated integer
-     * @return a random integer greater than or equal to <code>lower</code> and less than or equal
-     *         to <code>upper</code>. If lower == upper then lower is returned.
+     * @return a random integer greater than or equal to <code>lower</code> and less than or equal      *         to <code>upper</code>. If lower == upper then lower is returned.
      */
     public final int getInteger(final int lower, final int upper) {
         int lo = lower;
@@ -208,21 +208,30 @@ public class RNG {
     }
 
     /**
+     * Randomly pick an object from an array of objects.
+     * @param objects an array of objects, one of whom is to be picked.
+     * @return a random element from objects.
+     */
+    public final Object selectOneOf(final Collection<?> objects) {
+        return selectOneOf(objects.toArray(new Object[objects.size()]));
+    }
+
+    /**
      * Randomly pick N objects from an array of objects. Note, this assumes that N much much les than the size of the
      * array being sampled from, if this is not the case this method is VERY slow.
      * @param objects an array of objects, one of whom is to be picked.
-     * @param N       the number of objects we will select.
+     * @param n       the number of objects we will select.
      * @return a random element from objects.
      */
-    public final List<Object> selectManyOf(final Object[] objects, final int N) {
-        
-        if (N > objects.length) {
+    public final List<Object> selectManyOf(final Object[] objects, final int n) {
+
+        if (n > objects.length) {
             throw new IllegalArgumentException("Attempting to select more elements from an array that exist.");
         }
-        
-        List<Object> list = new ArrayList<>(N);
-        Set<Integer> sampled = new TreeSet<>();
-        for (int i=0; i<N; i++){
+
+        final List<Object> list = new ArrayList<>(n);
+        final Set<Integer> sampled = new TreeSet<>();
+        for (int i = 0; i < n; i++) {
             int index = getInteger(0, objects.length - 1);
             while (sampled.contains(index)) {
                 index = getInteger(0, objects.length - 1);
@@ -230,9 +239,22 @@ public class RNG {
             sampled.add(index);
             list.add(objects[index]);
         }
-        
+
         return list;
     }
+    
+    
+    /**
+     * Randomly pick N objects from an array of objects. Note, this assumes that N much much les than the size of the
+     * array being sampled from, if this is not the case this method is VERY slow.
+     * @param objects an array of objects, one of whom is to be picked.
+     * @param n       the number of objects we will select.
+     * @return a random element from objects.
+     */
+    public final List<Object> selectManyOf(final Collection<?> objects, final int n) {
+        return selectManyOf(objects.toArray(new Object[objects.size()]), n);
+    }
+    
     
     /**
      * Random number generator type.
