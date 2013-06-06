@@ -51,7 +51,7 @@ public final class GraphViz {
             sb.append(";\n");
         }
 
-        sb.append("\n");
+        sb.append("\n}");
 
         return sb.toString();
     }
