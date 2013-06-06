@@ -11,6 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FileInputIterator implements Iterator<String> {
 
+    /**
+     * Create a iterator over the contents of a file.
+     * @param fileInput the FileInput object over which the iterator should run.
+     */
     FileInputIterator(final FileInput fileInput) {
         this.reader = fileInput.reader;
     }
