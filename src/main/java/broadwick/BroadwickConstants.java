@@ -34,7 +34,7 @@ public final class BroadwickConstants {
      * @return the datetime object corresponding to the 'zero date' plus date.
      */
     public static DateTime toDate(final int date) {
-        return ZERO_DATE.plus(date);
+        return ZERO_DATE.plusDays(date);
     }
 
     /**
