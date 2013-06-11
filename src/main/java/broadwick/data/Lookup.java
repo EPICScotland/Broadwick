@@ -600,6 +600,7 @@ public final class Lookup {
         try {
             records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME())
                     .where(String.format("%s = '%s'", FullMovementsFileReader.getID(), animalId))
+                    .orderBy(DSL.fieldByName(FullMovementsFileReader.getDEPARTURE_DATE()).asc())
                     .fetch();
             for (Record r : records) {
                 movements.add(createMovement(r));
@@ -647,7 +648,7 @@ public final class Lookup {
                     .where(String.format("%s = '%s' and (%s <= %d or %s <= %d)", FullMovementsFileReader.getID(), animalId,
                                          FullMovementsFileReader.getDEPARTURE_DATE(), date,
                                          FullMovementsFileReader.getDESTINATION_DATE(), date))
-                    .orderBy(DSL.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()).asc())
+                    .orderBy(DSL.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()).desc())
                     .limit(1)
                     .fetch();
             if (records.isNotEmpty()) {
@@ -668,7 +669,7 @@ public final class Lookup {
                     .from(DirectedMovementsFileReader.getTABLE_NAME())
                     .where(String.format("%s = '%s' and %s <= %d", DirectedMovementsFileReader.getID(), animalId,
                                          DirectedMovementsFileReader.getMOVEMENT_DATE(), date))
-                    .orderBy(DSL.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()).asc())
+                    .orderBy(DSL.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()).desc())
                     .limit(1)
                     .fetch();
             if (records.isNotEmpty()) {
@@ -867,8 +868,8 @@ public final class Lookup {
 //        for (int i = 6; i < testRecord.size(); i++) {
 //            testRecord.getValue(i);
 //        }
-        
-        log.trace("Creating test object for {}", 
+
+        log.trace("Creating test object for {}",
                   String.format("%s group:%s location:%s date:%d pos:%s neg:%s", id, group, location, testDate, positiveResult, negativeResult));
 
         return new Test(id, group, location, testDate, positiveResult, negativeResult);
@@ -941,11 +942,11 @@ public final class Lookup {
 //        for (int i = 6; i < testRecord.size(); i++) {
 //            testRecord.getValue(i);
 //        }
-        
-        log.trace("Creating movement object for {}", 
-                  String.format("%s batchSize:%d departureDate:%d departureId:%s destinationDate:%d destinationId:%s marketDate:%s marketId:%s species:%s", 
+
+        log.trace("Creating movement object for {}",
+                  String.format("%s batchSize:%d departureDate:%d departureId:%s destinationDate:%d destinationId:%s marketDate:%s marketId:%s species:%s",
                                 id, batchSize, departureDate, departureId, destinationDate, destinationId, marketDate, marketId, species));
-        
+
         return new Movement(id, batchSize, departureDate, departureId, destinationDate, destinationId, marketDate, marketId, species);
     }
     Cache<String, Collection<Movement>> movementsCache = CacheBuilder.newBuilder().maximumSize(1000).build();
