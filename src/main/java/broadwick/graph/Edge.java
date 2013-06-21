@@ -83,5 +83,5 @@ public class Edge {
     protected Vertex destination = null;
     @Setter
     @Getter
-    protected Double weight = 0.0;
+    protected Double weight = 1.0;
 }
