@@ -204,7 +204,7 @@ public class NewickTreeParser {
         PhyloNode phyloNode;
 
         final int lcolon = node.indexOf(':');
-        String nodeName = StringUtils.EMPTY;
+        String nodeName;
         double distance = 0.0;
 
         if (node.isEmpty()) {
@@ -224,7 +224,7 @@ public class NewickTreeParser {
         phyloNode = new PhyloNode(nodeName, distance);
 
         try {
-            tree.addEdge(new Edge(parent, phyloNode), parent, phyloNode);
+            tree.addEdge(new Edge(parent, phyloNode, distance), parent, phyloNode);
         } catch (IllegalArgumentException e) {
             // we may have non-unique branch names in the data file, if we encounter one here and we want to rename
             // it we do it now. This is not very good as we are searching for an error message but it's the best as can
