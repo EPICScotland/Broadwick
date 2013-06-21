@@ -14,8 +14,8 @@ import org.apache.commons.collections15.Transformer;
 public class ShortestPath<V extends Vertex, E extends Edge> {
 
     /**
-     *
-     * @param graph
+     * Create a ShortestPath instance. 
+     * @param graph the network/graph on which we will be looking for shortest paths.
      */
     public ShortestPath(final Graph<V, E> graph) {
 
@@ -35,23 +35,27 @@ public class ShortestPath<V extends Vertex, E extends Edge> {
      * @param target the target
      * @return the distance from source to target
      */
-    public final long calculateDistance(final V source, final V target) {
+    public final double calculateDistance(final V source, final V target) {
 
         final DijkstraDistance<V, E> distance = new DijkstraDistance<>(jungGraph, weightTransformer);
         final Number d = distance.getDistance(source, target);
-        return d == null ? 0 : d.longValue();
+        return d == null ? 0 : d.doubleValue();
     }
     private edu.uci.ics.jung.graph.UndirectedSparseMultigraph jungGraph;
     private Transformer<E, Number> weightTransformer;
     
+    /**
+     * Transformer class to transform the edge of a graph to a double (it's weight).
+     */
     private class EdgeWeightTransformer implements Transformer<E, Number> {
 
         @Override
-        public Number transform(E edge) {
-            if (edge instanceof Edge) {
+        public Number transform(final E edge) {
+            // all nonnull values are instances of broadwick.graph.Edge
+            if (edge != null) {
                 return ((Edge) edge).getWeight();
             } else {
-                return 0.0;
+                return 1.0;
             }
         }
     }
