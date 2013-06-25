@@ -2,7 +2,9 @@ package broadwick.graph;
 
 import broadwick.utils.Pair;
 import edu.uci.ics.jung.graph.DelegateTree;
+import edu.uci.ics.jung.graph.util.TreeUtils;
 import java.util.Collection;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * A subtype of Graph which is a (directed, rooted) tree. Actually what we have here is a rooted tree, that is, there is
@@ -13,6 +15,7 @@ import java.util.Collection;
  * @param <V> the vertex type.
  * @param <E> the edge type.
  */
+@Slf4j
 public class Tree<V extends Vertex, E extends Edge> implements broadwick.graph.Graph<V, E> {
 
     /**
@@ -48,13 +51,24 @@ public class Tree<V extends Vertex, E extends Edge> implements broadwick.graph.G
         return tree.getDepth(vertex);
     }
 
-    /**
-     * Will set the root of the Tree, only if the Tree is empty and the root is currently unset.
-     * @param vertex the tree root to set
-     * @return true if this call mutates the underlying graph
-     */
+    @Override
     public final boolean addVertex(final V vertex) {
         return tree.addVertex(vertex);
+    }
+    
+    /**
+     * Obtain the sub-tree with <code>vertex</code> as it's root.
+     * @param vertex the root node of the subtree.
+     * @return a tree object that is a subtree of the current tree.
+     */
+    public final Tree<V,E> getSubTree(final V vertex) {
+        final Tree<V,E> subTree = new Tree();
+        try {
+            subTree.tree = (DelegateTree<V,E>) TreeUtils.getSubTree(tree, vertex);
+        } catch (InstantiationException | IllegalAccessException ex) {
+           log.error("Could not create subtree. {}", ex.getLocalizedMessage());
+        }
+        return subTree;
     }
 
     @Override
@@ -170,7 +184,7 @@ public class Tree<V extends Vertex, E extends Edge> implements broadwick.graph.G
     /**
      * Get the
      * <code>vertex</code> in this graph that is the source of the (single) edge that is incident on this vertex. A
-     * vertex on a tree has only one incodent edge but several
+     * vertex on a tree has only one incident edge but several.
      * @param vertex the vertex whose predecessor is to be returned
      * @return a <code>Collection</code> view of the predecessors of <code>vertex</code> in this graph
      */
@@ -181,10 +195,10 @@ public class Tree<V extends Vertex, E extends Edge> implements broadwick.graph.G
         }
         return (V) inEdges.iterator().next().source;
     }
+
     @Override
     public final EdgeType getEdgeType() {
         return EdgeType.DIRECTED;
     }
-
     private DelegateTree<V, E> tree;
 }
