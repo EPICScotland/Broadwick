@@ -10,6 +10,8 @@ import org.apache.commons.collections15.Transformer;
  * Calculates distances in a specified graph, using Dijkstra's single-source-shortest-path algorithm. All edge weights
  * in the graph must be nonnegative; otherwise an
  * <code>IllegalArgumentException</code> will be thrown.
+ * @param <V> the vertex type.
+ * @param <E> the edge type.
  */
 public class ShortestPath<V extends Vertex, E extends Edge> {
 
