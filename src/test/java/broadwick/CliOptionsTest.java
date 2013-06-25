@@ -1,6 +1,6 @@
 package broadwick;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
