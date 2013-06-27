@@ -55,18 +55,19 @@ public class Tree<V extends Vertex, E extends Edge> implements broadwick.graph.G
     public final boolean addVertex(final V vertex) {
         return tree.addVertex(vertex);
     }
-    
+
     /**
-     * Obtain the sub-tree with <code>vertex</code> as it's root.
+     * Obtain the sub-tree with
+     * <code>vertex</code> as it's root.
      * @param vertex the root node of the subtree.
      * @return a tree object that is a subtree of the current tree.
      */
-    public final Tree<V,E> getSubTree(final V vertex) {
-        final Tree<V,E> subTree = new Tree();
+    public final Tree<V, E> getSubTree(final V vertex) {
+        final Tree<V, E> subTree = new Tree();
         try {
-            subTree.tree = (DelegateTree<V,E>) TreeUtils.getSubTree(tree, vertex);
+            subTree.tree = (DelegateTree<V, E>) TreeUtils.getSubTree(tree, vertex);
         } catch (InstantiationException | IllegalAccessException ex) {
-           log.error("Could not create subtree. {}", ex.getLocalizedMessage());
+            log.error("Could not create subtree. {}", ex.getLocalizedMessage());
         }
         return subTree;
     }
@@ -197,8 +198,19 @@ public class Tree<V extends Vertex, E extends Edge> implements broadwick.graph.G
     }
 
     @Override
+    public final boolean removeVertex(final V vertex) {
+        return tree.removeVertex(vertex);
+    }
+
+    @Override
+    public final boolean removeEdge(final E edge) {
+        return tree.removeEdge(edge);
+    }
+    
+    @Override
     public final EdgeType getEdgeType() {
         return EdgeType.DIRECTED;
     }
     private DelegateTree<V, E> tree;
+
 }

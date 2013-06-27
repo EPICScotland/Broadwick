@@ -132,6 +132,16 @@ public class DirectedGraph<V extends Vertex, E extends Edge> implements broadwic
     }
 
     @Override
+    public final boolean removeVertex(final V vertex) {
+        return graph.removeVertex(vertex);
+    }
+
+    @Override
+    public final boolean removeEdge(final E edge) {
+        return graph.removeEdge(edge);
+    }
+
+    @Override
     public final EdgeType getEdgeType() {
         return EdgeType.DIRECTED;
     }

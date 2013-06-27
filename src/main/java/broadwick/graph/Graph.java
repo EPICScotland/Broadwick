@@ -12,7 +12,7 @@ import java.util.Collection;
  * @param <V> the vertex type.
  * @param <E> the edge type.
  */
-public interface Graph<V, E> {
+public interface Graph<V extends Vertex, E extends Edge> {
 
     /**
      * Returns a
@@ -150,8 +150,7 @@ public interface Graph<V, E> {
      * <code>EdgeType</code> is
      * <code>DIRECTED</code>.
      * @param directedEdge the edge for which we want the corresponding destination.
-     * @return the destination of <code>directed_edge</code> if it is a directed edge in this graph, *
-     *         or <code>null</code> otherwise
+     * @return the destination of <code>directed_edge</code> if it is a directed edge in this graph, *      *         or <code>null</code> otherwise
      */
     V getDest(E directedEdge);
 
@@ -270,6 +269,22 @@ public interface Graph<V, E> {
      * @return a <code>Collection</code> view of all edges in this graph
      */
     Collection<E> getEdges();
+
+    /**
+     * Remove the passed node, and, in the case of a tree, all nodes that are descendants of the passed node.
+     * @param vertex the vertex to be removed.
+     * @return <code>true</code> iff the graph was modified
+     */
+    boolean removeVertex(V vertex);
+    
+    /**
+     * Removes <code>edge</code> from this graph.
+     * Fails if <code>edge</code> is null, or is otherwise not an element of this graph.
+     * @param edge the edge to remove
+     * @return <code>true</code> if the removal is successful, <code>false</code> otherwise
+     */
+    boolean removeEdge(E edge);
+
 
     /**
      * Get the type of edge (directed/undirected employed in the graph.
