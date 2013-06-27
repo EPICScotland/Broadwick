@@ -2,6 +2,7 @@ package broadwick.phylo;
 
 import broadwick.graph.Vertex;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * A node object for phylogenetic trees. Each node contains the id and the distance from the previous branching point.
@@ -45,8 +46,8 @@ public class PhyloNode extends Vertex {
         hash = 61 * hash + (int) (Double.doubleToLongBits(this.distance) ^ (Double.doubleToLongBits(this.distance) >>> 32));
         return hash;
     }
-    
 
     @Getter
+    @Setter
     private double distance;
 }
