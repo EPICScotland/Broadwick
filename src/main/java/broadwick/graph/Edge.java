@@ -1,12 +1,14 @@
 package broadwick.graph;
 
+import java.io.Serializable;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
  * This class represents a generic edge in a graph.
+ * @param <V> the type of vertices on the edges. 
  */
-public class Edge {
+public class Edge<V extends Vertex>  implements Serializable {
 
     /**
      * A generic edge for a graph object.
@@ -22,7 +24,7 @@ public class Edge {
      * @param source      the source of the edge.
      * @param destination the destination of the edge.
      */
-    public Edge(final String id, final Vertex source, final Vertex destination) {
+    public Edge(final String id, final V source, final V destination) {
         this(id, source, destination, 0.0);
 
     }
@@ -32,7 +34,7 @@ public class Edge {
      * @param source      the source of the edge.
      * @param destination the destination of the edge.
      */
-    public Edge(final Vertex source, final Vertex destination) {
+    public Edge(final V source, final V destination) {
         this(String.format("%s-%s", source.getId(), destination.getId()), source, destination, 0.0);
     }
 
@@ -42,7 +44,7 @@ public class Edge {
      * @param destination the destination of the edge.
      * @param weight      the weight attached to the edge.
      */
-    public Edge(final Vertex source, final Vertex destination, final Double weight) {
+    public Edge(final V source, final V destination, final Double weight) {
         this(String.format("%s-%s", source.getId(), destination.getId()), source, destination, weight);
     }
 
@@ -53,7 +55,7 @@ public class Edge {
      * @param destination the destination of the edge.
      * @param weight      the weight attached to the edge.
      */
-    public Edge(final String id, final Vertex source, final Vertex destination, final Double weight) {
+    public Edge(final String id, final V source, final V destination, final Double weight) {
         this.id = id;
         this.source = source;
         this.destination = destination;
@@ -63,9 +65,9 @@ public class Edge {
     @Getter
     protected String id = null;
     @Getter
-    protected Vertex source = null;
+    protected V source = null;
     @Getter
-    protected Vertex destination = null;
+    protected V destination = null;
     @Setter
     @Getter
     protected Double weight = 1.0;

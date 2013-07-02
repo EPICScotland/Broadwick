@@ -3,6 +3,7 @@ package broadwick.graph;
 import broadwick.utils.Pair;
 import edu.uci.ics.jung.graph.DelegateTree;
 import edu.uci.ics.jung.graph.util.TreeUtils;
+import java.io.Serializable;
 import java.util.Collection;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
  * @param <E> the edge type.
  */
 @Slf4j
-public class Tree<V extends Vertex, E extends Edge> implements broadwick.graph.Graph<V, E> {
+public class Tree<V extends Vertex, E extends Edge> implements broadwick.graph.Graph<V, E>, Serializable  {
 
     /**
      * Creates an instance of the tree.
@@ -205,6 +206,10 @@ public class Tree<V extends Vertex, E extends Edge> implements broadwick.graph.G
     @Override
     public final boolean removeEdge(final E edge) {
         return tree.removeEdge(edge);
+    }
+    
+    public final void addSubtree(Tree<V,E> subtree, V node, E connectingEdge) {
+       TreeUtils.addSubTree(tree, subtree.tree, node, connectingEdge);
     }
     
     @Override

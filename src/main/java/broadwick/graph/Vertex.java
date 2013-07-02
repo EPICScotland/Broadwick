@@ -1,12 +1,13 @@
 package broadwick.graph;
 
+import java.io.Serializable;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
  * This class represents a generic vertex (node) in a graph.
  */
-public class Vertex {
+public class Vertex implements Serializable {
 
     /**
      * A generic vertex for a graph object.

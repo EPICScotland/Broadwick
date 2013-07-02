@@ -1,6 +1,7 @@
 package broadwick.graph;
 
 import broadwick.utils.Pair;
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Collection;
  * @param <V> the vertex type.
  * @param <E> the edge type.
  */
-public interface Graph<V extends Vertex, E extends Edge> {
+public interface Graph<V extends Vertex, E extends Edge> extends Serializable {
 
     /**
      * Returns a
