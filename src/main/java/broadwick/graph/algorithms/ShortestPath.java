@@ -1,9 +1,12 @@
 package broadwick.graph.algorithms;
 
 import broadwick.graph.Edge;
+import broadwick.graph.EdgeType;
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraDistance;
 import broadwick.graph.Graph;
 import broadwick.graph.Vertex;
+import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
+import java.util.List;
 import org.apache.commons.collections15.Transformer;
 
 /**
@@ -16,15 +19,22 @@ import org.apache.commons.collections15.Transformer;
 public class ShortestPath<V extends Vertex, E extends Edge> {
 
     /**
-     * Create a ShortestPath instance. 
+     * Create a ShortestPath instance.
      * @param graph the network/graph on which we will be looking for shortest paths.
      */
     public ShortestPath(final Graph<V, E> graph) {
 
-        jungGraph = new edu.uci.ics.jung.graph.UndirectedSparseMultigraph();
+        if (EdgeType.DIRECTED.equals(graph.getEdgeType())) {
+            jungGraph = new edu.uci.ics.jung.graph.DirectedSparseMultigraph();
+        } else if (EdgeType.UNDIRECTED.equals(graph.getEdgeType())) {
+            jungGraph = new edu.uci.ics.jung.graph.UndirectedSparseMultigraph();
+        } else {
+            throw new IllegalArgumentException("Could not create ShortestPath object for unknown grpah type.");
+        }
         for (E edge : graph.getEdges()) {
             jungGraph.addEdge(edge, edge.getSource(), edge.getDestination());
         }
+
 
         weightTransformer = new EdgeWeightTransformer();
     }
@@ -43,9 +53,21 @@ public class ShortestPath<V extends Vertex, E extends Edge> {
         final Number d = distance.getDistance(source, target);
         return d == null ? 0 : d.doubleValue();
     }
-    private edu.uci.ics.jung.graph.UndirectedSparseMultigraph jungGraph;
+
+    /**
+     * Returns a List of the edges on the shortest path from source to target, in order of their occurrence on this
+     * path. If either vertex is not in the graph for which this instance was created, throws IllegalArgumentException
+     * @param source the vertex from which distances are measured
+     * @param target the number of vertics for which to measure distances
+     * @return
+     */
+    public final List<E> getEdgesInPath(final V source, final V target) {
+        DijkstraShortestPath path = new DijkstraShortestPath(jungGraph);
+        return path.getPath(source, target);
+    }
+    private edu.uci.ics.jung.graph.AbstractTypedGraph jungGraph;
     private Transformer<E, Number> weightTransformer;
-    
+
     /**
      * Transformer class to transform the edge of a graph to a double (it's weight).
      */
