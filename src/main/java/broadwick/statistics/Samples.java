@@ -1,11 +1,12 @@
 package broadwick.statistics;
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 
 /**
  * This class collects data values and calculates their mean and variance.
  */
-public class Samples {
+public class Samples implements Serializable {
 
     /**
      * Empty object where the internal values are initialised to 0. Getting any statistics from this object will result
