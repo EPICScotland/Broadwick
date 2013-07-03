@@ -16,6 +16,7 @@ public class FileInputIterator implements Iterator<String> {
      * @param fileInput the FileInput object over which the iterator should run.
      */
     FileInputIterator(final FileInput fileInput) {
+        this.fileInput = fileInput;
         this.reader = fileInput.reader;
     }
 
@@ -33,7 +34,7 @@ public class FileInputIterator implements Iterator<String> {
     @Override
     public final String next() {
         try {
-            return reader.readLine();
+            return fileInput.readNextLine();
         } catch (IOException ioe) {
             log.error("Could not get next from FileInputIterator. {}", ioe.getLocalizedMessage());
             return null;
@@ -44,5 +45,6 @@ public class FileInputIterator implements Iterator<String> {
     public final void remove() {
         throw new UnsupportedOperationException("FileInputIterator.remove() is not supported");
     }
+    private FileInput fileInput;
     private BufferedReader reader;
 }
