@@ -61,6 +61,11 @@ public class Edge<V extends Vertex>  implements Serializable {
         this.destination = destination;
         this.weight = weight;
     }
+    
+    @Override
+    public String toString() {
+        return String.format("%s->%s", source.getId(), destination.getId());
+    }
 
     @Getter
     protected String id = null;
