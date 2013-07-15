@@ -116,5 +116,10 @@ public class SimpleLinearRegression {
     public final double getSlopeStdErr() {
         return regression.getSlopeStdErr();
     }
+    
+    @Override
+    public final String toString() {
+        return String.format("Slope [%f], Intercept [%f]. N=%d", getSlope(), getIntercept(), getN());
+    }
     private SimpleRegression regression;
 }
