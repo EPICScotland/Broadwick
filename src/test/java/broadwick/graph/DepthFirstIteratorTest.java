@@ -1,10 +1,6 @@
 package broadwick.graph;
 
-import broadwick.markovchain.Step;
-import broadwick.rng.RNG;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
@@ -138,7 +134,6 @@ public class DepthFirstIteratorTest {
 
     private Tree<Vertex, Edge> createTree(final int numVertices) {
 
-        System.out.println("Creating tree for " + numVertices + " nodes");
         Tree<Vertex, Edge> tree = new Tree<>();
 
         // let's create a simple tree where all the even numbered nodes are on one [linear] branch and the odd ones are 
