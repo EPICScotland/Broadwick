@@ -93,9 +93,11 @@ public class PopulationsFileReader extends DataFileReader {
         createTableCommand.append("PRIMARY KEY (").append(asCsv(primaryKeys)).append(")");
         createTableCommand.append(");");
 
-        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_POP_ID ON %s (%s);",
+//        createIndexCommand.append(" DROP INDEX IDX_POP_ID IF EXISTS;");
+        createIndexCommand.append(String.format(" CREATE INDEX IDX_POP_ID ON %s (%s);",
                                                 LIFE_HISTORIES_TABLE_NAME, ID));
-        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_POP_DATE ON %s (%s,%s,%s);",
+//        createIndexCommand.append(" DROP INDEX IDX_POP_DATE IF EXISTS;");
+        createIndexCommand.append(String.format(" CREATE INDEX IDX_POP_DATE ON %s (%s,%s,%s);",
                                                 LIFE_HISTORIES_TABLE_NAME, ID, DATE_OF_BIRTH, DATE_OF_DEATH));
 
         createTableCommand.append(createIndexCommand.toString());
@@ -159,7 +161,8 @@ public class PopulationsFileReader extends DataFileReader {
         createTableCommand.deleteCharAt(createTableCommand.length() - 1);
         createTableCommand.append(");");
 
-        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_POP_LOCATION ON %s (%s);",
+//        createIndexCommand.append(" DROP INDEX IDX_POP_LOCATION IF EXISTS;");
+        createIndexCommand.append(String.format(" CREATE INDEX IDX_POP_LOCATION ON %s (%s);",
                                                 POPULATIONS_TABLE_NAME, LOCATION));
 
         createTableCommand.append(createIndexCommand.toString());

@@ -6,7 +6,9 @@ import broadwick.io.FileInput;
 import com.google.common.base.Throwables;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
@@ -80,7 +82,7 @@ public abstract class DataFileReader {
                                                     final StringBuilder createTableCommand, final String tableName,
                                                     final String sectionName, final StringBuilder errors) {
         if (createTableCommand.length() == 0) {
-            createTableCommand.append(String.format("CREATE TABLE IF NOT EXISTS %s (", tableName));
+            createTableCommand.append(String.format("CREATE TABLE %s (", tableName));
         }
 
         String addedColumnName = null;
@@ -106,26 +108,39 @@ public abstract class DataFileReader {
      */
     protected final void createTable(final String tableName, final String createTableCommand, final Connection connection)
             throws SQLException {
-//        final String dropStatement = String.format("DROP TABLE IF EXISTS %s;", tableName);
-//        try (Statement stmt = connection.createStatement()) {
-//            stmt.execute(dropStatement);
-//        } catch (SQLException sqle) {
-//            log.error("Error while dropping the table '{}'. {}", dropStatement,
-//                      Throwables.getStackTraceAsString(sqle));
-//            throw sqle;
-//        }
-//        connection.commit();
 
-//        final Savepoint savept1 = connection.setSavepoint();
-        try (Statement stmt = connection.createStatement()) {
-            log.trace("Creating table {}", createTableCommand);
-            stmt.execute(createTableCommand);
-        } catch (SQLException sqle) {
-            connection.rollback();
-            log.error("Error while creating the table '{}'. {}", createTableCommand,
-                      Throwables.getStackTraceAsString(sqle));
-            throw sqle;
+        try {
+            // First check if the table already exists, some databases do not support
+            // CREATE TABLE ??? IF NOT EXISTS
+            // so we have to look at the database schema
+            DatabaseMetaData dbm = connection.getMetaData();
+            ResultSet resultSet = dbm.getTables(null, null, "%", null);
+            boolean tableExists = false;
+            while (resultSet.next()) {
+                if (tableName.equalsIgnoreCase(resultSet.getString("TABLE_NAME"))) {
+                    log.debug("Table {} already exists, ignoring", tableName);
+                    tableExists = true;
+                }
+            }
+
+            if (!tableExists) {
+                try (Statement stmt = connection.createStatement()) {
+                    String[] commands = createTableCommand.split(";");
+                    for (int i = 0; i < commands.length; i++) {
+                        log.trace("Creating table {}", commands[i]);
+                        stmt.execute(commands[i]);
+                    }
+                } catch (SQLException sqle) {
+                    connection.rollback();
+                    log.error("Error while creating the table '{}'. {}", createTableCommand,
+                              Throwables.getStackTraceAsString(sqle));
+                    throw sqle;
+                }
+            }
+        } catch (Exception e) {
+            log.error("Could not create database {}", Throwables.getStackTraceAsString(e));
         }
+
         connection.commit();
     }
 
@@ -152,6 +167,7 @@ public abstract class DataFileReader {
             // Now do the insertion.
             log.trace("Inserting into {} via {}", tableName, insertString);
             PreparedStatement pstmt = connection.prepareStatement(insertString);
+            log.trace("Prepared statement = {}", pstmt.toString());
 
             try (FileInput instance = new FileInput(dataFile, ",")) {
                 final StopWatch sw = new StopWatch();
@@ -181,9 +197,14 @@ public abstract class DataFileReader {
                         pstmt.executeUpdate();
                         inserted++;
                     } catch (SQLException ex) {
-                        log.warn("Duplicate data found for {}: continuing despite errors: {}", data.get(0), ex.getLocalizedMessage());
-                        log.trace("{}", Throwables.getStackTraceAsString(ex));
-                        throw (ex);
+                        if (ex.getSQLState().equals("23505")) {
+                            //Ignore found duplicate from database view
+                            continue;
+                        } else {
+                            log.warn("Duplicate data found for {}: continuing despite errors: {}", data.get(0), ex.getLocalizedMessage());
+                            log.trace("{}", Throwables.getStackTraceAsString(ex));
+                            throw (ex);
+                        }
                     }
                     if (inserted % 250000 == 0) {
                         log.trace("Inserted {} rows in {}", inserted, sw.toString());
@@ -221,5 +242,4 @@ public abstract class DataFileReader {
      * @return the number of rows read
      */
     public abstract int insert();
-
 }
