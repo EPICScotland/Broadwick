@@ -208,7 +208,13 @@ public class Tree<V extends Vertex, E extends Edge> implements broadwick.graph.G
         return tree.removeEdge(edge);
     }
     
-    public final void addSubtree(Tree<V,E> subtree, V node, E connectingEdge) {
+    /**
+     * Add a [sub]tree to the current tree.
+     * @param subtree the tree to be added.
+     * @param node the node at which the tree is to be added.
+     * @param connectingEdge the edge that will be used to connect <code>node</code> to the root of the subtree.
+     */
+    public final void addSubtree(final Tree<V,E> subtree, final V node, final E connectingEdge) {
        TreeUtils.addSubTree(tree, subtree.tree, node, connectingEdge);
     }
     

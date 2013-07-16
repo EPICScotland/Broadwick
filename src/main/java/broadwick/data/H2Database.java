@@ -2,6 +2,7 @@ package broadwick.data;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import lombok.extern.slf4j.Slf4j;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.jooq.SQLDialect;
@@ -30,8 +31,10 @@ public final class H2Database implements DatabaseImpl {
         this.open(dbName);
 
         if (deleteDb) {
-            try {
-                connectionPool.getConnection().createStatement().execute("DROP ALL OBJECTS");
+            try (Connection conn = connectionPool.getConnection()) {
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.execute("DROP ALL OBJECTS");
+                }
             } catch (SQLException ex) {
                 log.error("Could clean database {}", ex.getLocalizedMessage());
             }
@@ -95,7 +98,6 @@ public final class H2Database implements DatabaseImpl {
     public SQLDialect getDialect() {
         return org.jooq.SQLDialect.H2;
     }
-
     private Connection connection = null;
     private JdbcConnectionPool connectionPool = null;
 }

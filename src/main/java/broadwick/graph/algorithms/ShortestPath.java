@@ -59,10 +59,10 @@ public class ShortestPath<V extends Vertex, E extends Edge> {
      * path. If either vertex is not in the graph for which this instance was created, throws IllegalArgumentException
      * @param source the vertex from which distances are measured
      * @param target the number of vertics for which to measure distances
-     * @return
+     * @return a list of edges that comprise the shortest path from source to target.
      */
     public final List<E> getEdgesInPath(final V source, final V target) {
-        DijkstraShortestPath path = new DijkstraShortestPath(jungGraph);
+        final DijkstraShortestPath path = new DijkstraShortestPath(jungGraph);
         return path.getPath(source, target);
     }
     private edu.uci.ics.jung.graph.AbstractTypedGraph jungGraph;

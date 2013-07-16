@@ -109,12 +109,12 @@ public abstract class DataFileReader {
     protected final void createTable(final String tableName, final String createTableCommand, final Connection connection)
             throws SQLException {
 
-        try {
-            // First check if the table already exists, some databases do not support
-            // CREATE TABLE ??? IF NOT EXISTS
-            // so we have to look at the database schema
-            DatabaseMetaData dbm = connection.getMetaData();
-            ResultSet resultSet = dbm.getTables(null, null, "%", null);
+        final DatabaseMetaData dbm = connection.getMetaData();
+
+        // First check if the table already exists, some databases do not support
+        // CREATE TABLE ??? IF NOT EXISTS
+        // so we have to look at the database schema
+        try (ResultSet resultSet = dbm.getTables(null, null, "%", null)) {
             boolean tableExists = false;
             while (resultSet.next()) {
                 if (tableName.equalsIgnoreCase(resultSet.getString("TABLE_NAME"))) {
@@ -125,7 +125,7 @@ public abstract class DataFileReader {
 
             if (!tableExists) {
                 try (Statement stmt = connection.createStatement()) {
-                    String[] commands = createTableCommand.split(";");
+                    final String[] commands = createTableCommand.split(";");
                     for (int i = 0; i < commands.length; i++) {
                         log.trace("Creating table {}", commands[i]);
                         stmt.execute(commands[i]);
@@ -137,8 +137,9 @@ public abstract class DataFileReader {
                     throw sqle;
                 }
             }
-        } catch (Exception e) {
-            log.error("Could not create database {}", Throwables.getStackTraceAsString(e));
+
+//        } catch (Exception e) {
+//            log.error("Could not create database {}", Throwables.getStackTraceAsString(e));
         }
 
         connection.commit();
@@ -197,7 +198,7 @@ public abstract class DataFileReader {
                         pstmt.executeUpdate();
                         inserted++;
                     } catch (SQLException ex) {
-                        if (ex.getSQLState().equals("23505")) {
+                        if ("23505".equals(ex.getSQLState())) {
                             //Ignore found duplicate from database view
                             continue;
                         } else {
