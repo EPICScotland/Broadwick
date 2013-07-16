@@ -1,6 +1,5 @@
-package broadwick.markovchain;
+package broadwick.montecarlo.path;
 
-import broadwick.markovchain.proposals.NormalProposal;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,7 +7,7 @@ import lombok.Setter;
  * An implementation of a Markov Chain. Markov Chains have a current step and generates a new step based solely on the
  * current one.
  */
-public class MarkovChain {
+public class MarkovChain implements PathGenerator {
 
     /**
      * Create a new Markov chain with an initial step.
@@ -16,8 +15,9 @@ public class MarkovChain {
      */
     public MarkovChain(final Step initialStep) {
         this.currentStep = initialStep;
-        this.generator = new NormalProposal();
-
+        this.initialStep = initialStep;
+        this.generator = new MarkovNormalProposal();
+        this.chainLength = 1;
     }
 
     /**
@@ -28,18 +28,25 @@ public class MarkovChain {
     public MarkovChain(final Step initialStep, final MarkovProposalFunction generator) {
         this.currentStep = initialStep;
         this.generator = generator;
-
+        this.chainLength = 1;
     }
 
-    /**
-     * Generate the next state from the current state.
-     * @return the proposed next step.
-     */
-    public final Step generateNextStep() {
+    @Override
+    public final Step generateNextStep(final Step step) {
+        chainLength++;
         return generator.generate(currentStep);
+    }
+
+    @Override
+    public final Step getInitialStep() {
+        return initialStep;
     }
     @Getter
     @Setter
     private Step currentStep;
+    private Step initialStep;
     private MarkovProposalFunction generator;
+    @Getter
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private int chainLength;
 }

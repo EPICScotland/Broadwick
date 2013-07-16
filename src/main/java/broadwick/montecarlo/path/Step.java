@@ -1,4 +1,4 @@
-package broadwick.markovchain;
+package broadwick.montecarlo.path;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,7 +19,7 @@ public class Step {
             this.coordinates = new LinkedHashMap<>();
             this.coordinates.putAll(coordinates);
         } else {
-            throw new IllegalArgumentException("The coordinates of the Markov Chain step must be a LinkedHashMap");
+            throw new IllegalArgumentException("The coordinates of the Monte Carlo Path step must be a LinkedHashMap");
         }
     }
     

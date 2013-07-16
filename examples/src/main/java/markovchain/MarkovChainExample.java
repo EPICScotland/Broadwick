@@ -2,8 +2,8 @@ package markovchain;
 
 import broadwick.BroadwickException;
 import broadwick.io.FileOutput;
-import broadwick.markovchain.MarkovChain;
-import broadwick.markovchain.Step;
+import broadwick.montecarlo.path.MarkovChain;
+import broadwick.montecarlo.path.Step;
 import broadwick.model.Model;
 import broadwick.xml.XmlParser;
 import com.google.common.base.Throwables;

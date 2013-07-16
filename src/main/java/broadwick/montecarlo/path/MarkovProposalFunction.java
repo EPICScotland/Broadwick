@@ -1,4 +1,4 @@
-package broadwick.markovchain;
+package broadwick.montecarlo.path;
 
 /**
  * A Markov proposal distribution generates a new step based only on information from the current step.

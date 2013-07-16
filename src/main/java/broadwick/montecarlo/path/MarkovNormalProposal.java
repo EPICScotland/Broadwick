@@ -1,7 +1,5 @@
-package broadwick.markovchain.proposals;
+package broadwick.montecarlo.path;
 
-import broadwick.markovchain.MarkovProposalFunction;
-import broadwick.markovchain.Step;
 import broadwick.rng.RNG;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -9,7 +7,7 @@ import java.util.Map;
 /**
  * A proposal class that samples each new parameter in the steps coordinate from a normal distribution.
  */
-public class NormalProposal implements MarkovProposalFunction {
+public class MarkovNormalProposal implements MarkovProposalFunction {
 
     @Override
     public final Step generate(final Step step) {
