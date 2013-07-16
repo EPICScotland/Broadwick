@@ -68,7 +68,7 @@ public class MonteCarlo {
 
             final boolean accepted = prevResults == null ? true : acceptor.accept(prevResults, currentResults);
 
-            writer.write("%d,%d,%s,%s,%s\n", numStepsTaken, (accepted ? 1 : 0),
+            writer.write("%d,%d,%s,%s\n", numStepsTaken, (accepted ? 1 : 0),
                          proposedStep.toString(), currentResults.toCsv());
             if (accepted) {
                 numAcceptedSteps++;
