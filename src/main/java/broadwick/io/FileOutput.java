@@ -12,6 +12,15 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class FileOutput implements AutoCloseable {
+    
+    
+    /**
+     * Create a null file output object similar to writing to /dev/null. This allows for empty FileOutput objects
+     * to be used without throwing NullPointerExceptions.
+     */
+    public FileOutput() {
+        buffer = new NullOutputStream();
+    }
 
     /**
      * Create a file with the given name.
