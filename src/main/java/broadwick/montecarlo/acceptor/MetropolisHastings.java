@@ -21,12 +21,7 @@ public class MetropolisHastings implements Acceptor {
     public final boolean accept(final McResults oldResult, final McResults newResult) {
 
         final double ratio = newResult.getScore() / oldResult.getScore();
-
-        if (ratio > 1.0) {
-            return true;
-        } else {
-            return GENERATOR.getDouble() < ratio;
-        }
+        return GENERATOR.getDouble() < Math.min(ratio, 1);
     }
     
     private static final RNG GENERATOR = new RNG(RNG.Generator.Well19937c);

@@ -24,7 +24,7 @@ public class MonteCarlo {
      * @param generator the object that will generate the Monte Carlo chain/path.
      */
     public MonteCarlo(final McModel model, final PathGenerator generator) {
-        this(model, new MonteCarloMaxNumStepController(1000), generator);
+        this(model, new McMaxNumStepController(1000), generator);
     }
 
     /**
@@ -49,7 +49,7 @@ public class MonteCarlo {
 
         writer.write("# Steps taken\n");
         writer.write("# Current step accepted?\n");
-        writer.write("# Current step coordinated\n");
+        writer.write("# Current step coordinates\n");
         writer.write("# Results for current step\n");
 
         for (McObserver observer : observers) {
@@ -57,20 +57,26 @@ public class MonteCarlo {
         }
 
         Step currentStep = pathGenerator.getInitialStep();
-        McResults prevResults = null;
+        log.info("Running Monte Carlo simulation with initial step {}", currentStep.toString());
+        McResults prevResults = model.compute(currentStep);
+        writer.write("%d,%d,%s,%s\n", numStepsTaken, 1, currentStep.toString(), prevResults.toCsv());
+            
         while (mcController.goOn(this)) {
+            numStepsTaken++;
             int stepsSinceLastMeasurement = 0;
             final Step proposedStep = pathGenerator.generateNextStep(currentStep);
             final McResults currentResults = model.compute(proposedStep);
+            
             for (McObserver observer : observers) {
                 observer.step();
             }
 
-            final boolean accepted = prevResults == null ? true : acceptor.accept(prevResults, currentResults);
+            final boolean accepted = acceptor.accept(prevResults, currentResults);
 
             writer.write("%d,%d,%s,%s\n", numStepsTaken, (accepted ? 1 : 0),
                          proposedStep.toString(), currentResults.toCsv());
             if (accepted) {
+                log.info("Accepted Monte Carlo step {}", proposedStep.toString());
                 numAcceptedSteps++;
                 if (numStepsTaken > burnIn
                     && (thinningInterval == 0 || stepsSinceLastMeasurement % thinningInterval == 0)) {
@@ -81,8 +87,9 @@ public class MonteCarlo {
                 }
                 currentStep = proposedStep;
                 prevResults = currentResults;
+            } else {
+                log.info("Rejected Monte Carlo step {}", proposedStep.toString());
             }
-            numStepsTaken++;
         }
 
         for (McObserver observer : observers) {

@@ -14,30 +14,3 @@ public interface McController {
      */
     boolean goOn(MonteCarlo mc);
 }
-/**
- * Create a default controller that run 1000 steps.
- */
-class MonteCarloMaxNumStepController implements McController {
-
-    /**
-     * Create a Monte Carlo controller object that stops the run after a specified number of steps (a fixed path length).
-     */
-    MonteCarloMaxNumStepController() {
-        this.maxSteps = 1000;
-    }
-    
-    /**
-     * Create a Monte Carlo controller object that stops the run after a specified number of steps (a fixed path length).
-     * @param maxSteps the maximum length of the monte carlo chain.
-     */
-    MonteCarloMaxNumStepController(final int maxSteps) {
-        this.maxSteps = maxSteps;
-    }
-    
-    @Override
-    public boolean goOn(final MonteCarlo mc) {
-        return mc.getNumStepsTaken() <= maxSteps;
-    }
-    
-    private int maxSteps;
-};

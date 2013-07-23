@@ -34,7 +34,8 @@ public class MarkovChain implements PathGenerator {
     @Override
     public final Step generateNextStep(final Step step) {
         chainLength++;
-        return generator.generate(currentStep);
+        currentStep = generator.generate(step);
+        return currentStep;
     }
 
     @Override
