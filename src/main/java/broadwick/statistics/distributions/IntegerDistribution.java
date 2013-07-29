@@ -11,12 +11,12 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import lombok.Synchronized;
 
 /**
- * A simple class for defining distributions on integers.
+ * A simple class for defining custom distributions. This is, in effect, a histogram.
  */
 public class IntegerDistribution {
 
     /**
-     * Constructor.
+     * Create an empty distribution.
      */
     public IntegerDistribution() {
         bins = new ConcurrentSkipListMap<>();
@@ -24,7 +24,7 @@ public class IntegerDistribution {
     }
 
     /**
-     * Constructor which number of bins.
+     * Create the distribution with a specified number of bins.
      * @param nbins the number of bins
      */
     public IntegerDistribution(final int nbins) {

@@ -100,6 +100,8 @@ public abstract class StochasticSimulator {
 
                 // The performStep() method is implemented by the specifc stochastic algorithm (e.g. Gillespie's)
                 performStep();
+                
+                //amountManager.doHouseKeeping();
 
                 // tell our observers that the step has been completed.
                 for (Observer observer : observers) {
@@ -169,7 +171,7 @@ public abstract class StochasticSimulator {
             final Collection<Object> events = entry.getValue();
 
             if (events != null) {
-                log.trace("Informing observer of theta events {}", events.toString());
+                log.trace("Informing observer of {} theta events", events.size());
                 observer.theta(nextThetaEventTime, events);
             }
         }
@@ -243,7 +245,7 @@ public abstract class StochasticSimulator {
         @Synchronized
         public void pushTheta(final double time, final Observer obs, final Object theta) {
 
-            log.trace("Adding new theta event {} at t={}", theta, time);
+            log.trace("Adding new {} theta event at t={}", theta.getClass(), time);
 
             Collection<Object> events = thetas.get(time, obs);
             if (events == null) {
