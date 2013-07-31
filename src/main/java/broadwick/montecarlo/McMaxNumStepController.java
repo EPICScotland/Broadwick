@@ -10,7 +10,7 @@ public class McMaxNumStepController implements McController {
      * length).
      */
     public McMaxNumStepController() {
-        this.maxSteps = 1000;
+        this(1000);
     }
 
     /**
@@ -24,7 +24,7 @@ public class McMaxNumStepController implements McController {
 
     @Override
     public final boolean goOn(final MonteCarlo mc) {
-        return mc.getNumStepsTaken() <= maxSteps;
+        return mc.getNumStepsTaken() < maxSteps;
     }
     private int maxSteps;
 }

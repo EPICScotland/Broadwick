@@ -122,11 +122,19 @@ public final class LoggingFacade {
     private Filter<ILoggingEvent> createThresholdFilter(final String level) {
         // Set a default level if the supplied level is empty
         final String lev = (level == null) ? "info" : level;
+        setLoggingLevel(level);
 
         final ThresholdFilter filter = new ThresholdFilter();
         filter.setLevel(lev);
         filter.start();
         return (Filter<ILoggingEvent>) filter;
+    }
+
+    /*
+     * Convert the string passed as argument to a Level. If the conversion fails, then this method returns Level.DEBUG.
+     */
+    private void setLoggingLevel(final String level) {
+        rootLogger.setLevel(Level.toLevel(level));
     }
     @Getter
     private Logger rootLogger;
