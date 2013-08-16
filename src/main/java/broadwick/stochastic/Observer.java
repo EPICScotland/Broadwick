@@ -20,7 +20,7 @@ import lombok.Getter;
  * @author Florian Erhard (copied from FERN http://www.bio.ifi.lmu.de/FERN/)
  * <p/>
  */
-public abstract class Observer implements Comparable {
+public abstract class Observer implements Comparable<Observer> {
 
     /**
      * Creates an observer dedicated to one process. The observer is NOT registered at the process, you have to call
@@ -33,7 +33,7 @@ public abstract class Observer implements Comparable {
     }
 
     @Override
-    public final int compareTo(final Object o) {
+    public final int compareTo(final Observer o) {
         // We really are only interested in determining if the Observers are equal so that a tree based table 
         // can distinguish between observers. Order does NOT matter so we return 1 if the objects are not equal.
         if (this == o) {
@@ -73,7 +73,7 @@ public abstract class Observer implements Comparable {
      * @param tau   the time the event occurs (at this time {@link Simulator#getTime()}
      * @param times the number of firings
      */
-    public abstract void performEvent(final SimulationEvent event, final double tau, final int times);
+    public abstract void observeEvent(final SimulationEvent event, final double tau, final int times);
 
     @Getter
     @SuppressWarnings("PMD.UnusedPrivateField")

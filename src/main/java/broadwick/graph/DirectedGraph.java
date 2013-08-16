@@ -11,13 +11,13 @@ import java.util.Collection;
  * @param <V> the vertex type.
  * @param <E> the edge type.
  */
-public class DirectedGraph<V extends Vertex, E extends Edge> implements broadwick.graph.Graph<V, E> {
+public class DirectedGraph<V extends Vertex, E extends Edge<V>> implements broadwick.graph.Graph<V, E> {
 
     /**
      * Creates an instance of the graph.
      */
     public DirectedGraph() {
-        graph = new DirectedSparseMultigraph();
+        graph = new DirectedSparseMultigraph<>();
     }
 
     @Override

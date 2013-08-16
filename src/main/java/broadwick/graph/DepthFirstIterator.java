@@ -9,7 +9,7 @@ import java.util.List;
  * @param <V> the class type of the vertex.
  * @param <E> the class type of the edges.
  */
-public class DepthFirstIterator<V extends Vertex, E extends Edge> implements Iterator<V> {
+public class DepthFirstIterator<V extends Vertex, E extends Edge<V>> implements Iterator<V> {
 
     /**
      * Create the iterator over a tree. The tree is read and the vertices arranged (internally) so that they can be read
@@ -50,7 +50,7 @@ public class DepthFirstIterator<V extends Vertex, E extends Edge> implements Ite
             }
             for (V vertex : tree.getSuccessors(tree.getRoot())) {
                 vertexList.add(vertex);
-                final Tree subtree = tree.getSubTree(vertex);
+                final Tree<V, E> subtree = tree.getSubTree(vertex);
                 traverseTree(subtree);
             }
         }

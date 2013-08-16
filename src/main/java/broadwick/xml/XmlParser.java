@@ -29,7 +29,7 @@ public final class XmlParser {
      * @return on Object with the same class as the clazz parameter, populated with the elements of the XML.
      * @throws JAXBException if the XML cannot be unmarshalled.
      */
-    public static Object unmarshallXmlString(final String xmlStr, final Class clazz) throws JAXBException {
+    public static Object unmarshallXmlString(final String xmlStr, final Class<?> clazz) throws JAXBException {
 
         if (clazz.isAnnotationPresent(XmlRootElement.class)) {
 

@@ -331,7 +331,7 @@ public class StochasticSimulatorTest {
         }
 
         @Override
-        public void performEvent(SimulationEvent event, double tau, int times) {
+        public void observeEvent(SimulationEvent event, double tau, int times) {
         }
 
         @Getter

@@ -63,8 +63,8 @@ public class DepthFirstIteratorTest {
      */
     @Test
     public void testHasNext() {
-        Tree<Vertex, Edge> tree = createTree(0);
-        DepthFirstIterator<Vertex, Edge> it = new DepthFirstIterator<>(tree);
+        Tree<Vertex, Edge<Vertex>> tree = createTree(0);
+        DepthFirstIterator<Vertex, Edge<Vertex>> it = new DepthFirstIterator<>(tree);
         assertFalse(it.hasNext());
 
         int treeSize = 1;
@@ -106,8 +106,8 @@ public class DepthFirstIteratorTest {
 
         final List<String> nodeIds = Arrays.asList("root", "1", "2", "3", "4");
 
-        Tree<Vertex, Edge> tree = createTree(5);
-        DepthFirstIterator<Vertex, Edge> it = new DepthFirstIterator<>(tree);
+        Tree<Vertex, Edge<Vertex>> tree = createTree(5);
+        DepthFirstIterator<Vertex, Edge<Vertex>> it = new DepthFirstIterator<>(tree);
         int numNodes = 0;
         while (it.hasNext()) {
             final Vertex next = it.next();
@@ -124,17 +124,17 @@ public class DepthFirstIteratorTest {
      */
     @Test(expected = UnsupportedOperationException.class)
     public void testRemove() {
-        Tree<Vertex, Edge> tree = createTree(1);
-        DepthFirstIterator<Vertex, Edge> it = new DepthFirstIterator<>(tree);
+        Tree<Vertex, Edge<Vertex>> tree = createTree(1);
+        DepthFirstIterator<Vertex, Edge<Vertex>> it = new DepthFirstIterator<>(tree);
         System.out.println("testRemove " + it.hasNext());
         assertTrue(it.hasNext());
 
         it.remove();
     }
 
-    private Tree<Vertex, Edge> createTree(final int numVertices) {
+    private Tree<Vertex, Edge<Vertex>> createTree(final int numVertices) {
 
-        Tree<Vertex, Edge> tree = new Tree<>();
+        Tree<Vertex, Edge<Vertex>> tree = new Tree<>();
 
         // let's create a simple tree where all the even numbered nodes are on one [linear] branch and the odd ones are 
         // on the other.

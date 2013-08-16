@@ -10,7 +10,7 @@
 
     <groupId>broadwick</groupId>
     <artifactId>broadwick</artifactId>
-    <version>0.0</version>
+    <version>1.0_alpha</version>
     <packaging>jar</packaging>
 
     <name>Broadwick</name>
@@ -79,12 +79,12 @@
         <junit.junit.version>4.11</junit.junit.version>
         <jung.version>2.0.1</jung.version>	
         <onejar-plugin.version>1.4.5</onejar-plugin.version>
-        <org.h2.version>1.3.172</org.h2.version>
+        <org.h2.version>1.3.173</org.h2.version>
         <org.apache.mahout.commons.commons-cli.version>2.0-mahout</org.apache.mahout.commons.commons-cli.version>
         <org.apache.commons.lang3.version>3.1</org.apache.commons.lang3.version>  
         <org.apache.commons-math.version>2.2</org.apache.commons-math.version>
         <org.jooq.version>3.1.0</org.jooq.version>
-        <org.projectlombok.lombok.version>0.11.8</org.projectlombok.lombok.version>
+        <org.projectlombok.lombok.version>0.12.0</org.projectlombok.lombok.version>
         <org.slf4j.slf4j-api.version>1.7.5</org.slf4j.slf4j-api.version>
         <org.swinglabs.swing-layout.version>1.0.3</org.swinglabs.swing-layout.version>
         <taglist-maven-plugin.version>2.4</taglist-maven-plugin.version>

@@ -51,7 +51,7 @@ public class LocalPoolExecutor implements Executor {
         status = Executor.Status.RUNNING;
 
         // Submit all the Callable objects to the executor, counting down the latch
-        // when eah submitted job is finished. If any of the jobs throws an exception,
+        // when each submitted job is finished. If any of the jobs throws an exception,
         // it will be wrapped in an ExecutionException by the Future and we will check for it later.
         for (int i = 0; i < numRuns; i++) {
             final int taskId = i;

@@ -68,17 +68,17 @@ public abstract class StochasticSimulator {
      * {@link StochasticSimulator#start(SimulationController)}.
      * @param time	simulation time
      */
-    public final void start(final double time) {
+    public final void run(final double time) {
         if (controller == null) {
             controller = new DefaultController(time);
         }
-        start();
+        run();
     }
 
     /**
      * Start the simulation with the given {@link SimulationController}.
      */
-    public final void start() {
+    public final void run() {
 
         try {
             // If we haven't set a controller for the process then set the default one with a max time of 5
@@ -148,7 +148,7 @@ public abstract class StochasticSimulator {
     protected final void doEvent(final SimulationEvent event, final double t, final int n) {
         log.trace("Performing event {}", event);
         for (Observer observer : observers) {
-            observer.performEvent(event, t, n);
+            observer.observeEvent(event, t, n);
         }
         // change the amount of the reactants
         if (!Double.isInfinite(t)) {

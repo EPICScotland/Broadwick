@@ -31,6 +31,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -121,6 +122,9 @@ public final class Broadwick {
      */
     public void run() {
         if (project != null) {
+            final StopWatch sw = new StopWatch();
+            sw.start();
+            
             // initialise the data, by reading the data files and/or the database.
 
             log.info("Running broadwick {}", BroadwickVersion.getVersionAndTimeStamp());
@@ -165,7 +169,7 @@ public final class Broadwick {
                 log.error("Something went wrong. See previous messages for details.");
             }
 
-            log.info("Simulation complete.");
+            log.info("Simulation complete. {}", sw.toString());
         }
     }
 

@@ -16,7 +16,7 @@ import org.apache.commons.collections15.Transformer;
  * @param <V> the vertex type.
  * @param <E> the edge type.
  */
-public class ShortestPath<V extends Vertex, E extends Edge> {
+public class ShortestPath<V extends Vertex, E extends Edge<V>> {
 
     /**
      * Create a ShortestPath instance.
@@ -25,9 +25,9 @@ public class ShortestPath<V extends Vertex, E extends Edge> {
     public ShortestPath(final Graph<V, E> graph) {
 
         if (EdgeType.DIRECTED.equals(graph.getEdgeType())) {
-            jungGraph = new edu.uci.ics.jung.graph.DirectedSparseMultigraph();
+            jungGraph = new edu.uci.ics.jung.graph.DirectedSparseMultigraph<>();
         } else if (EdgeType.UNDIRECTED.equals(graph.getEdgeType())) {
-            jungGraph = new edu.uci.ics.jung.graph.UndirectedSparseMultigraph();
+            jungGraph = new edu.uci.ics.jung.graph.UndirectedSparseMultigraph<>();
         } else {
             throw new IllegalArgumentException("Could not create ShortestPath object for unknown grpah type.");
         }
@@ -62,10 +62,10 @@ public class ShortestPath<V extends Vertex, E extends Edge> {
      * @return a list of edges that comprise the shortest path from source to target.
      */
     public final List<E> getEdgesInPath(final V source, final V target) {
-        final DijkstraShortestPath path = new DijkstraShortestPath(jungGraph);
+        final DijkstraShortestPath<V,E> path = new DijkstraShortestPath<>(jungGraph);
         return path.getPath(source, target);
     }
-    private edu.uci.ics.jung.graph.AbstractTypedGraph jungGraph;
+    private edu.uci.ics.jung.graph.AbstractTypedGraph<V,E> jungGraph;
     private Transformer<E, Number> weightTransformer;
 
     /**

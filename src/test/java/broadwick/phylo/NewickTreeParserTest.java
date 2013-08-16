@@ -70,7 +70,7 @@ public class NewickTreeParserTest {
     @Test
     public void testParse() {
         NewickTreeParser newickTreeParser = new NewickTreeParser(testFileName);
-        Tree<PhyloNode, Edge> tree = newickTreeParser.parse();
+        Tree<PhyloNode, Edge<PhyloNode>> tree = newickTreeParser.parse();
         checkTree(tree);
     }
 
@@ -79,7 +79,7 @@ public class NewickTreeParserTest {
         NewickTreeParser newickTreeParser = new NewickTreeParser();
 
         // Test the trees we've already tested
-        Tree<PhyloNode, Edge> tree = newickTreeParser.parse("A:0.1,B:0.2,(C:0.3,D:0.4):0.5");
+        Tree<PhyloNode, Edge<PhyloNode>> tree = newickTreeParser.parse("A:0.1,B:0.2,(C:0.3,D:0.4):0.5");
         checkTree(tree);
 
         // now test the same tree with optional braces, semicolon
@@ -129,7 +129,7 @@ public class NewickTreeParserTest {
      * this method tests the outcomes.
      * @param tree
      */
-    private void checkTree(final Tree<PhyloNode, Edge> tree) {
+    private void checkTree(final Tree<PhyloNode, Edge<PhyloNode>> tree) {
         assertEquals(6, tree.getVertexCount());
         assertEquals(2, tree.getHeight());
 
@@ -174,7 +174,7 @@ public class NewickTreeParserTest {
         assertEquals(2, tree.outDegree(branchNode));
     }
 
-    private void checkTreeWithBranchName(final Tree<PhyloNode, Edge> tree) {
+    private void checkTreeWithBranchName(final Tree<PhyloNode, Edge<PhyloNode>> tree) {
         // This is the newwick string we're checking 
         // (A:0.1,B:0.2,(C:0.3,D:0.4)E:0.5)F:0.0;
         // i.e. it is the same as before but the branch name and root are specified.
@@ -223,7 +223,7 @@ public class NewickTreeParserTest {
         assertEquals(2, tree.outDegree(branchNode));
     }
 
-    private void checkTreeWithOnlyRootNode(final Tree<PhyloNode, Edge> tree) {
+    private void checkTreeWithOnlyRootNode(final Tree<PhyloNode, Edge<PhyloNode>> tree) {
         assertEquals(1, tree.getVertexCount());
         assertEquals(0, tree.getHeight());
         PhyloNode rootNode = new PhyloNode("A", 0.1);
@@ -233,7 +233,7 @@ public class NewickTreeParserTest {
         assertEquals(0, tree.outDegree(rootNode));
     }
     
-    private void checkTreeWithNoBranchLengths(Tree<PhyloNode, Edge> tree) {
+    private void checkTreeWithNoBranchLengths(Tree<PhyloNode, Edge<PhyloNode>> tree) {
         
         assertEquals(6, tree.getVertexCount());
         assertEquals(2, tree.getHeight());
@@ -279,7 +279,7 @@ public class NewickTreeParserTest {
         assertEquals(2, tree.outDegree(branchNode));
     } 
     
-    private void checkTreeWithWithBranchNamesWithoutBranchLengths(Tree<PhyloNode, Edge> tree) {
+    private void checkTreeWithWithBranchNamesWithoutBranchLengths(Tree<PhyloNode, Edge<PhyloNode>> tree) {
         assertEquals(6, tree.getVertexCount());
         assertEquals(2, tree.getHeight());
 
@@ -324,7 +324,7 @@ public class NewickTreeParserTest {
         assertEquals(2, tree.outDegree(branchNode));
     }
     
-    private void checkTreeWithNestedBranches(final Tree<PhyloNode, Edge> tree) {
+    private void checkTreeWithNestedBranches(final Tree<PhyloNode, Edge<PhyloNode>> tree) {
         assertEquals(15, tree.getVertexCount());
         assertEquals(3, tree.getHeight());
         

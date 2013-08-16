@@ -5,7 +5,7 @@ import lombok.Getter;
 /**
  * Implementing classes are used to take measurements during a Monte Carlo run.
  */
-public abstract class McObserver implements Comparable {
+public abstract class McObserver implements Comparable<McObserver> {
 
     /**
      * Creates an observer dedicated to one Monte Carlo process.
@@ -16,7 +16,7 @@ public abstract class McObserver implements Comparable {
     }
 
     @Override
-    public final int compareTo(final Object o) {
+    public final int compareTo(final McObserver o) {
         // We really are only interested in determining if the Observers are equal so that a tree based table 
         // can distinguish between observers. Order does NOT matter so we return 1 if the objects are not equal.
         if (this == o) {

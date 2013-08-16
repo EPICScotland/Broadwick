@@ -13,7 +13,7 @@ import java.util.Collection;
  * @param <V> the vertex type.
  * @param <E> the edge type.
  */
-public interface Graph<V extends Vertex, E extends Edge> extends Serializable {
+public interface Graph<V extends Vertex, E extends Edge<V>> extends Serializable {
 
     /**
      * Returns a

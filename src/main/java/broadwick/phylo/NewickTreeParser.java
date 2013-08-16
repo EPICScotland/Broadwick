@@ -2,6 +2,7 @@ package broadwick.phylo;
 
 import broadwick.graph.Edge;
 import broadwick.graph.Tree;
+import broadwick.graph.Vertex;
 import broadwick.io.FileInput;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,10 +42,10 @@ public class NewickTreeParser {
      * @param newickStr the string to parse.
      * @return a Tree created from the parsed string.
      */
-    public final Tree<PhyloNode, Edge> parse(final String newickStr) {
+    public final Tree<PhyloNode, Edge<PhyloNode>> parse(final String newickStr) {
         branchLabel = 0;
 
-        final Tree<PhyloNode, Edge> phyloTree = new Tree<>();
+        final Tree<PhyloNode, Edge<PhyloNode>> phyloTree = new Tree<>();
         // first remove the trailing ; if any
         String stringToParse = StringUtils.removeEnd(newickStr.trim(), ";").trim();
 
@@ -86,7 +87,7 @@ public class NewickTreeParser {
      * Parse a string from a Newick file.
      * @return a generated Tree object.
      */
-    public final Tree<PhyloNode, Edge> parse() {
+    public final Tree<PhyloNode, Edge<PhyloNode>> parse() {
         if (newickString == null) {
             throw new IllegalArgumentException("NewickParser created but no string to parse found. Did you create the parser without specifying a file?");
         }
@@ -100,7 +101,8 @@ public class NewickTreeParser {
      *                      this method is called recursively).
      * @param tree          the tree to which the created nodes will be attached.
      */
-    private void parseString(final String stringToParse, final PhyloNode parent, final Tree tree) {
+    private void parseString(final String stringToParse, final PhyloNode parent,
+                             final Tree<PhyloNode, Edge<PhyloNode>> tree) {
         for (String node : findNodes(stringToParse)) {
             parseNode(node, tree, parent);
         }
@@ -170,7 +172,7 @@ public class NewickTreeParser {
      * @param tree   the tree to which the created node will be attached.
      * @param parent the node on the tree to which the new node will be created.
      */
-    private void parseNode(final String node, final Tree tree, final PhyloNode parent) {
+    private void parseNode(final String node, final Tree<PhyloNode, Edge<PhyloNode>> tree, final PhyloNode parent) {
         log.trace("parsing {} from parent node {} ", node, parent.getId());
         if (node.charAt(0) == '(') {
             // this is a branch so create a branch node and set the parent
@@ -199,7 +201,8 @@ public class NewickTreeParser {
      * @param createUniqueName if the name of the node is not unique then add create a unique one if this is true.
      * @return the node added to the tree.
      */
-    private PhyloNode addNodeToTree(final String node, final Tree tree, final PhyloNode parent, final boolean createUniqueName) {
+    private PhyloNode addNodeToTree(final String node, final Tree<PhyloNode, Edge<PhyloNode>> tree, final PhyloNode parent,
+                                    final boolean createUniqueName) {
         log.trace("Adding {} to tree at {}.", node, parent);
         PhyloNode phyloNode;
 
@@ -224,7 +227,7 @@ public class NewickTreeParser {
         phyloNode = new PhyloNode(nodeName, distance);
 
         try {
-            tree.addEdge(new Edge(parent, phyloNode, distance), parent, phyloNode);
+            tree.addEdge(new Edge<>(parent, phyloNode, distance), parent, phyloNode);
         } catch (IllegalArgumentException e) {
             // we may have non-unique branch names in the data file, if we encounter one here and we want to rename
             // it we do it now. This is not very good as we are searching for an error message but it's the best as can
@@ -232,13 +235,12 @@ public class NewickTreeParser {
             if (e.getLocalizedMessage().contains("already exists in this graph") && createUniqueName) {
                 nodeName = String.format("branch-%d", branchLabel++);
                 phyloNode = new PhyloNode(nodeName, distance);
-                tree.addEdge(new Edge(parent, phyloNode), parent, phyloNode);
+                tree.addEdge(new Edge<>(parent, phyloNode), parent, phyloNode);
             }
         }
 
         return phyloNode;
     }
-
     private String newickString;
     private int branchLabel = 0;
 }

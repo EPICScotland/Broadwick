@@ -27,7 +27,7 @@
 	</sonar.exclusions>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <broadwick.version>0.0</broadwick.version>
+        <broadwick.version>1.0_alpha</broadwick.version>
 	<exec-maven-plugin.version>1.2.1</exec-maven-plugin.version>
         <junit.junit.version>4.11</junit.junit.version>
         <onejar-plugin.version>1.4.5</onejar-plugin.version>

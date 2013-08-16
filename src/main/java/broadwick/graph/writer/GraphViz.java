@@ -27,7 +27,7 @@ public final class GraphViz {
      * @param network the network object to be written.
      * @return a string representing a document.
      */
-    public static String toString(final Graph<? extends Vertex, ? extends Edge> network) {
+    public static String toString(final Graph<? extends Vertex, ? extends Edge<?>> network) {
         final StringBuilder sb = new StringBuilder();
 
         final String edgeOp = network.getEdgeType() == EdgeType.DIRECTED ? "->" : "--";
@@ -43,7 +43,7 @@ public final class GraphViz {
 
         sb.append("\n");
 
-        for (Edge edge : network.getEdges()) {
+        for (Edge<?> edge : network.getEdges()) {
             sb.append("   ");
             sb.append(edge.getSource().getId());
             sb.append(" ").append(edgeOp).append(" ");
@@ -61,7 +61,7 @@ public final class GraphViz {
      * @param network the network object to be written.
      * @param file    the file name
      */
-    public static void save(final String file, final Graph<? extends Vertex, ? extends Edge> network) {
+    public static void save(final String file, final Graph<? extends Vertex, ? extends Edge<Vertex>> network) {
         try (FileOutput fo = new FileOutput(file)) {
             fo.write(GraphViz.toString(network));
         }

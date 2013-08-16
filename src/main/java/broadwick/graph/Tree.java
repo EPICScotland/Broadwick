@@ -17,13 +17,13 @@ import lombok.extern.slf4j.Slf4j;
  * @param <E> the edge type.
  */
 @Slf4j
-public class Tree<V extends Vertex, E extends Edge> implements broadwick.graph.Graph<V, E>, Serializable  {
+public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.graph.Graph<V, E>, Serializable  {
 
     /**
      * Creates an instance of the tree.
      */
     public Tree() {
-        tree = new DelegateTree();
+        tree = new DelegateTree<>();
     }
 
     /**
@@ -64,7 +64,7 @@ public class Tree<V extends Vertex, E extends Edge> implements broadwick.graph.G
      * @return a tree object that is a subtree of the current tree.
      */
     public final Tree<V, E> getSubTree(final V vertex) {
-        final Tree<V, E> subTree = new Tree();
+        final Tree<V, E> subTree = new Tree<>();
         try {
             subTree.tree = (DelegateTree<V, E>) TreeUtils.getSubTree(tree, vertex);
         } catch (InstantiationException | IllegalAccessException ex) {
@@ -195,7 +195,7 @@ public class Tree<V extends Vertex, E extends Edge> implements broadwick.graph.G
         if (inEdges.size() != 1) {
             throw new IllegalArgumentException("Vertex in tree has incorrect number of in edges.");
         }
-        return (V) inEdges.iterator().next().source;
+        return inEdges.iterator().next().source;
     }
 
     @Override
