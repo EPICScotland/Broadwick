@@ -4,7 +4,7 @@
 
     <groupId>BroadwickExamples</groupId>
     <artifactId>BroadwickExamples</artifactId>
-    <version>0.0</version>
+    <version>1.0_beta</version>
     <packaging>jar</packaging>
 
     <name>BroadwickExamples</name>
@@ -27,7 +27,7 @@
 	</sonar.exclusions>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <broadwick.version>1.0_alpha</broadwick.version>
+        <broadwick.version>1.0_beta</broadwick.version>
 	<exec-maven-plugin.version>1.2.1</exec-maven-plugin.version>
         <junit.junit.version>4.11</junit.junit.version>
         <onejar-plugin.version>1.4.5</onejar-plugin.version>

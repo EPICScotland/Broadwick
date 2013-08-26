@@ -10,7 +10,7 @@
 
     <groupId>broadwick</groupId>
     <artifactId>broadwick</artifactId>
-    <version>1.0_alpha</version>
+    <version>1.0_beta</version>
     <packaging>jar</packaging>
 
     <name>Broadwick</name>
@@ -22,7 +22,7 @@
     </prerequisites>
 
     <organization>
-        <name/>
+        <name>University of Glasgow</name>
         <url/>
     </organization>
 

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package broadwick.concurrent;
 
 import broadwick.BroadwickException;
@@ -18,14 +33,14 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * This Executor controls the execution of several threads using a fixed thread pool. Several instances of the callable
  * object are added to the execution pool which monitors their execution, if any fails, i.e. any of the jobs throws an
- * exception, then all non-running jobs are cancelled and currently running jobs are terminated.
+ * exception, then all non-running jobs are canceled and currently running jobs are terminated.
  */
 @Slf4j
 public class LocalPoolExecutor implements Executor {
 
     /**
-     * Create the Callable executor that will run 'threadPoolSize' instances of callableInst cancelling the execution if
-     * a thread throws an exception.
+     * Create the Callable executor that will run a supplied number of instances of a supplied callable, canceling the execution
+     * if a thread throws an exception.
      * @param threadPoolSize    the number of concurrent threads to be run (the size of the thread pool)
      * @param numInstancesToRun the number of threads to be run.
      * @param callable          the actual Callable instance that is to be executed in the pool.
@@ -34,6 +49,19 @@ public class LocalPoolExecutor implements Executor {
         poolSize = threadPoolSize;
         numRuns = numInstancesToRun;
         job = callable;
+        service = Executors.newFixedThreadPool(poolSize);
+    }
+
+    /**
+     * Create the Callable executor that will run each callable in a collection, canceling the execution
+     * if a thread throws an exception.
+     * @param threadPoolSize    the number of concurrent threads to be run (the size of the thread pool)
+     * @param jobs          a collection of [Callable] jobs to be run.
+     */
+    public LocalPoolExecutor(final int threadPoolSize, final List<Callable<?>> jobs) {
+        poolSize = threadPoolSize;
+        numRuns = jobs.size();
+        job = null;
         service = Executors.newFixedThreadPool(poolSize);
     }
 

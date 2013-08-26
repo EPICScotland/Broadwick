@@ -1,3 +1,18 @@
+/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package broadwick;
 
 import ch.qos.logback.classic.Level;
@@ -37,7 +52,7 @@ public final class LoggingFacade {
 
             rootLogger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
             rootLogger.detachAndStopAllAppenders();
-            rootLogger.setLevel(Level.ALL);
+            rootLogger.setLevel(Level.OFF);
 
             // Create the layout pattern for the appenders.
             addConsoleLogger("error", logFormatThreadMsg);
@@ -130,8 +145,9 @@ public final class LoggingFacade {
         return (Filter<ILoggingEvent>) filter;
     }
 
-    /*
+    /**
      * Convert the string passed as argument to a Level. If the conversion fails, then this method returns Level.DEBUG.
+     * @param level the logging level that should be used.
      */
     private void setLoggingLevel(final String level) {
         rootLogger.setLevel(Level.toLevel(level));
