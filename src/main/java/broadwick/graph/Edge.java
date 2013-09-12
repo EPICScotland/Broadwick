@@ -78,7 +78,7 @@ public class Edge<V extends Vertex>  implements Serializable {
     }
     
     @Override
-    public final String toString() {
+    public String toString() {
         return String.format("%s->%s", source.getId(), destination.getId());
     }
 
