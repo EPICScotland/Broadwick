@@ -179,8 +179,8 @@ public final class Broadwick {
                     //sw.stop();
                     //log.trace("Finished {} simulations in {}.", maxSimulations, sw);
                 }
-            } catch (InterruptedException | BroadwickException ex) {
-                log.trace("{}", Throwables.getStackTraceAsString(ex));
+            } catch (Exception ex) {
+                log.error("{}", Throwables.getStackTraceAsString(ex));
                 log.error("Something went wrong. See previous messages for details.");
             }
 

@@ -61,17 +61,18 @@ public class MonteCarlo {
      * Run the MonteCarlo Simulation.
      */
     public final void run() {
+        
+        Step currentStep = pathGenerator.getInitialStep();
 
-        writer.write("# Steps taken\n");
-        writer.write("# Current step accepted?\n");
-        writer.write("# Current step coordinates\n");
-        writer.write("# Results for current step\n");
+        writer.write("# Steps taken [1]\n");
+        writer.write("# Current step accepted? [2]\n");
+        writer.write(String.format("# Current step coordinates [3-%d]\n", (2+currentStep.getCoordinates().size())));
+        writer.write(String.format("# Results for current step [%d-n]\n", (3+currentStep.getCoordinates().size())));
 
         for (McObserver observer : observers) {
             observer.started();
         }
 
-        Step currentStep = pathGenerator.getInitialStep();
         log.info("Running Monte Carlo simulation with initial step {}", currentStep.toString());
         McResults prevResults = model.compute(currentStep);
         writer.write("%d,%d,%s,%s\n", numStepsTaken, 1, currentStep.toString(), prevResults.toCsv());
