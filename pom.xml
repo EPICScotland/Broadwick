@@ -10,7 +10,7 @@
 
     <groupId>broadwick</groupId>
     <artifactId>broadwick</artifactId>
-    <version>1.0_beta</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
     <name>Broadwick</name>
@@ -28,13 +28,18 @@
 
     <developers>
         <developer>
-            <id>duke</id>
+            <name>Sam Lycett</name>
+            <email>slycett@staffmail.ed.ac.uk</email>
+            <roles>
+                <role>Architect</role>
+            </roles>
+        </developer>
+        <developer>
             <name>Anthony O'Hare</name>
             <email>Anthony.OHare@stir.ac.uk</email>
             <roles>
                 <role>Architect</role>
             </roles>
-            <!--<organization>Acme.com</organization>-->
         </developer>
     </developers>
 
@@ -100,6 +105,7 @@
         <maven-jxr-plugin.version>2.3</maven-jxr-plugin.version>
         <maven-project-info-reports-plugin.version>2.4</maven-project-info-reports-plugin.version>
         <maven-site-plugin.version>3.2</maven-site-plugin.version>
+        <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <maven-surefire-plugin.version>2.14.1</maven-surefire-plugin.version>
     </properties>
 
@@ -291,6 +297,21 @@
                     </archive>
                 </configuration>
             </plugin>
+
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-source-plugin</artifactId>
+                <version>${maven-source-plugin.version}</version>
+		<executions>
+		    <execution>
+			<id>attach-sources</id>
+                        <phase>package</phase>
+			<goals>
+			    <goal>jar</goal>
+			</goals>
+		    </execution>
+		</executions>
+	    </plugin>
 
             <plugin>
                 <groupId>org.jacoco</groupId>
