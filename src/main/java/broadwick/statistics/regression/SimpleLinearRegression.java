@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package broadwick.stat.regression;
+package broadwick.statistics.regression;
 
 import org.apache.commons.math.stat.regression.SimpleRegression;
 
