@@ -19,8 +19,7 @@ import broadwick.montecarlo.McResults;
 import broadwick.rng.RNG;
 
 /**
- *
- * @author anthony
+ * A Metropolis-Hastings acceptor.
  */
 public class MetropolisHastings implements Acceptor {
     

@@ -31,7 +31,6 @@ public interface AbcController {
 
 /**
  * Create a default controller that run 1000 samples from the prior.
- * @author anthony
  */
 class AbcMaxNumStepController implements AbcController {
 

@@ -32,10 +32,6 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.slf4j.MarkerFactory;
 
-/**
- *
- * @author anthony
- */
 @Slf4j
 public class DepthFirstIteratorTest {
 
