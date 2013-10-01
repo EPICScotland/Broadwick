@@ -14,29 +14,8 @@
  * limitations under the License.
  */
 
-package seir;
-
-import broadwick.model.Model;
-import lombok.extern.slf4j.Slf4j;
-
 /**
- * Simple class that runs an SEIR model.
+ * An example of a project that runs an SIR model stochastically.
  */
-@Slf4j
-public class SeirModel extends Model {
+package sir;
 
-    @Override
-    public void init() {
-        // TODO
-    }
-
-    @Override
-    public void run() {
-        // TODO
-    }
-    
-    @Override
-    public void finalise() {
-        // TODO
-    }
-}

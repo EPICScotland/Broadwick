@@ -14,29 +14,34 @@
  * limitations under the License.
  */
 
-package seir;
+package sir;
 
-import broadwick.model.Model;
-import lombok.extern.slf4j.Slf4j;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-/**
- * Simple class that runs an SEIR model.
- */
-@Slf4j
-public class SeirModel extends Model {
-
-    @Override
-    public void init() {
-        // TODO
-    }
-
-    @Override
-    public void run() {
-        // TODO
-    }
+@RunWith(Suite.class)
+@Suite.SuiteClasses({StochasticSirTest.class})
+public class StochasticSirTestSuite {
     
-    @Override
-    public void finalise() {
-        // TODO
+
+    @BeforeClass
+    public static void setUpClass() throws Exception {
     }
+
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+    }
+
+    @Before
+    public void setUp() throws Exception {
+    }
+
+    @After
+    public void tearDown() throws Exception {
+    }
+
 }

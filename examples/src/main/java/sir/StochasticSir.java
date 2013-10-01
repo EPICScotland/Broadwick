@@ -14,34 +14,29 @@
  * limitations under the License.
  */
 
-package stochasticSir;
+package sir;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import broadwick.model.Model;
+import lombok.extern.slf4j.Slf4j;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({StochasticSirTest.class})
-public class StochasticSirTestSuite {
-    
+/**
+ * Example SIR model using a stochastic solver.
+ */
+@Slf4j
+public class StochasticSir extends Model {
 
-    @BeforeClass
-    public static void setUpClass() throws Exception {
+    @Override
+    public void init() {
+        // TODO
     }
 
-    @AfterClass
-    public static void tearDownClass() throws Exception {
+    @Override
+    public void run() {
+        // TODO
     }
 
-    @Before
-    public void setUp() throws Exception {
+    @Override
+    public void finalise() {
+        // TODO
     }
-
-    @After
-    public void tearDown() throws Exception {
-    }
-
 }

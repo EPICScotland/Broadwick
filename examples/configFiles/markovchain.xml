@@ -15,14 +15,17 @@
     </logs>
 
     <models>
-	<model id="Example of a project generating a Marĸov Chain">
+	<model id="Example of a project generating a Markov Chain">
 	    <classname>markovchain.MarkovChainExample</classname>
-	    <initialStep>
-		<x>0.0</x>
-		<y>0.0</y>
-	    </initialStep>
-	    <chainLength>500</chainLength>
-	    <output>MarkovChain.csv</output>
+	    <parameter id="initialStep">
+		<value>0.0,0.0</value>
+	    </parameter>
+	    <parameter id="chainLength">
+		<value>500</value>
+	    </parameter>
+	    <parameter id="outputFile">
+		<value>MarkovChain.csv</value>
+	    </parameter>
 	</model>
     </models>
 </project>

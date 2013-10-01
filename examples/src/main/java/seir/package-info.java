@@ -14,29 +14,8 @@
  * limitations under the License.
  */
 
+/**
+ * An example of a project that runs an SEIR example.
+ */
 package seir;
 
-import broadwick.model.Model;
-import lombok.extern.slf4j.Slf4j;
-
-/**
- * Simple class that runs an SEIR model.
- */
-@Slf4j
-public class SeirModel extends Model {
-
-    @Override
-    public void init() {
-        // TODO
-    }
-
-    @Override
-    public void run() {
-        // TODO
-    }
-    
-    @Override
-    public void finalise() {
-        // TODO
-    }
-}

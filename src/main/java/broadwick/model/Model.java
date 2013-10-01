@@ -15,8 +15,14 @@
  */
 package broadwick.model;
 
+import broadwick.config.generated.Parameter;
+import broadwick.config.generated.UniformPrior;
 import broadwick.data.Lookup;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import java.util.List;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * This interface declares a model for the Broadwick framework. To create a model for this framework (by model we mean
@@ -33,6 +39,7 @@ import lombok.Getter;
  * }
  * </code>
  */
+@Slf4j
 public abstract class Model {
 
     /**
@@ -52,8 +59,87 @@ public abstract class Model {
     }
 
     /**
-     * Initialise the model. This method is called by the framework before calling the models run method to allow
-     * the implementation of the model to perform any initialisation required.
+     * Set the list of parameters for the model.
+     * @param parameters a collection of parameters for the model.
+     */
+    public final void setModelParameters(final List<Parameter> parameters) {
+        this.parameters = parameters;
+    }
+
+    /**
+     * Set the list of priors for the model.
+     * @param priors a collection of priors for the model.
+     */
+    public final void setModelPriors(final List<UniformPrior> priors) {
+        this.priors = priors;
+    }
+
+    /**
+     * Get the prior of a paramter for the model given the parameter name (as defined in the config file).
+     * @param name the name of the parameter.
+     * @return the prior defeind in the configuration file.
+     */
+    public final UniformPrior getUniformPrior(final String name) {
+        return Iterables.find(priors, new Predicate<UniformPrior>() {
+            @Override
+            public boolean apply(final UniformPrior prior) {
+                return (name.equals(prior.getId()));
+            }
+        });
+    }
+
+    /**
+     * Get the value of a parameter for the model given the parameter name (as defined in the config file).
+     * @param name the name of the parameter.
+     * @return a string value of the value for the parameter.
+     */
+    public final String getParameterValue(final String name) {
+        try {
+            return Iterables.find(parameters, new Predicate<Parameter>() {
+                @Override
+                public boolean apply(final Parameter parameter) {
+                    return (name.equals(parameter.getId()));
+                }
+            }).getValue();
+        } catch (java.util.NoSuchElementException e) {
+            log.error("Could not find parameter {} in configuration file.", name);
+        }
+        return "";
+    }
+
+    /**
+     * Get the value (as a double) of a parameter for the model given the parameter name (as defined in the config
+     * file).
+     * @param name the name of the parameter.
+     * @return a string value of the value for the parameter.
+     */
+    public final Double getParameterValueAsDouble(final String name) {
+        return Double.parseDouble(getParameterValue(name));
+    }
+
+    /**
+     * Get the value (as an integer) of a parameter for the model given the parameter name (as defined in the config
+     * file).
+     * @param name the name of the parameter.
+     * @return a string value of the value for the parameter.
+     */
+    public final Integer getParameterValueAsInteger(final String name) {
+        return Integer.parseInt(getParameterValue(name));
+    }
+
+    /**
+     * Get the value (as a boolean) of a parameter for the model given the parameter name (as defined in the config
+     * file).
+     * @param name the name of the parameter.
+     * @return a string value of the value for the parameter.
+     */
+    public final Boolean getParameterValueAsBoolean(final String name) {
+        return Boolean.parseBoolean(getParameterValue(name));
+    }
+
+    /**
+     * Initialise the model. This method is called by the framework before calling the models run method to allow the
+     * implementation of the model to perform any initialisation required.
      */
     public abstract void init();
 
@@ -67,11 +153,12 @@ public abstract class Model {
      * End the model. This method is called by the framework after the model has finished running.
      */
     public abstract void finalise();
-
     @Getter
     @SuppressWarnings("PMD.UnusedPrivateField")
     private String model;
     @SuppressWarnings("PMD.UnusedPrivateField")
     @Getter
     private Lookup lookup;
+    private List<Parameter> parameters;
+    private List<UniformPrior> priors;
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package stochasticSir;
+package sir;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.*;

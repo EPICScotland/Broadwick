@@ -27,7 +27,7 @@
 	</sonar.exclusions>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <broadwick.version>1.0</broadwick.version>
+        <broadwick.version>1.1</broadwick.version>
 	<exec-maven-plugin.version>1.2.1</exec-maven-plugin.version>
         <junit.junit.version>4.11</junit.junit.version>
         <onejar-plugin.version>1.4.5</onejar-plugin.version>
@@ -122,38 +122,6 @@
                 </configuration>
             </plugin>
             
-            <!-- generate the java classes from the xsd definition -->
-            <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>${maven-jaxb2-plugin.version}</version>
-                <configuration>
-                    <quiet>true</quiet>
-                    <verbose>false</verbose>
-                    <readOnly>true</readOnly>
-                    <arguments>-mark-generated</arguments>
-                    <removeOldOutput>false</removeOldOutput>
-                    <clearOutputDir>false</clearOutputDir>
-                    <forceRegenerate>true</forceRegenerate>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>markovchain-generate</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <schemaDirectory>src/main/resources/markovchain</schemaDirectory>
-                            <schemaIncludes>
-                                <include>markovchain.xsd</include>
-                            </schemaIncludes>
-                            <generatePackage>markovchain.config.generated</generatePackage>
-                            <generateDirectory>${project.build.directory}/generated-sources/xjc</generateDirectory>
-                        </configuration>
-                    </execution>
-                    
-                </executions>
-            </plugin>
         </plugins>
     </build>
 </project>

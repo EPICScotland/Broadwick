@@ -206,6 +206,8 @@ public final class Broadwick {
                 final Model newInstance = Model.class.cast(Class.forName(model.getClassname()).newInstance());
                 newInstance.setModelConfiguration(getModelsConfiguration(model.getId(), getAllModelConfigurations()));
                 newInstance.setModelDataLookup(lookup);
+                newInstance.setModelParameters(model.getParameter());
+                newInstance.setModelPriors(model.getUniformPrior());
                 registeredModels.put(model.getId(), newInstance);
             }
         } catch (ParserConfigurationException | SAXException | IOException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException ex) {

@@ -15,16 +15,12 @@
  */
 package markovchain;
 
-import broadwick.BroadwickException;
 import broadwick.io.FileOutput;
 import broadwick.montecarlo.path.MarkovChain;
 import broadwick.montecarlo.path.Step;
 import broadwick.model.Model;
-import broadwick.xml.XmlParser;
-import com.google.common.base.Throwables;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -37,30 +33,26 @@ public class MarkovChainExample extends Model {
     public final void init() {
 
         log.debug("Initialising the variables in MarkovChainExample");
-        try {
-            final markovchain.config.generated.Model model = (markovchain.config.generated.Model) XmlParser.unmarshallXmlString(
-                    this.getModel(),
-                    markovchain.config.generated.Model.class);
 
-            chainLength = model.getChainLength();
-            initialStep = model.getInitialStep();
-            fo = new FileOutput(model.getOutput());
-            fo.write("# df <- read.csv(file=\"MarkovChain.csv\", blank.lines.skip=T, header=F, comment.char = \"#\")\n");
-            fo.write("# plot(df$V1, df$V2, xlab=\"x\", ylab=\"y\", main=\"Markov Chain\", type=\"b\")\n");
-        } catch (JAXBException ex) {
-            log.error("Error initialising BtbIbmClusterDynamics. {}", ex.getLocalizedMessage());
-            log.error(Throwables.getStackTraceAsString(ex));
-            throw new BroadwickException(ex.getLocalizedMessage());
+        chainLength = this.getParameterValueAsInteger("chainLength");
+        final String[] step = this.getParameterValue("initialStep").split(",");
+        final Map<String, Double> coordinates = new LinkedHashMap<>();
+        {
+            coordinates.put("x", Double.parseDouble(step[0]));
+            coordinates.put("y", Double.parseDouble(step[1]));
         }
+        initialStep = new Step(coordinates);
+
+        fo = new FileOutput(this.getParameterValue("outputFile"));
+        fo.write("# df <- read.csv(file=\"MarkovChain.csv\", blank.lines.skip=T, header=F, comment.char = \"#\")\n");
+        fo.write("# plot(df$V1, df$V2, xlab=\"x\", ylab=\"y\", main=\"Markov Chain\", type=\"b\")\n");
+
     }
 
     @Override
     public final void run() {
 
-        final Map<String, Double> coordinates = new LinkedHashMap<>(2);
-        coordinates.put("x", initialStep.getX());
-        coordinates.put("y", initialStep.getY());
-        final Step step = new Step(coordinates);
+        final Step step = new Step(initialStep);
         fo.write(step.toString() + "\n");
         log.trace("{}", step.toString());
 
@@ -81,6 +73,6 @@ public class MarkovChainExample extends Model {
         fo.close();
     }
     private int chainLength;
-    private markovchain.config.generated.Step initialStep;
+    private Step initialStep;
     private FileOutput fo;
 }

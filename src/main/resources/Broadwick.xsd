@@ -140,9 +140,9 @@
                         <xsd:element name="alias" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="separator" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <!--<xsd:choice minOccurs="1" maxOccurs="3">-->
-                            <xsd:element name="idColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
-                            <xsd:element name="groupIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
-                            <xsd:element name="locationIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="idColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="groupIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="locationIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
                         <!--</xsd:choice>-->
                         <xsd:element name="testDateColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
                         <xsd:element name="postiveResultColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
@@ -167,7 +167,8 @@
                 <xsd:complexType>
                     <xsd:sequence>                        
                         <xsd:element name="classname" minOccurs="1" maxOccurs="1" type="xsd:string"/>
-                        <xsd:any maxOccurs="unbounded" processContents="skip"/>
+                        <xsd:element name="parameter" minOccurs="1" maxOccurs="unbounded" type="Parameter"/>
+                        <xsd:element name="uniformPrior" minOccurs="1" maxOccurs="unbounded" type="UniformPrior"/>                    
                     </xsd:sequence>
                     <xsd:attribute name="id" type="xsd:string" use="optional"/>
                 </xsd:complexType>
@@ -207,6 +208,24 @@
             <xsd:element name="populationDateColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
             <xsd:element name="speciesColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
         </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="UniformPrior">
+        <xsd:sequence>
+            <xsd:element name="hint" minOccurs="0" maxOccurs="1" type="xsd:string"/>
+            <xsd:element name="initialVal" minOccurs="0" maxOccurs="1" type="xsd:double"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:string" use="optional"/>
+        <xsd:attribute name="min" type="xsd:double"/>
+        <xsd:attribute name="max" type="xsd:double"/>
+    </xsd:complexType>
+    
+    <xsd:complexType name="Parameter">
+        <xsd:sequence>
+            <xsd:element name="value" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+            <xsd:element name="hint" minOccurs="0" maxOccurs="1" type="xsd:string"/> 
+        </xsd:sequence> 
+        <xsd:attribute name="id" type="xsd:string" use="optional"/>
     </xsd:complexType>
 </xsd:schema>
 

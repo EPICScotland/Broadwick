@@ -26,6 +26,17 @@ import lombok.Getter;
 public class Step {
 
     /**
+     * Copy constructor.
+     * @param step the step to copy.
+     */
+    public Step(final Step step) {
+        this.coordinates = new LinkedHashMap<>();
+        for (Map.Entry<String, Double> entry : step.coordinates.entrySet()) {
+             coordinates.put(entry.getKey(), entry.getValue());
+        }
+    }
+
+    /**
      * Create a single step in a Markov Chain.
      * @param coordinates the coordinates of the step in the parameter space of the chain.
      */
@@ -37,16 +48,16 @@ public class Step {
             throw new IllegalArgumentException("The coordinates of the Monte Carlo Path step must be a LinkedHashMap");
         }
     }
-    
+
     @Override
     public final String toString() {
         final StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, Double> entry : coordinates.entrySet()) {
             sb.append(entry.getValue()).append(',');
         }
-        
+
         // remove the last value separator.
-        sb.deleteCharAt(sb.length()-1);
+        sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
     }
     @Getter
