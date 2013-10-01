@@ -17,15 +17,9 @@
     <models>
 	<model id="Example of a project generating a Markov Chain">
 	    <classname>markovchain.MarkovChainExample</classname>
-	    <parameter id="initialStep">
-		<value>0.0,0.0</value>
-	    </parameter>
-	    <parameter id="chainLength">
-		<value>500</value>
-	    </parameter>
-	    <parameter id="outputFile">
-		<value>MarkovChain.csv</value>
-	    </parameter>
+	    <parameter id="initialStep" value="0.0,0.0"/>
+	    <parameter id="chainLength" value="500"/>
+	    <parameter id="outputFile" value="MarkovChain.csv"/>
 	</model>
     </models>
 </project>

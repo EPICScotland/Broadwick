@@ -222,10 +222,10 @@
     
     <xsd:complexType name="Parameter">
         <xsd:sequence>
-            <xsd:element name="value" minOccurs="1" maxOccurs="1" type="xsd:string"/>
             <xsd:element name="hint" minOccurs="0" maxOccurs="1" type="xsd:string"/> 
         </xsd:sequence> 
         <xsd:attribute name="id" type="xsd:string" use="optional"/>
+        <xsd:attribute name="value" type="xsd:string"/>
     </xsd:complexType>
 </xsd:schema>
 
