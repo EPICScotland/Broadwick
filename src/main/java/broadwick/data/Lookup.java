@@ -293,9 +293,10 @@ public final class Lookup {
 
             try {
                 records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())
-                        .where(String.format("%s >= %d AND %s <= %d AND MOVEMENT_DIRECTION='OFF'",
+                        .where(String.format("%s >= %d AND %s <= %d AND %s ='OFF'",
                                              DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate,
-                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate))
+                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate,
+                                             DirectedMovementsFileReader.getMOVEMENT_DIRECTION() ))
                         .fetch();
                 for (Record r : records) {
                     final Movement movement = createMovement(r);
@@ -373,9 +374,10 @@ public final class Lookup {
 
             try {
                 records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())
-                        .where(String.format("%s >= %d AND %s <= %d AND MOVEMENT_DIRECTION='ON'",
+                        .where(String.format("%s >= %d AND %s <= %d AND %s ='ON'",
                                              DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate,
-                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate))
+                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate,
+                                             DirectedMovementsFileReader.getMOVEMENT_DIRECTION()))
                         .fetch();
                 for (Record r : records) {
                     final Movement movement = createMovement(r);
@@ -469,7 +471,8 @@ public final class Lookup {
 
         final Result<Record> records = jooq.select().from(TestsFileReader.getTABLE_NAME())
                 .where(String.format("%s >= %d and %s <= %d",
-                                     TestsFileReader.getTEST_DATE(), startDate, TestsFileReader.getTEST_DATE(), endDate))
+                                     TestsFileReader.getTEST_DATE(), startDate, 
+                                     TestsFileReader.getTEST_DATE(), endDate))
                 .fetch();
         for (Record r : records) {
             final Test test = createTest(r);
@@ -660,7 +663,8 @@ public final class Lookup {
             records = jooq.select(DSL.fieldByName(FullMovementsFileReader.getDESTINATION_ID()),
                                   DSL.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()))
                     .from(FullMovementsFileReader.getTABLE_NAME())
-                    .where(String.format("%s = '%s' and (%s <= %d or %s <= %d)", FullMovementsFileReader.getID(), animalId,
+                    .where(String.format("%s = '%s' and (%s <= %d or %s <= %d)", 
+                                         FullMovementsFileReader.getID(), animalId,
                                          FullMovementsFileReader.getDEPARTURE_DATE(), date,
                                          FullMovementsFileReader.getDESTINATION_DATE(), date))
                     .orderBy(DSL.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()).desc())
@@ -682,7 +686,8 @@ public final class Lookup {
             records = jooq.select(DSL.fieldByName(DirectedMovementsFileReader.getLOCATION_ID()),
                                   DSL.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()))
                     .from(DirectedMovementsFileReader.getTABLE_NAME())
-                    .where(String.format("%s = '%s' and %s <= %d", DirectedMovementsFileReader.getID(), animalId,
+                    .where(String.format("%s = '%s' and %s <= %d", 
+                                         DirectedMovementsFileReader.getID(), animalId,
                                          DirectedMovementsFileReader.getMOVEMENT_DATE(), date))
                     .orderBy(DSL.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()).desc())
                     .limit(1)
