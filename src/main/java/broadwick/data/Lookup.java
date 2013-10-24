@@ -296,7 +296,7 @@ public final class Lookup {
                         .where(String.format("%s >= %d AND %s <= %d AND %s ='OFF'",
                                              DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate,
                                              DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate,
-                                             DirectedMovementsFileReader.getMOVEMENT_DIRECTION() ))
+                                             DirectedMovementsFileReader.getMOVEMENT_DIRECTION()))
                         .fetch();
                 for (Record r : records) {
                     final Movement movement = createMovement(r);
@@ -471,7 +471,7 @@ public final class Lookup {
 
         final Result<Record> records = jooq.select().from(TestsFileReader.getTABLE_NAME())
                 .where(String.format("%s >= %d and %s <= %d",
-                                     TestsFileReader.getTEST_DATE(), startDate, 
+                                     TestsFileReader.getTEST_DATE(), startDate,
                                      TestsFileReader.getTEST_DATE(), endDate))
                 .fetch();
         for (Record r : records) {
@@ -663,7 +663,7 @@ public final class Lookup {
             records = jooq.select(DSL.fieldByName(FullMovementsFileReader.getDESTINATION_ID()),
                                   DSL.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()))
                     .from(FullMovementsFileReader.getTABLE_NAME())
-                    .where(String.format("%s = '%s' and (%s <= %d or %s <= %d)", 
+                    .where(String.format("%s = '%s' and (%s <= %d or %s <= %d)",
                                          FullMovementsFileReader.getID(), animalId,
                                          FullMovementsFileReader.getDEPARTURE_DATE(), date,
                                          FullMovementsFileReader.getDESTINATION_DATE(), date))
@@ -686,7 +686,7 @@ public final class Lookup {
             records = jooq.select(DSL.fieldByName(DirectedMovementsFileReader.getLOCATION_ID()),
                                   DSL.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()))
                     .from(DirectedMovementsFileReader.getTABLE_NAME())
-                    .where(String.format("%s = '%s' and %s <= %d", 
+                    .where(String.format("%s = '%s' and %s <= %d",
                                          DirectedMovementsFileReader.getID(), animalId,
                                          DirectedMovementsFileReader.getMOVEMENT_DATE(), date))
                     .orderBy(DSL.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()).desc())
@@ -954,6 +954,19 @@ public final class Lookup {
         }
         try {
             species = (String) movementRecord.getValue(DirectedMovementsFileReader.getSPECIES());
+        } catch (ArrayIndexOutOfBoundsException e) {
+            // ignore - the field was not in the record.
+        }
+        // For directed movements, set the appropriate destination/departure id and dates.
+        try {
+            final String direction = (String) movementRecord.getValue(DirectedMovementsFileReader.getMOVEMENT_DIRECTION());
+            if ("ON".equalsIgnoreCase(direction)) {
+                destinationId = (String) movementRecord.getValue(DirectedMovementsFileReader.getLOCATION_ID());
+                destinationDate = (Integer) movementRecord.getValue(DirectedMovementsFileReader.getMOVEMENT_DATE());
+            } else {
+                departureId = (String) movementRecord.getValue(DirectedMovementsFileReader.getLOCATION_ID());
+                departureDate = (Integer) movementRecord.getValue(DirectedMovementsFileReader.getMOVEMENT_DATE());
+            }
         } catch (ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
