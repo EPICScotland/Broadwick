@@ -85,7 +85,7 @@ public class IntegerDistribution {
      */
     @Synchronized
     public final void add(final IntegerDistribution hist) {
-        for (Integer i : hist.getBins() ) {
+        for (Integer i : hist.getBins()) {
             if (bins.containsKey(i)) {
                 bins.put(i, this.getData(i) + hist.getData(i));
             } else {
@@ -93,7 +93,6 @@ public class IntegerDistribution {
             }
         }
     }
-
 
     /**
      * Get the number of bins.
@@ -119,7 +118,7 @@ public class IntegerDistribution {
 
     /**
      * Set the value of a bin.
-     * @param bin the bin.
+     * @param bin  the bin.
      * @param data the data.
      */
     @Synchronized
@@ -160,8 +159,29 @@ public class IntegerDistribution {
     }
 
     /**
-     * Creates a copy of this histogram and returns it. The returned IntegerDistribution is a completely
-     * different object.
+     * Select a random bin from the cumulative distribution of the histograms contents.
+     * @return the contents of the randomly selected bin.
+     */
+    @Synchronized
+    public final Integer getRandomBinContents() {
+        final int cumulativeSum = getSumCounts();
+        final int randomBin = (new RNG(RNG.Generator.Well44497b)).getInteger(0, cumulativeSum);
+
+        int sum = 0;
+        for (int value : bins.values()) {
+            sum += value;
+            if (sum >= randomBin) {
+                return value;
+            }
+        }
+
+        // return the contents of the last bin.
+        return bins.keySet().toArray(new Integer[bins.size()])[bins.size() - 1];
+    }
+
+    /**
+     * Creates a copy of this histogram and returns it. The returned IntegerDistribution is a completely different
+     * object.
      * @return a copy of this histogram.
      */
     @Synchronized
@@ -189,7 +209,7 @@ public class IntegerDistribution {
     }
 
     /**
-     *  Get the bins in the histogram. The bins are the keySet of the underlying map object.
+     * Get the bins in the histogram. The bins are the keySet of the underlying map object.
      * @return the number of bins.
      */
     @Synchronized
@@ -197,9 +217,9 @@ public class IntegerDistribution {
         return bins.keySet();
     }
 
-
     /**
-     *  Get a collection of the values held in the histogram. The bins are the keySet of the underlying map object, the values are the contents if the bin.
+     * Get a collection of the values held in the histogram. The bins are the keySet of the underlying map object, the
+     * values are the contents if the bin.
      * @return a collection of the values held in the histogram.
      */
     @Synchronized
@@ -253,8 +273,8 @@ public class IntegerDistribution {
     }
 
     /**
-     * Scale the values in the histogram by a given factor. A copy of the histogram is returned, the original
-     * is not modified.
+     * Scale the values in the histogram by a given factor. A copy of the histogram is returned, the original is not
+     * modified.
      * @param factor the value by which every value in the hiistogram will be multiplied.
      * @return the scaled histogram.
      */
@@ -270,8 +290,8 @@ public class IntegerDistribution {
     }
 
     /**
-     * Normalise the frequency distribution. The returned histogram is a scaled copy of the input histogram so
-     * that the sum of the returned histogram is equal to the normalising factor.
+     * Normalise the frequency distribution. The returned histogram is a scaled copy of the input histogram so that the
+     * sum of the returned histogram is equal to the normalising factor.
      * @param constant the normalising constant
      * @return the scaled and normalised histogram.
      */
@@ -335,9 +355,8 @@ public class IntegerDistribution {
         for (Map.Entry<Integer, Integer> entry : bins.entrySet()) {
             str.append(entry.getValue()).append(",");
         }
-        str.deleteCharAt( str.length()-1);
+        str.deleteCharAt(str.length() - 1);
         return str.toString();
     }
-
     private ConcurrentMap<Integer, Integer> bins;
 }

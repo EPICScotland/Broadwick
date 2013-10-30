@@ -100,7 +100,7 @@ public final class LoggingFacade {
                 Files.delete(Paths.get(file));
             }
         } catch (IOException ex) {
-            log.error("Could not delete ol log file; {}", ex.getLocalizedMessage());
+            log.error("Could not delete old log file; {}", ex.getLocalizedMessage());
         }
 
         final FileAppender<ILoggingEvent> appender = new FileAppender<>();

@@ -17,7 +17,7 @@ option_list <- list(
     make_option(c("-k", "--skip"), type="integer", default=0, dest="skip", help="Number of rows in the data file to skip [default \"%default\"]", metavar="number"),
     make_option(c("-z", "--score"), dest="score", type="integer", default=1, help = "The column that holds the height data for the 3d plot [default \"%default\"]"),
     make_option(c("-p", "--plot"), dest="plot", type="integer", default=-1, help = "The column that holds the flag on whether to include this line in the plot (1=include, 0=ignore) [default \"%default\"]"),
-    make_option(c("-b", "--burnin"), dest="burnin", default="0", help = "The number of selected samples to ignore (can be a csv list specific for each chain). If negative then then the we wilwill remove all but the last n values from the chain. [default \"%default\"]"),
+    make_option(c("-b", "--burnin"), dest="burnin", default="0", help = "The number of selected samples to ignore (can be a csv list specific for each chain). If negative then then the we will remove all but the last n values from the chain. [default \"%default\"]"),
     make_option(c("-c", "--columns"), dest="columns", default="2,3,4,5,6", help = "List of columns to plot [default \"%default\"]"),
     make_option(c("-l", "--labels"), dest="labels", default="alpha,beta,gamma,delta,epsilon", help = "Labels of the columns to plot [default \"%default\"]"),
     make_option(c("-x", "--xmin"), dest="xmin", type="double", default="-2e+308", help = "minimum values of the likelihood to consider [default \"%default\"]"),
@@ -100,12 +100,13 @@ process_chains <- function(datafile, burnin) {
 }
 
 # process the chains by reading the files, removing any burn-in and 
-# then creating a singel combined chain, list of chains etc for further plotting.
+# then creating a single combined chain, list of chains etc for further plotting.
 invisible(mapply(process_chains, files, burn_in))
 
 # do some further filtering on the processed data e.g. extract the parameters for
 # the maximum value of the score command line argument and
 data <- processedData$chain
+#print(data)
 
 mergedParameterChains <- data.matrix(data[opt_columns])
 maxScore <- (max( data[,opt$score] ))
