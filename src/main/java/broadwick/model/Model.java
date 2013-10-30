@@ -16,10 +16,12 @@
 package broadwick.model;
 
 import broadwick.config.generated.Parameter;
+import broadwick.config.generated.Prior;
 import broadwick.config.generated.UniformPrior;
 import broadwick.data.Lookup;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * This interface declares a model for the Broadwick framework. To create a model for this framework (by model we mean
  * both the model and the methodology for running/solving it) the user creates an implementation of this class and
- * refers to it in the framework configuration file.
- * <code>
+ * refers to it in the framework configuration file.  <code>
  * public class SIRModel implements Model {
  *     public void run() {
  *         // perform model specific step here
@@ -48,6 +49,7 @@ public abstract class Model {
      */
     public final void setModelConfiguration(final String model) {
         this.model = model;
+         this.priors = new ArrayList<>();
     }
 
     /**
@@ -70,8 +72,8 @@ public abstract class Model {
      * Set the list of priors for the model.
      * @param priors a collection of priors for the model.
      */
-    public final void setModelPriors(final List<UniformPrior> priors) {
-        this.priors = priors;
+    public final void setModelPriors(final List<Prior> priors) {
+        this.priors.addAll(priors);
     }
 
     /**
@@ -79,10 +81,10 @@ public abstract class Model {
      * @param name the name of the parameter.
      * @return the prior defeind in the configuration file.
      */
-    public final UniformPrior getUniformPrior(final String name) {
-        return Iterables.find(priors, new Predicate<UniformPrior>() {
+    public final Prior getUniformPrior(final String name) {
+        return Iterables.find(priors, new Predicate<Prior>() {
             @Override
-            public boolean apply(final UniformPrior prior) {
+            public boolean apply(final Prior prior) {
                 return (name.equals(prior.getId()));
             }
         });
@@ -159,6 +161,10 @@ public abstract class Model {
     @SuppressWarnings("PMD.UnusedPrivateField")
     @Getter
     private Lookup lookup;
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    @Getter
     private List<Parameter> parameters;
-    private List<UniformPrior> priors;
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    @Getter
+    private List<Prior> priors;
 }

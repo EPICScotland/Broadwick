@@ -168,7 +168,7 @@
                     <xsd:sequence>                        
                         <xsd:element name="classname" minOccurs="1" maxOccurs="1" type="xsd:string"/>
                         <xsd:element name="parameter" minOccurs="1" maxOccurs="unbounded" type="Parameter"/>
-                        <xsd:element name="uniformPrior" minOccurs="1" maxOccurs="unbounded" type="UniformPrior"/>                    
+                        <xsd:element name="prior" minOccurs="1" maxOccurs="unbounded" type="Prior"/>                    
                     </xsd:sequence>
                     <xsd:attribute name="id" type="xsd:string" use="optional"/>
                 </xsd:complexType>
@@ -210,14 +210,31 @@
         </xsd:sequence>
     </xsd:complexType>
     
-    <xsd:complexType name="UniformPrior">
+    
+    <xsd:complexType name="Prior" abstract="true">
         <xsd:sequence>
             <xsd:element name="hint" minOccurs="0" maxOccurs="1" type="xsd:string"/>
             <xsd:element name="initialVal" minOccurs="0" maxOccurs="1" type="xsd:double"/>
         </xsd:sequence>
         <xsd:attribute name="id" type="xsd:string" use="optional"/>
-        <xsd:attribute name="min" type="xsd:double"/>
-        <xsd:attribute name="max" type="xsd:double"/>
+    </xsd:complexType>
+    
+    <xsd:complexType name="GaussianPrior">
+        <xsd:complexContent>
+            <xsd:extension base="Prior">
+                <xsd:attribute name="mean" type="xsd:double"/>
+                <xsd:attribute name="deviation" type="xsd:double"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    
+    <xsd:complexType name="UniformPrior">
+        <xsd:complexContent>
+            <xsd:extension base="Prior">
+                <xsd:attribute name="min" type="xsd:double"/>
+                <xsd:attribute name="max" type="xsd:double"/>
+            </xsd:extension>
+        </xsd:complexContent>
     </xsd:complexType>
     
     <xsd:complexType name="Parameter">
