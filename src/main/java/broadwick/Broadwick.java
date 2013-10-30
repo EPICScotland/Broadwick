@@ -55,14 +55,12 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- * Broadwick: Project for Scientific Computing. The Broadwick framework allows
- * for rapid epidemic modelling.
+ * Broadwick: Project for Scientific Computing. The Broadwick framework allows for rapid epidemic modelling.
  */
 public final class Broadwick {
 
     /**
-     * Create the Broadwick project to read and verify the configuration files
-     * and initialise the project.
+     * Create the Broadwick project to read and verify the configuration files and initialise the project.
      *
      * @param args the command line arguments supplied to the project.
      */
@@ -82,7 +80,7 @@ public final class Broadwick {
     /**
      * Read the configuration file from the configuration file.
      *
-     * @param logFacade the LoggingFacade object used to log any messages.
+     * @param logFacade  the LoggingFacade object used to log any messages.
      * @param configFile the name of the configuration file.
      */
     private void readConfigFile(final LoggingFacade logFacade, final String configFile) {
@@ -139,9 +137,8 @@ public final class Broadwick {
         if (project != null) {
             final StopWatch sw = new StopWatch();
             sw.start();
-            
-            // initialise the data, by reading the data files and/or the database.
 
+            // initialise the data, by reading the data files and/or the database.
             log.info("Running broadwick {}", BroadwickVersion.getVersionAndTimeStamp());
 
             try (DataReader dr = new DataReader(project.getData())) {
@@ -189,12 +186,11 @@ public final class Broadwick {
     }
 
     /**
-     * Create and register the models internally. If there was a problem
-     * registering the models an empty cache is returned.
+     * Create and register the models internally. If there was a problem registering the models an empty cache is
+     * returned.
      *
      * @param project the unmarshalled configuration file.
-     * @param lookup the Lookuup object that allows the model to access the data
-     * specified in the data files.
+     * @param lookup  the Lookuup object that allows the model to access the data specified in the data files.
      * @return the registered models.
      */
     private Map<String, Model> registerModels(final Project project, final Lookup lookup) {
@@ -207,7 +203,9 @@ public final class Broadwick {
                 newInstance.setModelConfiguration(getModelsConfiguration(model.getId(), getAllModelConfigurations()));
                 newInstance.setModelDataLookup(lookup);
                 newInstance.setModelParameters(model.getParameter());
-                newInstance.setModelPriors(model.getPrior());
+                if (model.getPriors() != null) {
+                    newInstance.setModelPriors(model.getPriors().getGaussianPriorAndUniformPrior());
+                }
                 registeredModels.put(model.getId(), newInstance);
             }
         } catch (ParserConfigurationException | SAXException | IOException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException ex) {
@@ -222,12 +220,9 @@ public final class Broadwick {
      * Get a collection of XML elements one for each <model> section.
      *
      * @return a collection of XML elements of each <model>.
-     * @throws ParserConfigurationException if the nodes for the configured
-     * models cannot be found.
-     * @throws SAXException if the nodes for the configured models cannot be
-     * found.
-     * @throws IOException if the nodes for the configured models cannot be
-     * found.
+     * @throws ParserConfigurationException if the nodes for the configured models cannot be found.
+     * @throws SAXException                 if the nodes for the configured models cannot be found.
+     * @throws IOException                  if the nodes for the configured models cannot be found.
      */
     private NodeList getAllModelConfigurations() throws ParserConfigurationException, SAXException, IOException {
         final DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
@@ -237,10 +232,9 @@ public final class Broadwick {
     }
 
     /**
-     * Get the XML string of the model with the given id from a list of
-     * configured models.
+     * Get the XML string of the model with the given id from a list of configured models.
      *
-     * @param id the id of the model to be found.
+     * @param id     the id of the model to be found.
      * @param models a list of XML <model> nodes.
      * @return the XML string for the model.
      */

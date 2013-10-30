@@ -17,7 +17,6 @@ package broadwick.model;
 
 import broadwick.config.generated.Parameter;
 import broadwick.config.generated.Prior;
-import broadwick.config.generated.UniformPrior;
 import broadwick.data.Lookup;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
