@@ -32,7 +32,7 @@ public class Step {
     public Step(final Step step) {
         this.coordinates = new LinkedHashMap<>();
         for (Map.Entry<String, Double> entry : step.coordinates.entrySet()) {
-             coordinates.put(entry.getKey(), entry.getValue());
+            coordinates.put(entry.getKey(), entry.getValue());
         }
     }
 
@@ -56,8 +56,10 @@ public class Step {
             sb.append(entry.getValue()).append(',');
         }
 
-        // remove the last value separator.
-        sb.deleteCharAt(sb.length() - 1);
+        if (sb.length() > 0) {
+            // remove the last value separator.
+            sb.deleteCharAt(sb.length() - 1);
+        }
         return sb.toString();
     }
     @Getter
