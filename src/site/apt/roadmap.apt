@@ -2,6 +2,8 @@
             RoadMap
             ------
 
-      * List item 1.
+      * 1.0 Initial release
 
-      * List item 2.
+      * 1.1 Simplify configuration file, bug fixes 
+
+      * 1.2 Add ODE solver

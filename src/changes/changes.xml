@@ -4,24 +4,29 @@
       <author email="anthony.ohare@glasgow.ac.uk">Anthony O'Hare</author>
    </properties>
    <body>
-      <release version="current"  date="2012-11-14" description="Initial version">
+      <release version="0.0"  date="2012-11-14" description="Initial version">
            <action dev="Anthony O'Hare" type="add">
                Initіal release.
            </action>         
          </release>
-      <release version="current"  date="2013-08-16" description="1.0 alpha">
+      <release version="1.0 alpha"  date="2013-08-16" description="1.0 alpha">
            <action dev="Anthony O'Hare" type="add">
                1.0 alpha release.
            </action>         
          </release>
-      <release version="current"  date="2013-08-26" description="1.0 beta">
+      <release version="1.0 beta"  date="2013-08-26" description="1.0 beta">
            <action dev="Anthony O'Hare" type="add">
                1.0 beta release.
            </action>         
          </release>
-      <release version="current"  date="2013-09-25" description="1.0">
+      <release version="1.0"  date="2013-09-25" description="1.0">
            <action dev="Anthony O'Hare" type="add">
                1.0 release
+           </action>         
+         </release>
+      <release version="current"  date="2013-09-25" description="1.1">
+           <action dev="Anthony O'Hare" type="add">
+               1.1 release simplified the configuration file.
            </action>         
          </release>
    </body>
