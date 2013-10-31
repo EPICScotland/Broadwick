@@ -232,8 +232,10 @@
     <xsd:complexType name="GaussianPrior">
         <xsd:complexContent>
             <xsd:extension base="Prior">
-                <xsd:attribute name="mean" type="xsd:double"/>
-                <xsd:attribute name="deviation" type="xsd:double"/>
+                <xsd:sequence>
+                    <xsd:element name="mean" type="xsd:double"/>
+                    <xsd:element name="deviation" type="xsd:double"/>
+                </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -241,8 +243,10 @@
     <xsd:complexType name="UniformPrior">
         <xsd:complexContent>
             <xsd:extension base="Prior">
-                <xsd:attribute name="min" type="xsd:double"/>
-                <xsd:attribute name="max" type="xsd:double"/>
+                <xsd:sequence>
+                    <xsd:element name="min" type="xsd:double"/>
+                    <xsd:element name="max" type="xsd:double"/>
+                </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
