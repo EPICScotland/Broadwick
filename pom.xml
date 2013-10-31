@@ -89,10 +89,11 @@
         <org.apache.commons.lang3.version>3.1</org.apache.commons.lang3.version>  
         <org.apache.commons-math.version>2.2</org.apache.commons-math.version>
         <org.jooq.version>3.2.0</org.jooq.version>
+        <org.jvnet.jaxb2_commons.version>0.4.1</org.jvnet.jaxb2_commons.version>
         <org.projectlombok.lombok.version>1.12.2</org.projectlombok.lombok.version>
         <org.slf4j.slf4j-api.version>1.7.5</org.slf4j.slf4j-api.version>
         <org.swinglabs.swing-layout.version>1.0.3</org.swinglabs.swing-layout.version>
-	<org.umlgraph.version>5.6</org.umlgraph.version>                                               
+        <org.umlgraph.version>5.6</org.umlgraph.version>                                               
         <taglist-maven-plugin.version>2.4</taglist-maven-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.0.3</maven.min-version>
@@ -161,6 +162,12 @@
             <groupId>org.jvnet.jaxb2.maven2</groupId>
             <artifactId>maven-jaxb2-plugin</artifactId>
             <version>${maven-jaxb2-plugin.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.jvnet.jaxb2_commons</groupId>
+            <artifactId>runtime</artifactId>
+            <version>0.4.1</version>
         </dependency>
 
         <!-- Graph dependency -->
@@ -241,7 +248,8 @@
                     <compilerArgument>-Xlint:all</compilerArgument>
                 </configuration>
             </plugin>
-            <!-- generate the java classes from the xsd definition -->
+            
+            <!-- generate the java classes from the xsd definition -->            
             <plugin>
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
                 <artifactId>maven-jaxb2-plugin</artifactId>
@@ -253,10 +261,25 @@
                         </goals>
                         <configuration>
                             <generatePackage>broadwick.config.generated</generatePackage>
+                            <verbose>false</verbose>                       
                         </configuration>
-
                     </execution>
                 </executions>
+                <configuration>
+                    <args>
+                        <arg>-XtoString</arg>
+                        <arg>-Xequals</arg>
+                        <arg>-XhashCode</arg>
+                        <arg>-Xcopyable</arg>
+                    </args>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.jvnet.jaxb2_commons</groupId>
+                            <artifactId>basic</artifactId>
+                            <version>${org.jvnet.jaxb2_commons.version}</version>
+                        </plugin>
+                    </plugins>
+                </configuration>
             </plugin>
 
             <plugin>
@@ -298,20 +321,20 @@
                 </configuration>
             </plugin>
 
-	    <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-source-plugin</artifactId>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
                 <version>${maven-source-plugin.version}</version>
-		<executions>
-		    <execution>
-			<id>attach-sources</id>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
                         <phase>package</phase>
-			<goals>
-			    <goal>jar</goal>
-			</goals>
-		    </execution>
-		</executions>
-	    </plugin>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -389,7 +412,7 @@
                                 <docletArtifact>
                                     <groupId>org.umlgraph</groupId>                                      
                                     <artifactId>umlgraph</artifactId>                                    
-				    <version>${org.umlgraph.version}</version>                                               
+                                    <version>${org.umlgraph.version}</version>                                               
                                 </docletArtifact>
                                 <useStandardDocletOptions>true</useStandardDocletOptions>                
                                 <additionalparam>
