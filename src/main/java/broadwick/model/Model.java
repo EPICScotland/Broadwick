@@ -17,6 +17,7 @@ package broadwick.model;
 
 import broadwick.config.generated.Parameter;
 import broadwick.config.generated.Prior;
+import broadwick.config.generated.UniformPrior;
 import broadwick.data.Lookup;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -48,7 +49,7 @@ public abstract class Model {
      */
     public final void setModelConfiguration(final String model) {
         this.model = model;
-         this.priors = new ArrayList<>();
+        this.priors = new ArrayList<>();
     }
 
     /**
@@ -80,13 +81,13 @@ public abstract class Model {
      * @param name the name of the parameter.
      * @return the prior defeind in the configuration file.
      */
-    public final Prior getUniformPrior(final String name) {
-        return Iterables.find(priors, new Predicate<Prior>() {
+    public final UniformPrior getUniformPrior(final String name) {
+        return ((UniformPrior) Iterables.find(priors, new Predicate<Prior>() {
             @Override
             public boolean apply(final Prior prior) {
                 return (name.equals(prior.getId()));
             }
-        });
+        }));
     }
 
     /**
