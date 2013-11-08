@@ -17,14 +17,16 @@ package broadwick.rng;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.random.MersenneTwister;
-import org.apache.commons.math3.random.RandomDataImpl;
+import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.random.Well44497b;
 
@@ -33,6 +35,7 @@ import org.apache.commons.math3.random.Well44497b;
  */
 @EqualsAndHashCode
 @ToString
+@Slf4j
 public class RNG {
 
     /**
@@ -43,7 +46,7 @@ public class RNG {
         // the JDK-provided PRNG. Like most other PRNGs, the JDK generator
         // generates sequences of random numbers based on an initial
         // "seed value".
-        generator = new RandomDataImpl();
+        generator = new RandomDataGenerator();
     }
 
     /**
@@ -52,20 +55,20 @@ public class RNG {
      */
     public RNG(final Generator gen) {
         if (gen.equals(Generator.MERSENNE)) {
-            generator = new RandomDataImpl(new MersenneTwister(System.currentTimeMillis() * Thread.currentThread().getId()));
+            generator = new RandomDataGenerator(new MersenneTwister(System.currentTimeMillis() * Thread.currentThread().getId()));
             name = "Mersenne Twister";
         } else if (gen.equals(Generator.Well19937c)) {
-            generator = new RandomDataImpl(new Well19937c(System.currentTimeMillis() * Thread.currentThread().getId()));
+            generator = new RandomDataGenerator(new Well19937c(System.currentTimeMillis() * Thread.currentThread().getId()));
             name = "Well19937c";
         } else if (gen.equals(Generator.Well44497b)) {
-            generator = new RandomDataImpl(new Well44497b(System.currentTimeMillis() * Thread.currentThread().getId()));
+            generator = new RandomDataGenerator(new Well44497b(System.currentTimeMillis() * Thread.currentThread().getId()));
             name = "Well44497b";
         } else {
             // By default, the implementation provided in RandomDataImpl uses
             // the JDK-provided PRNG. Like most other PRNGs, the JDK generator
             // generates sequences of random numbers based on an initial
             // "seed value".
-            generator = new RandomDataImpl();
+            generator = new RandomDataGenerator();
         }
     }
 
@@ -141,7 +144,8 @@ public class RNG {
      * <li><code>lower < upper</code> (otherwise an IllegalArgumentException is thrown.)</li> </ul></p>
      * @param lower lower bound for generated integer
      * @param upper upper bound for generated integer
-     * @return a random integer greater than or equal to <code>lower</code> and less than or equal      *         to <code>upper</code>. If lower == upper then lower is returned.
+     * @return a random integer greater than or equal to <code>lower</code> and less than or equal * * *
+     *         to <code>upper</code>. If lower == upper then lower is returned.
      */
     public final int getInteger(final int lower, final int upper) {
         int lo = lower;
@@ -228,7 +232,16 @@ public class RNG {
      * @return a random element from objects.
      */
     public final Object selectOneOf(final Collection<?> objects) {
-        return selectOneOf(objects.toArray(new Object[objects.size()]));
+        final int n = getInteger(0, objects.size() - 1);
+        int i = 0;
+        for (Object obj : objects) {
+            if (i == n) {
+                return obj;
+            }
+            i = i + 1;
+        }
+        log.error("Could not correctly select one of a collection of objects.");
+        return null;
     }
 
     /**
@@ -257,8 +270,7 @@ public class RNG {
 
         return list;
     }
-    
-    
+
     /**
      * Randomly pick N objects from an array of objects. Note, this assumes that N much much les than the size of the
      * array being sampled from, if this is not the case this method is VERY slow.
@@ -266,15 +278,31 @@ public class RNG {
      * @param n       the number of objects we will select.
      * @return a random element from objects.
      */
-    public final List<Object> selectManyOf(final Collection<?> objects, final int n) {
-        return selectManyOf(objects.toArray(new Object[objects.size()]), n);
+    public final List<Object> selectManyOf(final Collection<Object> objects, final int n) {
+        Set<Integer> s = new HashSet<>(n);
+        while (s.size() < n) {
+            s.add(getInteger(0, objects.size() - 1));
+        }
+
+        final List<Object> list = new ArrayList<>(n);
+        int i = 0;
+        for (Object obj : objects) {
+            if (s.contains(i)) {
+                list.add(obj);
+            }
+            i = i + 1;
+        }
+
+        if (list.size() != n) {
+            log.error("Could not correctly select correct number of objects from a collection of objects.");
+        }
+
+        return list;
     }
-    
-    
     /**
      * Random number generator type.
      */
-    private RandomDataImpl generator;
+    private RandomDataGenerator generator;
     @SuppressWarnings("PMD.UnusedPrivateField")
     @Getter
     private String name;
