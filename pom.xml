@@ -87,7 +87,7 @@
         <org.h2.version>1.3.174</org.h2.version>
         <org.apache.mahout.commons.commons-cli.version>2.0-mahout</org.apache.mahout.commons.commons-cli.version>
         <org.apache.commons.lang3.version>3.1</org.apache.commons.lang3.version>  
-        <org.apache.commons-math.version>2.2</org.apache.commons-math.version>
+        <org.apache.commons-math3.version>3.2</org.apache.commons-math3.version>
         <org.jooq.version>3.2.0</org.jooq.version>
         <org.jvnet.jaxb2_commons.version>0.4.1</org.jvnet.jaxb2_commons.version>
         <org.projectlombok.lombok.version>1.12.2</org.projectlombok.lombok.version>
@@ -144,8 +144,8 @@
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math</artifactId>
-            <version>${org.apache.commons-math.version}</version>
+            <artifactId>commons-math3</artifactId>
+            <version>${org.apache.commons-math3.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.mahout.commons</groupId>

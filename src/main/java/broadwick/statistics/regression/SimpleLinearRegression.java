@@ -15,7 +15,7 @@
  */
 package broadwick.statistics.regression;
 
-import org.apache.commons.math.stat.regression.SimpleRegression;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 /**
  * Estimates an ordinary least squares regression model with one independent variable. y = intercept + slope * x

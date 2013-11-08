@@ -23,10 +23,10 @@ import java.util.TreeSet;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import org.apache.commons.math.random.MersenneTwister;
-import org.apache.commons.math.random.RandomDataImpl;
-import org.apache.commons.math.random.Well19937c;
-import org.apache.commons.math.random.Well44497b;
+import org.apache.commons.math3.random.MersenneTwister;
+import org.apache.commons.math3.random.RandomDataImpl;
+import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.random.Well44497b;
 
 /**
  * Random number generator singleton class This class is not thread safe.
