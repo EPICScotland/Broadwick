@@ -93,13 +93,13 @@ public class RNG {
     }
 
     /**
-     * Generates a uniformly distributed random value from the open interval (
-     * <code>0.0</code>,
-     * <code>1.0</code>) (i.e., endpoints excluded). <p>
+     * Generates a uniformly distributed random value from the open interval ( <code>0.0</code>, <code>1.0</code>)
+     * (i.e., endpoints excluded).
+     * <p>
      * <strong>Definition</strong>: <a href="http://www.itl.nist.gov/div898/handbook/eda/section3/eda3662.htm">
      * Uniform Distribution</a>
-     * <code>0.0</code> and
-     * <code>1.0 - 0.0</code> are the <a href = "http://www.itl.nist.gov/div898/handbook/eda/section3/eda364.htm">
+     * <code>0.0</code> and <code>1.0 - 0.0</code> are the <a href =
+     * "http://www.itl.nist.gov/div898/handbook/eda/section3/eda364.htm">
      * location and scale parameters</a>, respectively.</p>
      * @return uniformly distributed random value between lower and upper (exclusive)
      */
@@ -108,14 +108,15 @@ public class RNG {
     }
 
     /**
-     * Generates a uniformly distributed random value from the open interval (
-     * <code>lower</code>,
-     * <code>upper</code>) (i.e., endpoints excluded). <p>
+     * Generates a uniformly distributed random value from the open interval ( <code>lower</code>, <code>upper</code>)
+     * (i.e., endpoints excluded).
+     * <p>
      * <strong>Definition</strong>: <a href="http://www.itl.nist.gov/div898/handbook/eda/section3/eda3662.htm">
      * Uniform Distribution</a>
-     * <code>lower</code> and
-     * <code>upper - lower</code> are the <a href = "http://www.itl.nist.gov/div898/handbook/eda/section3/eda364.htm">
-     * location and scale parameters</a>, respectively.</p> <p>
+     * <code>lower</code> and <code>upper - lower</code> are the <a href =
+     * "http://www.itl.nist.gov/div898/handbook/eda/section3/eda364.htm">
+     * location and scale parameters</a>, respectively.</p>
+     * <p>
      * <strong>Preconditions</strong>:<ul> <li><code>lower < upper</code> (otherwise an IllegalArgumentException is
      * thrown.)</li> </ul></p>
      * @param lower lower endpoint of the interval of support
@@ -136,16 +137,18 @@ public class RNG {
     }
 
     /**
-     * Generates a uniformly distributed random integer between
-     * <code>lower</code> and
-     * <code>upper</code> (endpoints included). <p> The generated integer will be random, but not cryptographically
-     * secure. To generate cryptographically secure integer sequences, use
-     * <code>nextSecureInt</code>.</p> <p> <strong>Preconditions</strong>:<ul>
+     * Generates a uniformly distributed random integer between <code>lower</code> and <code>upper</code> (endpoints
+     * included).
+     * <p>
+     * The generated integer will be random, but not cryptographically secure. To generate cryptographically secure
+     * integer sequences, use <code>nextSecureInt</code>.</p>
+     * <p>
+     * <strong>Preconditions</strong>:<ul>
      * <li><code>lower < upper</code> (otherwise an IllegalArgumentException is thrown.)</li> </ul></p>
      * @param lower lower bound for generated integer
      * @param upper upper bound for generated integer
-     * @return a random integer greater than or equal to <code>lower</code> and less than or equal * * *
-     *         to <code>upper</code>. If lower == upper then lower is returned.
+     * @return a random integer greater than or equal to <code>lower</code> and less than or equal * * * to
+     *         <code>upper</code>. If lower == upper then lower is returned.
      */
     public final int getInteger(final int lower, final int upper) {
         int lo = lower;
@@ -162,10 +165,12 @@ public class RNG {
 
     /**
      * Generates a random value from the Poisson distribution with the given mean.
-     * <p> <strong>Definition</strong>: <a href="http://www.itl.nist.gov/div898/handbook/eda/section3/eda366j.htm">
+     * <p>
+     * <strong>Definition</strong>: <a href="http://www.itl.nist.gov/div898/handbook/eda/section3/eda366j.htm">
      * Poisson Distribution</a>
      * </p>
-     * <p> <strong>Preconditions</strong>: <ul>
+     * <p>
+     * <strong>Preconditions</strong>: <ul>
      * <li>The specified mean <i>must</i> be positive (otherwise an IllegalArgumentException is thrown.)</li> </ul></p>
      * @param mean Mean of the distribution
      * @return poisson deviate with the specified mean
@@ -176,9 +181,12 @@ public class RNG {
 
     /**
      * Generates a random value from the Normal (or Gaussian) distribution with the given mean and standard deviation.
-     * <p> <strong>Definition</strong>:
+     * <p>
+     * <strong>Definition</strong>:
      * <a href="http://www.itl.nist.gov/div898/handbook/eda/section3/eda3661.htm">
-     * Normal Distribution</a></p> <p> <strong>Preconditions</strong>: <ul>
+     * Normal Distribution</a></p>
+     * <p>
+     * <strong>Preconditions</strong>: <ul>
      * <li><code>sigma > 0</code> (otherwise an IllegalArgumentException is thrown.)</li> </ul></p>
      * @param mu    Mean of the distribution
      * @param sigma Standard deviation given as a percentage of the mean.
@@ -199,7 +207,8 @@ public class RNG {
     /**
      * Generates a random value from the binomial distribution with the given N and p. The returned value is a random
      * integer drawn from <DIV ALIGN="CENTER" CLASS="mathdisplay"> <I>P</I>(<I>x</I>) = (<SUP>n</SUP><SUB>x</SUB>)
-     * <I>p</I><SUP>x</SUP>(1-<I>p</I>)<SUP>(<I>n-x</I>)</SUP> </DIV><P></P>
+     * <I>p</I><SUP>x</SUP>(1-<I>p</I>)<SUP>(<I>n-x</I>)</SUP> </DIV><P>
+     * </P>
      * Successive draws from this distribution can be combined, i.e. if X ~ getBinomial(n, p) and Y ~ getBinomial(m, p)
      * are independent binomial variables , then X + Y is again a binomial variable; its distribution is
      * getBinomial(n+m, p)
@@ -231,17 +240,14 @@ public class RNG {
      * @param objects an array of objects, one of whom is to be picked.
      * @return a random element from objects.
      */
-    public final Object selectOneOf(final Collection<?> objects) {
+    public final Object selectOneOf(final Collection<?> objects) {        
+        
         final int n = getInteger(0, objects.size() - 1);
-        int i = 0;
-        for (Object obj : objects) {
-            if (i == n) {
-                return obj;
-            }
-            i = i + 1;
+        if (objects instanceof List) {
+            return ((List<?>) objects).get(n);
+        } else {
+            return com.google.common.collect.Iterators.get(objects.iterator(), n);
         }
-        log.error("Could not correctly select one of a collection of objects.");
-        return null;
     }
 
     /**
