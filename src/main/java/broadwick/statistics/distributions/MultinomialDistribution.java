@@ -16,6 +16,7 @@
 package broadwick.statistics.distributions;
 
 import broadwick.math.Factorial;
+import java.io.Serializable;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -31,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  * <p/>
  */
 @Slf4j
-public class MultinomialDistribution {
+public class MultinomialDistribution implements Serializable {
 
     /**
      * Creates a <TT>MultinomialDist</TT> object with parameters <SPAN CLASS="MATH"><I>numSamples</I></SPAN> and (<SPAN

@@ -16,6 +16,7 @@
 package broadwick.statistics.distributions;
 
 import broadwick.rng.RNG;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,7 +29,7 @@ import lombok.Synchronized;
 /**
  * A simple class for defining custom distributions. This is, in effect, a histogram.
  */
-public class IntegerDistribution {
+public class IntegerDistribution implements Serializable {
 
     /**
      * Create an empty distribution.
