@@ -2,12 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>Broadwick</groupId>
-  <artifactId>Broadwick-archetype</artifactId>
-  <version>1.0</version>
+  <groupId>broadwick</groupId>
+  <artifactId>broadwick-archetype</artifactId>
+  <version>1.1</version>
   <packaging>maven-archetype</packaging>
 
-  <name>Broadwick-archetype</name>
+  <name>broadwick-archetype</name>
+  <description>Generate a project using the Broadwick framework.</description>
+  
+
+  <prerequisites>
+      <maven>3.0.0</maven>
+  </prerequisites>
 
   <build>
     <extensions>

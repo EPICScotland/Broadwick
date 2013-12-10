@@ -2,6 +2,8 @@
 #set( $symbol_dollar = '$' )
 #set( $symbol_escape = '\' )
 
+package ${package};
+
 import broadwick.model.Model;
 import lombok.extern.slf4j.Slf4j;
 
