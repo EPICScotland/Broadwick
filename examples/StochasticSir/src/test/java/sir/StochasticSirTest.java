@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package seir;
+package broadwick.stochasticsir;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.*;
+import static org.junit.Assert.*;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -25,9 +26,9 @@ import org.junit.runners.model.Statement;
 import org.slf4j.MarkerFactory;
 
 @Slf4j
-public class SeirTest {
+public class StochasticSirTest {
 
-    public SeirTest() {
+    public StochasticSirTest() {
     }
 
     @BeforeClass
@@ -62,8 +63,10 @@ public class SeirTest {
             return base;
         }
 
-    };   
+    };
+      
     @Test
     public void testRun() {
+        assertTrue(true);
     }
 }
