@@ -117,7 +117,7 @@ public class LocalPoolExecutor implements Executor {
                         stopAllTasks(tasks);
                     }
                 }
-                Thread.sleep(100);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 status = Executor.Status.TERMINATED;

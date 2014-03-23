@@ -104,9 +104,9 @@ public abstract class Model {
                 }
             }).getValue();
         } catch (java.util.NoSuchElementException e) {
-            log.error("Could not find parameter {} in configuration file.", name);
+            log.error("Could not find parameter [{}] in configuration file.", name);
+            throw new ModelParameterException("Could not find parameter [" + name + "] in configuration file.");
         }
-        return "";
     }
 
     /**

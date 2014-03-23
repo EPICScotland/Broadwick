@@ -81,7 +81,7 @@ public class ShortestPath<V extends Vertex, E extends Edge<V>> {
         return path.getPath(source, target);
     }
     private edu.uci.ics.jung.graph.AbstractTypedGraph<V,E> jungGraph;
-    private Transformer<E, Number> weightTransformer;
+    private final Transformer<E, Number> weightTransformer;
 
     /**
      * Transformer class to transform the edge of a graph to a double (it's weight).
