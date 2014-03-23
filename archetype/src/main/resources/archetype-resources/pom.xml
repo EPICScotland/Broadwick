@@ -7,8 +7,12 @@
     <version>${version}</version>
     <packaging>jar</packaging>
 
-    <name>MyProject</name>
+    <name>${artifactId}</name>
     <url>http://maven.apache.org</url>
+
+    <prerequisites>
+       <maven>3.0.0</maven>
+    </prerequisites>
 
     <properties>
 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -16,7 +20,7 @@
 	<jdk.version>1.7</jdk.version>
 	<junit.junit.version>4.11</junit.junit.version>
 	<broadwick.version>1.1</broadwick.version>
-	<maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
+	<maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
 	<onejar-plugin.version>1.4.5</onejar-plugin.version>
     </properties>
 

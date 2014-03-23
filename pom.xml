@@ -88,6 +88,7 @@
         <org.apache.mahout.commons.commons-cli.version>2.0-mahout</org.apache.mahout.commons.commons-cli.version>
         <org.apache.commons.lang3.version>3.1</org.apache.commons.lang3.version>  
         <org.apache.commons-math3.version>3.2</org.apache.commons-math3.version>
+        <org.jdom.version>2.0.2</org.jdom.version>
         <org.jooq.version>3.2.0</org.jooq.version>
         <org.jvnet.jaxb2_commons.version>0.4.1</org.jvnet.jaxb2_commons.version>
         <org.projectlombok.lombok.version>1.12.2</org.projectlombok.lombok.version>
@@ -168,6 +169,12 @@
             <groupId>org.jvnet.jaxb2_commons</groupId>
             <artifactId>runtime</artifactId>
             <version>0.4.1</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.jdom</groupId>
+            <artifactId>jdom</artifactId>
+            <version>${org.jdom.version}</version>
         </dependency>
 
         <!-- Graph dependency -->
