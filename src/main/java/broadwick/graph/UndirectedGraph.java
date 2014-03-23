@@ -16,7 +16,7 @@
 package broadwick.graph;
 
 import broadwick.utils.Pair;
-import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
+import edu.uci.ics.jung.graph.UndirectedSparseMultigraph;
 import java.util.ArrayList;
 import java.util.Collection;
 import lombok.Getter;
@@ -28,13 +28,13 @@ import lombok.Getter;
  * @param <V> the vertex type.
  * @param <E> the edge type.
  */
-public class DirectedGraph<V extends Vertex, E extends Edge<V>> implements broadwick.graph.Graph<V, E> {
+public class UndirectedGraph<V extends Vertex, E extends Edge<V>> implements broadwick.graph.Graph<V, E> {
 
     /**
      * Creates an instance of the graph.
      */
-    public DirectedGraph() {
-        graph = new DirectedSparseMultigraph<>();
+    public UndirectedGraph() {
+        graph = new UndirectedSparseMultigraph<>();
     }
 
     @Override
@@ -162,7 +162,7 @@ public class DirectedGraph<V extends Vertex, E extends Edge<V>> implements broad
     public final EdgeType getEdgeType() {
         return EdgeType.DIRECTED;
     }
-    
+
     @Override
     public final void addVertexAttribute(final String name, final String type, final String defaultValue) {
         vertexAttributes.add(new VertexAttribute(name, type, defaultValue));
@@ -172,12 +172,10 @@ public class DirectedGraph<V extends Vertex, E extends Edge<V>> implements broad
     public final void addEdgeAttribute(final String name, final String type, final String defaultValue) {
         edgeAttributes.add(new EdgeAttribute(name, type, defaultValue));
     }
-    
+
     @Getter
     private final Collection<VertexAttribute> vertexAttributes = new ArrayList<>();
-    
     @Getter
     private final Collection<EdgeAttribute> edgeAttributes = new ArrayList<>();
-    
-    private DirectedSparseMultigraph<V, E> graph;
+    private UndirectedSparseMultigraph<V, E> graph;
 }

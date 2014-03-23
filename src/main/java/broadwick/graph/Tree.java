@@ -19,7 +19,9 @@ import broadwick.utils.Pair;
 import edu.uci.ics.jung.graph.DelegateTree;
 import edu.uci.ics.jung.graph.util.TreeUtils;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -237,6 +239,21 @@ public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.grap
     public final EdgeType getEdgeType() {
         return EdgeType.DIRECTED;
     }
+
+    @Override
+    public final void addVertexAttribute(final String name, final String type, final String defaultValue) {
+        vertexAttributes.add(new VertexAttribute(name, type, defaultValue));
+    }
+
+    @Override
+    public final void addEdgeAttribute(final String name, final String type, final String defaultValue) {
+        edgeAttributes.add(new EdgeAttribute(name, type, defaultValue));
+    }
+
+    @Getter
+    private final Collection<VertexAttribute> vertexAttributes = new ArrayList<>();
+    @Getter
+    private final Collection<EdgeAttribute> edgeAttributes = new ArrayList<>();
     private DelegateTree<V, E> tree;
 
 }

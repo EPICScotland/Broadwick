@@ -16,14 +16,17 @@
 package broadwick.graph;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * This class represents a generic edge in a graph.
- * @param <V> the type of vertices on the edges. 
+ * @param <V> the type of vertices on the edges.
  */
-public class Edge<V extends Vertex>  implements Serializable {
+public class Edge<V extends Vertex> implements Serializable {
 
     /**
      * A generic edge for a graph object.
@@ -76,12 +79,34 @@ public class Edge<V extends Vertex>  implements Serializable {
         this.destination = destination;
         this.weight = weight;
     }
-    
+
     @Override
     public String toString() {
         return String.format("%s->%s", source.getId(), destination.getId());
     }
 
+    /**
+     * Obtain an attribute of this edge by the attributes name.
+     * @param attributeName the name of the attribute to be found.
+     * @return the attribute (or null if no attribute matches the name).
+     */
+    public EdgeAttribute getAttributeByName(final String attributeName) {
+        for (EdgeAttribute attr : attributes) {
+            if (StringUtils.equalsIgnoreCase(attributeName, attr.getName())) {
+                return attr;
+            }
+        }
+        return null;
+    }
+    /**
+     * Add an attribute to the edge.
+     * @param attribute the attribute to be added.
+     * @return true if the collection of attributes changed as a result of the call
+     */
+    public boolean addAttribute(final EdgeAttribute attribute) {
+        return attributes.add(attribute);
+    }
+    
     @Getter
     protected String id = null;
     @Getter
@@ -91,4 +116,6 @@ public class Edge<V extends Vertex>  implements Serializable {
     @Setter
     @Getter
     protected Double weight = 1.0;
+    @Getter
+    private Collection<EdgeAttribute> attributes = new ArrayList<>();
 }

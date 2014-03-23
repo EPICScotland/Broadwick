@@ -16,8 +16,11 @@
 package broadwick.graph;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * This class represents a generic vertex (node) in a graph.
@@ -32,7 +35,49 @@ public class Vertex implements Serializable {
         this.id = id;
     }
 
+    /**
+     * Obtain an attribute of this vertex by the attributes name.
+     * @param attributeName the name of the attribute to be found.
+     * @return the attribute (or null if no attribute matches the name).
+     */
+    public VertexAttribute getAttributeByName(final String attributeName) {
+        for (VertexAttribute attr : attributes) {
+            if (StringUtils.equalsIgnoreCase(attributeName, attr.getName())) {
+                return attr;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Add an attribute to the vertex.
+     * @param attribute the attribute to be added.
+     * @return true if the collection of attributes changed as a result of the call
+     */
+    public boolean addAttribute(final VertexAttribute attribute) {
+        return attributes.add(attribute);
+    }
+
+    public void setXCoord(final double x) {
+        xCoord = x;
+        attributes.add(new VertexAttribute("xCoord", "Double", String.valueOf(x)));
+    }
+
+    public void setYCoord(final double y) {
+        yCoord = y;
+        attributes.add(new VertexAttribute("yCoord", "Double", String.valueOf(y)));
+    }
+
     @Setter
     @Getter
     protected String id = null;
+
+    @Getter
+    protected double xCoord = 0.0;
+
+    @Getter
+    protected double yCoord = 0.0;
+
+    @Getter
+    private Collection<VertexAttribute> attributes = new ArrayList<>();
 }
