@@ -17,7 +17,7 @@ public class VertexAttribute {
      * @param type the type of the attribute.
      * @param defaultValue the default value for the attribute.
      */
-    public VertexAttribute(String name, String type, String defaultValue) {
+    public VertexAttribute(String name, Class type, Object defaultValue) {
         this.name = name;
         this.type = type;
         this.defaultValue = defaultValue;
@@ -26,9 +26,9 @@ public class VertexAttribute {
 
 
     private final String name;
-    private final String type;
-    private final String defaultValue;
+    private final Class type;
+    private final Object defaultValue;
     @Getter
     @Setter
-    private String value;
+    private Object value;
 }

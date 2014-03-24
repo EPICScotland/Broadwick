@@ -17,7 +17,7 @@ public class EdgeAttribute {
      * @param type the type of the attribute.
      * @param defaultValue the default value for the attribute.
      */
-    public EdgeAttribute(String name, String type, String defaultValue) {
+    public EdgeAttribute(String name, Class type, String defaultValue) {
         this.name = name;
         this.type = type;
         this.defaultValue = defaultValue;
@@ -27,7 +27,7 @@ public class EdgeAttribute {
 
 
     private final String name;
-    private final String type;
+    private final Class type;
     private final String defaultValue;
     @Getter
     @Setter

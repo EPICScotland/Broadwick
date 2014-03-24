@@ -60,12 +60,12 @@ public class Vertex implements Serializable {
 
     public void setXCoord(final double x) {
         xCoord = x;
-        attributes.add(new VertexAttribute("xCoord", "Double", String.valueOf(x)));
+        attributes.add(new VertexAttribute("xCoord", Double.class, String.valueOf(x)));
     }
 
     public void setYCoord(final double y) {
         yCoord = y;
-        attributes.add(new VertexAttribute("yCoord", "Double", String.valueOf(y)));
+        attributes.add(new VertexAttribute("yCoord", Double.class, String.valueOf(y)));
     }
 
     @Setter

@@ -241,12 +241,12 @@ public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.grap
     }
 
     @Override
-    public final void addVertexAttribute(final String name, final String type, final String defaultValue) {
+    public final void addVertexAttribute(final String name, final Class type, final String defaultValue) {
         vertexAttributes.add(new VertexAttribute(name, type, defaultValue));
     }
 
     @Override
-    public final void addEdgeAttribute(final String name, final String type, final String defaultValue) {
+    public final void addEdgeAttribute(final String name, final Class type, final String defaultValue) {
         edgeAttributes.add(new EdgeAttribute(name, type, defaultValue));
     }
 

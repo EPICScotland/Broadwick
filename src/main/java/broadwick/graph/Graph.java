@@ -17,7 +17,6 @@ package broadwick.graph;
 
 import broadwick.utils.Pair;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -312,7 +311,7 @@ public interface Graph<V extends Vertex, E extends Edge<V>> extends Serializable
      * @param type the type of attribute (int string etc).
      * @param defaultValue the default value for the attribute.
      */
-    void addVertexAttribute(final String name, final String type, final String defaultValue);
+    void addVertexAttribute(final String name, final Class type, final String defaultValue);
 
     /**
      * Add a new node attribute to the network.
@@ -320,7 +319,7 @@ public interface Graph<V extends Vertex, E extends Edge<V>> extends Serializable
      * @param type the type of attribute (int string etc).
      * @param defaultValue the default value for the attribute.
      */
-    void addEdgeAttribute(final String name, final String type, final String defaultValue);
+    void addEdgeAttribute(final String name, final Class type, final String defaultValue);
 
     /**
      * Get the type of edge (directed/undirected employed in the graph.

@@ -59,10 +59,10 @@ public class GraphMl {
             element.setAttribute("id", attr.getName());
             element.setAttribute("for", "node");
             element.setAttribute("attr.name", attr.getName());
-            element.setAttribute("attr.type", attr.getType());
+            element.setAttribute("attr.type", attr.getType().getName());
             if (attr.getDefaultValue() != null) {
                 final Element defaultValueElement = new Element("default");
-                defaultValueElement.addContent(attr.getDefaultValue());
+                defaultValueElement.addContent(attr.getDefaultValue().toString());
                 element.addContent(defaultValueElement);
             }
             graphml.addContent(element);
@@ -73,7 +73,7 @@ public class GraphMl {
             element.setAttribute("id", attr.getName());
             element.setAttribute("for", "edge");
             element.setAttribute("attr.name", attr.getName());
-            element.setAttribute("attr.type", attr.getType());
+            element.setAttribute("attr.type", attr.getType().getName());
             if (attr.getDefaultValue() != null) {
                 final Element defaultValueElement = new Element("default");
                 defaultValueElement.addContent(attr.getDefaultValue());
@@ -161,7 +161,7 @@ public class GraphMl {
         for (VertexAttribute attr : vertex.getAttributes()) {
             final Element data = new Element("data");
             data.setAttribute("key", attr.getName());
-            data.setText(attr.getValue());
+            data.setText(attr.getValue().toString());
             node.addContent(data);
         }
 
