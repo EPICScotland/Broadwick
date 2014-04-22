@@ -81,7 +81,7 @@ public class Edge<V extends Vertex> implements Serializable {
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return String.format("%s->%s", source.getId(), destination.getId());
     }
 
@@ -90,7 +90,7 @@ public class Edge<V extends Vertex> implements Serializable {
      * @param attributeName the name of the attribute to be found.
      * @return the attribute (or null if no attribute matches the name).
      */
-    public EdgeAttribute getAttributeByName(final String attributeName) {
+    public final EdgeAttribute getAttributeByName(final String attributeName) {
         for (EdgeAttribute attr : attributes) {
             if (StringUtils.equalsIgnoreCase(attributeName, attr.getName())) {
                 return attr;
@@ -103,7 +103,7 @@ public class Edge<V extends Vertex> implements Serializable {
      * @param attribute the attribute to be added.
      * @return true if the collection of attributes changed as a result of the call
      */
-    public boolean addAttribute(final EdgeAttribute attribute) {
+    public final boolean addAttribute(final EdgeAttribute attribute) {
         return attributes.add(attribute);
     }
     

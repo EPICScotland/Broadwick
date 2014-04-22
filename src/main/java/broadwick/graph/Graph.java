@@ -301,8 +301,16 @@ public interface Graph<V extends Vertex, E extends Edge<V>> extends Serializable
      */
     boolean removeEdge(E edge);
 
+    /**
+     * Get the attributes for the vertics in the graph.
+     * @return the collection of VertexAttributes.
+     */
     Collection<VertexAttribute> getVertexAttributes();
     
+    /**
+     * Get the attributes for the edges in the graph.
+     * @return the collection of EdgeAttributes.
+     */
     Collection<EdgeAttribute> getEdgeAttributes();
     
     /**

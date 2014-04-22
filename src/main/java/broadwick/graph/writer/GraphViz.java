@@ -72,9 +72,9 @@ public final class GraphViz {
     }
 
     /**
-     * Write the XML document into file.
-     * @param network the network object to be written.
-     * @param file    the file name
+     * Save the graph as in graphviz format in the given file.
+     * @param network the network object to be saved.
+     * @param file    the name of the file in which the graph will be saved.
      */
     public static void save(final String file, final Graph<? extends Vertex, ? extends Edge<Vertex>> network) {
         try (FileOutput fo = new FileOutput(file)) {

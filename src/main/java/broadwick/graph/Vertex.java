@@ -40,7 +40,7 @@ public class Vertex implements Serializable {
      * @param attributeName the name of the attribute to be found.
      * @return the attribute (or null if no attribute matches the name).
      */
-    public VertexAttribute getAttributeByName(final String attributeName) {
+    public final VertexAttribute getAttributeByName(final String attributeName) {
         for (VertexAttribute attr : attributes) {
             if (StringUtils.equalsIgnoreCase(attributeName, attr.getName())) {
                 return attr;
@@ -54,16 +54,24 @@ public class Vertex implements Serializable {
      * @param attribute the attribute to be added.
      * @return true if the collection of attributes changed as a result of the call
      */
-    public boolean addAttribute(final VertexAttribute attribute) {
+    public final boolean addAttribute(final VertexAttribute attribute) {
         return attributes.add(attribute);
     }
 
-    public void setXCoord(final double x) {
+    /**
+     * Set the x coordinate for the vertex.
+     * @param x the x coordinate for the vertex.
+     */
+    public final void setXCoord(final double x) {
         xCoord = x;
         attributes.add(new VertexAttribute("xCoord", Double.class, String.valueOf(x)));
     }
 
-    public void setYCoord(final double y) {
+    /**
+     * Set the y coordinate for the vertex.
+     * @param y the y coordinate for the vertex.
+     */
+    public final void setYCoord(final double y) {
         yCoord = y;
         attributes.add(new VertexAttribute("yCoord", Double.class, String.valueOf(y)));
     }

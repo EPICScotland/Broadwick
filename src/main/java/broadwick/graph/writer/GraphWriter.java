@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package broadwick.graph.writer;
 
 import broadwick.graph.Edge;
@@ -24,19 +23,19 @@ import broadwick.graph.Vertex;
  * Interface defining the writers.
  */
 public interface GraphWriter {
- 
+
     /**
      * Print the content of the graph.
      * @param network the network object to be written.
      * @return a string representing a document.
      */
-   public String toString(final Graph<? extends Vertex, ? extends Edge<?>> network);
-    
-        /**
+    String toString(final Graph<? extends Vertex, ? extends Edge<?>> network);
+
+    /**
      * Write the XML document into file.
      * @param network the network object to be written.
      * @param file    the file name
      */
-    public void save(final String file, final Graph<? extends Vertex, ? extends Edge<Vertex>> network);
+    void save(final String file, final Graph<? extends Vertex, ? extends Edge<Vertex>> network);
 
 }

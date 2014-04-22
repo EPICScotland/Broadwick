@@ -31,9 +31,9 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 /**
- *
+ * Simple class to write the nodes/edges of a network in graphML format.
  */
-public class GraphMl {
+public final class GraphMl {
 
     /**
      * hidden constructor for static class.
@@ -42,7 +42,13 @@ public class GraphMl {
         // no constructor
     }
 
-    public static String toString(Graph<? extends Vertex, ? extends Edge<?>> network, final boolean directed) {
+    /**
+     * Get the string representation of the network.
+     * @param network  the network object to be written.
+     * @param directed a boolean flag, true if the network is directed.
+     * @return a string representing a document.
+     */
+    public static String toString(final Graph<? extends Vertex, ? extends Edge<?>> network, final boolean directed) {
         // graphml document header
         final Element graphml = new Element("graphml", "http://graphml.graphdrawing.org/xmlns");
         final Document document = new Document(graphml);
@@ -95,7 +101,7 @@ public class GraphMl {
         final Iterator<Vertex> vertexIterator = vertices.iterator();
         while (vertexIterator.hasNext()) {
             final Vertex vertex = vertexIterator.next();
-            addNode(vertex, graph, network);
+            addNode(vertex, graph);
         }
 
         final ImmutableList<Edge<? extends Vertex>> edges;
@@ -104,25 +110,35 @@ public class GraphMl {
         while (edgeIterator.hasNext()) {
             addEdge(edgeIterator.next(), graph);
         }
-        
+
         final XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
         return outputter.outputString(document).replaceAll("xmlns=\"\" ", "");
     }
 
-    public static String toString(Graph<? extends Vertex, ? extends Edge<?>> network) {
+    /**
+     * Get the string representation of the network.
+     * @param network the network object to be written.
+     * @return a string representing a document.
+     */
+    public static String toString(final Graph<? extends Vertex, ? extends Edge<?>> network) {
         return GraphMl.toString(network, false);
     }
 
-    public static void save(String file, Graph<? extends Vertex, ? extends Edge<Vertex>> network) {
+    /**
+     * Save the graph as in graphML format in the given file.
+     * @param network the network object to be saved.
+     * @param file    the name of the file in which the graph will be saved.
+     */
+    public static void save(final String file, final Graph<? extends Vertex, ? extends Edge<Vertex>> network) {
         try (FileOutput fo = new FileOutput(file)) {
             fo.write(GraphMl.toString(network));
         }
     }
-    
-        /**
+
+    /**
      * Add an edge to the graphML document.
-     * @param edge the edge to be added to the graph element.
-     * @param graph the graph element of the graphML document
+     * @param edge    the edge to be added to the graph element.
+     * @param element the graph element of the graphML document
      */
     private static void addEdge(final Edge edge, final Element element) {
 
@@ -136,8 +152,8 @@ public class GraphMl {
         elem.setAttribute("source", source);
         elem.setAttribute("target", target);
 
-        for (Iterator it = edge.getAttributes().iterator(); it.hasNext();) {
-            EdgeAttribute attr = (EdgeAttribute) it.next();
+        for (final Iterator it = edge.getAttributes().iterator(); it.hasNext();) {
+            final EdgeAttribute attr = (EdgeAttribute) it.next();
             final Element data = new Element("data");
             data.setAttribute("key", attr.getName());
             data.setText(attr.getValue());
@@ -149,12 +165,10 @@ public class GraphMl {
 
     /**
      * Add a node to the graphML document.
-     * @param nodeId the id of the node
-     * @param graph the graph element of the graphML document
-     * @param network the network object that defines the node.
+     * @param vertex  the id of the node.
+     * @param element the graph element of the graphML document.
      */
-    private static void addNode(final Vertex vertex, final Element element, 
-                                                     final Graph<? extends Vertex, ? extends Edge<?>> network) {
+    private static void addNode(final Vertex vertex, final Element element) {
         final Element node = new Element("node");
         node.setAttribute("id", vertex.getId());
 
