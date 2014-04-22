@@ -13,20 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package broadwick.montecarlo.acceptor;
+package broadwick.montecarlo.markovchain;
 
-import broadwick.montecarlo.MonteCarloResults;
+import broadwick.montecarlo.MonteCarloStep;
 
 /**
- * Acceptor for a Monte Carlo step.
+ * A Path consists of several steps generated at random.
  */
-public interface Acceptor {
-
+public interface MarkovStepGenerator {
+    
     /**
-     * Accept a step in a Monte Carlo path/chain based on the ratio of the results at each step.
-     * @param oldResult the results at the previous step.
-     * @param newResult the result at the current (proposed) step.
-     * @return true if the step that generated newResults is to be accepted, false otherwise.
+     * Generate the next step in the path.
+     * @param step the current step.
+     * @return the proposed next step.
      */
-    boolean accept(MonteCarloResults oldResult, MonteCarloResults newResult);
+     MonteCarloStep generateNextStep(final MonteCarloStep step);
+     
+     /**
+      * Get the initial Step of the path.
+      * @return the initial step.
+      */
+     MonteCarloStep getInitialStep();
 }

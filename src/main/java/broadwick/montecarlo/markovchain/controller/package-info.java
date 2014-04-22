@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * This package contains classes for generating paths or chains for Monte Carlo simulations.
+ * This package contains classes for controlling the Markov chain e.g determining when to terminate the chain.
  */
-package broadwick.montecarlo.path;
+package broadwick.montecarlo.markovchain.controller;
 

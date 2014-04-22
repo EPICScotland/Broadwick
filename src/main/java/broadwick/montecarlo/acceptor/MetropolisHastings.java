@@ -15,7 +15,7 @@
  */
 package broadwick.montecarlo.acceptor;
 
-import broadwick.montecarlo.McResults;
+import broadwick.montecarlo.MonteCarloResults;
 import broadwick.rng.RNG;
 
 /**
@@ -32,9 +32,9 @@ public class MetropolisHastings implements Acceptor {
     }
 
     @Override
-    public final boolean accept(final McResults oldResult, final McResults newResult) {
+    public final boolean accept(final MonteCarloResults oldResult, final MonteCarloResults newResult) {
 
-        final double ratio = newResult.getScore() / oldResult.getScore();
+        final double ratio = newResult.getExpectedValue() / oldResult.getExpectedValue();
         return GENERATOR.getDouble() < Math.min(ratio, 1);
     }
     

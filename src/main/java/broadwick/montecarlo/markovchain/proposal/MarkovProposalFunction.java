@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package broadwick.montecarlo.path;
+package broadwick.montecarlo.markovchain.proposal;
+
+import broadwick.montecarlo.MonteCarloStep;
 
 /**
- * A Markov proposal distribution generates a new step based only on information from the current step.
+ * A Markov proposal distribution generates a new step in a Markov Chain (i.e. is based only on information from the 
+ * current step and contains no memory of the walk beyond that).
  */
 public interface MarkovProposalFunction {
 
@@ -25,5 +28,5 @@ public interface MarkovProposalFunction {
      * @param step the current step in the Markov Chain
      * @return the proposed new step.
      */
-    Step generate(final Step step);
+    MonteCarloStep generate(final MonteCarloStep step);
 }

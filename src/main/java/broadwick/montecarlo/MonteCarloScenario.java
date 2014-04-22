@@ -15,17 +15,23 @@
  */
 package broadwick.montecarlo;
 
+import java.io.Serializable;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * Controller class for running monte carlo calculations. The controller (and its implementing classes) are responsible
- * for determining whether or not the calculation should end.
+ * A simple model class thats runs a model and creates named quantities, i.e. a map containing the vlaues and their
+ * names.
  */
-public interface McController {
+public abstract class MonteCarloScenario implements Serializable {
 
     /**
-     * Returns whether or not to continue with the calculation.
-     * @param mc the Monte Carlo process this object is to control.
-     * @return true if the process can continue, false if it should stop after the current step.
+     * Compute the value of the Monte Carlo model/simulation at the given set of coordinates.
+     * @return a Monte Carlo Results object.
      */
-    boolean goOn(MonteCarlo mc);
+    public abstract MonteCarloResults run();
+    
+    @Getter
+    @Setter
+    MonteCarloStep step;
 }

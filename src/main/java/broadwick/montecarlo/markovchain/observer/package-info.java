@@ -13,23 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package broadwick.montecarlo.path;
-
 /**
- * A Path consists of several steps generated at random.
+ * This package contains classes for observing Markov Chains.
  */
-public interface PathGenerator {
-    
-    /**
-     * Generate the next step in the path.
-     * @param step the current step.
-     * @return the proposed next step.
-     */
-     Step generateNextStep(final Step step);
-     
-     /**
-      * Get the initial Step of the path.
-      * @return the initial step.
-      */
-     Step getInitialStep();
-}
+package broadwick.montecarlo.markovchain.observer;
+

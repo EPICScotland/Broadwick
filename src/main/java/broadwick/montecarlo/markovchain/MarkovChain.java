@@ -13,22 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package broadwick.montecarlo.path;
+package broadwick.montecarlo.markovchain;
 
+import broadwick.montecarlo.MonteCarloStep;
+import broadwick.montecarlo.markovchain.proposal.MarkovProposalFunction;
+import broadwick.montecarlo.markovchain.proposal.MarkovNormalProposal;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * An implementation of a Markov Chain. Markov Chains have a current step and generates a new step based solely on the
- * current one.
+ * An implementation of a Markov Chain which stores the history. Markov Chains have a current step and generates a new 
+ * step based solely on the current one.
  */
-public class MarkovChain implements PathGenerator {
+public class MarkovChain implements MarkovStepGenerator {
 
     /**
      * Create a new Markov chain with an initial step.
      * @param initialStep the initial step.
      */
-    public MarkovChain(final Step initialStep) {
+    public MarkovChain(final MonteCarloStep initialStep) {
         this.currentStep = initialStep;
         this.initialStep = initialStep;
         this.generator = new MarkovNormalProposal();
@@ -40,28 +43,28 @@ public class MarkovChain implements PathGenerator {
      * @param initialStep the initial step.
      * @param generator   the generator object for proposing new steps.
      */
-    public MarkovChain(final Step initialStep, final MarkovProposalFunction generator) {
+    public MarkovChain(final MonteCarloStep initialStep, final MarkovProposalFunction generator) {
         this.currentStep = initialStep;
         this.generator = generator;
         this.chainLength = 1;
     }
 
     @Override
-    public final Step generateNextStep(final Step step) {
+    public final MonteCarloStep generateNextStep(final MonteCarloStep step) {
         chainLength++;
         currentStep = generator.generate(step);
         return currentStep;
     }
 
     @Override
-    public final Step getInitialStep() {
+    public final MonteCarloStep getInitialStep() {
         return initialStep;
     }
     @Getter
     @Setter
-    private Step currentStep;
-    private Step initialStep;
-    private MarkovProposalFunction generator;
+    private MonteCarloStep currentStep;
+    private MonteCarloStep initialStep;
+    private final MarkovProposalFunction generator;
     @Getter
     @SuppressWarnings("PMD.UnusedPrivateField")
     private int chainLength;

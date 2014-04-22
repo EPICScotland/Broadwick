@@ -13,20 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package broadwick.montecarlo;
-
-import broadwick.montecarlo.path.Step;
-
 /**
- * A simple model class thats runs a model and creates named quantities, i.e. a map containing the vlaues and their
- * names.
+ * This package contains classes for generating paths or chains for Monte Carlo Markov Chains.
  */
-public interface McModel {
+package broadwick.montecarlo.markovchain.proposal;
 
-    /**
-     * Compute the value of the Monte Carlo model/simulation at the given set of coordinates.
-     * @param coordinates the coordinates of the current MC step.
-     * @return a Monte Carlo Results object.
-     */
-    McResults compute(final Step coordinates);
-}

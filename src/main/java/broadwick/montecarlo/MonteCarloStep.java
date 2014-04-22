@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package broadwick.montecarlo.path;
+package broadwick.montecarlo;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -23,13 +23,13 @@ import lombok.Getter;
  * A representation of the current step in a Markov Chain. The step is represented by a set of coordinates in the
  * parameter space spanning the possible set of steps.
  */
-public class Step {
+public class MonteCarloStep {
 
     /**
      * Copy constructor.
      * @param step the step to copy.
      */
-    public Step(final Step step) {
+    public MonteCarloStep(final MonteCarloStep step) {
         this.coordinates = new LinkedHashMap<>();
         for (Map.Entry<String, Double> entry : step.coordinates.entrySet()) {
             coordinates.put(entry.getKey(), entry.getValue());
@@ -40,7 +40,7 @@ public class Step {
      * Create a single step in a Markov Chain.
      * @param coordinates the coordinates of the step in the parameter space of the chain.
      */
-    public Step(final Map<String, Double> coordinates) {
+    public MonteCarloStep(final Map<String, Double> coordinates) {
         if (coordinates instanceof LinkedHashMap) {
             this.coordinates = new LinkedHashMap<>();
             this.coordinates.putAll(coordinates);

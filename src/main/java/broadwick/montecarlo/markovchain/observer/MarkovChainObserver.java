@@ -13,25 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package broadwick.montecarlo;
+package broadwick.montecarlo.markovchain.observer;
 
-import lombok.Getter;
+import broadwick.montecarlo.markovchain.MarkovChainMonteCarlo;
 
 /**
  * Implementing classes are used to take measurements during a Monte Carlo run.
  */
-public abstract class McObserver implements Comparable<McObserver> {
+public abstract class MarkovChainObserver implements Comparable<MarkovChainObserver> {
 
     /**
      * Creates an observer dedicated to one Monte Carlo process.
      * @param mc the Monte Carlo process
      */
-    public McObserver(final MonteCarlo mc) {
+    public MarkovChainObserver(final MarkovChainMonteCarlo mc) {
         this.monteCarlo = mc;
     }
 
     @Override
-    public final int compareTo(final McObserver o) {
+    public final int compareTo(final MarkovChainObserver o) {
         // We really are only interested in determining if the Observers are equal so that a tree based table 
         // can distinguish between observers. Order does NOT matter so we return 1 if the objects are not equal.
         if (this == o) {
@@ -62,7 +62,6 @@ public abstract class McObserver implements Comparable<McObserver> {
      * Gets called when a simulation has finished, directly after the termination check.
      */
     public abstract void finished();
-    @Getter
     @SuppressWarnings("PMD.UnusedPrivateField")
-    private MonteCarlo monteCarlo;
+    private final MarkovChainMonteCarlo monteCarlo;
 }

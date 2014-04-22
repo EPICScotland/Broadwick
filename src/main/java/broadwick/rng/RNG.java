@@ -15,6 +15,7 @@
  */
 package broadwick.rng;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -36,7 +37,7 @@ import org.apache.commons.math3.random.Well44497b;
 @EqualsAndHashCode
 @ToString
 @Slf4j
-public class RNG {
+public class RNG  implements Serializable {
 
     /**
      * Create a random number generator using the default JDK-provied PRNG.
@@ -74,7 +75,7 @@ public class RNG {
 
     /**
      * Get a list of valid geometries for the lattice.
-     * @return Vector<String> a list of valid lattice geometries (in uppercase)
+     * @return List<> a list of valid lattice geometries (in uppercase)
      */
     public static List<String> validGenerators() {
         final ArrayList<String> generators = new ArrayList<>(3);
@@ -201,7 +202,7 @@ public class RNG {
      * @return boolean random true/false value
      */
     public final boolean getBoolean() {
-        return getDouble(0.0, 1.0) < 0.5 ? true : false;
+        return getDouble(0.0, 1.0) < 0.5;
     }
 
     /**
@@ -285,7 +286,7 @@ public class RNG {
      * @return a random element from objects.
      */
     public final List<Object> selectManyOf(final Collection<Object> objects, final int n) {
-        Set<Integer> s = new HashSet<>(n);
+        final Set<Integer> s = new HashSet<>(n);
         while (s.size() < n) {
             s.add(getInteger(0, objects.size() - 1));
         }

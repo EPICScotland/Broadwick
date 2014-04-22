@@ -35,7 +35,7 @@ public class ModelParameterException extends RuntimeException {
      *
      * @param   s   the detail message.
      */
-    public ModelParameterException(String s) {
+    public ModelParameterException(final String s) {
         super(s);
     }
 }

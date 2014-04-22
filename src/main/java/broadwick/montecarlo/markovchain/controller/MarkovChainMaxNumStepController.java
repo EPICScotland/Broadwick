@@ -13,18 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package broadwick.montecarlo;
+package broadwick.montecarlo.markovchain.controller;
+
+import broadwick.montecarlo.markovchain.MarkovChainMonteCarlo;
 
 /**
  * Create a default controller that run 1000 steps.
  */
-public class McMaxNumStepController implements McController {
+public class MarkovChainMaxNumStepController implements MarkovChainController {
 
     /**
      * Create a Monte Carlo controller object that stops the run after a specified number of steps (a fixed path
      * length).
      */
-    public McMaxNumStepController() {
+    public MarkovChainMaxNumStepController() {
         this(1000);
     }
 
@@ -33,12 +35,12 @@ public class McMaxNumStepController implements McController {
      * length).
      * @param maxSteps the maximum length of the monte carlo chain.
      */
-    public McMaxNumStepController(final int maxSteps) {
+    public MarkovChainMaxNumStepController(final int maxSteps) {
         this.maxSteps = maxSteps;
     }
 
     @Override
-    public final boolean goOn(final MonteCarlo mc) {
+    public final boolean goOn(final MarkovChainMonteCarlo mc) {
         return mc.getNumStepsTaken() < maxSteps;
     }
     private int maxSteps;

@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package broadwick.montecarlo.acceptor;
+package broadwick.montecarlo.markovchain.controller;
 
-import broadwick.montecarlo.MonteCarloResults;
+import broadwick.montecarlo.markovchain.MarkovChainMonteCarlo;
+
 
 /**
- * Acceptor for a Monte Carlo step.
+ * Controller class for running monte carlo calculations. The controller (and its implementing classes) are responsible
+ * for determining whether or not the calculation should end.
  */
-public interface Acceptor {
+public interface MarkovChainController {
 
     /**
-     * Accept a step in a Monte Carlo path/chain based on the ratio of the results at each step.
-     * @param oldResult the results at the previous step.
-     * @param newResult the result at the current (proposed) step.
-     * @return true if the step that generated newResults is to be accepted, false otherwise.
+     * Returns whether or not to continue with the calculation.
+     * @param mc the Monte Carlo process this object is to control.
+     * @return true if the process can continue, false if it should stop after the current step.
      */
-    boolean accept(MonteCarloResults oldResult, MonteCarloResults newResult);
+    boolean goOn(MarkovChainMonteCarlo mc);
 }

@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package broadwick.montecarlo.path;
+package broadwick.montecarlo.markovchain.proposal;
 
+import broadwick.montecarlo.MonteCarloStep;
 import broadwick.rng.RNG;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -25,14 +26,14 @@ import java.util.Map;
 public class MarkovNormalProposal implements MarkovProposalFunction {
 
     @Override
-    public final Step generate(final Step step) {
+    public final MonteCarloStep generate(final MonteCarloStep step) {
 
         final Map<String, Double> proposedStep = new LinkedHashMap<>(step.getCoordinates().size());
         for (Map.Entry<String, Double> entry : step.getCoordinates().entrySet()) {
             proposedStep.put(entry.getKey(), GENERATOR.getGaussian(entry.getValue(), 1.0));
         }
         
-        return new Step(proposedStep);
+        return new MonteCarloStep(proposedStep);
     }
     
     private static final RNG GENERATOR = new RNG(RNG.Generator.Well19937c);
