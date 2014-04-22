@@ -6,7 +6,7 @@
 	    <pattern>[%thread] %-5level %msg %n</pattern>
 	</console>
 	<file>
-	    <name>broadwick.stochasticsir.log</name> 
+	    <name>montecarlo.log</name> 
 	    <level>info</level> 
 	    <pattern>[%thread] %-5level %msg %n</pattern>
 	    <overwrite>true</overwrite>
@@ -15,12 +15,8 @@
    
     <models>
 	<model id="Broadwick Project">
-	    <classname>broadwick.example.stochasticsir.StochasticSIR</classname>
-
-	    <parameter id="beta" value="0.2" />
-	    <parameter id="rho" value="0.3" />
-	    <parameter id="tMax" value="100" />
-	    <parameter id="outputFile" value="broadwick.stochasticSIR.dat" />
+	    <classname>broadwick.example.montecarlo.App</classname>
+	    <parameter id="numSimulations" value="1000000" />
 	</model>
     </models>
 </project>

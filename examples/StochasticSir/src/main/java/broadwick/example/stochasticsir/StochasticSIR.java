@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package broadwick.stochasticsir;
+package broadwick.example.stochasticsir;
 
 import broadwick.model.Model;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * A simple example on how to use a the stochastic solver of Broadwick to solve the SIR model.
+ */
 @Slf4j
 public class StochasticSIR extends Model {
 
@@ -26,7 +29,7 @@ public class StochasticSIR extends Model {
     public final void init() {
 	log.info("Initialising project");
         
-        outputFileName = getParameterValue("outputFcleaile");
+        outputFileName = getParameterValue("outputFile");
         betaVal = getParameterValueAsDouble("beta");
         rhoVal = getParameterValueAsDouble("rho");
         tMax = getParameterValueAsDouble("tMax");
@@ -46,10 +49,10 @@ public class StochasticSIR extends Model {
 	log.info("Closing project");
     }
     
-    private static String outputFileName;
-    private static double betaVal;
-    private static double rhoVal;
-    private static double tMax;
+    private String outputFileName;
+    private double betaVal;
+    private double rhoVal;
+    private double tMax;
 
 }
 

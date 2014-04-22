@@ -15,7 +15,7 @@
 
     <models>
 	<model id="Example of an abc calculation">
-	    <classname>abc.AbcExample</classname>
+	    <classname>broadwick.example.abc.AbcExample</classname>
 	</model>
     </models>
 </project>

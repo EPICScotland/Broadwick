@@ -15,7 +15,7 @@
  */
 
 /**
- * This package contains examples of how to use the ABC package.
+ * This package contains examples of how to use the Monte Carlo pacage.
  */
+package broadwick.example.montecarlo;
 
-package broadwick.example.abc;

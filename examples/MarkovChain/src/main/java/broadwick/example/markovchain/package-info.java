@@ -15,7 +15,7 @@
  */
 
 /**
- * This package contains examples of how to use the ABC package.
+ * This package contains an examples of how to create a Markov Chain.
  */
 
-package broadwick.example.abc;
+package broadwick.example.markovchain;

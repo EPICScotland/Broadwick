@@ -18,4 +18,4 @@
  * This package contains examples of how to use the ABC package.
  */
 
-package broadwick.example.abc;
+package broadwick.example.stochasticsir;

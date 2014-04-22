@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package markovchain;
+package broadwick.example.markovchain;
 
 import broadwick.io.FileOutput;
-import broadwick.montecarlo.path.MarkovChain;
-import broadwick.montecarlo.path.Step;
 import broadwick.model.Model;
+import broadwick.montecarlo.MonteCarloStep;
+import broadwick.montecarlo.markovchain.MarkovChain;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +41,7 @@ public class MarkovChainExample extends Model {
             coordinates.put("x", Double.parseDouble(step[0]));
             coordinates.put("y", Double.parseDouble(step[1]));
         }
-        initialStep = new Step(coordinates);
+        initialStep = new MonteCarloStep(coordinates);
 
         fo = new FileOutput(this.getParameterValue("outputFile"));
         fo.write("# df <- read.csv(file=\"MarkovChain.csv\", blank.lines.skip=T, header=F, comment.char = \"#\")\n");
@@ -52,7 +52,7 @@ public class MarkovChainExample extends Model {
     @Override
     public final void run() {
 
-        final Step step = new Step(initialStep);
+        final MonteCarloStep step = new MonteCarloStep(initialStep);
         fo.write(step.toString() + "\n");
         log.trace("{}", step.toString());
 
@@ -60,7 +60,7 @@ public class MarkovChainExample extends Model {
         // if we want to add a new proposal function we can add one simply like
         // final MarkovChain mc = new MarkovChain(step, new broadwick.markovchain.proposals.NormalProposal());
         for (int i = 0; i < chainLength; i++) {
-            final Step nextStep = mc.generateNextStep(mc.getCurrentStep());
+            final MonteCarloStep nextStep = mc.generateNextStep(mc.getCurrentStep());
             mc.setCurrentStep(nextStep);
 
             fo.write(nextStep.toString() + "\n");
@@ -73,6 +73,6 @@ public class MarkovChainExample extends Model {
         fo.close();
     }
     private int chainLength;
-    private Step initialStep;
+    private MonteCarloStep initialStep;
     private FileOutput fo;
 }

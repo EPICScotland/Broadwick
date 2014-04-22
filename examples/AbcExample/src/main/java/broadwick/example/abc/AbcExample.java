@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package abc;
+package broadwick.example.abc;
 
 import broadwick.abc.AbcController;
 import broadwick.abc.AbcModel;
