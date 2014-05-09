@@ -15,12 +15,16 @@ import broadwick.stochastic.StochasticSimulator;
  */
 class MySimulationController implements SimulationController {
     
+    /**
+     * Create the controller that will stop at a set time.
+     * @param maxTime the maximum time that the simulation will run for.
+     */
     public MySimulationController(final double maxTime) {
         maxT = maxTime;
     }
 
     @Override
-    public boolean goOn(StochasticSimulator process) {
+    public boolean goOn(final StochasticSimulator process) {
         return ((MyAmountManager)process.getAmountManager()).getNumberOfSusceptibles() > 0 && 
                process.getCurrentTime() < maxT;
     }

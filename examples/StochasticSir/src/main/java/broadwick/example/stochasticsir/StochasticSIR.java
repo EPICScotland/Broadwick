@@ -71,7 +71,7 @@ public class StochasticSIR extends Model {
         // we will need an observer to 'observe' our simulation and record the simulation states. First we
         // remove any obervers attached to the simulator (we can have more than one observer!).
         simulator.getObservers().clear();
-        final MyObserver observer = new MyObserver(simulator, this, outputFileName);
+        final MyObserver observer = new MyObserver(simulator, outputFileName);
         simulator.addObserver(observer);
 
         // Create a simple controller object to tell the simulator when to stop.
@@ -89,6 +89,10 @@ public class StochasticSIR extends Model {
         log.info("Closing project");
     }
     
+    /**
+     * Update the transition kernel. This method actually clears the transition kernel and re-creates it given the 
+     * number of susceptibles, infectious and removed individuals.
+     */
     protected final void updateKernel() {
         kernel.clear();
         

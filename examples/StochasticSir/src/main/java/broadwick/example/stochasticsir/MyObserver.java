@@ -28,7 +28,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class MyObserver extends Observer {
 
-    MyObserver(StochasticSimulator simulator, StochasticSIR aThis, String outputFileName) {
+    /**
+     * Create an observer for the simulation that will just save the data at each step.
+     * @param simulator the simulator that will be observed.
+     * @param outputFileName the name of the file to which the data will be saved.
+     */
+    MyObserver(final StochasticSimulator simulator, final String outputFileName) {
         super(simulator);
         output = new FileOutput(outputFileName);
     }
@@ -60,7 +65,7 @@ class MyObserver extends Observer {
     }
 
     @Override
-    public void theta(double thetaTime, Collection<Object> events) {
+    public void theta(final double thetaTime, final Collection<Object> events) {
         log.info("Performing a theta event at t={}", thetaTime);
         for (Object theta: events) {
             // I know that the only theta event I've added to the model is a MyThetaEvent
@@ -69,13 +74,13 @@ class MyObserver extends Observer {
     }
 
     @Override
-    public void observeEvent(SimulationEvent event, double tau, int times) {
+    public void observeEvent(final SimulationEvent event, final double tau, final int times) {
         // we don't need to record each event but we can log it in case we want to see it later.
         // Note: this method will cause event.toString() to be called BEFORE checking if the log message should be run,
         // if speed is important to your simulation then perhaps wrap this call with  if (log.isTraceEnabled()) {...}
         log.trace("Observing event {}", event.toString());
     }
 
-    final private FileOutput output;
+     private final FileOutput output;
 
 }

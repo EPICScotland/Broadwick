@@ -31,9 +31,9 @@ class MyAmountManager implements AmountManager {
     /**
      * Create the amount manager. Normally we would define simulation states and event in separate classes but since, in
      * this case, they are quite simple we will define them here and allow accessors to get access to them.
-     * @param s the number of susceptibles in the simulation.
-     * @param i the number of infectious in the simulation.
-     * @param r the number of removed in the simulation.
+     * @param s     the number of susceptibles in the simulation.
+     * @param i     the number of infectious in the simulation.
+     * @param r     the number of removed in the simulation.
      * @param model the model is told to update the transition probabilities when the numbers of S/I/R are changed.
      */
     MyAmountManager(final int s, final int i, final int r, final StochasticSIR model) {
@@ -64,10 +64,10 @@ class MyAmountManager implements AmountManager {
     }
 
     @Override
-    public void performEvent(SimulationEvent event, int times) {
-        log.trace("{}", String.format("Performing event %s->%s %d times.", 
-                                     event.getInitialState().getStateName(), event.getFinalState().getStateName(), times));
-        
+    public void performEvent(final SimulationEvent event, final int times) {
+        log.trace("{}", String.format("Performing event %s->%s %d times.",
+                                      event.getInitialState().getStateName(), event.getFinalState().getStateName(), times));
+
         if (event.getInitialState().equals(susceptible) && event.getFinalState().equals(infectious)) {
             // the event was a S->I so decrease numberOfSusceptibles and increase numberOfInfectious
             final int numToBeRemoved = numberOfSusceptibles - Math.max(0, numberOfSusceptibles - times);
@@ -81,7 +81,7 @@ class MyAmountManager implements AmountManager {
         } else {
             log.error("Event {} undefined.", event.toString());
         }
-        
+
         // Now that the populations of S/I/R have changed we need to update our kernel
         model.updateKernel();
     }
@@ -119,7 +119,6 @@ class MyAmountManager implements AmountManager {
         //        numberOfInfectious = numberOfInfectiousSaved;
         //        numberOfRemoved = numberOfRemovedSaved;
     }
-    
 
     @Getter
     @Setter
@@ -135,6 +134,6 @@ class MyAmountManager implements AmountManager {
     private final SimulationState infectious;
     @Getter
     private final SimulationState removed;
-    final private StochasticSIR model;
+    private final StochasticSIR model;
 
 }

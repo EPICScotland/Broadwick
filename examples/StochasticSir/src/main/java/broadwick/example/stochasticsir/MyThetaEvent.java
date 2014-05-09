@@ -20,15 +20,22 @@ package broadwick.example.stochasticsir;
  */
 public class MyThetaEvent {
 
+    /**
+     * Create the theta event that will add 50 to the susceptibles.
+     * @param amountManager 
+     */
     public MyThetaEvent(final MyAmountManager amountManager) {
         this.amountManager = amountManager;
     }
     
-    public void doThetaEvent() {
+    /**
+     * Perform an event that we call a theta event. Here we will just add 50 individuals to the susceptibles.
+     */
+    public final void doThetaEvent() {
         
         amountManager.setNumberOfSusceptibles(amountManager.getNumberOfSusceptibles()+50);
     }
     
     
-    public final MyAmountManager amountManager;
+    private final MyAmountManager amountManager;
 }
