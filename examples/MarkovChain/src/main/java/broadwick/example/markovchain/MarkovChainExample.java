@@ -58,7 +58,7 @@ public class MarkovChainExample extends Model {
 
         final MarkovChain mc = new MarkovChain(step);
         // if we want to add a new proposal function we can add one simply like
-        // final MarkovChain mc = new MarkovChain(step, new broadwick.markovchain.proposals.NormalProposal());
+        // final MarkovChain mc = new MarkovChain(step, new broadwick.montecarlo.markovchain.proposal.MarkovNormalProposal());
         for (int i = 0; i < chainLength; i++) {
             final MonteCarloStep nextStep = mc.generateNextStep(mc.getCurrentStep());
             mc.setCurrentStep(nextStep);

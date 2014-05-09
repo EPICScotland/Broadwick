@@ -30,8 +30,7 @@ public class App extends Model {
         mc = new MonteCarlo(new Simulation(),
                             this.getParameterValueAsInteger("numSimulations"));
 
-        final MyResults results = new MyResults();
-        mc.setResultsConsumer(results);
+        mc.setResultsConsumer(new MyResultsConsumer());
     }
 
     @Override
@@ -41,7 +40,7 @@ public class App extends Model {
 
         // this should return a Samples object. The results class should contain a samples object for each measureable in 
         // the simulation......
-        final MyResults results = (MyResults) mc.getResults();
+        final MyResultsConsumer results = (MyResultsConsumer) mc.getResults();
         log.info("Hits : Misses = {}", results.toCsv());
         log.info("Estimation of Pi = {}", 4*results.getExpectedValue());
     }
@@ -77,7 +76,7 @@ class Simulation extends MonteCarloScenario {
         // to those that lie insode the square is pi/4.
 
         // In this simulation we wil throw one dart!
-        final MyResults results = new MyResults();
+        final MyResultsConsumer results = new MyResultsConsumer();
 
         final double x = rng.getDouble(-1, 1);
         final double y = rng.getDouble(-1, 1);
@@ -99,7 +98,7 @@ class Simulation extends MonteCarloScenario {
  * MonteCarloResults object that contains the results of the simulation above. It records the number of 
  * hits and misses and serves the fraction of throws that 'hit' as the explected value.
  */
-class MyResults implements MonteCarloResults {
+class MyResultsConsumer implements MonteCarloResults {
 
     @Override
     public double getExpectedValue() {
@@ -118,7 +117,7 @@ class MyResults implements MonteCarloResults {
 
     @Override
     public MonteCarloResults join(final MonteCarloResults results) {
-        final MyResults r = (MyResults) results;
+        final MyResultsConsumer r = (MyResultsConsumer) results;
         this.hits.add(r.hits);
         this.misses.add(r.misses);
         
