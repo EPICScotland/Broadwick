@@ -36,9 +36,10 @@ public class TransitionKernel implements Cloneable {
     }
 
     /**
-     * @see{@code Object.clone()}
+     * Copy this kernel object.
      * @return a copy of this object.
      * @throws CloneNotSupportedException if cloneable is not implemented.
+     * @see{@code Object.clone()}
      */
     @Override
     public final Object clone() throws CloneNotSupportedException {

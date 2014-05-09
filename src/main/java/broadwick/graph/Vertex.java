@@ -20,11 +20,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.apache.commons.lang.StringUtils;
 
 /**
  * This class represents a generic vertex (node) in a graph.
  */
+@ToString
 public class Vertex implements Serializable {
 
     /**

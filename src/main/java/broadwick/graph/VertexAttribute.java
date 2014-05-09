@@ -1,5 +1,6 @@
 package broadwick.graph;
 
+import java.io.Serializable;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +10,7 @@ import lombok.Setter;
  */
 @Data
 @SuppressWarnings("all")
-public class VertexAttribute {
+public class VertexAttribute implements Serializable {
 
     /**
      * Create a node attribute object setting the value to be the default value.

@@ -71,8 +71,12 @@ process_chains <- function(datafile, burnin) {
   chain <- try(read.csv(datafile, sep=opt$separator,  comment.char = "#", header=FALSE), silent=TRUE)
   if (class(chain) != "try-error") {
     if (opt$plot != -1) {
+    ####################print (chain)
       # filter out the rejected samples from the data frame.
       dataSubSet <- subset(chain, chain[,opt$plot] == 1)
+    ####################print (dataSubSet)
+    ####################print (chain[,opt$plot])
+    ####################print (opt$plot)
       
       # now remove the burn-in samples (if the burn-in is larger than the samples ignore data set)
       if (burnin < 0) {
@@ -83,7 +87,10 @@ process_chains <- function(datafile, burnin) {
         chain <- dataSubSet[0,]
       }
     }
+    #####################print (chain)
     chain <- subset(chain, chain[,opt$score] > opt$xmin)
+
+    #####################print (chain)
     
     if (nrow(chain) > 1 ) {
       cat (sprintf("                             merging %s (%d rows)\n", datafile, nrow(chain)))
@@ -100,6 +107,7 @@ process_chains <- function(datafile, burnin) {
   }
 }
 
+
 # process the chains by reading the files, removing any burn-in and 
 # then creating a single combined chain, list of chains etc for further plotting.
 invisible(mapply(process_chains, files, burn_in))
@@ -107,6 +115,8 @@ invisible(mapply(process_chains, files, burn_in))
 # do some further filtering on the processed data e.g. extract the parameters for
 # the maximum value of the score command line argument and
 data <- processedData$chain
+####################print ("data")
+####################print (data)
 
 mergedParameterChains <- data.matrix(data[opt_columns])
 maxScore <- (max( data[,opt$score] ))
