@@ -21,7 +21,7 @@ import broadwick.rng.RNG;
 /**
  * A Metropolis-Hastings acceptor.
  */
-public class MetropolisHastings implements Acceptor {
+public class MetropolisHastings implements MonteCarloAcceptor {
     
     /**
      * Create a MetropolisHastings acceptor with a given random seed.

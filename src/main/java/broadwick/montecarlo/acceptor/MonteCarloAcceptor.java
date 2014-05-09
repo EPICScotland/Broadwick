@@ -18,9 +18,9 @@ package broadwick.montecarlo.acceptor;
 import broadwick.montecarlo.MonteCarloResults;
 
 /**
- * Acceptor for a Monte Carlo step.
+ * MonteCarloAcceptor for a Monte Carlo step.
  */
-public interface Acceptor {
+public interface MonteCarloAcceptor {
 
     /**
      * Accept a step in a Monte Carlo path/chain based on the ratio of the results at each step.

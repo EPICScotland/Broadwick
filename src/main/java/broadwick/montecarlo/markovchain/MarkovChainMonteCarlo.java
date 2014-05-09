@@ -22,7 +22,7 @@ import broadwick.montecarlo.markovchain.controller.MarkovChainController;
 import broadwick.io.FileOutput;
 import broadwick.montecarlo.MonteCarloScenario;
 import broadwick.montecarlo.MonteCarloResults;
-import broadwick.montecarlo.acceptor.Acceptor;
+import broadwick.montecarlo.acceptor.MonteCarloAcceptor;
 import broadwick.montecarlo.acceptor.MetropolisHastings;
 import broadwick.rng.RNG;
 import java.util.HashSet;
@@ -136,7 +136,7 @@ public class MarkovChainMonteCarlo {
     @Setter
     private int thinningInterval = 0;
     @Setter
-    private Acceptor acceptor;
+    private MonteCarloAcceptor acceptor;
     @Setter
     private MarkovChainController mcController;
     @Getter
