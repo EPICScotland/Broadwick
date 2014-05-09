@@ -83,7 +83,7 @@
 
         <buildnumber-maven-plugin.version>1.2</buildnumber-maven-plugin.version>
         <ch.qos.logback.version>1.1.2</ch.qos.logback.version>
-        <com.google.guava.version>17.0-rc2</com.google.guava.version>
+        <com.google.guava.version>17.0</com.google.guava.version>
         <jacoco-maven-plugin.version>0.7.0.201403182114</jacoco-maven-plugin.version>
         <jdk.version>1.7</jdk.version>
         <joda-time.version>2.3</joda-time.version>
@@ -91,12 +91,12 @@
         <junit.junit.version>4.11</junit.junit.version>
         <jung.version>2.0.1</jung.version>	
         <onejar-plugin.version>1.4.5</onejar-plugin.version>
-        <org.h2.version>1.4.177</org.h2.version>
+        <org.h2.version>1.4.178</org.h2.version>
         <org.apache.mahout.commons.commons-cli.version>2.0-mahout</org.apache.mahout.commons.commons-cli.version>
         <org.apache.commons.lang3.version>3.3.2</org.apache.commons.lang3.version>  
         <org.apache.commons-math3.version>3.2</org.apache.commons-math3.version>
         <org.jdom.version>2.0.2</org.jdom.version>
-        <org.jooq.version>3.3.1</org.jooq.version>
+        <org.jooq.version>3.3.2</org.jooq.version>
         <org.jvnet.jaxb2_commons.version>0.4.1.5</org.jvnet.jaxb2_commons.version>
         <org.projectlombok.lombok.version>1.12.6</org.projectlombok.lombok.version>
         <org.slf4j.slf4j-api.version>1.7.7</org.slf4j.slf4j-api.version>
