@@ -19,7 +19,7 @@
 
 	<jdk.version>1.7</jdk.version>
 	<junit.junit.version>4.11</junit.junit.version>
-	<broadwick.version>1.2</broadwick.version>
+	<broadwick.version>1.1</broadwick.version>
 	<maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
 	<onejar-plugin.version>1.4.5</onejar-plugin.version>
     </properties>
