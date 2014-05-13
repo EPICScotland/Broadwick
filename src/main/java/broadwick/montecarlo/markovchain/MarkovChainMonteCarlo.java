@@ -15,15 +15,16 @@
  */
 package broadwick.montecarlo.markovchain;
 
-import broadwick.montecarlo.MonteCarloStep;
-import broadwick.montecarlo.markovchain.observer.MarkovChainObserver;
-import broadwick.montecarlo.markovchain.controller.MarkovChainMaxNumStepController;
-import broadwick.montecarlo.markovchain.controller.MarkovChainController;
 import broadwick.io.FileOutput;
-import broadwick.montecarlo.MonteCarloScenario;
+import broadwick.montecarlo.MonteCarlo;
 import broadwick.montecarlo.MonteCarloResults;
-import broadwick.montecarlo.acceptor.MonteCarloAcceptor;
+import broadwick.montecarlo.MonteCarloScenario;
+import broadwick.montecarlo.MonteCarloStep;
 import broadwick.montecarlo.acceptor.MetropolisHastings;
+import broadwick.montecarlo.acceptor.MonteCarloAcceptor;
+import broadwick.montecarlo.markovchain.controller.MarkovChainController;
+import broadwick.montecarlo.markovchain.controller.MarkovChainMaxNumStepController;
+import broadwick.montecarlo.markovchain.observer.MarkovChainObserver;
 import broadwick.rng.RNG;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,25 +40,34 @@ public class MarkovChainMonteCarlo {
 
     /**
      * Create a Monte Carlo instance.
-     * @param model     The Monte Carlo Model to be run.
-     * @param generator the object that will generate the Monte Carlo chain/path.
+     * @param model              The Monte Carlo Model to be run.
+     * @param consumer the object that will consume and aggregate the MC results.
+     * @param generator          the object that will generate the Monte Carlo chain/path.
+     * @param numMonteCarloSteps the number on MC steps to run fr each MC simulation.
      */
-    public MarkovChainMonteCarlo(final MonteCarloScenario model, final MarkovStepGenerator generator) {
-        this(model, new MarkovChainMaxNumStepController(1000), generator);
+    public MarkovChainMonteCarlo(final MonteCarloScenario model, final MonteCarloResults consumer,
+                                 final MarkovStepGenerator generator,
+                                 final int numMonteCarloSteps) {
+        this(model, consumer, new MarkovChainMaxNumStepController(1000), generator, numMonteCarloSteps);
     }
 
     /**
      * Create a Monte Carlo instance.
-     * @param model      The Monte Carlo Model to be run.
-     * @param controller the controller object for this class.
-     * @param generator  the object that will generate the Monte Carlo chain/path.
+     * @param model              The Monte Carlo Model to be run.
+     * @param consumer the object that will consume and aggregate the MC results.
+     * @param controller         the controller object for this class.
+     * @param generator          the object that will generate the Monte Carlo chain/path.
+     * @param numMonteCarloSteps the number on MC steps to run fr each MC simulation.
      */
-    public MarkovChainMonteCarlo(final MonteCarloScenario model, final MarkovChainController controller,
-                      final MarkovStepGenerator generator) {
+    public MarkovChainMonteCarlo(final MonteCarloScenario model, final MonteCarloResults consumer, 
+                                 final MarkovChainController controller,
+                                 final MarkovStepGenerator generator, final int numMonteCarloSteps) {
         this.observers = new HashSet<>(1);
         this.model = model;
+        this.consumer = consumer;
         this.mcController = controller;
         this.pathGenerator = generator;
+        this.numMonteCarloSteps = numMonteCarloSteps;
         this.acceptor = new MetropolisHastings(GENERATOR.getInteger(Integer.MIN_VALUE, Integer.MAX_VALUE));
     }
 
@@ -65,13 +75,13 @@ public class MarkovChainMonteCarlo {
      * Run the MonteCarlo Simulation.
      */
     public final void run() {
-        
+
         MonteCarloStep currentStep = pathGenerator.getInitialStep();
 
         writer.write("# Steps taken [1]\n");
         writer.write("# Current step accepted? [2]\n");
-        writer.write(String.format("# Current step coordinates [3-%d]\n", (2+currentStep.getCoordinates().size())));
-        writer.write(String.format("# Results for current step [%d-n]\n", (3+currentStep.getCoordinates().size())));
+        writer.write(String.format("# Current step coordinates [3-%d]\n", (2 + currentStep.getCoordinates().size())));
+        writer.write(String.format("# Results for current step [%d-n]\n", (3 + currentStep.getCoordinates().size())));
 
         for (MarkovChainObserver observer : observers) {
             observer.started();
@@ -79,16 +89,24 @@ public class MarkovChainMonteCarlo {
 
         log.info("Running Monte Carlo simulation with initial step {}", currentStep.toString());
         model.setStep(currentStep);
-        MonteCarloResults prevResults = model.run();
+
+        MonteCarlo mc = new MonteCarlo(model, numMonteCarloSteps);
+        mc.setResultsConsumer(consumer);
+        mc.run();
+        MonteCarloResults prevResults = mc.getResults();
         writer.write("%d,%d,%s,%s\n", numStepsTaken, 1, currentStep.toString(), prevResults.toCsv());
-            
+
         while (mcController.goOn(this)) {
             numStepsTaken++;
             int stepsSinceLastMeasurement = 0;
             final MonteCarloStep proposedStep = pathGenerator.generateNextStep(currentStep);
             model.setStep(proposedStep);
-            final MonteCarloResults currentResults = model.run();
-            
+
+            mc = new MonteCarlo(model, numMonteCarloSteps);
+            mc.setResultsConsumer(consumer);
+            mc.run();
+            final MonteCarloResults currentResults = mc.getResults();
+
             for (MarkovChainObserver observer : observers) {
                 observer.step();
             }
@@ -145,6 +163,8 @@ public class MarkovChainMonteCarlo {
     private FileOutput writer = new FileOutput();
     private MonteCarloScenario model;
     private MarkovStepGenerator pathGenerator;
+    private MonteCarloResults consumer;
+    private int numMonteCarloSteps;
     private static final RNG GENERATOR = new RNG(RNG.Generator.Well19937c);
     // TODO measure [auto]correlation function(s)
 }
