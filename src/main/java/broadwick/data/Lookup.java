@@ -746,17 +746,17 @@ public final class Lookup {
 
         try {
             id = (String) locationRecord.getValue(LocationsFileReader.getID());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             easting = (Double) locationRecord.getValue(LocationsFileReader.getEASTING());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             northing = (Double) locationRecord.getValue(LocationsFileReader.getNORTHING());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
 
@@ -787,33 +787,33 @@ public final class Lookup {
 
         try {
             id = (String) animalRecord.getValue(PopulationsFileReader.getID());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             log.trace("error {}", e.getLocalizedMessage());
             // ignore - the field was not in the record.
         }
         try {
             dob = (Integer) animalRecord.getValue(PopulationsFileReader.getDATE_OF_BIRTH());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             lob = (String) animalRecord.getValue(PopulationsFileReader.getLOCATION_OF_BIRTH());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             dod = (Integer) animalRecord.getValue(PopulationsFileReader.getDATE_OF_DEATH());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             lod = (String) animalRecord.getValue(PopulationsFileReader.getLOCATION_OF_DEATH());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             species = (String) animalRecord.getValue(PopulationsFileReader.getSPECIES());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
 
@@ -845,22 +845,22 @@ public final class Lookup {
 
         try {
             id = (String) testRecord.getValue(TestsFileReader.getID());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             group = (String) testRecord.getValue(TestsFileReader.getGROUP_ID());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             location = (String) testRecord.getValue(TestsFileReader.getLOCATION_ID());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             testDate = (Integer) testRecord.getValue(TestsFileReader.getTEST_DATE());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
@@ -870,7 +870,7 @@ public final class Lookup {
             } else {
                 positiveResult = Boolean.TRUE;
             }
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
@@ -880,7 +880,7 @@ public final class Lookup {
             } else {
                 negativeResult = Boolean.TRUE;
             }
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
 
@@ -914,47 +914,47 @@ public final class Lookup {
 
         try {
             id = (String) movementRecord.getValue(FullMovementsFileReader.getID());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             batchSize = (Integer) movementRecord.getValue(BatchedMovementsFileReader.getBATCH_SIZE());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             departureDate = (Integer) movementRecord.getValue(FullMovementsFileReader.getDEPARTURE_DATE());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             departureId = (String) movementRecord.getValue(FullMovementsFileReader.getDEPARTURE_ID());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             destinationDate = (Integer) movementRecord.getValue(FullMovementsFileReader.getDESTINATION_DATE());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             destinationId = (String) movementRecord.getValue(FullMovementsFileReader.getDESTINATION_ID());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             marketDate = (Integer) movementRecord.getValue(BatchedMovementsFileReader.getMARKET_DATE());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             marketId = (String) movementRecord.getValue(BatchedMovementsFileReader.getMARKET_ID());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         try {
             species = (String) movementRecord.getValue(DirectedMovementsFileReader.getSPECIES());
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
         // For directed movements, set the appropriate destination/departure id and dates.
@@ -967,7 +967,7 @@ public final class Lookup {
                 departureId = (String) movementRecord.getValue(DirectedMovementsFileReader.getLOCATION_ID());
                 departureDate = (Integer) movementRecord.getValue(DirectedMovementsFileReader.getMOVEMENT_DATE());
             }
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             // ignore - the field was not in the record.
         }
 
