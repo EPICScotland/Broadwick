@@ -37,7 +37,7 @@ import org.apache.commons.math3.random.Well44497b;
 @EqualsAndHashCode
 @ToString
 @Slf4j
-public class RNG  implements Serializable {
+public class RNG implements Serializable {
 
     /**
      * Create a random number generator using the default JDK-provied PRNG.
@@ -236,6 +236,24 @@ public class RNG  implements Serializable {
         return objects[getInteger(0, objects.length - 1)];
     }
 
+    /**
+     * Randomly pick an object from an array of objects.
+     * @param objects an array of objects, one of whom is to be picked.
+     * @param probabilities the probabilities of selecting each of the objects.
+     * @return a random element from objects.
+     */
+    public final Object selectOneOf(final Object[] objects, final double[] probabilities) {
+        double r = getDouble();
+        double cdf = 0.0;
+        for (int i = 0; i<objects.length; i++) {
+            cdf += probabilities[i];
+            if (r <= cdf) {
+                return objects[i];
+            }
+        }
+        return objects[objects.length];
+    }
+    
     /**
      * Randomly pick an object from an array of objects.
      * @param objects an array of objects, one of whom is to be picked.
