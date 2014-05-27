@@ -41,6 +41,7 @@ public class MarkovChainMaxNumStepController implements MarkovChainController {
 
     @Override
     public final boolean goOn(final MarkovChainMonteCarlo mc) {
+        
         return mc.getNumStepsTaken() < maxSteps;
     }
     private int maxSteps;

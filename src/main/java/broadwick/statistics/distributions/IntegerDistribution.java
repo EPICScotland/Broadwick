@@ -356,7 +356,9 @@ public class IntegerDistribution implements Serializable {
         for (Map.Entry<Integer, Integer> entry : bins.entrySet()) {
             str.append(entry.getValue()).append(",");
         }
-        str.deleteCharAt(str.length() - 1);
+        if (str.length() > 0) {
+            str.deleteCharAt(str.length() - 1);
+        }
         return str.toString();
     }
     private ConcurrentMap<Integer, Integer> bins;

@@ -15,6 +15,7 @@
  */
 package broadwick.stochastic;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 import java.util.Collection;
@@ -131,7 +132,7 @@ public abstract class StochasticSimulator {
                 observer.finished();
             }
         } catch (Exception e) {
-            log.error("Error running stochastic simulation. {}", e.getLocalizedMessage());
+            log.error("Error running stochastic simulation. {}", Throwables.getStackTraceAsString(e));
             throw (e);
         }
     }
