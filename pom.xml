@@ -120,6 +120,7 @@
         <maven-site-plugin.version>3.2</maven-site-plugin.version>
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <maven-surefire-plugin.version>2.14.1</maven-surefire-plugin.version>
+        <uk.com.robust-it.cloning.version>1.9.0</uk.com.robust-it.cloning.version>
     </properties>
 
     <pluginRepositories>
@@ -175,19 +176,22 @@
             <artifactId>maven-jaxb2-plugin</artifactId>
             <version>${maven-jaxb2-plugin.version}</version>
         </dependency>
-        
         <dependency>
             <groupId>org.jvnet.jaxb2_commons</groupId>
             <artifactId>runtime</artifactId>
             <version>${org.jvnet.jaxb2_commons.version}</version>
         </dependency>
-        
         <dependency>
             <groupId>org.jdom</groupId>
             <artifactId>jdom</artifactId>
             <version>${org.jdom.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>uk.com.robust-it</groupId>
+            <artifactId>cloning</artifactId>
+            <version>${uk.com.robust-it.cloning.version}</version>
+        </dependency>
+        
         <!-- Graph dependency -->
         <dependency>
             <groupId>net.sf.jung</groupId>
