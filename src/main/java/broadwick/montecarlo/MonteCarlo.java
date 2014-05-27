@@ -22,7 +22,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 
@@ -142,15 +141,19 @@ public class MonteCarlo {
     }
 
     /**
-     * Get a copy of the results from the simulation.
+     * Get a copy of the results from the simulation. This method MUST return a copy of the results NOT a reference.
      * @return the MonteCarloResults object that contains the results of all the simulations.
      */
     public final MonteCarloResults getResults() {
-        return resultsConsumer;
+        return CloneUtils.deepClone(resultsConsumer);
     }
 
+    public final void setResultsConsumer(final MonteCarloResults consumer) {
+        resultsConsumer = consumer;
+        resultsConsumer.reset();
+    }
+    
     private final MonteCarloScenario simulation;
-    @Setter
     private MonteCarloResults resultsConsumer;
     private final int numSimulations;
 }
@@ -178,5 +181,10 @@ class Poison implements MonteCarloResults {
     @Override
     public final MonteCarloResults join(final MonteCarloResults results) {
         return results;
+    }
+
+    @Override
+    public void reset() {
+        // do nothing - this is a poison pill
     }
 }

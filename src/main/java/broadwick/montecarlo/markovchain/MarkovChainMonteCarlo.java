@@ -95,9 +95,9 @@ public class MarkovChainMonteCarlo {
         mc.run();
         MonteCarloResults prevResults = mc.getResults();
         writer.write("%d,%d,%s,%s\n", numStepsTaken, 1, currentStep.toString(), prevResults.toCsv());
+            numStepsTaken++;
 
         while (mcController.goOn(this)) {
-            numStepsTaken++;
             int stepsSinceLastMeasurement = 0;
             final MonteCarloStep proposedStep = pathGenerator.generateNextStep(currentStep);
             model.setStep(proposedStep);
@@ -130,6 +130,7 @@ public class MarkovChainMonteCarlo {
             } else {
                 log.info("Rejected Monte Carlo step {}", proposedStep.toString());
             }
+            numStepsTaken++;
         }
 
         for (MarkovChainObserver observer : observers) {
