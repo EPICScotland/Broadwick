@@ -56,11 +56,12 @@ class MyObserver extends Observer {
     @Override
     public void finished() {
         log.info("Finished Observing using MyObserver.");
-        output.write("#df <- read.table('broadwick.stochasticSIR.dat', sep=\"\\t\")");
-        output.write("#cols <- c(\"yellow\", \"red\", \"blue\")");
-        output.write("#plot(df$V1, df$V2, type=\"l\", xlim=c(0,max(df$V1)), ylim=c(0,150), col=cols[1])");
-        output.write("#lines (df$V1, df$V3, type=\"l\", col=cols[2])");
-        output.write("#lines (df$V1, df$V4, type=\"l\", col=cols[3])");
+        output.write("#timeSeries <- read.table('broadwick.stochasticSIR.dat', sep=\"\\t\")\n");
+        output.write("#pdf(file=\"broadwick.stochasticSIR.pdf\", onefile=FALSE, width=7.5, height=7.5)\n");
+        output.write("#cols <- c(\"yellow\", \"red\", \"blue\")\n");
+        output.write("#plot(timeSeries$V1, timeSeries$V2, type=\"l\", xlim=c(0,max(timeSeries$V1)), ylim=c(0,150), col=cols[1])\n");
+        output.write("#lines (timeSeries$V1, timeSeries$V3, type=\"l\", col=cols[2])\n");
+        output.write("#lines (timeSeries$V1, timeSeries$V4, type=\"l\", col=cols[3])\n");
         output.close();
     }
 

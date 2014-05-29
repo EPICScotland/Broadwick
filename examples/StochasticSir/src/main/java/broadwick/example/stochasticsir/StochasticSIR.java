@@ -35,6 +35,9 @@ public class StochasticSIR extends Model {
 
     @Override
     public final void init() {
+	log.info("Initialising project");
+        
+        outputFileName = getParameterValue("outputFile");
         log.info("Initialising project");
 
         outputFileName = getParameterValue("outputFile");
@@ -101,6 +104,7 @@ public class StochasticSIR extends Model {
         kernel.addToKernel(new SimulationEvent(amountManager.getInfectious(), amountManager.getRemoved()), 
                            amountManager.getNumberOfInfectious()*rhoVal);
     }
+
 
     private String outputFileName;
     private double betaVal;
