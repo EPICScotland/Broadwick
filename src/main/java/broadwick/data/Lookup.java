@@ -141,6 +141,47 @@ public final class Lookup {
     }
 
     /**
+     * Get the number of movements stored in the internal database filtered on a date range.
+     * @param startDate the first date in the range with which we will filter the movements
+     * @param endDate   the final date in the range with which we will filter the movements
+     * @return a collection of movement events that have been recorded.
+     */
+    public int getNumMovements(final int startDate, final int endDate) {
+        int numMovements = 0;
+
+        try {
+            numMovements = jooq.selectCount().from(BatchedMovementsFileReader.getTABLE_NAME())
+                    .where(String.format("%s >= %d and %s <= %d",
+                                         BatchedMovementsFileReader.getDEPARTURE_DATE(), startDate,
+                                         BatchedMovementsFileReader.getDESTINATION_DATE(), endDate)).fetch().get(0).value1();
+        } catch (org.jooq.exception.DataAccessException e) {
+            log.trace("Could not get number of movements from {} - perhaps the table hasn't been created.",
+                      BatchedMovementsFileReader.getTABLE_NAME());
+        }
+        try {
+            numMovements += jooq.selectCount().from(FullMovementsFileReader.getTABLE_NAME())
+                    .where(String.format("%s >= %d and %s <= %d",
+                                         FullMovementsFileReader.getDEPARTURE_DATE(), startDate,
+                                         FullMovementsFileReader.getDESTINATION_DATE(), endDate))
+                    .fetch().get(0).value1();
+        } catch (org.jooq.exception.DataAccessException e) {
+            log.trace("Could not get number of movements from {} - perhaps the table hasn't been created.",
+                      FullMovementsFileReader.getTABLE_NAME());
+        }
+        try {
+            numMovements += jooq.selectCount().from(DirectedMovementsFileReader.getTABLE_NAME())
+                    .where(String.format("%s >= %d and %s <= %d",
+                                         DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate,
+                                         DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate))
+                    .fetch().get(0).value1();
+        } catch (org.jooq.exception.DataAccessException e) {
+            log.trace("Could not get number of movements from {} - perhaps the table hasn't been created.",
+                      DirectedMovementsFileReader.getTABLE_NAME());
+        }
+        return numMovements;
+    }
+
+    /**
      * Get all the movements that have been read from the file(s) specified in the configuration file.
      * @return a collection of movement events that have been recorded.
      */
@@ -821,7 +862,6 @@ public final class Lookup {
 //        for (int i = 6; i < animalRecord.size(); i++) {
 //            animalRecord.getValue(i);
 //        }
-
         log.trace("Creating animal object for {}",
                   String.format("%s (%s) dob:%d[%s] dod:%d[%s]", id, species, dob, lob, dod, lod));
 
@@ -888,7 +928,6 @@ public final class Lookup {
 //        for (int i = 6; i < testRecord.size(); i++) {
 //            testRecord.getValue(i);
 //        }
-
         log.trace("Creating test object for {}",
                   String.format("%s group:%s location:%s date:%d pos:%s neg:%s", id, group, location, testDate, positiveResult, negativeResult));
 
@@ -975,7 +1014,6 @@ public final class Lookup {
 //        for (int i = 6; i < testRecord.size(); i++) {
 //            testRecord.getValue(i);
 //        }
-
         log.trace("Creating movement object for {}",
                   String.format("%s batchSize:%d departureDate:%d departureId:%s destinationDate:%d destinationId:%s marketDate:%s marketId:%s species:%s",
                                 id, batchSize, departureDate, departureId, destinationDate, destinationId, marketDate, marketId, species));

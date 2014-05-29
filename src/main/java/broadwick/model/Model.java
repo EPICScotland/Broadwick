@@ -15,6 +15,7 @@
  */
 package broadwick.model;
 
+import broadwick.BroadwickException;
 import broadwick.config.generated.Parameter;
 import broadwick.config.generated.Prior;
 import broadwick.config.generated.UniformPrior;
@@ -104,8 +105,8 @@ public abstract class Model {
                 }
             }).getValue();
         } catch (java.util.NoSuchElementException e) {
-            log.error("Could not find parameter [{}] in configuration file.", name);
-            throw new ModelParameterException("Could not find parameter [" + name + "] in configuration file.");
+            log.error("{} in is not configured for the model.", name);
+            throw new BroadwickException(String.format("Could not find parameter %s in configuration file.", name));
         }
     }
 

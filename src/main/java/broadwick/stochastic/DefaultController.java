@@ -21,7 +21,7 @@ import lombok.Setter;
 /**
  * A simple implementation of a {@link SimulationController} causing the simulation to stop after a given time.
  */
-class DefaultController implements SimulationController {
+public class DefaultController implements SimulationController {
 
     /**
      * Creates the controller for a given time where the simulation has to stop.

@@ -65,7 +65,7 @@ public class FileOutput implements AutoCloseable {
     public FileOutput(final String dataFileName, final boolean addVersion, final String encoding) {
         try {
             fileEncoding = encoding;
-            buffer = new BufferedOutputStream(new FileOutputStream(dataFileName));
+            buffer = new BufferedOutputStream(new FileOutputStream(dataFileName, true));
             if (addVersion) {
                 buffer.write("# Version : ".getBytes(fileEncoding));
                 buffer.write(BroadwickVersion.getVersionAndTimeStamp().getBytes(fileEncoding));

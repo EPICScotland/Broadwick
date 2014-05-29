@@ -112,8 +112,7 @@ public class MultinomialDistribution implements Serializable {
         }
 
         if (sumX != numSamples) {
-            log.error("Multinomial distribution error: Sum_x [{}] != number of samples [{}].", sumX, numSamples);
-            return 0.0;
+            throw new IllegalArgumentException(String.format("Multinomial distribution error: Sum_x [%d] != number of samples [%d].", sumX, numSamples));
         } else {
             return Math.exp(Factorial.lnFactorial(numSamples) - sumXFact + sumPX);
         }
