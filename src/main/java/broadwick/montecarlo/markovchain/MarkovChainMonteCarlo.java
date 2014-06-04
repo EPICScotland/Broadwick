@@ -162,8 +162,10 @@ public class MarkovChainMonteCarlo {
     private Set<MarkovChainObserver> observers;
     @Setter
     private FileOutput writer = new FileOutput();
+    @Getter
     private MonteCarloScenario model;
     private MarkovStepGenerator pathGenerator;
+    @Getter
     private MonteCarloResults consumer;
     private int numMonteCarloSteps;
     private static final RNG GENERATOR = new RNG(RNG.Generator.Well19937c);

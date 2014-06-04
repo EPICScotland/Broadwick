@@ -63,5 +63,5 @@ public abstract class MarkovChainObserver implements Comparable<MarkovChainObser
      */
     public abstract void finished();
     @SuppressWarnings("PMD.UnusedPrivateField")
-    private final MarkovChainMonteCarlo monteCarlo;
+    protected final MarkovChainMonteCarlo monteCarlo;
 }
