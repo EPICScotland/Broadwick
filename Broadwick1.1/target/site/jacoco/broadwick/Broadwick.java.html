@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Broadwick.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="right"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.html" class="el_package">broadwick</a> &gt; <span class="el_source">Broadwick.java</span></div><h1>Broadwick.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick;
+
+import broadwick.config.ConfigValidationErrors;
+import broadwick.config.ConfigValidator;
+import broadwick.config.generated.Logs;
+import broadwick.config.generated.Models;
+import broadwick.config.generated.Project;
+import broadwick.data.DataReader;
+import broadwick.data.Lookup;
+import broadwick.model.Model;
+import com.google.common.base.Throwables;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.apache.commons.lang3.time.StopWatch;
+import org.slf4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+/**
+ * Broadwick: Project for Scientific Computing. The Broadwick framework allows for rapid epidemic modelling.
+ */
+public final class Broadwick {
+
+    /**
+     * Create the Broadwick project to read and verify the configuration files and initialise the project.
+     *
+     * @param args the command line arguments supplied to the project.
+     */
+<span class="nc" id="L67">    public Broadwick(final String[] args) {</span>
+
+<span class="nc" id="L69">        final LoggingFacade logFacade = new LoggingFacade();</span>
+<span class="nc" id="L70">        log = logFacade.getRootLogger();</span>
+        try {
+<span class="nc" id="L72">            final CliOptions cli = new CliOptions(args);</span>
+<span class="nc" id="L73">            readConfigFile(logFacade, cli.getConfigurationFileName());</span>
+<span class="nc" id="L74">        } catch (BroadwickException ex) {</span>
+<span class="nc" id="L75">            log.error(&quot;{}\nSomething went wrong starting project. See the error messages.&quot;, ex.getLocalizedMessage());</span>
+<span class="nc" id="L76">            log.trace(Throwables.getStackTraceAsString(ex));</span>
+<span class="nc" id="L77">        }</span>
+<span class="nc" id="L78">    }</span>
+
+    /**
+     * Read the configuration file from the configuration file.
+     *
+     * @param logFacade  the LoggingFacade object used to log any messages.
+     * @param configFile the name of the configuration file.
+     */
+    private void readConfigFile(final LoggingFacade logFacade, final String configFile) {
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (!configFile.isEmpty()) {</span>
+<span class="nc" id="L88">            final File cfg = new File(configFile);</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">            if (!cfg.exists()) {</span>
+<span class="nc" id="L90">                throw new BroadwickException(&quot;Configuration file [&quot; + configFile + &quot;] does not exist.&quot;);</span>
+            }
+            try {
+                // read the configuration file
+<span class="nc" id="L94">                final JAXBContext jaxbContext = JAXBContext.newInstance(Constants.GENERATED_CONFIG_CLASSES_DIR);</span>
+<span class="nc" id="L95">                final Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();</span>
+<span class="nc" id="L96">                project = (Project) unmarshaller.unmarshal(cfg);</span>
+
+                // save the config file as a string for later use
+<span class="nc" id="L99">                final StringWriter writer = new StringWriter();</span>
+<span class="nc" id="L100">                jaxbContext.createMarshaller().marshal(project, writer);</span>
+<span class="nc" id="L101">                configXml = writer.toString();</span>
+
+                // Validate the configuration file
+<span class="nc" id="L104">                final ConfigValidator validator = new ConfigValidator(project);</span>
+<span class="nc" id="L105">                final ConfigValidationErrors validationErrors = validator.validate();</span>
+
+                // now set up the logger as defined in the config file, we want to do this
+                // BEFORE writing the results of validation
+<span class="nc" id="L109">                final Logs.File file = project.getLogs().getFile();</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">                if (file != null) {</span>
+<span class="nc" id="L111">                    logFacade.addFileLogger(file.getName(), file.getLevel(), file.getPattern(), file.isOverwrite());</span>
+                }
+<span class="nc" id="L113">                final Logs.Console console = project.getLogs().getConsole();</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">                if (console != null) {</span>
+<span class="nc" id="L115">                    logFacade.addConsoleLogger(console.getLevel(), console.getPattern());</span>
+                }
+
+                // Log any validation errors.
+<span class="nc bnc" id="L119" title="All 2 branches missed.">                if (validationErrors.getNumErrors() &gt; 0) {</span>
+<span class="nc" id="L120">                    log.error(&quot;Invalid configuration file.\n{}Correct any errors before continuing.&quot;, validationErrors.getValidationErrors());</span>
+<span class="nc" id="L121">                    project = validator.getValidatedProject();</span>
+                }
+
+<span class="nc" id="L124">            } catch (JAXBException ex) {</span>
+<span class="nc" id="L125">                log.error(&quot;Could not read configuration file. {}&quot;, ex.toString());</span>
+<span class="nc" id="L126">                log.trace(com.google.common.base.Throwables.getStackTraceAsString(ex));</span>
+<span class="nc" id="L127">            }</span>
+<span class="nc" id="L128">        } else {</span>
+<span class="nc" id="L129">            throw new BroadwickException(&quot;No configuration file specified&quot;);</span>
+        }
+<span class="nc" id="L131">    }</span>
+
+    /**
+     * Run the Broadwick framework.
+     */
+    public void run() {
+<span class="nc bnc" id="L137" title="All 2 branches missed.">        if (project != null) {</span>
+<span class="nc" id="L138">            final StopWatch sw = new StopWatch();</span>
+<span class="nc" id="L139">            sw.start();</span>
+
+            // initialise the data, by reading the data files and/or the database.
+<span class="nc" id="L142">            log.info(&quot;Running broadwick {}&quot;, BroadwickVersion.getVersionAndTimeStamp());</span>
+
+<span class="nc" id="L144">            try (DataReader dr = new DataReader(project.getData())) {</span>
+<span class="nc" id="L145">                final Map&lt;String, Model&gt; registeredModels = registerModels(project, dr.getLookup());</span>
+<span class="nc" id="L146">                log.info(&quot;Running broadwick for the following models {}&quot;, registeredModels.keySet());</span>
+
+                // Run the models, each on a separate thread.
+                // TODO in a single-threaded grid environment we cannot do this - need to think again here....
+<span class="nc" id="L150">                final int poolSize = registeredModels.size();</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">                if (poolSize &gt; 0) {</span>
+<span class="nc" id="L152">                    final ExecutorService es = Executors.newFixedThreadPool(poolSize);</span>
+
+                    //final StopWatch sw = new StopWatch();
+<span class="nc bnc" id="L155" title="All 2 branches missed.">                    for (final Entry&lt;String, Model&gt; entry : registeredModels.entrySet()) {</span>
+<span class="nc" id="L156">                        es.submit(new Runnable() {</span>
+                            @Override
+                            public void run() {
+<span class="nc" id="L159">                                final String modelName = entry.getKey();</span>
+                                try {
+<span class="nc" id="L161">                                    log.info(&quot;Running {} [{}]&quot;, modelName, entry.getValue().getClass().getCanonicalName());</span>
+<span class="nc" id="L162">                                    entry.getValue().init();</span>
+<span class="nc" id="L163">                                    entry.getValue().run();</span>
+<span class="nc" id="L164">                                    entry.getValue().finalise();</span>
+<span class="nc" id="L165">                                } catch (Exception ex) {</span>
+<span class="nc" id="L166">                                    log.error(&quot;Error running model {}. see stack trace from details.&quot;, modelName);</span>
+<span class="nc" id="L167">                                    log.error(&quot;{}&quot;, Throwables.getStackTraceAsString(ex));</span>
+<span class="nc" id="L168">                                }</span>
+<span class="nc" id="L169">                            }</span>
+                        });
+<span class="nc" id="L171">                    }</span>
+<span class="nc" id="L172">                    es.shutdown();</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">                    while (!es.isTerminated()) {</span>
+<span class="nc" id="L174">                        es.awaitTermination(10, TimeUnit.SECONDS);</span>
+                    }
+                    //sw.stop();
+                    //log.trace(&quot;Finished {} simulations in {}.&quot;, maxSimulations, sw);
+                }
+<span class="nc bnc" id="L179" title="All 8 branches missed.">            } catch (Exception ex) {</span>
+<span class="nc" id="L180">                log.error(&quot;{}&quot;, Throwables.getStackTraceAsString(ex));</span>
+<span class="nc" id="L181">                log.error(&quot;Something went wrong. See previous messages for details.&quot;);</span>
+<span class="nc" id="L182">            }</span>
+
+<span class="nc" id="L184">            log.info(&quot;Simulation complete. {}&quot;, sw.toString());</span>
+        }
+<span class="nc" id="L186">    }</span>
+
+    /**
+     * Create and register the models internally. If there was a problem registering the models an empty cache is
+     * returned.
+     *
+     * @param project the unmarshalled configuration file.
+     * @param lookup  the Lookuup object that allows the model to access the data specified in the data files.
+     * @return the registered models.
+     */
+    private Map&lt;String, Model&gt; registerModels(final Project project, final Lookup lookup) {
+<span class="nc" id="L197">        final Map&lt;String, Model&gt; registeredModels = new HashMap&lt;&gt;();</span>
+        try {
+
+<span class="nc bnc" id="L200" title="All 2 branches missed.">            for (Models.Model model : project.getModels().getModel()) {</span>
+                // Create and register the new model object that we will be running later.
+<span class="nc" id="L202">                final Model newInstance = Model.class.cast(Class.forName(model.getClassname()).newInstance());</span>
+<span class="nc" id="L203">                newInstance.setModelConfiguration(getModelsConfiguration(model.getId(), getAllModelConfigurations()));</span>
+<span class="nc" id="L204">                newInstance.setModelDataLookup(lookup);</span>
+<span class="nc" id="L205">                newInstance.setModelParameters(model.getParameter());</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">                if (model.getPriors() != null) {</span>
+<span class="nc" id="L207">                    newInstance.setModelPriors(model.getPriors().getGaussianPriorAndUniformPrior());</span>
+                }
+<span class="nc" id="L209">                registeredModels.put(model.getId(), newInstance);</span>
+<span class="nc" id="L210">            }</span>
+<span class="nc" id="L211">        } catch (ParserConfigurationException | SAXException | IOException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException ex) {</span>
+<span class="nc" id="L212">            log.error(&quot;Could not create model ; {}&quot;, ex.getLocalizedMessage());</span>
+<span class="nc" id="L213">            registeredModels.clear();</span>
+<span class="nc" id="L214">        }</span>
+
+<span class="nc" id="L216">        return registeredModels;</span>
+    }
+
+    /**
+     * Get a collection of XML elements one for each &lt;model&gt; section.
+     *
+     * @return a collection of XML elements of each &lt;model&gt;.
+     * @throws ParserConfigurationException if the nodes for the configured models cannot be found.
+     * @throws SAXException                 if the nodes for the configured models cannot be found.
+     * @throws IOException                  if the nodes for the configured models cannot be found.
+     */
+    private NodeList getAllModelConfigurations() throws ParserConfigurationException, SAXException, IOException {
+<span class="nc" id="L228">        final DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();</span>
+<span class="nc" id="L229">        final DocumentBuilder docBuilder = xmlFactory.newDocumentBuilder();</span>
+<span class="nc" id="L230">        final Document xmlDoc = docBuilder.parse(new InputSource(new StringReader(configXml)));</span>
+<span class="nc" id="L231">        return xmlDoc.getElementsByTagName(&quot;model&quot;);</span>
+    }
+
+    /**
+     * Get the XML string of the model with the given id from a list of configured models.
+     *
+     * @param id     the id of the model to be found.
+     * @param models a list of XML &lt;model&gt; nodes.
+     * @return the XML string for the model.
+     */
+    private String getModelsConfiguration(final String id, final NodeList models) {
+        try {
+<span class="nc bnc" id="L243" title="All 2 branches missed.">            for (int i = 0; i &lt; models.getLength(); i++) {</span>
+<span class="nc" id="L244">                final NamedNodeMap attributes = models.item(i).getAttributes();</span>
+<span class="nc" id="L245">                final String nodeId = attributes.getNamedItem(&quot;id&quot;).getNodeValue();</span>
+
+<span class="nc bnc" id="L247" title="All 2 branches missed.">                if (id.equals(nodeId)) {</span>
+<span class="nc" id="L248">                    final TransformerFactory transFactory = TransformerFactory.newInstance();</span>
+<span class="nc" id="L249">                    final Transformer transformer = transFactory.newTransformer();</span>
+<span class="nc" id="L250">                    final StringWriter buffer = new StringWriter();</span>
+<span class="nc" id="L251">                    transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, &quot;yes&quot;);</span>
+<span class="nc" id="L252">                    transformer.transform(new DOMSource(models.item(i)),</span>
+                            new StreamResult(buffer));
+<span class="nc" id="L254">                    return buffer.toString();</span>
+                }
+            }
+<span class="nc" id="L257">        } catch (TransformerException ex) {</span>
+<span class="nc" id="L258">            log.error(&quot;Could not get the configuration for the model [{}]. {}&quot;, id, ex.getLocalizedMessage());</span>
+<span class="nc" id="L259">        }</span>
+<span class="nc" id="L260">        return &quot;&quot;;</span>
+    }
+
+    /**
+     * Invocation point.
+     *
+     * @param args the command line arguments passed to Broadwick.
+     */
+    public static void main(final String[] args) {
+
+<span class="nc" id="L270">        final Broadwick broadwick = new Broadwick(args);</span>
+<span class="nc" id="L271">        broadwick.run();</span>
+<span class="nc" id="L272">    }</span>
+    private Project project;
+    private Logger log;
+    private String configXml;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.6.2.201302030002</span></div></body></html>

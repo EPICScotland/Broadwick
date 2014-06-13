@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MonteCarlo.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="right"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.html" class="el_package">broadwick.montecarlo</a> &gt; <span class="el_source">MonteCarlo.java</span></div><h1>MonteCarlo.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.montecarlo;
+
+import broadwick.io.FileOutput;
+import broadwick.montecarlo.acceptor.Acceptor;
+import broadwick.montecarlo.acceptor.MetropolisHastings;
+import broadwick.montecarlo.path.PathGenerator;
+import broadwick.montecarlo.path.Step;
+import broadwick.rng.RNG;
+import java.util.HashSet;
+import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Monte Carlo class that is responsible for constructing Monte Carlo chains and the simulations thereon.
+ */
+<span class="nc" id="L33">@Slf4j</span>
+public class MonteCarlo {
+
+    /**
+     * Create a Monte Carlo instance.
+     * @param model     The Monte Carlo Model to be run.
+     * @param generator the object that will generate the Monte Carlo chain/path.
+     */
+    public MonteCarlo(final McModel model, final PathGenerator generator) {
+<span class="nc" id="L42">        this(model, new McMaxNumStepController(1000), generator);</span>
+<span class="nc" id="L43">    }</span>
+
+    /**
+     * Create a Monte Carlo instance.
+     * @param model      The Monte Carlo Model to be run.
+     * @param controller the controller object for this class.
+     * @param generator  the object that will generate the Monte Carlo chain/path.
+     */
+    public MonteCarlo(final McModel model, final McController controller,
+<span class="nc" id="L52">                      final PathGenerator generator) {</span>
+<span class="nc" id="L53">        this.observers = new HashSet&lt;&gt;(1);</span>
+<span class="nc" id="L54">        this.model = model;</span>
+<span class="nc" id="L55">        this.mcController = controller;</span>
+<span class="nc" id="L56">        this.pathGenerator = generator;</span>
+<span class="nc" id="L57">        this.acceptor = new MetropolisHastings(GENERATOR.getInteger(Integer.MIN_VALUE, Integer.MAX_VALUE));</span>
+<span class="nc" id="L58">    }</span>
+
+    /**
+     * Run the MonteCarlo Simulation.
+     */
+    public final void run() {
+        
+<span class="nc" id="L65">        Step currentStep = pathGenerator.getInitialStep();</span>
+
+<span class="nc" id="L67">        writer.write(&quot;# Steps taken [1]\n&quot;);</span>
+<span class="nc" id="L68">        writer.write(&quot;# Current step accepted? [2]\n&quot;);</span>
+<span class="nc" id="L69">        writer.write(String.format(&quot;# Current step coordinates [3-%d]\n&quot;, (2+currentStep.getCoordinates().size())));</span>
+<span class="nc" id="L70">        writer.write(String.format(&quot;# Results for current step [%d-n]\n&quot;, (3+currentStep.getCoordinates().size())));</span>
+
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        for (McObserver observer : observers) {</span>
+<span class="nc" id="L73">            observer.started();</span>
+<span class="nc" id="L74">        }</span>
+
+<span class="nc" id="L76">        log.info(&quot;Running Monte Carlo simulation with initial step {}&quot;, currentStep.toString());</span>
+<span class="nc" id="L77">        McResults prevResults = model.compute(currentStep);</span>
+<span class="nc" id="L78">        writer.write(&quot;%d,%d,%s,%s\n&quot;, numStepsTaken, 1, currentStep.toString(), prevResults.toCsv());</span>
+            
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        while (mcController.goOn(this)) {</span>
+<span class="nc" id="L81">            numStepsTaken++;</span>
+<span class="nc" id="L82">            int stepsSinceLastMeasurement = 0;</span>
+<span class="nc" id="L83">            final Step proposedStep = pathGenerator.generateNextStep(currentStep);</span>
+<span class="nc" id="L84">            final McResults currentResults = model.compute(proposedStep);</span>
+            
+<span class="nc bnc" id="L86" title="All 2 branches missed.">            for (McObserver observer : observers) {</span>
+<span class="nc" id="L87">                observer.step();</span>
+<span class="nc" id="L88">            }</span>
+
+<span class="nc" id="L90">            final boolean accepted = acceptor.accept(prevResults, currentResults);</span>
+
+<span class="nc bnc" id="L92" title="All 2 branches missed.">            writer.write(&quot;%d,%d,%s,%s\n&quot;, numStepsTaken, (accepted ? 1 : 0),</span>
+                         proposedStep.toString(), currentResults.toCsv());
+<span class="nc bnc" id="L94" title="All 2 branches missed.">            if (accepted) {</span>
+<span class="nc" id="L95">                log.info(&quot;Accepted Monte Carlo step {}&quot;, proposedStep.toString());</span>
+<span class="nc" id="L96">                numAcceptedSteps++;</span>
+<span class="nc bnc" id="L97" title="All 6 branches missed.">                if (numStepsTaken &gt; burnIn</span>
+                    &amp;&amp; (thinningInterval == 0 || stepsSinceLastMeasurement % thinningInterval == 0)) {
+<span class="nc" id="L99">                    stepsSinceLastMeasurement++;</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">                    for (McObserver observer : observers) {</span>
+<span class="nc" id="L101">                        observer.takeMeasurements();</span>
+<span class="nc" id="L102">                    }</span>
+                }
+<span class="nc" id="L104">                currentStep = proposedStep;</span>
+<span class="nc" id="L105">                prevResults = currentResults;</span>
+            } else {
+<span class="nc" id="L107">                log.info(&quot;Rejected Monte Carlo step {}&quot;, proposedStep.toString());</span>
+            }
+<span class="nc" id="L109">        }</span>
+
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        for (McObserver observer : observers) {</span>
+<span class="nc" id="L112">            observer.finished();</span>
+<span class="nc" id="L113">        }</span>
+<span class="nc" id="L114">    }</span>
+
+    /**
+     * Add an observer to the list of observers.
+     * @param observer the observer that is used to monitor/take measurements.
+     */
+    public final void addObserver(final McObserver observer) {
+<span class="nc" id="L121">        observers.add(observer);</span>
+<span class="nc" id="L122">    }</span>
+<span class="nc" id="L123">    @Getter</span>
+    private int numStepsTaken = 0;
+<span class="nc" id="L125">    @Getter</span>
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+    private int numAcceptedSteps = 0;
+<span class="nc" id="L128">    @Setter</span>
+    private int burnIn = 0;
+<span class="nc" id="L130">    @Setter</span>
+    private int thinningInterval = 0;
+<span class="nc" id="L132">    @Setter</span>
+    private Acceptor acceptor;
+<span class="nc" id="L134">    @Setter</span>
+    private McController mcController;
+<span class="nc" id="L136">    @Getter</span>
+    private Set&lt;McObserver&gt; observers;
+<span class="nc" id="L138">    @Setter</span>
+    private FileOutput writer = new FileOutput();
+    private McModel model;
+    private PathGenerator pathGenerator;
+<span class="nc" id="L142">    private static final RNG GENERATOR = new RNG(RNG.Generator.Well19937c);</span>
+    // TODO measure [auto]correlation function(s)
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.6.2.201302030002</span></div></body></html>

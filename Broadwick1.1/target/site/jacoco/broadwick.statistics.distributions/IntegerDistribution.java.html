@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>IntegerDistribution.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="right"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.html" class="el_package">broadwick.statistics.distributions</a> &gt; <span class="el_source">IntegerDistribution.java</span></div><h1>IntegerDistribution.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.statistics.distributions;
+
+import broadwick.rng.RNG;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import lombok.Synchronized;
+
+/**
+ * A simple class for defining custom distributions. This is, in effect, a histogram.
+ */
+public class IntegerDistribution implements Serializable {
+
+    /**
+     * Create an empty distribution.
+     */
+<span class="fc" id="L37">    public IntegerDistribution() {</span>
+<span class="fc" id="L38">        bins = new ConcurrentSkipListMap&lt;&gt;();</span>
+<span class="fc" id="L39">        this.init(0);</span>
+<span class="fc" id="L40">    }</span>
+
+    /**
+     * Create the distribution with a specified number of bins.
+     * @param nbins the number of bins
+     */
+<span class="fc" id="L46">    public IntegerDistribution(final int nbins) {</span>
+<span class="fc" id="L47">        bins = new ConcurrentSkipListMap&lt;&gt;();</span>
+<span class="fc" id="L48">        this.init(nbins);</span>
+<span class="fc" id="L49">    }</span>
+
+    /**
+     * Add a number of entries (keys) to the histogram (with zero value).
+     * @param nbins the number of bins to add.
+     */
+<span class="fc" id="L55">    @Synchronized</span>
+    private void init(final int nbins) {
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        for (int i = 1; i &lt;= nbins; i++) {</span>
+<span class="fc" id="L58">            bins.put(Integer.valueOf(i), Integer.valueOf(0));</span>
+        }
+<span class="pc" id="L60">    }</span>
+
+    /**
+     * Resets the value in each bin.
+     * @param val the reset value.
+     */
+<span class="fc" id="L66">    @Synchronized</span>
+    public final void reset(final int val) {
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        for (int i : getBins()) {</span>
+<span class="fc" id="L69">            bins.put(Integer.valueOf(i), val);</span>
+<span class="fc" id="L70">        }</span>
+<span class="pc" id="L71">    }</span>
+
+    /**
+     * Resets the value in each bin.
+     */
+<span class="fc" id="L76">    @Synchronized</span>
+    public final void reset() {
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        for (int i : getBins()) {</span>
+<span class="fc" id="L79">            bins.put(Integer.valueOf(i), 0);</span>
+<span class="fc" id="L80">        }</span>
+<span class="pc" id="L81">    }</span>
+
+    /**
+     * Adds the content of the argument to the current object.
+     * @param hist the histogram data to add.
+     */
+<span class="fc" id="L87">    @Synchronized</span>
+    public final void add(final IntegerDistribution hist) {
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        for (Integer i : hist.getBins()) {</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">            if (bins.containsKey(i)) {</span>
+<span class="fc" id="L91">                bins.put(i, this.getData(i) + hist.getData(i));</span>
+            } else {
+<span class="nc" id="L93">                bins.put(i, hist.getData(i));</span>
+            }
+<span class="fc" id="L95">        }</span>
+<span class="pc" id="L96">    }</span>
+
+    /**
+     * Get the number of bins.
+     * @return the number of bins.
+     */
+<span class="fc" id="L102">    @Synchronized</span>
+    public final int getNumBins() {
+<span class="fc" id="L104">        return bins.size();</span>
+<span class="nc" id="L105">    }</span>
+
+    /**
+     * Increment the size of a bin.
+     * @param bin the bin to increment.
+     */
+<span class="fc" id="L111">    @Synchronized</span>
+    public final void setData(final Integer bin) {
+<span class="fc" id="L113">        Integer value = 1;</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        if (bins.get(bin) != null) {</span>
+<span class="fc" id="L115">            value = bins.get(bin) + 1;</span>
+        }
+<span class="fc" id="L117">        bins.put(bin, value);</span>
+<span class="pc" id="L118">    }</span>
+
+    /**
+     * Set the value of a bin.
+     * @param bin  the bin.
+     * @param data the data.
+     */
+<span class="fc" id="L125">    @Synchronized</span>
+    public final void setData(final Integer bin, final Integer data) {
+<span class="fc" id="L127">        bins.put(bin, data);</span>
+<span class="pc" id="L128">    }</span>
+
+    /**
+     * Get the size of the histogram at the given bin.
+     * @param bin the bin.
+     * @return the size of the bin, or null if the bin is not in the histogram.
+     */
+<span class="fc" id="L135">    @Synchronized</span>
+    public final Integer getData(final Integer bin) {
+<span class="fc" id="L137">        return bins.get(bin);</span>
+<span class="nc" id="L138">    }</span>
+
+    /**
+     * Select a random bin from the cumulative distribution of the histograms contents.
+     * @return the name of the random bin.
+     */
+<span class="fc" id="L144">    @Synchronized</span>
+    public final Integer getRandomBin() {
+<span class="fc" id="L146">        final int cumulativeSum = getSumCounts();</span>
+<span class="fc" id="L147">        final int randomBin = (new RNG(RNG.Generator.Well44497b)).getInteger(0, cumulativeSum);</span>
+
+<span class="fc" id="L149">        final Integer[] arr = bins.keySet().toArray(new Integer[bins.size()]);</span>
+<span class="fc" id="L150">        int index = 0;</span>
+<span class="fc" id="L151">        int sum = 0;</span>
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">        for (int value : bins.values()) {</span>
+<span class="fc" id="L153">            sum += value;</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">            if (sum &gt;= randomBin) {</span>
+<span class="fc" id="L155">                return arr[index];</span>
+            }
+<span class="fc" id="L157">            index++;</span>
+<span class="fc" id="L158">        }</span>
+<span class="nc" id="L159">        return arr[index - 1];</span>
+<span class="nc" id="L160">    }</span>
+
+    /**
+     * Select a random bin from the cumulative distribution of the histograms contents.
+     * @return the contents of the randomly selected bin.
+     */
+<span class="nc" id="L166">    @Synchronized</span>
+    public final Integer getRandomBinContents() {
+<span class="nc" id="L168">        final int cumulativeSum = getSumCounts();</span>
+<span class="nc" id="L169">        final int randomBin = (new RNG(RNG.Generator.Well44497b)).getInteger(0, cumulativeSum);</span>
+
+<span class="nc" id="L171">        int sum = 0;</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">        for (int value : bins.values()) {</span>
+<span class="nc" id="L173">            sum += value;</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">            if (sum &gt;= randomBin) {</span>
+<span class="nc" id="L175">                return value;</span>
+            }
+<span class="nc" id="L177">        }</span>
+
+        // return the contents of the last bin.
+<span class="nc" id="L180">        return bins.keySet().toArray(new Integer[bins.size()])[bins.size() - 1];</span>
+<span class="nc" id="L181">    }</span>
+
+    /**
+     * Creates a copy of this histogram and returns it. The returned IntegerDistribution is a completely different
+     * object.
+     * @return a copy of this histogram.
+     */
+<span class="fc" id="L188">    @Synchronized</span>
+    public final IntegerDistribution copy() {
+<span class="fc" id="L190">        final IntegerDistribution clone = new IntegerDistribution(bins.size());</span>
+
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        for (Integer bin : this.getBins()) {</span>
+<span class="fc" id="L193">            clone.setData(bin, bins.get(bin));</span>
+<span class="fc" id="L194">        }</span>
+
+<span class="fc" id="L196">        return clone;</span>
+<span class="nc" id="L197">    }</span>
+
+    /**
+     * Get the sum of the counts in the histogram.
+     * @return the sum of all the bins in the histogram.
+     */
+<span class="fc" id="L203">    @Synchronized</span>
+    public final Integer getSumCounts() {
+<span class="fc" id="L205">        int sum = 0;</span>
+<span class="fc bfc" id="L206" title="All 2 branches covered.">        for (int value : bins.values()) {</span>
+<span class="fc" id="L207">            sum += value;</span>
+<span class="fc" id="L208">        }</span>
+<span class="fc" id="L209">        return sum;</span>
+<span class="nc" id="L210">    }</span>
+
+    /**
+     * Get the bins in the histogram. The bins are the keySet of the underlying map object.
+     * @return the number of bins.
+     */
+<span class="fc" id="L216">    @Synchronized</span>
+    public final Collection&lt;Integer&gt; getBins() {
+<span class="fc" id="L218">        return bins.keySet();</span>
+<span class="nc" id="L219">    }</span>
+
+    /**
+     * Get a collection of the values held in the histogram. The bins are the keySet of the underlying map object, the
+     * values are the contents if the bin.
+     * @return a collection of the values held in the histogram.
+     */
+<span class="fc" id="L226">    @Synchronized</span>
+    public final Collection&lt;Integer&gt; getBinContents() {
+<span class="fc" id="L228">        return bins.values();</span>
+<span class="nc" id="L229">    }</span>
+
+    /**
+     * Get the size (the number of bins) in the histogram.
+     * @return the size
+     */
+<span class="fc" id="L235">    @Synchronized</span>
+    public final int size() {
+<span class="fc" id="L237">        return bins.size();</span>
+<span class="nc" id="L238">    }</span>
+
+    /**
+     * Get an array of the bin values.
+     * @return an array of int values.
+     */
+<span class="fc" id="L244">    @Synchronized</span>
+    public final synchronized int[] toArray() {
+<span class="fc" id="L246">        int[] arr = new int[size()];</span>
+
+<span class="fc" id="L248">        int i = 0;</span>
+<span class="fc" id="L249">        final Iterator&lt;Integer&gt; it = bins.values().iterator();</span>
+<span class="fc bfc" id="L250" title="All 2 branches covered.">        while (it.hasNext()) {</span>
+<span class="fc" id="L251">            arr[i] = it.next();</span>
+<span class="fc" id="L252">            i++;</span>
+        }
+
+<span class="fc" id="L255">        return arr;</span>
+<span class="nc" id="L256">    }</span>
+
+    /**
+     * Get an array of the bin values.
+     * @return an array of long values.
+     */
+<span class="fc" id="L262">    @Synchronized</span>
+    public final synchronized long[] toLongArray() {
+<span class="fc" id="L264">        long[] arr = new long[size()];</span>
+
+<span class="fc" id="L266">        int i = 0;</span>
+<span class="fc" id="L267">        final Iterator&lt;Integer&gt; it = bins.values().iterator();</span>
+<span class="fc bfc" id="L268" title="All 2 branches covered.">        while (it.hasNext()) {</span>
+<span class="fc" id="L269">            arr[i] = (long) it.next();</span>
+<span class="fc" id="L270">            i++;</span>
+        }
+
+<span class="fc" id="L273">        return arr;</span>
+<span class="nc" id="L274">    }</span>
+
+    /**
+     * Scale the values in the histogram by a given factor. A copy of the histogram is returned, the original is not
+     * modified.
+     * @param factor the value by which every value in the hiistogram will be multiplied.
+     * @return the scaled histogram.
+     */
+    public final IntegerDistribution scaleBins(final double factor) {
+<span class="fc" id="L283">        final IntegerDistribution data = this.copy();</span>
+
+<span class="fc bfc" id="L285" title="All 2 branches covered.">        for (Integer bin : data.getBins()) {</span>
+<span class="fc" id="L286">            final double d = data.getData(bin) * factor;</span>
+<span class="fc" id="L287">            data.setData(bin, (int) d);</span>
+<span class="fc" id="L288">        }</span>
+
+<span class="fc" id="L290">        return data;</span>
+    }
+
+    /**
+     * Normalise the frequency distribution. The returned histogram is a scaled copy of the input histogram so that the
+     * sum of the returned histogram is equal to the normalising factor.
+     * @param constant the normalising constant
+     * @return the scaled and normalised histogram.
+     */
+    public final IntegerDistribution normaliseBins(final int constant) {
+<span class="fc" id="L300">        final IntegerDistribution data = this.copy();</span>
+<span class="fc" id="L301">        final IntegerDistribution normalisedBins = new IntegerDistribution(this.getNumBins());</span>
+<span class="fc" id="L302">        final Map&lt;Integer, Double&gt; fractions = new HashMap&lt;&gt;(this.getNumBins());</span>
+<span class="fc" id="L303">        final double factor = constant / Double.valueOf(this.getSumCounts());</span>
+
+<span class="fc bfc" id="L305" title="All 2 branches covered.">        for (Integer bin : data.getBins()) {</span>
+<span class="fc" id="L306">            final double d = data.getData(bin) * factor;</span>
+<span class="fc" id="L307">            final int size = (int) Math.floor(d);</span>
+<span class="fc" id="L308">            fractions.put(bin, d - size);</span>
+<span class="fc" id="L309">            normalisedBins.setData(bin, size);</span>
+<span class="fc" id="L310">        }</span>
+
+        // Now normalisedBins.getSumCounts() &lt; data.getSumCounts()/runs so we need to increment the
+        // bins with the (data.getSumCounts()/runs - normalisedBins.getSumCounts()) largest fractions.
+<span class="fc" id="L314">        int diff = constant - normalisedBins.getSumCounts();</span>
+<span class="fc bfc" id="L315" title="All 2 branches covered.">        while (diff &gt; 0) {</span>
+<span class="fc" id="L316">            int binMax = -1;</span>
+<span class="fc" id="L317">            double max = 0.0;</span>
+
+<span class="fc bfc" id="L319" title="All 2 branches covered.">            for (Entry&lt;Integer, Double&gt; entry : fractions.entrySet()) {</span>
+<span class="fc bfc" id="L320" title="All 2 branches covered.">                if (entry.getValue() &gt; max) {</span>
+<span class="fc" id="L321">                    max = entry.getValue();</span>
+<span class="fc" id="L322">                    binMax = entry.getKey();</span>
+                }
+<span class="fc" id="L324">            }</span>
+<span class="pc bpc" id="L325" title="1 of 2 branches missed.">            if (binMax &gt; 0) {</span>
+<span class="fc" id="L326">                normalisedBins.setData(binMax);</span>
+<span class="fc" id="L327">                fractions.put(binMax, 0.0);</span>
+            }
+<span class="fc" id="L329">            diff--;</span>
+<span class="fc" id="L330">        }</span>
+
+<span class="fc" id="L332">        return normalisedBins;</span>
+    }
+
+    /**
+     * Get a string representation of the histogram.
+     * @return the string.
+     */
+    @Override
+<span class="fc" id="L340">    @Synchronized</span>
+    public final String toString() {
+<span class="fc" id="L342">        final StringBuilder str = new StringBuilder(10);</span>
+<span class="fc bfc" id="L343" title="All 2 branches covered.">        for (Map.Entry&lt;Integer, Integer&gt; entry : bins.entrySet()) {</span>
+<span class="fc" id="L344">            str.append(entry.getKey()).append(&quot;:&quot;).append(entry.getValue()).append(&quot;\n&quot;);</span>
+<span class="fc" id="L345">        }</span>
+<span class="fc" id="L346">        return str.toString();</span>
+<span class="nc" id="L347">    }</span>
+
+    /**
+     * Get a string representation of the histogram in a csv format.
+     * @return the string.
+     */
+<span class="fc" id="L353">    @Synchronized</span>
+    public final String toCsv() {
+<span class="fc" id="L355">        final StringBuilder str = new StringBuilder(10);</span>
+<span class="fc bfc" id="L356" title="All 2 branches covered.">        for (Map.Entry&lt;Integer, Integer&gt; entry : bins.entrySet()) {</span>
+<span class="fc" id="L357">            str.append(entry.getValue()).append(&quot;,&quot;);</span>
+<span class="fc" id="L358">        }</span>
+<span class="fc" id="L359">        str.deleteCharAt(str.length() - 1);</span>
+<span class="fc" id="L360">        return str.toString();</span>
+<span class="nc" id="L361">    }</span>
+    private ConcurrentMap&lt;Integer, Integer&gt; bins;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.6.2.201302030002</span></div></body></html>

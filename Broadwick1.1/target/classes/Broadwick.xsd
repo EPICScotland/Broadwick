@@ -1,0 +1,263 @@
+<xsd:schema 
+    xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            Broadwick configuration file schema.
+        </xsd:documentation>
+    </xsd:annotation>
+
+    <xsd:element name="project">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="logs" minOccurs="0" maxOccurs="1" type="Logs"/>
+                <xsd:element name="data" minOccurs="1" maxOccurs="1">
+                    <xsd:complexType>
+                        <xsd:choice minOccurs="0" maxOccurs="1">
+                            <xsd:element name="datafiles" type="DataFiles"/>
+                            <xsd:element name="databases" type="Databases"/>
+                        </xsd:choice>
+                    </xsd:complexType>
+                </xsd:element>
+                <xsd:element name="models" minOccurs="1" maxOccurs="1" type="Models"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:complexType name="Logs">
+        <xsd:sequence>
+            <xsd:element name="file" minOccurs="0" maxOccurs="1">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="level" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="pattern" minOccurs="0" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="overwrite" minOccurs="0" maxOccurs="1" type="xsd:boolean"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="console" minOccurs="0" maxOccurs="1">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="level" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="pattern" minOccurs="0" maxOccurs="1" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="DataFiles">
+        <xsd:sequence>
+            <xsd:element name="DirectedMovementFile" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="alias" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="separator" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="idColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="movementDateColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="movementDirectionColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="locationColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="speciesColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="dateFormat" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="customTags" minOccurs="0" maxOccurs="1" type="CustomTags"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="FullMovementFile" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="alias" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="separator" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="idColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="departureDateColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="departureLocationIdColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="destinationDateColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="destinationLocationIdColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="marketIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="marketDateColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="speciesColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="dateFormat" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="customTags" minOccurs="0" maxOccurs="1" type="CustomTags"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="BatchMovementFile" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="alias" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="separator" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="batchSizeColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="departureDateColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="departureLocationIdColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="destinationDateColumn" minOccurs="1" maxOccurs="1"  type="xsd:int"/>
+                        <xsd:element name="destinationLocationIdColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="marketIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="marketDateColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="speciesColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="dateFormat" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="customTags" minOccurs="0" maxOccurs="1" type="CustomTags"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="PopulationFile" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="alias" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="separator" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:choice minOccurs="1" maxOccurs="1">
+                            <xsd:element name="lifeHistory" type="LifeHistoryType"/>
+                            <xsd:element name="population" type="PopulationType"/>
+                        </xsd:choice>
+                        <xsd:element name="dateFormat" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="customTags" minOccurs="0" maxOccurs="1" type="CustomTags"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="LocationsFile" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="alias" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="separator" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="locationIdColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="eastingColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="northingColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="dateFormat" minOccurs="0" maxOccurs="1" type="xsd:string"/>			
+                        <xsd:element name="customTags" minOccurs="0" maxOccurs="1" type="CustomTags"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="TestsFile" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="alias" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="separator" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <!--<xsd:choice minOccurs="1" maxOccurs="3">-->
+                        <xsd:element name="idColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="groupIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="locationIdColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+                        <!--</xsd:choice>-->
+                        <xsd:element name="testDateColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="postiveResultColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="negativeResultColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/> 
+                        <xsd:element name="dateFormat" minOccurs="0" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="customTags" minOccurs="0" maxOccurs="1" type="CustomTags"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="Databases">
+        <xsd:sequence>
+            <xsd:element name="name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="Models">
+        <xsd:sequence>
+            <xsd:element name="model" minOccurs="1" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:sequence>                        
+                        <xsd:element name="classname" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="parameter" minOccurs="1" maxOccurs="unbounded" type="Parameter"/>
+                        <xsd:element name="priors" minOccurs="0" maxOccurs="1">
+                            <xsd:complexType>
+                                <xsd:complexContent>
+                                    <xsd:extension base="Prior">
+                                        <xsd:sequence maxOccurs="unbounded">
+                                            <xsd:element name="gaussianPrior" minOccurs="0" maxOccurs="unbounded" type="GaussianPrior"/>
+                                            <xsd:element name="uniformPrior" minOccurs="0" maxOccurs="unbounded"  type="UniformPrior"/>
+                                        </xsd:sequence>
+                                    </xsd:extension>
+                                </xsd:complexContent>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>     
+                    <xsd:attribute name="id" type="xsd:string" use="optional"/>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="CustomTags">
+        <xsd:sequence>
+            <xsd:element name="customTag" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="column" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+                        <xsd:element name="name" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                        <xsd:element name="type" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="LifeHistoryType">
+        <xsd:sequence>
+            <xsd:element name="idColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+            <xsd:element name="dateOfBirthColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+            <xsd:element name="locationOfBirthColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+            <xsd:element name="dateOfDeathColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+            <xsd:element name="locationOfDeathColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+            <xsd:element name="speciesColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="PopulationType">
+        <xsd:sequence>
+            <xsd:element name="locationIdColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+            <xsd:element name="populationSizeColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+            <xsd:element name="populationDateColumn" minOccurs="1" maxOccurs="1" type="xsd:int"/>
+            <xsd:element name="speciesColumn" minOccurs="0" maxOccurs="1" type="xsd:int"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="Prior" abstract="true">
+        <xsd:sequence>
+            <xsd:element name="hint" minOccurs="0" maxOccurs="1" type="xsd:string"/>
+            <xsd:element name="initialVal" minOccurs="0" maxOccurs="1" type="xsd:double"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:string" use="optional"/>
+    </xsd:complexType>
+    
+    <xsd:complexType name="GaussianPrior">
+        <xsd:complexContent>
+            <xsd:extension base="Prior">
+                <xsd:sequence>
+                    <xsd:element name="mean" type="xsd:double"/>
+                    <xsd:element name="deviation" type="xsd:double"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    
+    <xsd:complexType name="UniformPrior">
+        <xsd:complexContent>
+            <xsd:extension base="Prior">
+                <xsd:sequence>
+                    <xsd:element name="min" type="xsd:double"/>
+                    <xsd:element name="max" type="xsd:double"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    
+    <xsd:complexType name="Parameter">
+        <xsd:sequence>
+            <xsd:element name="hint" minOccurs="0" maxOccurs="1" type="xsd:string"/> 
+        </xsd:sequence> 
+        <xsd:attribute name="id" type="xsd:string" use="optional"/>
+        <xsd:attribute name="value" type="xsd:string"/>
+    </xsd:complexType>
+</xsd:schema>
+
+

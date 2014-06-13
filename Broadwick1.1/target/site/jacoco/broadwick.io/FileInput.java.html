@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>FileInput.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="right"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.html" class="el_package">broadwick.io</a> &gt; <span class="el_source">FileInput.java</span></div><h1>FileInput.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.io;
+
+import com.google.common.base.Splitter;
+import com.google.common.base.Throwables;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.regex.Pattern;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Simple interface for reading from a file. It simply wraps the java io classes to simplify the input of data.
+ */
+<span class="fc" id="L35">@Slf4j</span>
+public class FileInput implements AutoCloseable {
+
+    /**
+     * Open a handle to a file with the given name.
+     * @param dataFileName the name of the file.
+     * @throws IOException if the resource can't be found.
+     */
+    public FileInput(final String dataFileName) throws IOException {
+<span class="fc" id="L44">        this(dataFileName, DEFAULT_SEP, DEFAULT_ENCODING);</span>
+<span class="fc" id="L45">    }</span>
+
+    /**
+     * Open a handle to a file with the given name.
+     * @param dataFileName the name of the file.
+     * @param sep          The single char for the separator (not a list of separator characters).
+     * @throws IOException if the resource can't be found.
+     */
+    public FileInput(final String dataFileName, final String sep) throws IOException {
+<span class="fc" id="L54">        this(dataFileName, sep, DEFAULT_ENCODING);</span>
+<span class="fc" id="L55">    }</span>
+
+    /**
+     * Open a handle to a file with the given name.
+     * @param dataFileName the name of the file.
+     * @param sep          The single char for the separator (not a list of separator characters).
+     * @param encoding     the encoding used in the file e.g. UTF-8.
+     * @throws IOException if the resource can't be found.
+     */
+<span class="fc" id="L64">    public FileInput(final String dataFileName, final String sep, final Charset encoding) throws IOException {</span>
+<span class="fc" id="L65">        fieldSep = Pattern.compile(sep);</span>
+<span class="fc" id="L66">        fileEncoding = encoding;</span>
+<span class="fc" id="L67">        path = Paths.get(dataFileName.replace(&quot; &quot;, &quot;\\ &quot;));</span>
+<span class="fc" id="L68">        reader = Files.newBufferedReader(path, fileEncoding);</span>
+<span class="fc" id="L69">    }</span>
+
+    /**
+     * Read a line from the input file, split it according to the seperator specified in the constructor and get a list
+     * of tokens from the line. Comment characters (#) are supported, where any character after the comment character is
+     * not added to the collection of tokens.
+     * @return a list of entries in the line.
+     * @throws IOException if a line cannot be read, e.g if the object was closed.
+     */
+    public final List&lt;String&gt; readLine() throws IOException {
+
+<span class="fc" id="L80">        List&lt;String&gt; tokens = new LinkedList&lt;&gt;();</span>
+        try {
+<span class="fc" id="L82">            String line = reader.readLine();</span>
+            // we've not reached the end of the file, 
+<span class="pc bpc" id="L84" title="1 of 6 branches missed.">            while (line != null &amp;&amp; (line.isEmpty() || line.charAt(0) == '#')) {</span>
+                // read until the next non-empty line
+<span class="fc" id="L86">                line = reader.readLine();</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">                if (line == null) {</span>
+<span class="fc" id="L88">                    return tokens;</span>
+                }
+            }
+
+<span class="pc bpc" id="L92" title="2 of 4 branches missed.">            if (line != null &amp;&amp; !line.isEmpty()) {</span>
+<span class="fc" id="L93">                tokens = tokeniseLine(line);</span>
+            }
+
+<span class="fc" id="L96">        } catch (IOException e) {</span>
+<span class="fc" id="L97">            final StringBuilder sb = new StringBuilder(&quot;Unable to read from &quot;).append(path.getFileName());</span>
+<span class="fc" id="L98">            sb.append(&quot;, Reason : &quot;).append(e.getLocalizedMessage());</span>
+<span class="fc" id="L99">            log.error(sb.toString());</span>
+<span class="fc" id="L100">            sb.append(&quot;\n&quot;).append(Throwables.getStackTraceAsString(e));</span>
+<span class="fc" id="L101">            throw new IOException(sb.toString());</span>
+<span class="fc" id="L102">        }</span>
+<span class="fc" id="L103">        return tokens;</span>
+    }
+
+    /**
+     * Get the next (non-comment) line from the file.
+     * @return a string of the next non-comment line in the file.
+     * @throws IOException if a line cannot be read, e.g if the object was closed.
+     */
+    public final String readNextLine() throws IOException {
+
+<span class="fc" id="L113">        String line = reader.readLine();</span>
+        try {
+            // we've not reached the end of the file, 
+<span class="fc bfc" id="L116" title="All 6 branches covered.">            while (line != null &amp;&amp; (line.isEmpty() || line.charAt(0) == '#')) {</span>
+<span class="fc" id="L117">                line = reader.readLine();</span>
+            }
+<span class="nc" id="L119">        } catch (IOException e) {</span>
+<span class="nc" id="L120">            final StringBuilder sb = new StringBuilder(&quot;Unable to read from &quot;).append(path.getFileName());</span>
+<span class="nc" id="L121">            sb.append(&quot;, Reason : &quot;).append(e.getLocalizedMessage());</span>
+<span class="nc" id="L122">            log.error(sb.toString());</span>
+<span class="nc" id="L123">            sb.append(&quot;\n&quot;).append(Throwables.getStackTraceAsString(e));</span>
+<span class="nc" id="L124">            throw new IOException(sb.toString());</span>
+<span class="fc" id="L125">        }</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        if (line != null) {</span>
+<span class="fc" id="L127">            line = line.trim();</span>
+        }
+<span class="fc" id="L129">        return line;</span>
+    }
+
+    /**
+     * Read the contents of the file into a single string object.
+     * @return the contents of the file.
+     * @throws IOException if a line cannot be read, e.g if the object was closed.
+     */
+    public final String read() throws IOException {
+<span class="fc" id="L138">        final StringBuilder sb = new StringBuilder();</span>
+
+<span class="fc" id="L140">        String line = reader.readLine();</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        while (line != null) {</span>
+<span class="fc" id="L142">            sb.append(line).append(&quot;\n&quot;);</span>
+<span class="fc" id="L143">            line = reader.readLine();</span>
+        }
+<span class="fc" id="L145">        return sb.toString();</span>
+    }
+
+    /**
+     * Split a string (a line read from a file into tokens.
+     * @param line the line that is to be tokenised.
+     * @return a list of [string] tokens.
+     */
+    private List&lt;String&gt; tokeniseLine(final String line) {
+<span class="fc" id="L154">        final List&lt;String&gt; tokens = new LinkedList&lt;&gt;();</span>
+<span class="pc bpc" id="L155" title="2 of 4 branches missed.">        if (line != null &amp;&amp; !line.isEmpty()) {</span>
+<span class="fc" id="L156">            String trimmedLine = line.trim();</span>
+<span class="fc" id="L157">            final int indexOfCommentchar = trimmedLine.indexOf(COMMENT_CHAR);</span>
+
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">            if (indexOfCommentchar &gt; 0) {</span>
+<span class="nc" id="L160">                trimmedLine = trimmedLine.substring(0, indexOfCommentchar);</span>
+            }
+
+<span class="fc bfc" id="L163" title="All 2 branches covered.">            for (String token : Splitter.on(fieldSep).trimResults().split(trimmedLine)) {</span>
+<span class="fc" id="L164">                tokens.add(token.trim());</span>
+<span class="fc" id="L165">            }</span>
+
+        }
+<span class="fc" id="L168">        return tokens;</span>
+    }
+
+    @Override
+    public final void close() {
+        try {
+<span class="fc" id="L174">            reader.close();</span>
+<span class="nc" id="L175">        } catch (IOException ex) {</span>
+<span class="nc" id="L176">            log.error(&quot;Failed to close file {}.&quot;, path.getFileName());</span>
+<span class="fc" id="L177">        }</span>
+<span class="fc" id="L178">    }</span>
+    
+    /**
+     * Obtain an iterator for this input file.
+     * @return the FileInputIterator for this file.
+     */
+    public final FileInputIterator iterator() {
+        // the reader object will be instantiated by now so we should not have a NullPointerException.
+<span class="nc" id="L186">        return new FileInputIterator(this);</span>
+    }
+    
+    private Path path;
+    protected BufferedReader reader;
+    private Pattern fieldSep;
+    private Charset fileEncoding;
+    private static final String DEFAULT_SEP = &quot;[\\s,]&quot;;
+<span class="fc" id="L194">    private static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;</span>
+    private static final char COMMENT_CHAR = '#';
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.6.2.201302030002</span></div></body></html>

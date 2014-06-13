@@ -1,0 +1,70 @@
+<project name="${project.name}">
+  <version position="left"/>
+  <publishDate position="right"/>
+
+  <!--
+  <bannerLeft>
+    <name>Broadwick</name>
+    <src>images/File-John_Snow_memorial_and_pub.jpg</src>
+    <href>.</href>
+  </bannerLeft>
+  -->
+
+  <skin>
+    <groupId>org.apache.maven.skins</groupId>
+    <artifactId>maven-fluido-skin</artifactId>
+    <version>${maven-fluido-skin.version}</version>
+  </skin>
+
+  <body>
+      <!--<menu ref="reports" />-->
+
+      <menu name="${project.name}">
+	  <item name="About" href="index.html"/>
+	  <item name="Summary" href="project-summary.html"/>
+	  <item name="Team" href="team-list.html"/>
+	  <item name="License" href="license.html"/>
+	  <item name="Dependencies" href="dependencies.html"/>
+	  <item name="Plugins" href="plugins.html"/>
+	  <item name="Plugin Management" href="plugin-management.html"/>
+
+	  <item name="Manual" href="pdf/BroadwickManual.pdf"/>
+
+	  <item name="Roadmap" href="roadmap.html"/>
+	  <item name="Changes" href="changes-report.html"/>
+	  <item name="API Documentation" href="apidocs/index.html"/>
+	  <!--<item name="Test API Documentation" href="testapidocs/index.html"/>-->
+	  <item name="Source Xref" href="xref/index.html"/>
+	  <!--<item name="Test Sources Xref" href="xref-test/index.html"/>-->
+	  <item name="Test Coverage" href="jacoco/index.html"/>
+	  <item name="Todo" href="taglist.html"/>
+      </menu>
+      
+      <!--
+      ${reports}
+      -->
+
+  </body>
+
+  <custom>
+    <fluidoSkin>
+	<topBarEnabled>true</topBarEnabled>
+	<sideBarEnabled>true</sideBarEnabled>
+      <sourceLineNumbersEnabled>true</sourceLineNumbersEnabled>
+	
+  <!--
+      <topBarIcon>
+        <name>Maven Fluido Skin</name>
+        <alt>Maven Fluido Skin</alt>
+        <src>images/File-John_Snow_memorial_and_pub.jpg</src>
+        <href>/index.html</href>
+      </topBarIcon>
+  -->
+    </fluidoSkin>
+  </custom>
+
+  <poweredBy>
+    <logo name="Maven" href="http://maven.apache.org/" img="http://maven.apache.org/images/logos/maven-feather.png"/>
+  </poweredBy>
+</project>
+

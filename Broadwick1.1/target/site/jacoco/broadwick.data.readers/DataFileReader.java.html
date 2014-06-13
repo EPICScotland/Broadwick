@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>DataFileReader.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="right"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.html" class="el_package">broadwick.data.readers</a> &gt; <span class="el_source">DataFileReader.java</span></div><h1>DataFileReader.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.data.readers;
+
+import broadwick.BroadwickConstants;
+import broadwick.BroadwickException;
+import broadwick.io.FileInput;
+import com.google.common.base.Throwables;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
+
+/**
+ * Base class for all data file readers, containing useful common functionality..
+ */
+<span class="nc" id="L38">@Slf4j</span>
+<span class="nc" id="L39">public abstract class DataFileReader {</span>
+
+    /**
+     * Convert a collection of elements read from the data file (the column names in the internal database) into a CSV
+     * string.
+     * @param data the collection of column names.
+     * @return a csv string of the input data.
+     */
+    protected final String asCsv(final Collection&lt;String&gt; data) {
+<span class="nc" id="L48">        final StringBuilder sb = new StringBuilder();</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        for (String name : data) {</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">            if (name != null) {</span>
+<span class="nc" id="L51">                sb.append(name).append(&quot;,&quot;);</span>
+            }
+<span class="nc" id="L53">        }</span>
+        // remove the last character.
+<span class="nc" id="L55">        final String csv = sb.toString();</span>
+<span class="nc" id="L56">        return csv.substring(0, csv.length() - 1);</span>
+    }
+
+    /**
+     * Convert a collection of elements read from the data file (the column names in the internal database) into a CSV
+     * string of question marks.
+     * @param data the collection of column names.
+     * @return as csv string of the question marks containing the same number of data elements.
+     */
+    protected final String asQuestionCsv(final Collection&lt;String&gt; data) {
+<span class="nc" id="L66">        final StringBuilder sb = new StringBuilder();</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        for (String name : data) {</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">            if (name != null) {</span>
+<span class="nc" id="L69">                sb.append(&quot;?,&quot;);</span>
+            }
+<span class="nc" id="L71">        }</span>
+        // remove the last character.
+<span class="nc" id="L73">        final String csv = sb.toString();</span>
+<span class="nc" id="L74">        return csv.substring(0, csv.length() - 1);</span>
+    }
+
+    /**
+     * Create or append to a string command in the form &quot;CREATE TABLE IF NOT EXISTS [table] ([col1], [col2], ...,
+     * [coln]) values (?,?,...,?)&quot; from the details read from the configuration file.
+     * &lt;pre&gt;
+     * updateCreateTableCommand(ID, 1, &quot; VARCHAR(128), &quot;, new HashMap&lt;String, Integer&gt;(), createTableCommand,
+     * TABLE_NAME, SECTION_NAME, errors);
+     * &lt;/pre&gt;
+     * @param columnName         the name of the column in the table
+     * @param columnIndex        the location in the csv file where it appears.
+     * @param columnType         the type of column e.g. &quot;INT&quot;, &quot;VARCHAR(128) NOT NULL&quot; etc.
+     * @param insertedColDetails a map containing the name of the column and the location in the csv file where it
+     *                           appears i.e. columnName, columnIndex.
+     * @param createTableCommand a StringBuilder object that we append to to create the create table command.
+     * @param tableName          the name of the table that is being created.
+     * @param sectionName        the name of the section in the configuration file that configures the data.
+     * @param errors             a stringbuilder object to which we will append error messages.
+     * @return the name of the column added.
+     */
+    protected final String updateCreateTableCommand(final String columnName, final Integer columnIndex, final String columnType,
+                                                    final Map&lt;String, Integer&gt; insertedColDetails,
+                                                    final StringBuilder createTableCommand, final String tableName,
+                                                    final String sectionName, final StringBuilder errors) {
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        if (createTableCommand.length() == 0) {</span>
+<span class="nc" id="L100">            createTableCommand.append(String.format(&quot;CREATE TABLE %s (&quot;, tableName));</span>
+        }
+
+<span class="nc" id="L103">        String addedColumnName = null;</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">        if (columnIndex != null) {</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">            if (columnIndex != 0) {</span>
+<span class="nc" id="L106">                createTableCommand.append(columnName).append(columnType);</span>
+<span class="nc" id="L107">                insertedColDetails.put(columnName, columnIndex);</span>
+<span class="nc" id="L108">                addedColumnName = columnName;</span>
+            } else {
+<span class="nc" id="L110">                errors.append(&quot;No &quot;).append(columnName).append(&quot; column set in &quot;).append(sectionName).append(&quot; section\n&quot;);</span>
+            }
+        }
+
+<span class="nc" id="L114">        return addedColumnName;</span>
+    }
+
+    /**
+     * Execute a command to create a table.
+     * @param tableName          the name of the table to be created.
+     * @param createTableCommand the command to create the table.
+     * @param connection         the database connection to use to create the table.
+     * @throws SQLException if a SQL error has been encountered.
+     */
+    protected final void createTable(final String tableName, final String createTableCommand, final Connection connection)
+            throws SQLException {
+
+<span class="nc" id="L127">        final DatabaseMetaData dbm = connection.getMetaData();</span>
+
+        // First check if the table already exists, some databases do not support
+        // CREATE TABLE ??? IF NOT EXISTS
+        // so we have to look at the database schema
+<span class="nc" id="L132">        try (ResultSet resultSet = dbm.getTables(null, null, &quot;%&quot;, null)) {</span>
+<span class="nc" id="L133">            boolean tableExists = false;</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">            while (resultSet.next()) {</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">                if (tableName.equalsIgnoreCase(resultSet.getString(&quot;TABLE_NAME&quot;))) {</span>
+<span class="nc" id="L136">                    log.debug(&quot;Table {} already exists, ignoring&quot;, tableName);</span>
+<span class="nc" id="L137">                    tableExists = true;</span>
+                }
+            }
+
+<span class="nc bnc" id="L141" title="All 2 branches missed.">            if (!tableExists) {</span>
+<span class="nc" id="L142">                try (Statement stmt = connection.createStatement()) {</span>
+<span class="nc" id="L143">                    final String[] commands = createTableCommand.split(&quot;;&quot;);</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">                    for (int i = 0; i &lt; commands.length; i++) {</span>
+<span class="nc" id="L145">                        log.trace(&quot;Creating table {}&quot;, commands[i]);</span>
+<span class="nc" id="L146">                        stmt.execute(commands[i]);</span>
+                    }
+<span class="nc bnc" id="L148" title="All 8 branches missed.">                } catch (SQLException sqle) {</span>
+<span class="nc" id="L149">                    connection.rollback();</span>
+<span class="nc" id="L150">                    log.error(&quot;Error while creating the table '{}'. {}&quot;, createTableCommand,</span>
+                              Throwables.getStackTraceAsString(sqle));
+<span class="nc" id="L152">                    throw sqle;</span>
+<span class="nc" id="L153">                }</span>
+            }
+
+//        } catch (Exception e) {
+//            log.error(&quot;Could not create database {}&quot;, Throwables.getStackTraceAsString(e));
+<span class="nc bnc" id="L158" title="All 8 branches missed.">        }</span>
+
+<span class="nc" id="L160">        connection.commit();</span>
+<span class="nc" id="L161">    }</span>
+
+    /**
+     * Perform the insertion into the database.
+     * @param connection      the connection to the database.
+     * @param tableName       the name of the table into which the data will be put.
+     * @param insertString    the command used to insert a row into the database.
+     * @param dataFile        the [CSV] file that contained the data.
+     * @param dateFormat      the format of the date in the file.
+     * @param insertedColInfo a map of column name to column in the data file.
+     * @param dateFields      a collection of columns in the csv file that contains date fields.
+     * @return the number of rows inserted.
+     */
+    protected final int insert(final Connection connection, final String tableName,
+                               final String insertString,
+                               final String dataFile,
+                               final String dateFormat,
+                               final Map&lt;String, Integer&gt; insertedColInfo,
+                               final Collection&lt;Integer&gt; dateFields) {
+
+<span class="nc" id="L181">        int inserted = 0;</span>
+        try {
+            // Now do the insertion.
+<span class="nc" id="L184">            log.trace(&quot;Inserting into {} via {}&quot;, tableName, insertString);</span>
+<span class="nc" id="L185">            PreparedStatement pstmt = connection.prepareStatement(insertString);</span>
+<span class="nc" id="L186">            log.trace(&quot;Prepared statement = {}&quot;, pstmt.toString());</span>
+
+<span class="nc" id="L188">            try (FileInput instance = new FileInput(dataFile, &quot;,&quot;)) {</span>
+<span class="nc" id="L189">                final StopWatch sw = new StopWatch();</span>
+<span class="nc" id="L190">                sw.start();</span>
+<span class="nc" id="L191">                List&lt;String&gt; data = instance.readLine();</span>
+<span class="nc bnc" id="L192" title="All 4 branches missed.">                while (data != null &amp;&amp; data.size() &gt; 0) {</span>
+<span class="nc" id="L193">                    int parameterIndex = 1;</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">                    for (Map.Entry&lt;String, Integer&gt; entry : insertedColInfo.entrySet()) {</span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">                        if (entry.getValue() == -1) {</span>
+<span class="nc" id="L196">                            pstmt.setObject(parameterIndex, null);</span>
+                        } else {
+<span class="nc" id="L198">                            final String value = data.get(entry.getValue() - 1);</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">                            if (dateFields.contains(entry.getValue())) {</span>
+<span class="nc" id="L200">                                int dateField = Integer.MAX_VALUE;</span>
+<span class="nc bnc" id="L201" title="All 4 branches missed.">                                if (value != null &amp;&amp; !value.isEmpty()) {</span>
+<span class="nc" id="L202">                                    dateField = BroadwickConstants.getDate(value, dateFormat);</span>
+                                }
+<span class="nc" id="L204">                                pstmt.setObject(parameterIndex, dateField);</span>
+<span class="nc" id="L205">                            } else {</span>
+<span class="nc" id="L206">                                pstmt.setObject(parameterIndex, value);</span>
+                            }
+                        }
+<span class="nc" id="L209">                        parameterIndex++;</span>
+<span class="nc" id="L210">                    }</span>
+<span class="nc" id="L211">                    pstmt.addBatch();</span>
+                    try {
+<span class="nc" id="L213">                        pstmt.executeUpdate();</span>
+<span class="nc" id="L214">                        inserted++;</span>
+<span class="nc" id="L215">                    } catch (SQLException ex) {</span>
+<span class="nc bnc" id="L216" title="All 2 branches missed.">                        if (&quot;23505&quot;.equals(ex.getSQLState())) {</span>
+                            //Ignore found duplicate from database view
+<span class="nc" id="L218">                            continue;</span>
+                        } else {
+<span class="nc" id="L220">                            log.warn(&quot;Duplicate data found for {}: continuing despite errors: {}&quot;, data.get(0), ex.getLocalizedMessage());</span>
+<span class="nc" id="L221">                            log.trace(&quot;{}&quot;, Throwables.getStackTraceAsString(ex));</span>
+<span class="nc" id="L222">                            throw (ex);</span>
+                        }
+<span class="nc" id="L224">                    }</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">                    if (inserted % 250000 == 0) {</span>
+<span class="nc" id="L226">                        log.trace(&quot;Inserted {} rows in {}&quot;, inserted, sw.toString());</span>
+<span class="nc" id="L227">                        connection.commit();</span>
+<span class="nc" id="L228">                        pstmt.close();</span>
+<span class="nc" id="L229">                        pstmt = connection.prepareStatement(insertString);</span>
+                    }
+
+<span class="nc" id="L232">                    data = instance.readLine();</span>
+<span class="nc" id="L233">                }</span>
+<span class="nc" id="L234">                connection.commit();</span>
+
+<span class="nc bnc" id="L236" title="All 8 branches missed.">            } catch (IOException ex) {</span>
+<span class="nc" id="L237">                log.error(&quot;IO error : {}&quot;, ex.getLocalizedMessage());</span>
+<span class="nc" id="L238">                log.trace(&quot;{}&quot;, Throwables.getStackTraceAsString(ex));</span>
+<span class="nc" id="L239">            } catch (SQLException ex) {</span>
+<span class="nc" id="L240">                log.error(&quot;SQL Error : {}&quot;, ex.getLocalizedMessage());</span>
+<span class="nc" id="L241">                log.trace(&quot;{}&quot;, Throwables.getStackTraceAsString(ex));</span>
+<span class="nc" id="L242">                throw ex;</span>
+            } finally {
+<span class="nc" id="L244">                pstmt.close();</span>
+<span class="nc" id="L245">            }</span>
+<span class="nc" id="L246">        } catch (SQLException ex) {</span>
+<span class="nc" id="L247">            log.error(&quot;{}&quot;, ex.getLocalizedMessage());</span>
+<span class="nc" id="L248">            log.trace(&quot;{}&quot;, Throwables.getStackTraceAsString(ex));</span>
+<span class="nc" id="L249">            throw new BroadwickException(ex);</span>
+<span class="nc" id="L250">        }</span>
+
+<span class="nc" id="L252">        return inserted;</span>
+    }
+
+    /**
+     * Insert the data from the input file into the database. The data structure has been read and the database set up
+     * already so this method simply reads the file and extracts the relevant information, storing it in the database.
+     * @return the number of rows read
+     */
+    public abstract int insert();
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.6.2.201302030002</span></div></body></html>

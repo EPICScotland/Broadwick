@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Edge.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="right"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.html" class="el_package">broadwick.graph</a> &gt; <span class="el_source">Edge.java</span></div><h1>Edge.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.graph;
+
+import java.io.Serializable;
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * This class represents a generic edge in a graph.
+ * @param &lt;V&gt; the type of vertices on the edges. 
+ */
+public class Edge&lt;V extends Vertex&gt;  implements Serializable {
+
+    /**
+     * A generic edge for a graph object.
+     * @param id an id for the edge.
+     */
+<span class="nc" id="L32">    public Edge(final String id) {</span>
+<span class="nc" id="L33">        this.id = id;</span>
+<span class="nc" id="L34">    }</span>
+
+    /**
+     * A generic edge for a graph object.
+     * @param id          an id for the edge.
+     * @param source      the source of the edge.
+     * @param destination the destination of the edge.
+     */
+    public Edge(final String id, final V source, final V destination) {
+<span class="nc" id="L43">        this(id, source, destination, 0.0);</span>
+
+<span class="nc" id="L45">    }</span>
+
+    /**
+     * A generic edge for a graph object.
+     * @param source      the source of the edge.
+     * @param destination the destination of the edge.
+     */
+    public Edge(final V source, final V destination) {
+<span class="nc" id="L53">        this(String.format(&quot;%s-%s&quot;, source.getId(), destination.getId()), source, destination, 0.0);</span>
+<span class="nc" id="L54">    }</span>
+
+    /**
+     * A generic edge for a graph object.
+     * @param source      the source of the edge.
+     * @param destination the destination of the edge.
+     * @param weight      the weight attached to the edge.
+     */
+    public Edge(final V source, final V destination, final Double weight) {
+<span class="fc" id="L63">        this(String.format(&quot;%s-%s&quot;, source.getId(), destination.getId()), source, destination, weight);</span>
+<span class="fc" id="L64">    }</span>
+
+    /**
+     * A generic edge for a graph object.
+     * @param id          an id for the edge.
+     * @param source      the source of the edge.
+     * @param destination the destination of the edge.
+     * @param weight      the weight attached to the edge.
+     */
+<span class="fc" id="L73">    public Edge(final String id, final V source, final V destination, final Double weight) {</span>
+<span class="fc" id="L74">        this.id = id;</span>
+<span class="fc" id="L75">        this.source = source;</span>
+<span class="fc" id="L76">        this.destination = destination;</span>
+<span class="fc" id="L77">        this.weight = weight;</span>
+<span class="fc" id="L78">    }</span>
+    
+    @Override
+    public String toString() {
+<span class="nc" id="L82">        return String.format(&quot;%s-&gt;%s&quot;, source.getId(), destination.getId());</span>
+    }
+
+<span class="pc" id="L85">    @Getter</span>
+    protected String id = null;
+<span class="pc" id="L87">    @Getter</span>
+    protected V source = null;
+<span class="pc" id="L89">    @Getter</span>
+    protected V destination = null;
+<span class="pc" id="L91">    @Setter</span>
+<span class="nc" id="L92">    @Getter</span>
+    protected Double weight = 1.0;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.6.2.201302030002</span></div></body></html>

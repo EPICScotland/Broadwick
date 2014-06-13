@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>StochasticSimulator.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="right"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.html" class="el_package">broadwick.stochastic</a> &gt; <span class="el_source">StochasticSimulator.java</span></div><h1>StochasticSimulator.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.stochastic;
+
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.Synchronized;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
+
+/**
+ * Base class for stochastic simulators. Extending classes just have to implement
+ * &lt;code&gt;performStep&lt;/code&gt; which gets invoked as long as the simulation is running. They also may override
+ * &lt;code&gt;init&lt;/code&gt; but should in that case call
+ * &lt;code&gt;super.init()&lt;/code&gt; to avoid unwanted effects. &lt;p&gt; Simulators also should handle the special time
+ * &lt;code&gt;theta&lt;/code&gt;: is is a moment in time when
+ * &lt;code&gt;doThetaEvent&lt;/code&gt; is supposed to be invoked (e.g. to measure species populations at this moment). Consider
+ * this, if you want to implement a simulator.
+ * &lt;p/&gt;
+ * The &lt;TT&gt;doEvent&lt;/TT&gt; are supposed to be invoked when a simulator causes a reaction to fire.
+ * &lt;p/&gt;
+ * If an extending class sticks to these conventions, it can take full benefit of the observers system: One or more
+ * {@link Observer} can be registered at a simulator and observe certain aspects of the simulation (see the
+ * {@link Observer}s javadoc for more information).
+ * &lt;p/&gt;
+ * Note that this class is NOT thread-safe. Consequently, if a simulation program uses multiple threads, it should
+ * acquire a lock on a simulator (using a &lt;TT&gt;synchronized&lt;/TT&gt; block) before accessing its state. Note however, that
+ * one can launch many simulations in parallel with as many threads, as long as &lt;SPAN CLASS=&quot;textit&quot;&gt;each thread has its
+ * own&lt;/SPAN&gt; &lt;TT&gt;Simulator&lt;/TT&gt;.
+ * &lt;p/&gt;
+ * This class is mostly copied from the FERN projects stochastic classes and modified to fit into this framework.
+ * @see http://www.bio.ifi.lmu.de/FERN/
+ */
+<span class="fc" id="L55">@Slf4j</span>
+public abstract class StochasticSimulator {
+
+    /**
+     * Creates a new simulator using a given amount manager.
+     * @param amountManager    the amount manager used in the simulator.
+     * @param transitionKernel the transition kernel to be used with the stochastic solver.
+     */
+    public StochasticSimulator(final AmountManager amountManager, final TransitionKernel transitionKernel) {
+<span class="fc" id="L64">        this(amountManager, transitionKernel, false);</span>
+<span class="fc" id="L65">    }</span>
+
+    /**
+     * Creates a new simulator.
+     * @param amountManager    the amount manager used in the simulator.
+     * @param transitionKernel the transition kernel to be used with the stochastic solver.
+     * @param reverseTime      true if we wish to go backwards in time.
+     */
+    public StochasticSimulator(final AmountManager amountManager,
+<span class="fc" id="L74">                               final TransitionKernel transitionKernel, final boolean reverseTime) {</span>
+<span class="fc" id="L75">        this.amountManager = amountManager;</span>
+<span class="fc" id="L76">        this.transitionKernel = transitionKernel;</span>
+<span class="fc" id="L77">        this.reverseTime = reverseTime;</span>
+<span class="fc" id="L78">        this.thetaQueue = new ThetaQueue();</span>
+<span class="fc" id="L79">    }</span>
+
+    /**
+     * Starts the simulation up to a given time. It just uses a {@link DefaultController} and calls
+     * {@link StochasticSimulator#start(SimulationController)}.
+     * @param time	simulation time
+     */
+    public final void run(final double time) {
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (controller == null) {</span>
+<span class="nc" id="L88">            controller = new DefaultController(time);</span>
+        }
+<span class="nc" id="L90">        run();</span>
+<span class="nc" id="L91">    }</span>
+
+    /**
+     * Start the simulation with the given {@link SimulationController}.
+     */
+    public final void run() {
+
+        try {
+            // If we haven't set a controller for the process then set the default one with a max time of 5
+            // (unknonw  units).
+<span class="nc bnc" id="L101" title="All 2 branches missed.">            if (controller == null) {</span>
+<span class="nc" id="L102">                controller = new DefaultController(5);</span>
+            }
+
+<span class="nc" id="L105">            init();</span>
+
+            // tell our observers that the simulation has started
+<span class="nc bnc" id="L108" title="All 2 branches missed.">            for (Observer observer : observers) {</span>
+<span class="nc" id="L109">                observer.started();</span>
+<span class="nc" id="L110">            }</span>
+
+<span class="nc" id="L112">            final StopWatch sw = new StopWatch();</span>
+<span class="nc" id="L113">            sw.start();</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">            while (controller.goOn(this)) {</span>
+
+                // The performStep() method is implemented by the specifc stochastic algorithm (e.g. Gillespie's)
+<span class="nc" id="L117">                performStep();</span>
+                
+                //amountManager.doHouseKeeping();
+
+                // tell our observers that the step has been completed.
+<span class="nc bnc" id="L122" title="All 2 branches missed.">                for (Observer observer : observers) {</span>
+<span class="nc" id="L123">                    observer.step();</span>
+<span class="nc" id="L124">                }</span>
+<span class="nc" id="L125">                sw.split();</span>
+<span class="nc" id="L126">                log.trace(&quot;Performed step in {}&quot;, sw.toSplitString());</span>
+            }
+
+            // tell our observers that the simulation has finished.
+<span class="nc bnc" id="L130" title="All 2 branches missed.">            for (Observer observer : observers) {</span>
+<span class="nc" id="L131">                observer.finished();</span>
+<span class="nc" id="L132">            }</span>
+<span class="nc" id="L133">        } catch (Exception e) {</span>
+<span class="nc" id="L134">            log.error(&quot;Error running stochastic simulation. {}&quot;, e.getLocalizedMessage());</span>
+<span class="nc" id="L135">            throw (e);</span>
+<span class="nc" id="L136">        }</span>
+<span class="nc" id="L137">    }</span>
+
+    /**
+     * Initializes the algorithm. &lt;ul&gt;&lt;li&gt;set currentTime=0&lt;/li&gt;&lt;li&gt;reset the {@link AmountManager}&lt;/li&gt;&lt;li&gt;recalculate
+     * the propensities&lt;/li&gt;&lt;/ul&gt; Gets called at the very beginning of
+     * &lt;code&gt;start&lt;/code&gt;
+     */
+    public final void init() {
+<span class="nc" id="L145">        currentTime = startTime;</span>
+<span class="nc" id="L146">    }</span>
+
+    /**
+     * Fires a reaction. It calls the observers and the {@link AmountManager}.
+     * @param mu reaction to be fired.
+     * @param t	 time at which the firing occurs.
+     */
+    protected final void doEvent(final SimulationEvent mu, final double t) {
+<span class="nc" id="L154">        doEvent(mu, t, 1);</span>
+<span class="nc" id="L155">    }</span>
+
+    /**
+     * Perform an event by informing the subscribed observers and the amountManager.
+     * @param event event to be performed.
+     * @param t	    time at which the firing occurs.
+     * @param n     the number of times mu is to be fired.
+     */
+    protected final void doEvent(final SimulationEvent event, final double t, final int n) {
+<span class="nc" id="L164">        log.trace(&quot;Performing event {}&quot;, event);</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">        for (Observer observer : observers) {</span>
+<span class="nc" id="L166">            observer.observeEvent(event, t, n);</span>
+<span class="nc" id="L167">        }</span>
+        // change the amount of the reactants
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        if (!Double.isInfinite(t)) {</span>
+<span class="nc" id="L170">            amountManager.performEvent(event, n);</span>
+        }
+<span class="nc" id="L172">    }</span>
+
+    /**
+     * Gets called when the simulator reaches the predetermined time of a theta event. All the observers for the events
+     * that are configured for this time are notified and given a list of events that are triggered.
+     */
+    protected final void doThetaEvent() {
+<span class="fc" id="L179">        final double nextThetaEventTime = thetaQueue.getNextThetaEventTime();</span>
+<span class="fc" id="L180">        log.trace(&quot;Performing theta events at t = {}&quot;, nextThetaEventTime);</span>
+
+<span class="fc" id="L182">        final Map&lt;Observer, Collection&lt;Object&gt;&gt; nextEvents = thetaQueue.getNextEventDataAndRemove();</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">        for (Map.Entry&lt;Observer, Collection&lt;Object&gt;&gt; entry : nextEvents.entrySet()) {</span>
+
+<span class="fc" id="L185">            final Observer observer = entry.getKey();</span>
+<span class="fc" id="L186">            final Collection&lt;Object&gt; events = entry.getValue();</span>
+
+<span class="pc bpc" id="L188" title="1 of 2 branches missed.">            if (events != null) {</span>
+<span class="fc" id="L189">                log.trace(&quot;Informing observer of {} theta events&quot;, events.size());</span>
+<span class="fc" id="L190">                observer.theta(nextThetaEventTime, events);</span>
+            }
+<span class="fc" id="L192">        }</span>
+<span class="fc" id="L193">        log.trace(&quot;Finished theta events next =  {}&quot;, thetaQueue.getNextThetaEventTime());</span>
+<span class="fc" id="L194">    }</span>
+
+    /**
+     * Add an observer to the engines list of observers.
+     * @param observer the observer.
+     */
+    public final void addObserver(final Observer observer) {
+<span class="pc bpc" id="L201" title="1 of 2 branches missed.">        if (observer.getProcess() != this) {</span>
+<span class="nc" id="L202">            throw new IllegalArgumentException(&quot;Observer doesn't belong to this simulator!&quot;);</span>
+        }
+<span class="fc" id="L204">        this.getObservers().add(observer);</span>
+<span class="fc" id="L205">    }</span>
+
+    /**
+     * Theta defines a moment, where the simulator has to invoke &lt;TT&gt;theta&lt;/TT&gt; of a observers. It is used e.g. to
+     * determine the amounts of species at one moments. Extending class just have to call
+     * {@link Simulator#doThetaEvent()} which basically calls the observers.
+     * @return the theta
+     */
+    public final double getNextThetaEventTime() {
+<span class="fc" id="L214">        return thetaQueue.getNextThetaEventTime();</span>
+    }
+
+    /**
+     * Register a new theta event that is triggered at a given time.
+     * @param obs       the observers which is registering.
+     * @param thetaTime the time the theta event occurs.
+     * @param event     the theta event.
+     */
+    public final void registerNewTheta(final Observer obs, final double thetaTime, final Object event) {
+<span class="fc" id="L224">        thetaQueue.pushTheta(thetaTime, obs, event);</span>
+<span class="fc" id="L225">    }</span>
+
+    /**
+     * Get the default observer for the stochastic process. The default observer is first one defined.
+     * @return the default observer.
+     */
+    public final Observer getDefaultObserver() {
+<span class="nc" id="L232">        return observers.toArray(new Observer[observers.size()])[0];</span>
+    }
+
+    /**
+     * Manages the registered theta events. Each registered theta event is stored in a table containing the time of the
+     * event the list of observers for that event and the list of events for that time.
+     */
+    private class ThetaQueue {
+
+        /**
+         * Construct an empty theta queue.
+         */
+<span class="fc" id="L244">        public ThetaQueue() {</span>
+<span class="fc" id="L245">            thetas = TreeBasedTable.create();</span>
+<span class="pc bpc" id="L246" title="1 of 2 branches missed.">            if (reverseTime) {</span>
+<span class="nc" id="L247">                nextThetaEventTime = Double.NEGATIVE_INFINITY;</span>
+            } else {
+<span class="fc" id="L249">                nextThetaEventTime = Double.POSITIVE_INFINITY;</span>
+            }
+<span class="fc" id="L251">        }</span>
+
+        /**
+         * Add a new theta event to the registry, including the time, collection of observers and collection of events.
+         * Each event is stored as an object where it is assumed that the observer
+         * @param time  the time the theta event occurs.
+         * @param obs   the observers.
+         * @param theta the theta event.
+         */
+<span class="fc" id="L260">        @Synchronized</span>
+        public void pushTheta(final double time, final Observer obs, final Object theta) {
+
+<span class="fc" id="L263">            log.trace(&quot;Adding new {} theta event at t={}&quot;, theta.getClass(), time);</span>
+
+<span class="fc" id="L265">            Collection&lt;Object&gt; events = thetas.get(time, obs);</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">            if (events == null) {</span>
+                try {
+<span class="fc" id="L268">                    log.trace(&quot;No theta events registered at t={}; Creating new list&quot;, time);</span>
+<span class="fc" id="L269">                    events = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L270">                    events.add(theta);</span>
+<span class="fc" id="L271">                    thetas.put(time, obs, events);</span>
+<span class="nc" id="L272">                } catch (UnsupportedOperationException | ClassCastException |</span>
+                         IllegalArgumentException | IllegalStateException e) {
+<span class="nc" id="L274">                    log.error(&quot;Could not register theta. {}&quot;, e.getLocalizedMessage());</span>
+<span class="pc" id="L275">                }</span>
+            } else {
+<span class="fc" id="L277">                log.trace(&quot;Found {} theta events for t={}; Adding new event&quot;, events.size(), time);</span>
+<span class="fc" id="L278">                events.add(theta);</span>
+            }
+
+<span class="pc bpc" id="L281" title="1 of 2 branches missed.">            if (reverseTime) {</span>
+<span class="nc" id="L282">                nextThetaEventTime = Math.max(nextThetaEventTime, time);</span>
+            } else {
+<span class="fc" id="L284">                nextThetaEventTime = Math.min(nextThetaEventTime, time);</span>
+            }
+<span class="pc" id="L286">        }</span>
+
+        /**
+         * Get the next observer and the collection of events they are subscribed to and remove it from the theta queue.
+         * @return a map of the observers and their subscribed data.
+         */
+        public Map&lt;Observer, Collection&lt;Object&gt;&gt; getNextEventDataAndRemove() {
+<span class="fc" id="L293">            final Map&lt;Observer, Collection&lt;Object&gt;&gt; nextEventData = thetas.row(nextThetaEventTime);</span>
+
+            // we have a view of the underlying data that we want to return, copy it first then delete the
+            // underlying data.
+<span class="fc" id="L297">            final Map&lt;Observer, Collection&lt;Object&gt;&gt; eventData = new HashMap&lt;&gt;(nextEventData);</span>
+<span class="fc" id="L298">            log.trace(&quot;Found {} configured events and observers at t={}&quot;, eventData.size(), nextThetaEventTime);</span>
+
+<span class="fc bfc" id="L300" title="All 2 branches covered.">            for (Observer obs : eventData.keySet()) {</span>
+<span class="fc" id="L301">                final Collection&lt;Object&gt; removed = thetas.remove(nextThetaEventTime, obs);</span>
+<span class="fc" id="L302">                log.trace(&quot;Removed {} items from registered theta list&quot;, removed.size());</span>
+<span class="fc" id="L303">            }</span>
+
+            // Now we need to update the nextThetaEventTime
+<span class="pc bpc" id="L306" title="1 of 2 branches missed.">            if (reverseTime) {</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">                if (thetas.rowKeySet().isEmpty()) {</span>
+<span class="nc" id="L308">                    nextThetaEventTime = Double.NEGATIVE_INFINITY;</span>
+                } else {
+<span class="nc" id="L310">                    nextThetaEventTime = Collections.max(thetas.rowKeySet());</span>
+                }
+            } else {
+<span class="fc bfc" id="L313" title="All 2 branches covered.">                if (thetas.rowKeySet().isEmpty()) {</span>
+<span class="fc" id="L314">                    nextThetaEventTime = Double.POSITIVE_INFINITY;</span>
+                } else {
+<span class="fc" id="L316">                    nextThetaEventTime = Collections.min(thetas.rowKeySet());</span>
+                }
+            }
+
+<span class="fc" id="L320">            return eventData;</span>
+        }
+<span class="nc" id="L322">        @Getter</span>
+        private Table&lt;Double, Observer, Collection&lt;Object&gt;&gt; thetas;
+<span class="fc" id="L324">        @Getter</span>
+        private double nextThetaEventTime;
+    }
+
+    /**
+     * Reset propensities when a event has been executed.
+     */
+    public abstract void reinitialize();
+
+    /**
+     * Performs one simulation step. Between steps the terminating condition is checked. The simulators controller is
+     * passed, if an extending class wants to check it within one step. Implementing algorithms cannot be sure that the
+     * propensities are correct at the beginning of a step (e.g. if the volume changed). They should override
+     * {@link Simulator#setAmount(int, long)} and {@link Simulator#setVolume(double)} if they need correct values!
+     */
+    public abstract void performStep();
+
+    /**
+     * Gets the name of the algorithm.
+     * @return name of the algorithm
+     */
+    public abstract String getName();
+
+    /**
+     * Seed the RNG if required.
+     * @param seed the RNG seed.
+     */
+    public abstract void setRngSeed(final int seed);
+<span class="pc" id="L352">    @Setter</span>
+    private int startTime = 0;
+<span class="nc" id="L354">    @Setter</span>
+<span class="nc" id="L355">    @Getter</span>
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+    private TransitionKernel transitionKernel;
+<span class="nc" id="L358">    @Getter</span>
+    private AmountManager amountManager;
+<span class="pc" id="L360">    @Setter</span>
+<span class="nc" id="L361">    @Getter</span>
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+    private double currentTime = 0;
+<span class="pc" id="L364">    @Getter</span>
+<span class="nc" id="L365">    @Setter</span>
+    private SimulationController controller = null;
+<span class="fc" id="L367">    private ThetaQueue thetaQueue = new ThetaQueue();</span>
+<span class="fc" id="L368">    @Getter</span>
+    private Set&lt;Observer&gt; observers = new HashSet&lt;&gt;(1);
+<span class="fc" id="L370">    protected boolean reverseTime = false;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.6.2.201302030002</span></div></body></html>

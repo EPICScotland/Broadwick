@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project>
+    <logs>
+	<console>
+	    <level>info</level> 
+	    <pattern>[%thread] %-5level %msg %n</pattern>
+	</console>
+	<file>
+	    <name>broadwick.stochasticsir.log</name> 
+	    <level>info</level> 
+	    <pattern>[%thread] %-5level %msg %n</pattern>
+	    <overwrite>true</overwrite>
+	</file>
+    </logs>
+   
+    <models>
+	<model id="Broadwick Project">
+	    <classname>broadwick.stochasticsir.StochasticSIR</classname>
+
+	    <parameter id="beta" value="0.2" />
+	    <parameter id="rho" value="0.3" />
+	    <parameter id="tMax" value="100" />
+	    <parameter id="outputFile" value="broadwick.stochasticSIR.dat" />
+	</model>
+    </models>
+</project>
+
+

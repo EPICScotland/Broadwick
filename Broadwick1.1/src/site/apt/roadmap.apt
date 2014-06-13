@@ -1,0 +1,9 @@
+            ------
+            RoadMap
+            ------
+
+      * 1.0 Initial release
+
+      * 1.1 Simplify configuration file, bug fixes 
+
+      * 1.2 Add ODE solver

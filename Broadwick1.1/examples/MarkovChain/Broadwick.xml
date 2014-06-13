@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project>
+    <logs>
+	<console>
+	    <level>trace</level> 
+	    <pattern>%msg %n</pattern>
+	    <!--<pattern>[%thread] %-5level %msg %n</pattern>-->
+	</console>
+	<file>
+	    <name>MarkovChain.log</name> 
+	    <level>trace</level> 
+	    <pattern>[%thread] %-5level %msg %n</pattern>
+	    <overwrite>true</overwrite>
+	</file>
+    </logs>
+
+    <models>
+	<model id="Example of a project generating a Markov Chain">
+	    <classname>markovchain.MarkovChainExample</classname>
+	    <parameter id="initialStep" value="0.0,0.0"/>
+	    <parameter id="chainLength" value="500"/>
+	    <parameter id="outputFile" value="MarkovChain.csv"/>
+	</model>
+    </models>
+</project>
