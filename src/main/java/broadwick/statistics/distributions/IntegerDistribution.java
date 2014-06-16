@@ -144,7 +144,7 @@ public class IntegerDistribution implements Serializable {
     @Synchronized
     public final Integer getRandomBin() {
         final int cumulativeSum = getSumCounts();
-        final int randomBin = (new RNG(RNG.Generator.Well44497b)).getInteger(0, cumulativeSum);
+        final int randomBin = GENERATOR.getInteger(0, cumulativeSum);
 
         final Integer[] arr = bins.keySet().toArray(new Integer[bins.size()]);
         int index = 0;
@@ -166,7 +166,7 @@ public class IntegerDistribution implements Serializable {
     @Synchronized
     public final Integer getRandomBinContents() {
         final int cumulativeSum = getSumCounts();
-        final int randomBin = (new RNG(RNG.Generator.Well44497b)).getInteger(0, cumulativeSum);
+        final int randomBin = GENERATOR.getInteger(0, cumulativeSum);
 
         int sum = 0;
         for (int value : bins.values()) {
@@ -362,4 +362,5 @@ public class IntegerDistribution implements Serializable {
         return str.toString();
     }
     private ConcurrentMap<Integer, Integer> bins;
+    private static final RNG GENERATOR = new RNG(RNG.Generator.Well19937c);
 }
