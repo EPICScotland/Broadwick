@@ -27,11 +27,10 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class FileOutput implements AutoCloseable {
-    
-    
+
     /**
-     * Create a null file output object similar to writing to /dev/null. This allows for empty FileOutput objects
-     * to be used without throwing NullPointerExceptions.
+     * Create a null file output object similar to writing to /dev/null. This allows for empty FileOutput objects to be
+     * used without throwing NullPointerExceptions.
      */
     public FileOutput() {
         buffer = new NullOutputStream();
@@ -42,30 +41,43 @@ public class FileOutput implements AutoCloseable {
      * @param dataFileName the name of the file.
      */
     public FileOutput(final String dataFileName) {
-        this(dataFileName, false, DEFAULT_ENCODING);
+        this(dataFileName, false, false, DEFAULT_ENCODING);
     }
 
     /**
      * Create a file with the given name.
      * @param dataFileName the name of the file.
-     * @param addVersion   boolean that determines whether or not the project version
-     *                     number should be applied to the start of the file.
+     * @param addVersion   boolean that determines whether or not the project version number should be applied to the
+     *                     start of the file.
      */
     public FileOutput(final String dataFileName, final boolean addVersion) {
-        this(dataFileName, addVersion, DEFAULT_ENCODING);
+        this(dataFileName, addVersion, true, DEFAULT_ENCODING);
     }
 
     /**
      * Create a file with the given name.
      * @param dataFileName the name of the file.
-     * @param addVersion   boolean that determines whether or not the project version
-     *                     number should be applied to the start of the file.
+     * @param addVersion   boolean that determines whether or not the project version number should be applied to the
+     *                     start of the file.
+     * @param append       if <code>true</code>, then bytes will be written to the end of the file.
+     */
+    public FileOutput(final String dataFileName, final boolean addVersion, final boolean append) {
+        this(dataFileName, addVersion, append, DEFAULT_ENCODING);
+    }
+
+    /**
+     * Create a file with the given name.
+     * @param dataFileName the name of the file.
+     * @param addVersion   boolean that determines whether or not the project version number should be applied to the
+     *                     start of the file.
+     * @param append       if <code>true</code>, then bytes will be written to the end of the file.
      * @param encoding     the character encoding used in the file.
      */
-    public FileOutput(final String dataFileName, final boolean addVersion, final String encoding) {
+    public FileOutput(final String dataFileName, final boolean addVersion, final boolean append,
+                      final String encoding) {
         try {
             fileEncoding = encoding;
-            buffer = new BufferedOutputStream(new FileOutputStream(dataFileName, true));
+            buffer = new BufferedOutputStream(new FileOutputStream(dataFileName, append));
             if (addVersion) {
                 buffer.write("# Version : ".getBytes(fileEncoding));
                 buffer.write(BroadwickVersion.getVersionAndTimeStamp().getBytes(fileEncoding));
@@ -96,9 +108,8 @@ public class FileOutput implements AutoCloseable {
      * Writes a formatted string to the file stream.
      * @param format A format string as described in <a href="#syntax">Format string syntax</a>
      * @param args   Arguments referenced by the format specifiers in the format string. If there are more arguments
-     *               than format specifiers, the extra
-     *               arguments are ignored. The maximum number of arguments is limited by the maximum dimension of a
-     *               Java array as defined by the <a
+     *               than format specifiers, the extra arguments are ignored. The maximum number of arguments is limited
+     *               by the maximum dimension of a Java array as defined by the <a
      *               href="http://java.sun.com/docs/books/vmspec/">Java Virtual Machine Specification</a>
      * @return the string written to the buffer.
      */
@@ -154,10 +165,8 @@ public class FileOutput implements AutoCloseable {
      * @param format       A format string as described in <a href="#syntax">Format string syntax</a>
      * @param addVersion   add the project version number to the start of the file.
      * @param args         Arguments referenced by the format specifiers in the format string. If there are more
-     *                     arguments than format specifiers, the extra
-     *                     arguments are ignored. The maximum number of arguments is limited by the maximum dimension
-     *                     of
-     *                     a Java array as defined by the <a
+     *                     arguments than format specifiers, the extra arguments are ignored. The maximum number of
+     *                     arguments is limited by the maximum dimension of a Java array as defined by the <a
      *                     href="http://java.sun.com/docs/books/vmspec/">Java Virtual Machine Specification</a>
      */
     public static void saveToFile(final String dataFileName, final String format, final boolean addVersion, final Object... args) {
