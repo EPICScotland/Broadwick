@@ -1,0 +1,18 @@
+<map id="G" name="G">
+<area shape="rect" id="node1_0" href="../Broadwick.html" title="broadwick.Broadwick" alt="" coords="16,67,892,280"/>
+<area shape="rect" id="node1" href="../Broadwick.html" title="&lt;TABLE&gt;" alt="" coords="5,61,903,285"/>
+<area shape="rect" id="node2_1" href="./Lookup.html" title="broadwick.data.Lookup" alt="" coords="1640,395,2071,915"/>
+<area shape="rect" id="node2" href="./Lookup.html" title="&lt;TABLE&gt;" alt="" coords="1629,389,2081,920"/>
+<area shape="rect" id="node5_2" href="http://java.sun.com/j2se/1.4.2/docs/api/com/google/common/cache/Cache.html" title="com.google.common.cache.Cache" alt="" coords="1585,2797,2126,3075"/>
+<area shape="rect" id="node5" href="http://java.sun.com/j2se/1.4.2/docs/api/com/google/common/cache/Cache.html" title="&lt;TABLE&gt;" alt="" coords="1574,2792,2137,3080"/>
+<area shape="rect" id="node6_3" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jooq/DSLContext.html" title="org.jooq.DSLContext" alt="" coords="2171,973,6470,4899"/>
+<area shape="rect" id="node6" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jooq/DSLContext.html" title="&lt;TABLE&gt;" alt="" coords="2161,968,6481,4904"/>
+<area shape="rect" id="node7_4" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jooq/Record.html" title="org.jooq.Record" alt="" coords="6516,2349,6984,3523"/>
+<area shape="rect" id="node7" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jooq/Record.html" title="&lt;TABLE&gt;" alt="" coords="6505,2344,6995,3528"/>
+<area shape="rect" id="node8_5" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jooq/Result.html" title="org.jooq.Result" alt="" coords="7030,2237,7747,3635"/>
+<area shape="rect" id="node8" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jooq/Result.html" title="&lt;TABLE&gt;" alt="" coords="7019,2232,7758,3640"/>
+<area shape="rect" id="node3_6" href="./DataReader.html" title="broadwick.data.DataReader" alt="" coords="937,25,1957,321"/>
+<area shape="rect" id="node3" href="./DataReader.html" title="&lt;TABLE&gt;" alt="" coords="927,20,1968,327"/>
+<area shape="rect" id="node4_7" href="../model/Model.html" title="broadwick.model.Model" alt="" coords="2003,11,2523,336"/>
+<area shape="rect" id="node4" href="../model/Model.html" title="&lt;TABLE&gt;" alt="" coords="1993,5,2534,341"/>
+</map>

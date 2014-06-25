@@ -1,0 +1,12 @@
+<map id="G" name="G">
+<area shape="rect" id="node1_0" href="./LoggingFacade.html" title="broadwick.LoggingFacade" alt="" coords="2122,11,2585,195"/>
+<area shape="rect" id="node1" href="./LoggingFacade.html" title="&lt;TABLE&gt;" alt="" coords="2111,5,2595,200"/>
+<area shape="rect" id="node2_1" href="http://java.sun.com/j2se/1.4.2/docs/api/ch/qos/logback/classic/Logger.html" title="ch.qos.logback.classic.Logger" alt="" coords="16,253,1120,2003"/>
+<area shape="rect" id="node2" href="http://java.sun.com/j2se/1.4.2/docs/api/ch/qos/logback/classic/Logger.html" title="&lt;TABLE&gt;" alt="" coords="5,248,1131,2008"/>
+<area shape="rect" id="node3_2" href="http://java.sun.com/j2se/1.4.2/docs/api/ch/qos/logback/classic/LoggerContext.html" title="ch.qos.logback.classic.LoggerContext" alt="" coords="1166,709,2650,1547"/>
+<area shape="rect" id="node3" href="http://java.sun.com/j2se/1.4.2/docs/api/ch/qos/logback/classic/LoggerContext.html" title="&lt;TABLE&gt;" alt="" coords="1155,704,2661,1552"/>
+<area shape="rect" id="node4_3" href="http://java.sun.com/j2se/1.4.2/docs/api/ch/qos/logback/core/encoder/Encoder.html" title="ch.qos.logback.core.encoder.Encoder" alt="" coords="2696,1061,2904,1195"/>
+<area shape="rect" id="node4" href="http://java.sun.com/j2se/1.4.2/docs/api/ch/qos/logback/core/encoder/Encoder.html" title="&lt;TABLE&gt;" alt="" coords="2685,1056,2915,1200"/>
+<area shape="rect" id="node5_4" href="http://java.sun.com/j2se/1.4.2/docs/api/ch/qos/logback/core/filter/Filter.html" title="ch.qos.logback.core.filter.Filter" alt="" coords="2950,1029,3274,1227"/>
+<area shape="rect" id="node5" href="http://java.sun.com/j2se/1.4.2/docs/api/ch/qos/logback/core/filter/Filter.html" title="&lt;TABLE&gt;" alt="" coords="2939,1024,3285,1232"/>
+</map>

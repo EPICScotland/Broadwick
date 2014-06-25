@@ -1,0 +1,18 @@
+<map id="G" name="G">
+<area shape="rect" id="node1_0" href="./algorithms/GillespieSimple.html" title="broadwick.stochastic.algorithms.GillespieSimple" alt="" coords="16,493,899,739"/>
+<area shape="rect" id="node1" href="./algorithms/GillespieSimple.html" title="&lt;TABLE&gt;" alt="" coords="5,488,909,744"/>
+<area shape="rect" id="node2_1" href="./algorithms/AbstractTauLeapingBase.html" title="broadwick.stochastic.algorithms.AbstractTauLeapingBase" alt="" coords="945,557,1749,675"/>
+<area shape="rect" id="node2" href="./algorithms/AbstractTauLeapingBase.html" title="&lt;TABLE&gt;" alt="" coords="934,552,1759,680"/>
+<area shape="rect" id="node3_2" href="./TransitionKernel.html" title="broadwick.stochastic.TransitionKernel" alt="" coords="1795,524,2219,708"/>
+<area shape="rect" id="node3" href="./TransitionKernel.html" title="&lt;TABLE&gt;" alt="" coords="1784,519,2229,713"/>
+<area shape="rect" id="node4_3" href="./StochasticSimulator.html" title="broadwick.stochastic.StochasticSimulator" alt="" coords="2333,11,3000,435"/>
+<area shape="rect" id="node4" href="./StochasticSimulator.html" title="&lt;TABLE&gt;" alt="" coords="2323,5,3011,440"/>
+<area shape="rect" id="node5_4" href="./StochasticSimulator.ThetaQueue.html" title="broadwick.stochastic.StochasticSimulator.ThetaQueue" alt="" coords="2264,556,2675,676"/>
+<area shape="rect" id="node5" href="./StochasticSimulator.ThetaQueue.html" title="&lt;TABLE&gt;" alt="" coords="2253,551,2685,681"/>
+<area shape="rect" id="node6_5" href="./SimulationController.html" title="broadwick.stochastic.SimulationController" alt="" coords="2721,572,3007,660"/>
+<area shape="rect" id="node6" href="./SimulationController.html" title="&lt;TABLE&gt;" alt="" coords="2710,567,3018,665"/>
+<area shape="rect" id="node7_6" href="./Observer.html" title="broadwick.stochastic.Observer" alt="" coords="3053,532,3433,700"/>
+<area shape="rect" id="node7" href="./Observer.html" title="&lt;TABLE&gt;" alt="" coords="3042,527,3443,705"/>
+<area shape="rect" id="node8_7" href="./AmountManager.html" title="broadwick.stochastic.AmountManager" alt="" coords="3479,540,3799,692"/>
+<area shape="rect" id="node8" href="./AmountManager.html" title="&lt;TABLE&gt;" alt="" coords="3468,535,3809,697"/>
+</map>

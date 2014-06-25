@@ -1,0 +1,16 @@
+<map id="G" name="G">
+<area shape="rect" id="node1_0" href="./VertexAttribute.html" title="broadwick.graph.VertexAttribute" alt="" coords="29,1503,439,1623"/>
+<area shape="rect" id="node1" href="./VertexAttribute.html" title="&lt;TABLE&gt;" alt="" coords="19,1497,449,1628"/>
+<area shape="rect" id="node2_1" href="./Tree.html" title="broadwick.graph.Tree" alt="" coords="516,605,939,1237"/>
+<area shape="rect" id="node2" href="./Tree.html" title="&lt;TABLE&gt;" alt="" coords="505,600,949,1243"/>
+<area shape="rect" id="node4_2" href="./EdgeAttribute.html" title="broadwick.graph.EdgeAttribute" alt="" coords="485,1503,877,1623"/>
+<area shape="rect" id="node4" href="./EdgeAttribute.html" title="&lt;TABLE&gt;" alt="" coords="474,1497,887,1628"/>
+<area shape="rect" id="node6_3" href="../utils/Pair.html" title="broadwick.utils.Pair" alt="" coords="1607,1504,1783,1621"/>
+<area shape="rect" id="node6" href="../utils/Pair.html" title="&lt;TABLE&gt;" alt="" coords="1597,1499,1794,1627"/>
+<area shape="rect" id="node7_4" href="http://java.sun.com/j2se/1.4.2/docs/api/edu/uci/ics/jung/graph/DelegateTree.html" title="edu.uci.ics.jung.graph.DelegateTree" alt="" coords="922,1296,1562,1829"/>
+<area shape="rect" id="node7" href="http://java.sun.com/j2se/1.4.2/docs/api/edu/uci/ics/jung/graph/DelegateTree.html" title="&lt;TABLE&gt;" alt="" coords="911,1291,1573,1835"/>
+<area shape="rect" id="node3_5" href="./Graph.html" title="broadwick.graph.Graph" alt="" coords="1484,11,1907,547"/>
+<area shape="rect" id="node3" href="./Graph.html" title="&lt;TABLE&gt;" alt="" coords="1473,5,1917,552"/>
+<area shape="rect" id="node5_6" href="../phylo/NewickTreeParser.html" title="broadwick.phylo.NewickTreeParser" alt="" coords="16,164,1439,393"/>
+<area shape="rect" id="node5" href="../phylo/NewickTreeParser.html" title="&lt;TABLE&gt;" alt="" coords="5,159,1449,399"/>
+</map>

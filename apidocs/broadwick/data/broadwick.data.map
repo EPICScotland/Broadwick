@@ -1,0 +1,20 @@
+<map id="G" name="G">
+<area shape="rect" id="node1_0" href="./Test.html" title="broadwick.data.Test" alt="" coords="16,83,180,235"/>
+<area shape="rect" id="node1" href="./Test.html" title="&lt;TABLE&gt;" alt="" coords="5,77,191,240"/>
+<area shape="rect" id="node2_1" href="./MovementsComparator.html" title="broadwick.data.MovementsComparator" alt="" coords="226,115,514,203"/>
+<area shape="rect" id="node2" href="./MovementsComparator.html" title="&lt;TABLE&gt;" alt="" coords="215,109,525,208"/>
+<area shape="rect" id="node3_2" href="./Movement.html" title="broadwick.data.Movement" alt="" coords="560,59,727,259"/>
+<area shape="rect" id="node3" href="./Movement.html" title="&lt;TABLE&gt;" alt="" coords="549,53,737,264"/>
+<area shape="rect" id="node4_3" href="./Lookup.html" title="broadwick.data.Lookup" alt="" coords="887,365,1317,885"/>
+<area shape="rect" id="node4" href="./Lookup.html" title="&lt;TABLE&gt;" alt="" coords="876,360,1328,891"/>
+<area shape="rect" id="node5_4" href="./Location.html" title="broadwick.data.Location" alt="" coords="1837,83,2377,235"/>
+<area shape="rect" id="node5" href="./Location.html" title="&lt;TABLE&gt;" alt="" coords="1827,77,2388,240"/>
+<area shape="rect" id="node6_5" href="./H2Database.html" title="broadwick.data.H2Database" alt="" coords="1309,944,1612,1112"/>
+<area shape="rect" id="node6" href="./H2Database.html" title="&lt;TABLE&gt;" alt="" coords="1299,939,1623,1117"/>
+<area shape="rect" id="node7_6" href="./DataReader.html" title="broadwick.data.DataReader" alt="" coords="772,11,1792,307"/>
+<area shape="rect" id="node7" href="./DataReader.html" title="&lt;TABLE&gt;" alt="" coords="761,5,1803,312"/>
+<area shape="rect" id="node8_7" href="./DatabaseImpl.html" title="broadwick.data.DatabaseImpl" alt="" coords="1363,557,1559,693"/>
+<area shape="rect" id="node8" href="./DatabaseImpl.html" title="&lt;TABLE&gt;" alt="" coords="1352,552,1569,699"/>
+<area shape="rect" id="node9_8" href="./Animal.html" title="broadwick.data.Animal" alt="" coords="2423,83,2584,235"/>
+<area shape="rect" id="node9" href="./Animal.html" title="&lt;TABLE&gt;" alt="" coords="2412,77,2595,240"/>
+</map>

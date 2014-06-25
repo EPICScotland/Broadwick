@@ -1,0 +1,28 @@
+<map id="G" name="G">
+<area shape="rect" id="node1_0" href="./Project.html" title="broadwick.config.generated.Project" alt="" coords="1695,187,2061,531"/>
+<area shape="rect" id="node1" href="./Project.html" title="&lt;TABLE&gt;" alt="" coords="1684,181,2072,536"/>
+<area shape="rect" id="node2_1" href="./Logs.html" title="broadwick.config.generated.Logs" alt="" coords="1987,589,2353,885"/>
+<area shape="rect" id="node2" href="./Logs.html" title="&lt;TABLE&gt;" alt="" coords="1976,584,2364,891"/>
+<area shape="rect" id="node10_2" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jvnet/jaxb2_commons/lang/builder/CopyBuilder.html" title="org.jvnet.jaxb2_commons.lang.builder.CopyBuilder" alt="" coords="3023,1755,3386,2144"/>
+<area shape="rect" id="node10" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jvnet/jaxb2_commons/lang/builder/CopyBuilder.html" title="&lt;TABLE&gt;" alt="" coords="3013,1749,3397,2149"/>
+<area shape="rect" id="node11_3" href="http://java.sun.com/j2se/1.4.2/docs/api/org/apache/commons/lang/builder/EqualsBuilder.html" title="org.apache.commons.lang.builder.EqualsBuilder" alt="" coords="1928,1683,2977,2216"/>
+<area shape="rect" id="node11" href="http://java.sun.com/j2se/1.4.2/docs/api/org/apache/commons/lang/builder/EqualsBuilder.html" title="&lt;TABLE&gt;" alt="" coords="1917,1677,2988,2221"/>
+<area shape="rect" id="node12_4" href="http://java.sun.com/j2se/1.4.2/docs/api/org/apache/commons/lang/builder/ToStringBuilder.html" title="org.apache.commons.lang.builder.ToStringBuilder" alt="" coords="16,1395,900,2504"/>
+<area shape="rect" id="node12" href="http://java.sun.com/j2se/1.4.2/docs/api/org/apache/commons/lang/builder/ToStringBuilder.html" title="&lt;TABLE&gt;" alt="" coords="5,1389,911,2509"/>
+<area shape="rect" id="node13_5" href="http://java.sun.com/j2se/1.4.2/docs/api/org/apache/commons/lang/builder/HashCodeBuilder.html" title="org.apache.commons.lang.builder.HashCodeBuilder" alt="" coords="946,1659,1882,2240"/>
+<area shape="rect" id="node13" href="http://java.sun.com/j2se/1.4.2/docs/api/org/apache/commons/lang/builder/HashCodeBuilder.html" title="&lt;TABLE&gt;" alt="" coords="935,1653,1893,2245"/>
+<area shape="rect" id="node3_6" href="./Logs.Console.html" title="broadwick.config.generated.Logs.Console" alt="" coords="1463,992,1829,1288"/>
+<area shape="rect" id="node3" href="./Logs.Console.html" title="&lt;TABLE&gt;" alt="" coords="1452,987,1840,1293"/>
+<area shape="rect" id="node4_7" href="./Logs.File.html" title="broadwick.config.generated.Logs.File" alt="" coords="2269,944,2636,1336"/>
+<area shape="rect" id="node4" href="./Logs.File.html" title="&lt;TABLE&gt;" alt="" coords="2259,939,2647,1341"/>
+<area shape="rect" id="node5_8" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jvnet/jaxb2_commons/lang/CopyTo.html" title="org.jvnet.jaxb2_commons.lang.CopyTo" alt="" coords="1809,11,2437,128"/>
+<area shape="rect" id="node5" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jvnet/jaxb2_commons/lang/CopyTo.html" title="&lt;TABLE&gt;" alt="" coords="1799,5,2448,133"/>
+<area shape="rect" id="node6_9" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jvnet/jaxb2_commons/lang/Copyable.html" title="org.jvnet.jaxb2_commons.lang.Copyable" alt="" coords="1020,11,1325,128"/>
+<area shape="rect" id="node6" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jvnet/jaxb2_commons/lang/Copyable.html" title="&lt;TABLE&gt;" alt="" coords="1009,5,1336,133"/>
+<area shape="rect" id="node7_10" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jvnet/jaxb2_commons/lang/Equals.html" title="org.jvnet.jaxb2_commons.lang.Equals" alt="" coords="2937,19,3441,120"/>
+<area shape="rect" id="node7" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jvnet/jaxb2_commons/lang/Equals.html" title="&lt;TABLE&gt;" alt="" coords="2926,13,3451,125"/>
+<area shape="rect" id="node8_11" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jvnet/jaxb2_commons/lang/HashCode.html" title="org.jvnet.jaxb2_commons.lang.HashCode" alt="" coords="2483,19,2891,120"/>
+<area shape="rect" id="node8" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jvnet/jaxb2_commons/lang/HashCode.html" title="&lt;TABLE&gt;" alt="" coords="2473,13,2902,125"/>
+<area shape="rect" id="node9_12" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jvnet/jaxb2_commons/lang/ToString.html" title="org.jvnet.jaxb2_commons.lang.ToString" alt="" coords="1371,19,1763,120"/>
+<area shape="rect" id="node9" href="http://java.sun.com/j2se/1.4.2/docs/api/org/jvnet/jaxb2_commons/lang/ToString.html" title="&lt;TABLE&gt;" alt="" coords="1361,13,1774,125"/>
+</map>

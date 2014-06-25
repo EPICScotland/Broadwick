@@ -1,0 +1,12 @@
+<map id="G" name="G">
+<area shape="rect" id="node1_0" href="../data/Lookup.html" title="broadwick.data.Lookup" alt="" coords="16,381,705,915"/>
+<area shape="rect" id="node1" href="../data/Lookup.html" title="&lt;TABLE&gt;" alt="" coords="5,376,716,920"/>
+<area shape="rect" id="node2_1" href="./Model.html" title="broadwick.model.Model" alt="" coords="590,11,918,323"/>
+<area shape="rect" id="node2" href="./Model.html" title="&lt;TABLE&gt;" alt="" coords="579,5,929,328"/>
+<area shape="rect" id="node3_2" href="../config/generated/UniformPrior.html" title="broadwick.config.generated.UniformPrior" alt="" coords="608,973,1289,1283"/>
+<area shape="rect" id="node3" href="../config/generated/UniformPrior.html" title="&lt;TABLE&gt;" alt="" coords="597,968,1300,1288"/>
+<area shape="rect" id="node4_3" href="../config/generated/Prior.html" title="broadwick.config.generated.Prior" alt="" coords="803,477,1484,819"/>
+<area shape="rect" id="node4" href="../config/generated/Prior.html" title="&lt;TABLE&gt;" alt="" coords="792,472,1495,824"/>
+<area shape="rect" id="node5_4" href="../config/generated/Parameter.html" title="broadwick.config.generated.Parameter" alt="" coords="1529,469,2211,827"/>
+<area shape="rect" id="node5" href="../config/generated/Parameter.html" title="&lt;TABLE&gt;" alt="" coords="1519,464,2221,832"/>
+</map>
