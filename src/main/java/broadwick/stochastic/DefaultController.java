@@ -33,7 +33,7 @@ public class DefaultController implements SimulationController {
     }
 
     @Override
-    public boolean goOn(final StochasticSimulator process) {
+    public final boolean goOn(final StochasticSimulator process) {
         return process.getCurrentTime() < maxTime;
     }
 

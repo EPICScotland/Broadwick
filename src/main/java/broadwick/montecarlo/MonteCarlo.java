@@ -148,6 +148,11 @@ public class MonteCarlo {
         return CloneUtils.deepClone(resultsConsumer);
     }
 
+    /**
+     * Set the consumer object for this Monte Carlo simulation. A consumer is simply a MonteCarloResults class that 
+     * 'joins' each result that is consumes so that statistics can be calculated at the end of the simulation.
+     * @param consumer the results object to use as a consumer.
+     */
     public final void setResultsConsumer(final MonteCarloResults consumer) {
         resultsConsumer = consumer;
         resultsConsumer.reset();

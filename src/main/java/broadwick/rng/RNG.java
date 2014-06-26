@@ -243,7 +243,7 @@ public class RNG implements Serializable {
      * @return a random element from objects.
      */
     public final Object selectOneOf(final Object[] objects, final double[] probabilities) {
-        double r = getDouble();
+        final double r = getDouble();
         double cdf = 0.0;
         for (int i = 0; i<objects.length; i++) {
             cdf += probabilities[i];

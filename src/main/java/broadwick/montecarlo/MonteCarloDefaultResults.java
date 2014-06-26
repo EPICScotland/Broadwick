@@ -52,7 +52,7 @@ public class MonteCarloDefaultResults implements MonteCarloResults {
     }
 
     @Override
-    public void reset() {
+    public final void reset() {
         this.samples = new Samples();
     }
 

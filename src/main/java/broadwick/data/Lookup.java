@@ -15,15 +15,16 @@
  */
 package broadwick.data;
 
-import broadwick.data.readers.FullMovementsFileReader;
-import broadwick.data.readers.PopulationsFileReader;
 import broadwick.data.readers.BatchedMovementsFileReader;
-import broadwick.data.readers.LocationsFileReader;
 import broadwick.data.readers.DirectedMovementsFileReader;
+import broadwick.data.readers.FullMovementsFileReader;
+import broadwick.data.readers.LocationsFileReader;
+import broadwick.data.readers.PopulationsFileReader;
 import broadwick.data.readers.TestsFileReader;
 import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -1034,7 +1035,7 @@ public final class Lookup {
  * Implement a comparator for movements so that movements can be stored in ascending date order with OFF movements
  * appearing before ON movements in the movements cache.
  */
-class MovementsComparator implements Comparator<Movement> {
+class MovementsComparator implements Comparator<Movement>,Serializable {
 
     @Override
     public int compare(final Movement m1, final Movement m2) {

@@ -75,7 +75,7 @@
     <properties>
         <!-- Sonar exclusions. [CSV] List of files for sonar to ignore (this will 
         be exclusively 3rd party files. -->
-        <sonar.exclusions>broadwick/config/generated/*.java,broadwick/BroadwickGui.java
+	<sonar.exclusions>broadwick/config/generated/*.java,broadwick/BroadwickGui.java,target/generated-sources/xjc/broadwick/config/generated/*.java
         </sonar.exclusions>
 
         <timestamp>${maven.build.timestamp}</timestamp>

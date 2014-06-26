@@ -321,7 +321,7 @@ public abstract class StochasticSimulator {
             return eventData;
         }
         @Getter
-        private Table<Double, Observer, Collection<Object>> thetas;
+        private final Table<Double, Observer, Collection<Object>> thetas;
         @Getter
         private double nextThetaEventTime;
     }
