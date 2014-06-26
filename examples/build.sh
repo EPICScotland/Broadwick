@@ -1,7 +1,8 @@
 EXAMPLES="AbcExample
 MarkovChain
 MonteCarlo
-StochasticSIR"
+StochasticSIR
+DeterministicSir"
 
 for f in $EXAMPLES
 do

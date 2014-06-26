@@ -30,7 +30,7 @@ class MyObserver extends Observer {
 
     /**
      * Create an observer for the simulation that will just save the data at each step.
-     * @param simulator the simulator that will be observed.
+     * @param simulator      the simulator that will be observed.
      * @param outputFileName the name of the file to which the data will be saved.
      */
     MyObserver(final StochasticSimulator simulator, final String outputFileName) {
@@ -42,6 +42,12 @@ class MyObserver extends Observer {
     public void started() {
         log.info("Started Observing using MyObserver.");
         output.write("#t\tS\tI\tR\n");
+
+        final MyAmountManager amountManager = (MyAmountManager) this.getProcess().getAmountManager();
+        output.write("%.2f\t%d\t%d\t%d\n", this.getProcess().getCurrentTime(),
+                     amountManager.getNumberOfSusceptibles(),
+                     amountManager.getNumberOfInfectious(),
+                     amountManager.getNumberOfRemoved());
     }
 
     @Override
@@ -68,7 +74,7 @@ class MyObserver extends Observer {
     @Override
     public void theta(final double thetaTime, final Collection<Object> events) {
         log.info("Performing a theta event at t={}", thetaTime);
-        for (Object theta: events) {
+        for (Object theta : events) {
             // I know that the only theta event I've added to the model is a MyThetaEvent
             ((MyThetaEvent) theta).doThetaEvent();
         }
@@ -82,6 +88,6 @@ class MyObserver extends Observer {
         log.trace("Observing event {}", event.toString());
     }
 
-     private final FileOutput output;
+    private final FileOutput output;
 
 }

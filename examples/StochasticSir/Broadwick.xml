@@ -20,8 +20,8 @@
 	    <parameter id="numS" value="100" />
 	    <parameter id="numI" value="1" />
 	    <parameter id="numR" value="0" />
-	    <parameter id="beta" value="0.2" />
-	    <parameter id="rho" value="0.3" />
+	    <parameter id="beta" value="0.004" />
+	    <parameter id="rho" value="0.04" />
 	    <parameter id="tMax" value="50" />
 
 	    <parameter id="outputFile" value="broadwick.stochasticSIR.dat" />

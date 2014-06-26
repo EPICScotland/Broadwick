@@ -100,7 +100,7 @@ public class StochasticSIR extends Model {
         kernel.clear();
         
         kernel.addToKernel(new SimulationEvent(amountManager.getSusceptible(), amountManager.getInfectious()), 
-                           amountManager.getNumberOfSusceptibles()*betaVal);
+                           amountManager.getNumberOfSusceptibles()*amountManager.getNumberOfInfectious()*betaVal);
         kernel.addToKernel(new SimulationEvent(amountManager.getInfectious(), amountManager.getRemoved()), 
                            amountManager.getNumberOfInfectious()*rhoVal);
     }
