@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project>
+    <logs>
+	<console>
+	    <level>trace</level> 
+	    <pattern>[%thread] %-5level %msg %n</pattern>
+	</console>
+	<file>
+	    <name>broadwick.example.deterministicsir.log</name> 
+	    <level>trace</level> 
+	    <pattern>[%thread] %-5level %msg %n</pattern>
+	    <overwrite>true</overwrite>
+	</file>
+    </logs>
+   
+    <models>
+	<model id="Broadwick Project">
+	    <classname>broadwick.example.deterministicsir.RungeKutta</classname>
+	    <parameter id="initialS" value="100" />
+	    <parameter id="initialI" value="1" />
+	    <parameter id="initialR" value="0" />
+	    <parameter id="beta" value="0.004" />
+	    <parameter id="rho" value="0.04" />
+	    <parameter id="startTime" value="0" />
+	    <parameter id="endTime" value="50" />
+	    <parameter id="numSteps" value="500" />
+
+	    <parameter id="outputFile" value="broadwick.deterministicsir.dat" />
+	</model>
+    </models>
+</project>
+
+
