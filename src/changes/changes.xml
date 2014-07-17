@@ -6,27 +6,35 @@
    <body>
       <release version="0.0"  date="2012-11-14" description="Initial version">
            <action dev="Anthony O'Hare" type="add">
-               Initіal release.
+               Initіal commit.
            </action>         
          </release>
       <release version="1.0 alpha"  date="2013-08-16" description="1.0 alpha">
            <action dev="Anthony O'Hare" type="add">
-               1.0 alpha release.
+               Alpha release - bug fixes, added tests.
            </action>         
          </release>
       <release version="1.0 beta"  date="2013-08-26" description="1.0 beta">
            <action dev="Anthony O'Hare" type="add">
-               1.0 beta release.
+               Beta release - final bug fixes, sonarQube checks.
            </action>         
          </release>
       <release version="1.0"  date="2013-09-25" description="1.0">
            <action dev="Anthony O'Hare" type="add">
-               1.0 release
+               Initial Release of Broadwick
            </action>         
          </release>
-      <release version="current"  date="2013-09-25" description="1.1">
+      <release version="1.1"  date="2014-05-13" description="1.1">
+           <action dev="Anthony O'Hare" type="update">
+               Simplified the configuration file.
+           </action>         
            <action dev="Anthony O'Hare" type="add">
-               1.1 release simplified the configuration file.
+               Included Monte Carlo simulations, Markov Chain generators and MCMC simulations.
+           </action>         
+         </release>
+      <release version="current"  date="2014-07-04" description="1.1">
+           <action dev="Anthony O'Hare" type="add">
+              Added [deterministoc] ODE solver.
            </action>         
          </release>
    </body>
