@@ -27,9 +27,11 @@ public abstract class MonteCarloScenario implements Serializable {
 
     /**
      * Compute the value of the Monte Carlo model/simulation at the given set of coordinates.
+     * @param seed a seed for the random number generator in the scenario. Scenarios are created so quickly, relying on
+     * the clock as a seed may lead to a lot of generator with the same sequence.
      * @return a Monte Carlo Results object.
      */
-    public abstract MonteCarloResults run();
+    public abstract MonteCarloResults run(final int seed);
     
     @Getter
     @Setter
