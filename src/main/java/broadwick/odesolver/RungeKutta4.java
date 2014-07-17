@@ -15,6 +15,8 @@
  */
 package broadwick.odesolver;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -25,9 +27,9 @@ public class RungeKutta4 extends OdeSolver {
 
     /**
      * Create the solver for a give ode object and initial consitions.
-     * @param ode the ode object containing the specification of the ode.
-     * @param tStart the start time (the independent variable is assumed to be time)
-     * @param tEnd the end time (the independent variable is assumed to be time)
+     * @param ode      the ode object containing the specification of the ode.
+     * @param tStart   the start time (the independent variable is assumed to be time)
+     * @param tEnd     the end time (the independent variable is assumed to be time)
      * @param stepSize the size of the step to be used in the solver.
      */
     public RungeKutta4(final Ode ode, final double tStart, final double tEnd, final double stepSize) {
@@ -44,14 +46,17 @@ public class RungeKutta4 extends OdeSolver {
         }
 
         // create some internal working arrays
-        final int n = this.getOde().getInitialValues().length;
+        final int n = this.getOde().getInitialValues().size();
         Double[] k1 = new Double[n];
         Double[] k2 = new Double[n];
         Double[] k3 = new Double[n];
         Double[] k4 = new Double[n];
         final double halfStep = 0.5 * stepSize;
-        Double[] dydx = new Double[n];
-        Double[] yd = new Double[n];
+        List<Double> dydx;
+        final List<Double> yd = new ArrayList<>(n);
+        for (int i = 0; i < n; i++) {
+            yd.add(0.0);
+        }
 
         do {
             currentTime = currentTime + stepSize;
@@ -60,35 +65,27 @@ public class RungeKutta4 extends OdeSolver {
             }
             dydx = this.getOde().computeDerivatives(currentTime, dependentVariables);
             for (int i = 0; i < n; i++) {
-                k1[i] = stepSize * dydx[i];
-            }
-
-            for (int i = 0; i < n; i++) {
-                yd[i] = dependentVariables[i] + k1[i] / 2;
+                k1[i] = stepSize * dydx.get(i);
+                yd.set(i, dependentVariables.get(i) + k1[i] / 2);
             }
             dydx = this.getOde().computeDerivatives(currentTime + halfStep, yd);
             for (int i = 0; i < n; i++) {
-                k2[i] = stepSize * dydx[i];
-            }
-
-            for (int i = 0; i < n; i++) {
-                yd[i] = dependentVariables[i] + k2[i] / 2;
+                k2[i] = stepSize * dydx.get(i);
+                yd.set(i, dependentVariables.get(i) + k2[i] / 2);
             }
             dydx = this.getOde().computeDerivatives(currentTime + halfStep, yd);
             for (int i = 0; i < n; i++) {
-                k3[i] = stepSize * dydx[i];
-            }
-
-            for (int i = 0; i < n; i++) {
-                yd[i] = dependentVariables[i] + k3[i];
+                k3[i] = stepSize * dydx.get(i);
+                yd.set(i, dependentVariables.get(i) + k3[i]);
             }
             dydx = this.getOde().computeDerivatives(currentTime + stepSize, yd);
             for (int i = 0; i < n; i++) {
-                k4[i] = stepSize * dydx[i];
+                k4[i] = stepSize * dydx.get(i);
             }
 
             for (int i = 0; i < n; i++) {
-                dependentVariables[i] += k1[i] / 6 + k2[i] / 3 + k3[i] / 3 + k4[i] / 6;
+                final double newVal = dependentVariables.get(i) + (k1[i] / 6 + k2[i] / 3 + k3[i] / 3 + k4[i] / 6);
+                dependentVariables.set(i, newVal);
             }
 
             for (Observer observer : getObservers()) {

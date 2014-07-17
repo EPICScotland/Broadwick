@@ -17,10 +17,12 @@ package broadwick.odesolver;
 
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
@@ -48,9 +50,7 @@ public abstract class OdeSolver {
         this.independentVariableEnd = tEnd;
         this.stepSize = stepSize;
 
-        dependentVariables = new Double[ode.getInitialValues().length];
-        System.arraycopy(ode.getInitialValues(), 0,
-                         dependentVariables, 0, ode.getInitialValues().length);
+        dependentVariables = new ArrayList<>(ode.getInitialValues());
         log.debug("Created ODE solver");
     }
 
@@ -120,7 +120,7 @@ public abstract class OdeSolver {
      * Get the dependent variables.
      * @return an array of the dependent variables.
      */
-    public final Double[] getDependentVariables() {
+    public final List<Double> getDependentVariables() {
         return dependentVariables;
     }
 
@@ -209,7 +209,7 @@ public abstract class OdeSolver {
         private double nextThetaEventTime;
     }
 
-    protected final Double dependentVariables[];
+    protected final List<Double> dependentVariables;
     protected final double stepSize;
     @Getter
     @SuppressWarnings("PMD.UnusedPrivateField")

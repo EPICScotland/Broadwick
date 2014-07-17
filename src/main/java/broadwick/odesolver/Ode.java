@@ -15,6 +15,8 @@
  */
 package broadwick.odesolver;
 
+import java.util.List;
+
 /**
  * Interface defining a First Order Ordinary Differential Equation.
  */
@@ -23,15 +25,15 @@ public interface Ode {
     /**
      * Get the current time derivative of the state vector.
      * @param t current value of the independent <I>time</I> variable.
-     * @param y array containing the current value of the state vector.
+     * @param y array[list] containing the current value of the state vector.
      * @return the derivative of the dependent variables.
      */
-    Double[] computeDerivatives(double t, Double[] y);
+    List<Double> computeDerivatives(double t, List<Double> y);
 
     /**
      * Get the initial values of each dependent variable.
      * @return double[] the (list of) initial values of each dependent variable
      */
-    Double[] getInitialValues();
+    List<Double> getInitialValues();
 
 }

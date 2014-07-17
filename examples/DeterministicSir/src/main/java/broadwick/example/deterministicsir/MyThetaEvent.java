@@ -37,7 +37,7 @@ class MyThetaEvent {
      */
     public final void doThetaEvent() {
         log.info("Performing theta at {}", this.solver.getCurrentTime());
-        solver.getDependentVariables()[0] += 50;
+        solver.getDependentVariables().set(0, solver.getDependentVariables().get(0) + 50);
     }
     
     

@@ -16,6 +16,8 @@
 package broadwick.example.deterministicsir;
 
 import broadwick.odesolver.Ode;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Create a simple set of ODE describing a density dependent SIR model.
@@ -34,27 +36,26 @@ class SirModel implements Ode {
                     final double initialS, final double initialI, final double initialR) {
         this.beta = beta;
         this.gamma = gamma;
-        this.initialValues = new Double[3];
-        this.initialValues[0] = initialS;
-        this.initialValues[1] = initialI;
-        this.initialValues[2] = initialR;
+        this.initialValues.add(initialS);
+        this.initialValues.add(initialI);
+        this.initialValues.add(initialR);
     }
 
     @Override
-    public final Double[] computeDerivatives(final double t, final Double[] y) {
-        final Double[] yDot = new Double[y.length];
-        yDot[0] = -beta * y[0] * y[1];                  // dS/dt  = -\beta IS
-        yDot[1] = beta * y[0] * y[1] - gamma * y[1];    // dI/dt = \beta IS - \gamma I
-        yDot[2] = gamma * y[1];                         // dR/dt = \gamma I
+    public final List<Double> computeDerivatives(final double t, final List<Double> y) {
+        final List<Double> yDot = new ArrayList<>(y.size());
+        yDot.add(-beta * y.get(0) * y.get(1));                  // dS/dt  = -\beta IS
+        yDot.add(beta * y.get(0) * y.get(1) - gamma * y.get(1));    // dI/dt = \beta IS - \gamma I
+        yDot.add(gamma * y.get(1));                         // dR/dt = \gamma I
         return yDot;
     }
 
     @Override
-    public Double[] getInitialValues() {
+    public List<Double> getInitialValues() {
         return initialValues;
     }
 
     private final double beta, gamma;
-    Double[] initialValues;
+    List<Double> initialValues = new ArrayList<>(3);
 
 }
