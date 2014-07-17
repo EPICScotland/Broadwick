@@ -31,7 +31,7 @@ option_list <- list(
 
 # if you prefer to have each chain depicted in a different colour set useColours to true (T), the default (false)
 # will set all chains to black.
-useColours <- F
+useColours <- T
 
 opt <- parse_args(OptionParser(option_list=option_list))
 
@@ -69,6 +69,7 @@ chains$chains <- list()
 chains$matrix <- matrix(nrow=0, ncol=length(opt_columns)+1)
 chains$mcmc <- c()
 chains$num <- 0
+chains$maxLength <- 0
 
 # look at each chain in parallel, exoptracting accepted steps and removing burn-in steps as required.
 process_chains <- function(datafile, burnin, numChains) {
@@ -106,6 +107,7 @@ process_chains <- function(datafile, burnin, numChains) {
 	    chains$matrix <- rbind(chains$matrix, data.matrix(chain))
 	    chains$mcmc <- append(chains$mcmc, mcmc.list(mcmc(chain[ncol(chain)])))  # the score that we require for the MCMC object was the last column added to the chain!
 	    chains$num <- 1 + chains$num 
+	    chains$maxLength <- 1 + max(chains$maxLength, nrow(chain))
 	} else {
 	    cat (sprintf("                                                     ignoring %s (%d rows)\n", datafile, nrow(chain)))
 	}
@@ -211,6 +213,8 @@ result = tryCatch({
 
        #filled.contour(data.interp)
        try(image(data.interp, col = heat.colors(64),add=TRUE)  , silent = TRUE)
+    } else {
+
     }
   }
   
@@ -243,7 +247,7 @@ result = tryCatch({
   if (opt$gelman) {
     pairs(chains$matrix[,chain_cols], lower.panel=panel.points, upper.panel=panel.quilt, diag.panel=panel.hist, text.panel=panel.text, gap=0) 
   } else {
-    pairs(chains$matrix[,chain_cols], lower.panel=panel.points, upper.panel=panel.contour, text.panel=panel.text, gap=0) 
+    pairs(chains$matrix[,chain_cols], lower.panel=panel.points, upper.panel=panel.quilt, text.panel=panel.text, gap=0) 
   }
  
 }, error = function(err) {
@@ -397,7 +401,6 @@ result = tryCatch({
     
     # calculate the x,y limits for the axes by finding the max value of the elements in the data
     # and adding/subtracting 5%
-    max_x <- 1.05*length(chains$matrix[,i])
     min_y <- (1-sign(min_y)*0.05)*min(chains$matrix[,i])
     max_y <- (1+sign(max_y)*0.05)*max(chains$matrix[,i])
     df_size <- length(chains$matrix[,i])/chains$num
@@ -406,7 +409,7 @@ result = tryCatch({
     if (opt$logscale == TRUE) {
       logscale = "y"
     }
-    plot(1, type='n', log=logscale, ylab=txt, xlab="step", xlim=c(1,max_x), ylim=c(min_y,max_y))
+    plot(1, type='n', log=logscale, ylab=txt, xlab="step", xlim=c(1,chains$maxLength), ylim=c(min_y,max_y))
     for (j in 1:chains$num) {
       lines( chains$chains[[j]][,i], col=cols[j]) # the ith column of the jth chain
     }
@@ -431,7 +434,6 @@ result = tryCatch({
   pdffile <- paste(outputFileNameBase, "_score_evolution.pdf", sep="", collapse = NULL)
   pdf(file=pdffile, onefile=FALSE, width=7.5, height=7.5)
   
-  max_x <- 1.05*length(chains$matrix[,chain_colScore])
   min_y <- min(chains$matrix[,chain_colScore])
   max_y <- max(chains$matrix[,chain_colScore])
   
@@ -440,7 +442,7 @@ result = tryCatch({
     logscale = "y"
   }
 
-  plot(1, type='n', log=logscale, ylab="", xlab="step", xlim=c(1,max_x), ylim=c(min_y,max_y))
+  plot(1, type='n', log=logscale, ylab="", xlab="step", xlim=c(1,chains$maxLength), ylim=c(min_y,max_y))
   for (j in 1:chains$num) {
     lines(chains$chains[[j]][,chain_colScore], col=cols[j])
   }
