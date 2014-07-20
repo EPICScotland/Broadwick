@@ -14,8 +14,8 @@ public class VertexAttribute implements Serializable {
 
     /**
      * Create a node attribute object setting the value to be the default value.
-     * @param name the name of the attribute.
-     * @param type the type of the attribute.
+     * @param name         the name of the attribute.
+     * @param type         the type of the attribute.
      * @param defaultValue the default value for the attribute.
      */
     public VertexAttribute(String name, Class type, Object defaultValue) {
@@ -25,7 +25,7 @@ public class VertexAttribute implements Serializable {
         this.value = defaultValue;
     }
 
-
+    @Getter
     private final String name;
     private final Class type;
     private final Object defaultValue;
