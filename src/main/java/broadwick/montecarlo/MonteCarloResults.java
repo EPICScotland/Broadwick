@@ -59,4 +59,5 @@ public interface MonteCarloResults extends Cloneable {
      * clear any cached results that should be cleared between runs.
      */
     void reset();
+
 }

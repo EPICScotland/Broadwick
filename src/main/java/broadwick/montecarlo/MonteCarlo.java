@@ -54,10 +54,11 @@ public class MonteCarlo {
      */
     public final void run() {
 
-        final ArrayBlockingQueue<MonteCarloResults> queue = new ArrayBlockingQueue<>(1000);
+        final ArrayBlockingQueue<MonteCarloResults> queue = new ArrayBlockingQueue<>(numSimulations + 1);
 
         //Creating Producer and Consumer Thread
-        final Thread producer = new Thread(new Producer(queue, (MonteCarloScenario) CloneUtils.deepClone(simulation), numSimulations));
+        final Thread producer = new Thread(new Producer(queue, (MonteCarloScenario) CloneUtils.deepClone(simulation),
+                                                        numSimulations));
         final Thread consumer = new Thread(new Consumer(queue, resultsConsumer));
 
         producer.start();
@@ -67,7 +68,8 @@ public class MonteCarlo {
             producer.join();
             consumer.join();
         } catch (java.lang.InterruptedException e) {
-            log.error(Throwables.getStackTraceAsString(e));
+            log.error("Error joining Monte Carlo results {}",
+                      Throwables.getStackTraceAsString(e));
         }
     }
 
@@ -96,7 +98,7 @@ public class MonteCarlo {
 }
 
 /**
- * This class takes (or consumes) the results of a single simulation of the model and saves the results in a manner to 
+ * This class takes (or consumes) the results of a single simulation of the model and saves the results in a manner to
  * allow statistics to be generated from the Monte Carlo simulation.
  */
 @Slf4j
@@ -104,7 +106,7 @@ class Consumer implements Runnable {
 
     /**
      * Create the consumer object.
-     * @param queue the queue that the consumer should check for values to consume.
+     * @param queue         the queue that the consumer should check for values to consume.
      * @param joinedResults the MonteCarloResults object to which the consumed results will be added.
      */
     public Consumer(final ArrayBlockingQueue<MonteCarloResults> queue, final MonteCarloResults joinedResults) {
@@ -115,7 +117,7 @@ class Consumer implements Runnable {
 
     @Override
     public void run() {
-        log.debug("Starting Monte Carlo results consumer thread");
+        log.trace("Starting Monte Carlo results consumer thread");
         final StopWatch sw = new StopWatch();
         sw.start();
 
@@ -129,10 +131,13 @@ class Consumer implements Runnable {
 
                     // get the MonteCarloResults from the q and calculate the statistics on it.
                     joinedResults.join(results);
+
+                    // we no longer require the results so allow the memory to be freed.
+                    results = null;
                 }
             }
         } catch (java.lang.InterruptedException e) {
-            log.error(Throwables.getStackTraceAsString(e));
+            log.error("Error consuming Monte Carlo Results {}", Throwables.getStackTraceAsString(e));
         }
         sw.stop();
         log.debug("Analysed {} simulation results in {}.", numSimulationsFound, sw);
@@ -144,7 +149,7 @@ class Consumer implements Runnable {
 }
 
 /**
- * This class runs a single simulation of the model to 'produce' results (hence the name). This runnable class is run 
+ * This class runs a single simulation of the model to 'produce' results (hence the name). This runnable class is run
  * many times to create a Monte Carlo simulation.
  */
 @Slf4j
@@ -152,8 +157,8 @@ class Producer implements Runnable {
 
     /**
      * Create the producer object.
-     * @param queue the queue on which the producers results are added.
-     * @param simulation the model that will be run to produce results.
+     * @param queue          the queue on which the producers results are added.
+     * @param simulation     the model that will be run to produce results.
      * @param numSimulations the number of simulations that are to be run and placed in the quque.
      */
     public Producer(final ArrayBlockingQueue<MonteCarloResults> queue, final MonteCarloScenario simulation, final int numSimulations) {
@@ -164,7 +169,7 @@ class Producer implements Runnable {
 
     @Override
     public void run() {
-        log.debug("Starting Monte Carlo results producer thread");
+        log.trace("Starting Monte Carlo results producer thread");
         try {
             final int poolSize = Runtime.getRuntime().availableProcessors();
             final ExecutorService es = Executors.newFixedThreadPool(poolSize);
@@ -178,25 +183,26 @@ class Producer implements Runnable {
                     public void run() {
                         try {
                             final MonteCarloScenario scenario = (MonteCarloScenario) CloneUtils.deepClone(simulation);
-                            final MonteCarloResults results = scenario.run(generator.getInteger(0, Integer.MAX_VALUE-1));
+                            final MonteCarloResults results = scenario.run(generator.getInteger(0, Integer.MAX_VALUE - 1));
                             queue.put(results);
 
                         } catch (java.lang.InterruptedException e) {
-                            log.error(Throwables.getStackTraceAsString(e));
+                            log.error("Error running Monte Carlo simulation {}",
+                                      Throwables.getStackTraceAsString(e));
                         }
                     }
                 });
             }
-            es.shutdown();
+                       es.shutdown();
             while (!es.isTerminated()) {
                 es.awaitTermination(1, TimeUnit.SECONDS);
             }
             queue.put(new Poison());
 
             sw.stop();
-            log.debug("Finished {} simulations in {}.", numSimulations, sw);
+            log.info("Finished {} simulations in {}.", numSimulations, sw);
         } catch (InterruptedException ex) {
-            log.error(Throwables.getStackTraceAsString(ex));
+            log.error("Monte Carlo simulation error: {}", Throwables.getStackTraceAsString(ex));
         }
     }
 

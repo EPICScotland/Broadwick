@@ -51,13 +51,9 @@ public final class SetOperations {
      * @return setA intersection setB
      */
     public static <T> Set<T> intersection(final Collection<T> setA, final Collection<T> setB) {
-        final Set<T> tmp = new TreeSet<>();
-        for (T x : setA) {
-            if (setB.contains(x)) {
-                tmp.add(x);
-            }
-        }
-        return tmp;
+        final Set<T> intersection = new TreeSet<>(setA);
+        intersection.retainAll(setB);
+        return intersection;
     }
 
     /**
@@ -81,12 +77,13 @@ public final class SetOperations {
      * @return (setA union setB) minus (setA union setB)
      */
     public static <T> Set<T> symDifference(final Set<T> setA, final Set<T> setB) {
-        final Set<T> tmpA;
-        final Set<T> tmpB;
-
-        tmpA = union(setA, setB);
-        tmpB = intersection(setA, setB);
-        return difference(tmpA, tmpB);
+        final Set<T> union = new TreeSet<>(setA);
+        union.addAll(setB);
+        final Set<T> intersection = new TreeSet<>(setA);
+        intersection.retainAll(setB);
+        
+        union.removeAll(intersection);
+        return union;
     }
 
     /**

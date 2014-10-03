@@ -157,11 +157,12 @@ public final class Broadwick {
                             @Override
                             public void run() {
                                 final String modelName = entry.getKey();
+                                final Model model = entry.getValue();
                                 try {
-                                    log.info("Running {} [{}]", modelName, entry.getValue().getClass().getCanonicalName());
-                                    entry.getValue().init();
-                                    entry.getValue().run();
-                                    entry.getValue().finalise();
+                                    log.info("Running {} [{}]", modelName, model.getClass().getCanonicalName());
+                                    model.init();
+                                    model.run();
+                                    model.finalise();
                                 } catch (Exception ex) {
                                     log.error("Error running model {}. see stack trace from details.", modelName);
                                     log.error("{}", Throwables.getStackTraceAsString(ex));
@@ -177,11 +178,15 @@ public final class Broadwick {
                     //log.trace("Finished {} simulations in {}.", maxSimulations, sw);
                 }
             } catch (Exception ex) {
+                log.error("{}", ex.getLocalizedMessage());
                 log.error("{}", Throwables.getStackTraceAsString(ex));
                 log.error("Something went wrong. See previous messages for details.");
             }
 
             log.info("Simulation complete. {}", sw.toString());
+            // In rare circumstances, where exceptions are caught and the simulation has completed but
+            // there are still tasks being submitted to the executor, we need to force the progam to quit.
+            Runtime.getRuntime().exit(0);
         }
     }
 

@@ -125,7 +125,7 @@ public class LocalPoolExecutor implements Executor {
                 break;
             } catch (ExecutionException e) {
                 // One of the submitted jobs threw an exception, we need to stop all the currently running threads.
-                log.error("{}", Throwables.getStackTraceAsString(e));
+                log.error("LocalPoolExecutor detected an error: {}", Throwables.getStackTraceAsString(e));
                 stopAllTasks(tasks);
                 service.shutdown();
                 status = Executor.Status.TERMINATED;
