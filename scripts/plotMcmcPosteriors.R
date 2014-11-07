@@ -473,11 +473,10 @@ result = tryCatch({
   for (j in 1:chains$num) {
       box <-  boxplot.stats(chains$chains[[j]][,chain_colScore])
       dens <- try(density(chains$chains[[j]][,chain_colScore], kernel="gaussian", bw="nrd", n=8192), silent=TRUE)
-      min_x <- min(min_x, (1-sign(min_x)*0.05)*box$stats[1]) 
-      max_x <- max(max_x, (1+sign(max_x)*0.05)*box$stats[5]) 
+      min_x <- min(min_x, box$stats[1] - abs(box$stats[1])*0.01)
+      max_x <- max(max_x, box$stats[5] + abs(box$stats[5])*0.01) 
       max_y <- max(max_y, (1+sign(max_y)*0.05)*max(dens$y))
   }
-
 
   plot(1, type='n', ylab="", xlab="", xlim=c(min_x,max_x), ylim=c(0,max_y))
   for (j in 1:chains$num) {
