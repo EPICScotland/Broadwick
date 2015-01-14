@@ -24,6 +24,7 @@ import broadwick.data.DataReader;
 import broadwick.data.Lookup;
 import broadwick.model.Model;
 import com.google.common.base.Throwables;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
@@ -33,6 +34,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -61,7 +63,7 @@ public final class Broadwick {
 
     /**
      * Create the Broadwick project to read and verify the configuration files and initialise the project.
-     *
+     * <p>
      * @param args the command line arguments supplied to the project.
      */
     public Broadwick(final String[] args) {
@@ -79,7 +81,7 @@ public final class Broadwick {
 
     /**
      * Read the configuration file from the configuration file.
-     *
+     * <p>
      * @param logFacade  the LoggingFacade object used to log any messages.
      * @param configFile the name of the configuration file.
      */
@@ -149,7 +151,11 @@ public final class Broadwick {
                 // TODO in a single-threaded grid environment we cannot do this - need to think again here....
                 final int poolSize = registeredModels.size();
                 if (poolSize > 0) {
-                    final ExecutorService es = Executors.newFixedThreadPool(poolSize);
+                    final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+                            .setNameFormat("BroadwickModels-%d")
+                            .setDaemon(true)
+                            .build();
+                    final ExecutorService es = Executors.newFixedThreadPool(poolSize, threadFactory);
 
                     //final StopWatch sw = new StopWatch();
                     for (final Entry<String, Model> entry : registeredModels.entrySet()) {
@@ -193,7 +199,7 @@ public final class Broadwick {
     /**
      * Create and register the models internally. If there was a problem registering the models an empty cache is
      * returned.
-     *
+     * <p>
      * @param project the unmarshalled configuration file.
      * @param lookup  the Lookuup object that allows the model to access the data specified in the data files.
      * @return the registered models.
@@ -223,7 +229,7 @@ public final class Broadwick {
 
     /**
      * Get a collection of XML elements one for each <model> section.
-     *
+     * <p>
      * @return a collection of XML elements of each <model>.
      * @throws ParserConfigurationException if the nodes for the configured models cannot be found.
      * @throws SAXException                 if the nodes for the configured models cannot be found.
@@ -238,7 +244,7 @@ public final class Broadwick {
 
     /**
      * Get the XML string of the model with the given id from a list of configured models.
-     *
+     * <p>
      * @param id     the id of the model to be found.
      * @param models a list of XML <model> nodes.
      * @return the XML string for the model.
@@ -255,7 +261,7 @@ public final class Broadwick {
                     final StringWriter buffer = new StringWriter();
                     transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
                     transformer.transform(new DOMSource(models.item(i)),
-                            new StreamResult(buffer));
+                                          new StreamResult(buffer));
                     return buffer.toString();
                 }
             }
@@ -267,7 +273,7 @@ public final class Broadwick {
 
     /**
      * Invocation point.
-     *
+     * <p>
      * @param args the command line arguments passed to Broadwick.
      */
     public static void main(final String[] args) {
