@@ -52,11 +52,17 @@ public class Vertex implements Serializable {
     }
 
     /**
-     * Add an attribute to the vertex.
+     * Add an attribute to the vertex, overwriting any attribute of the same name.
      * @param attribute the attribute to be added.
      * @return true if the collection of attributes changed as a result of the call
      */
     public final boolean addAttribute(final VertexAttribute attribute) {
+        for (VertexAttribute attr : attributes) {
+            if (StringUtils.equalsIgnoreCase(attribute.getName(), attr.getName())) {
+                attributes.remove(attr);
+                break;
+            }
+        }
         return attributes.add(attribute);
     }
 
