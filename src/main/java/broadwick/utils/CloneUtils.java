@@ -19,8 +19,8 @@ import com.rits.cloning.Cloner;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Utility for object cloning using serialization. This allows objects to be deep-copied
- * without the need for each object to implement the Cloneable interface.
+ * Utility for object cloning using serialization. This allows objects to be deep-copied without the need for each
+ * object to implement the Cloneable interface.
  * <p>
  * Note, object being cloned MUST be serializable.
  */
@@ -34,10 +34,10 @@ public final class CloneUtils {
     }
 
     /**
-     * Deep clones an object. The object to be clone does not need to implement Cloneable or be serializable
-     * for this method to work.
+     * Deep clones an object. The object to be clone does not need to implement Cloneable or be serializable for this
+     * method to work.
      * @param <T> the type of "o"
-     * @param o The object to be cloned.
+     * @param o   The object to be cloned.
      * @return The cloned object.
      */
     @SuppressWarnings("FinalStaticMethod")
