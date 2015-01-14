@@ -40,10 +40,10 @@ public class MarkovChainMonteCarlo {
 
     /**
      * Create a Monte Carlo instance.
-     * @param model              The Monte Carlo Model to be run.
-     * @param numSimulations     The number of time the Monte Carlo model should be run at each step.
-     * @param consumer           the object that will consume and aggregate the MC results.
-     * @param generator          the object that will generate the Monte Carlo chain/path.
+     * @param model          The Monte Carlo Model to be run.
+     * @param numSimulations The number of time the Monte Carlo model should be run at each step.
+     * @param consumer       the object that will consume and aggregate the MC results.
+     * @param generator      the object that will generate the Monte Carlo chain/path.
      */
     public MarkovChainMonteCarlo(final MonteCarloScenario model, final int numSimulations,
                                  final MonteCarloResults consumer,
@@ -53,11 +53,11 @@ public class MarkovChainMonteCarlo {
 
     /**
      * Create a Monte Carlo instance.
-     * @param model              The Monte Carlo Model to be run.
-     * @param numSimulations     The number of time the Monte Carlo model should be run at each step.
-     * @param consumer           the object that will consume and aggregate the MC results.
-     * @param controller         the controller object for this class.
-     * @param generator          the object that will generate the Monte Carlo chain/path.
+     * @param model          The Monte Carlo Model to be run.
+     * @param numSimulations The number of time the Monte Carlo model should be run at each step.
+     * @param consumer       the object that will consume and aggregate the MC results.
+     * @param controller     the controller object for this class.
+     * @param generator      the object that will generate the Monte Carlo chain/path.
      */
     public MarkovChainMonteCarlo(final MonteCarloScenario model, final int numSimulations,
                                  final MonteCarloResults consumer, final MarkovChainController controller,
@@ -94,9 +94,13 @@ public class MarkovChainMonteCarlo {
         mc.setResultsConsumer(consumer);
         mc.run();
         MonteCarloResults prevResults = mc.getResults();
+        for (MarkovChainObserver observer : observers) {
+            observer.step();
+            observer.takeMeasurements();
+        }
         writer.write("%d,%d,%s,%s\n", numStepsTaken, 1, currentStep.toString(), prevResults.toCsv());
         numStepsTaken++;
-        
+
         while (mcController.goOn(this)) {
             int stepsSinceLastMeasurement = 0;
             final MonteCarloStep proposedStep = pathGenerator.generateNextStep(currentStep);
