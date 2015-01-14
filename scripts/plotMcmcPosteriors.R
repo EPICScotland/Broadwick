@@ -271,7 +271,7 @@ tryCatch ({
   pdf(file=pdffile, onefile=FALSE, width=7.5, height=7.5)
   
   corrMatrix <- cor(chains$matrix[,chain_cols], method="spearman")
-  corrplot.mixed(corrMatrix, lower = "number", upper = "ellipse")
+  corrplot.mixed(corrMatrix, lower = "number", upper = "pie", order = "FPC")
 
 }, error = function(err) {
   cat(paste("****Could not create parameter correlations:  ",err))
@@ -318,7 +318,13 @@ tryCatch ({
 	rug(x)
     }
 
-    pairs(chains$matrix[,chain_cols], gap=0, lower.panel=panel.smooth, upper.panel=panel.cor, diag.panel=hist.panel)
+    # Labels on the diagonal
+    panel.text <- function(x, y, opt_lbls, cex, font) {
+	txt <- parse(text = opt_labels[parent.frame(1)$i])
+	text(0.4, 0.75, txt, cex=1.5)
+    }
+  
+    pairs(chains$matrix[,chain_cols], gap=0, lower.panel=panel.smooth, upper.panel=panel.cor, diag.panel=hist.panel, text.panel=panel.text)
 
 }, error = function(err) {
     cat(paste("****Could not create parameter correlations:  ",err))
@@ -473,9 +479,15 @@ result = tryCatch({
   for (j in 1:chains$num) {
       box <-  boxplot.stats(chains$chains[[j]][,chain_colScore])
       dens <- try(density(chains$chains[[j]][,chain_colScore], kernel="gaussian", bw="nrd", n=8192), silent=TRUE)
+<<<<<<< mine
+      min_x <- min(min_x, box$stats[1]-0.01*abs(box$stats[1]))
+      max_x <- max(max_x, box$stats[5]+0.01*abs(box$stats[5])) 
+      max_y <- max(max_y, max(dens$y)*1.05)
+=======
       min_x <- min(min_x, box$stats[1] - abs(box$stats[1])*0.01)
       max_x <- max(max_x, box$stats[5] + abs(box$stats[5])*0.01) 
       max_y <- max(max_y, (1+sign(max_y)*0.05)*max(dens$y))
+>>>>>>> theirs
   }
 
   plot(1, type='n', ylab="", xlab="", xlim=c(min_x,max_x), ylim=c(0,max_y))
