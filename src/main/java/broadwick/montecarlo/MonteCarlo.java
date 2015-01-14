@@ -19,9 +19,11 @@ import broadwick.rng.RNG;
 import broadwick.statistics.Samples;
 import broadwick.utils.CloneUtils;
 import com.google.common.base.Throwables;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
@@ -67,9 +69,8 @@ public class MonteCarlo {
         try {
             producer.join();
             consumer.join();
-        } catch (java.lang.InterruptedException e) {
-            log.error("Error joining Monte Carlo results {}",
-                      Throwables.getStackTraceAsString(e));
+        } catch (Exception e) {
+            log.error("Error joining Monte Carlo results {}", Throwables.getStackTraceAsString(e));
         }
     }
 
@@ -94,7 +95,6 @@ public class MonteCarlo {
     private final MonteCarloScenario simulation;
     private MonteCarloResults resultsConsumer;
     private final int numSimulations;
-
 }
 
 /**
@@ -172,7 +172,11 @@ class Producer implements Runnable {
         log.trace("Starting Monte Carlo results producer thread");
         try {
             final int poolSize = Runtime.getRuntime().availableProcessors();
-            final ExecutorService es = Executors.newFixedThreadPool(poolSize);
+            final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+                    .setNameFormat("MCScenarioProducer-%d")
+                    .setDaemon(true)
+                    .build();
+            final ExecutorService es = Executors.newFixedThreadPool(poolSize, threadFactory);
             final RNG generator = new RNG(RNG.Generator.Well44497b);
 
             final StopWatch sw = new StopWatch();
@@ -185,15 +189,13 @@ class Producer implements Runnable {
                             final MonteCarloScenario scenario = (MonteCarloScenario) CloneUtils.deepClone(simulation);
                             final MonteCarloResults results = scenario.run(generator.getInteger(0, Integer.MAX_VALUE - 1));
                             queue.put(results);
-
-                        } catch (java.lang.InterruptedException e) {
-                            log.error("Error running Monte Carlo simulation {}",
-                                      Throwables.getStackTraceAsString(e));
+                        } catch (Exception e) {
+                            log.error("Error running Monte Carlo simulation {}", Throwables.getStackTraceAsString(e));
                         }
                     }
                 });
             }
-                       es.shutdown();
+            es.shutdown();
             while (!es.isTerminated()) {
                 es.awaitTermination(1, TimeUnit.SECONDS);
             }
@@ -201,7 +203,7 @@ class Producer implements Runnable {
 
             sw.stop();
             log.info("Finished {} simulations in {}.", numSimulations, sw);
-        } catch (InterruptedException ex) {
+        } catch (Exception ex) {
             log.error("Monte Carlo simulation error: {}", Throwables.getStackTraceAsString(ex));
         }
     }
