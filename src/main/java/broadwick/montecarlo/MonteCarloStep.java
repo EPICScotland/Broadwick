@@ -15,6 +15,7 @@
  */
 package broadwick.montecarlo;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.Getter;
@@ -23,7 +24,7 @@ import lombok.Getter;
  * A representation of the current step in a Markov Chain. The step is represented by a set of coordinates in the
  * parameter space spanning the possible set of steps.
  */
-public class MonteCarloStep {
+public class MonteCarloStep implements Serializable {
 
     /**
      * Copy constructor.

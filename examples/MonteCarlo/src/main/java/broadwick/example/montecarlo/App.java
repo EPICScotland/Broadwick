@@ -138,6 +138,12 @@ class MyResultsConsumer implements MonteCarloResults {
         misses.add(1);
     }
 
+    /**
+     * Clear the results of the MonteCarloResults object.
+     */
+    public void reset() {
+    }
+
     @Getter
     private final Samples hits = new Samples();
     @Getter

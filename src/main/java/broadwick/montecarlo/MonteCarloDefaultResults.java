@@ -23,8 +23,8 @@ import broadwick.statistics.Samples;
 public class MonteCarloDefaultResults implements MonteCarloResults {
 
     /**
-     * Create a default implementation of the MonteCarloResults class. This class stores a single result from a 
-     * Monte Carlo simulation and returns the mean of this value over all simulations as the expected value.
+     * Create a default implementation of the MonteCarloResults class. This class stores a single result from a Monte
+     * Carlo simulation and returns the mean of this value over all simulations as the expected value.
      */
     MonteCarloDefaultResults() {
         this.samples = new Samples();
@@ -51,5 +51,11 @@ public class MonteCarloDefaultResults implements MonteCarloResults {
         return this;
     }
 
-    private final Samples samples;
+    @Override
+    public final void reset() {
+        this.samples = new Samples();
+    }
+
+    private Samples samples;
+
 }

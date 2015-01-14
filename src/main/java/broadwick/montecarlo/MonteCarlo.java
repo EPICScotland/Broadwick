@@ -15,14 +15,16 @@
  */
 package broadwick.montecarlo;
 
+import broadwick.rng.RNG;
 import broadwick.statistics.Samples;
 import broadwick.utils.CloneUtils;
 import com.google.common.base.Throwables;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 
@@ -36,7 +38,7 @@ public class MonteCarlo {
 
     /**
      * Create a Monte Carlo object that is capable of running <code>numSimulation</code> MonteCarloScenarios.
-     * @param simulation the simulation or scenario to be run.
+     * @param simulation     the simulation or scenario to be run.
      * @param numSimulations the number of times the simulation should be run.
      */
     public MonteCarlo(final MonteCarloScenario simulation,
@@ -54,81 +56,12 @@ public class MonteCarlo {
      */
     public final void run() {
 
-        // Create the queue for the producer-consumer to use. It will take the producers longer to create results than it takes
-        // consumers to process them so having a relavively small queue should be ok.
-        final ArrayBlockingQueue<MonteCarloResults> q = new ArrayBlockingQueue<>(1000);
-        final MonteCarloResults poison = new Poison();
+        final ArrayBlockingQueue<MonteCarloResults> queue = new ArrayBlockingQueue<>(numSimulations + 1);
 
-        // Create the producer (the epdemics and generator of data) and the consumer (the gatherer of the data).
-        final Thread producer = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    final int poolSize = Runtime.getRuntime().availableProcessors();
-                    final ExecutorService es = Executors.newFixedThreadPool(poolSize);
-
-                    final StopWatch sw = new StopWatch();
-                    sw.start();
-                    for (int i = 0; i < numSimulations; i++) {
-                        es.submit(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    //final StochasticEpidemic epidemic = new StochasticEpidemic((ConfigProperties) CloneUtils.deepClone(parameters), herdSizeDistrib, generator.getInteger(0, Integer.MAX_VALUE), maxRecordedBreakdownSize);
-                                    MonteCarloScenario scenario = (MonteCarloScenario) CloneUtils.deepClone(simulation);
-                                    MonteCarloResults results = scenario.run();
-                                    q.put(results);
-
-                                } catch (java.lang.InterruptedException e) {
-                                    log.error(Throwables.getStackTraceAsString(e));
-                                }
-                            }
-                        });
-                    }
-                    es.shutdown();
-                    while (!es.isTerminated()) {
-                        es.awaitTermination(1, TimeUnit.SECONDS);
-                    }
-                    q.put(poison);
-                    sw.stop();
-                    log.trace("Finished {} simulations in {}.", numSimulations, sw);
-                } catch (InterruptedException ex) {
-                    log.error(Throwables.getStackTraceAsString(ex));
-                }
-            }
-        });
-
-        final Thread consumer;
-        consumer = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                MonteCarloResults results = null;
-                final StopWatch sw = new StopWatch();
-                sw.start();
-
-                while (!(results instanceof Poison)) {
-                    try {
-                        results = q.take();
-
-                        if (!(results instanceof Poison)) {
-                            numSimulationsFound++;
-
-                            // get the MonteCarloResults from the q and calculate the statistics on it.
-                            resultsConsumer.join(results);
-                        }
-
-                    } catch (java.lang.InterruptedException e) {
-                        log.error(Throwables.getStackTraceAsString(e));
-                    }
-                }
-                sw.stop();
-                log.trace("Analysed {} simulation results in {}.", numSimulationsFound, sw);
-
-            }
-            private int numSimulationsFound = 0;
-        });
+        //Creating Producer and Consumer Thread
+        final Thread producer = new Thread(new Producer(queue, (MonteCarloScenario) CloneUtils.deepClone(simulation),
+                                                        numSimulations));
+        final Thread consumer = new Thread(new Consumer(queue, resultsConsumer));
 
         producer.start();
         consumer.start();
@@ -136,22 +69,147 @@ public class MonteCarlo {
         try {
             producer.join();
             consumer.join();
-        } catch (java.lang.InterruptedException e) {
-            log.error(Throwables.getStackTraceAsString(e));
+        } catch (Exception e) {
+            log.error("Error joining Monte Carlo results {}", Throwables.getStackTraceAsString(e));
         }
     }
 
     /**
-     * Get a copy of the results from the simulation.
+     * Get a copy of the results from the simulation. This method MUST return a copy of the results NOT a reference.
      * @return the MonteCarloResults object that contains the results of all the simulations.
      */
     public final MonteCarloResults getResults() {
-        return resultsConsumer;
+        return (MonteCarloResults) CloneUtils.deepClone(resultsConsumer);
+    }
+
+    /**
+     * Set the consumer object for this Monte Carlo simulation. A consumer is simply a MonteCarloResults class that
+     * 'joins' each result that is consumes so that statistics can be calculated at the end of the simulation.
+     * @param consumer the results object to use as a consumer.
+     */
+    public final void setResultsConsumer(final MonteCarloResults consumer) {
+        resultsConsumer = consumer;
+        resultsConsumer.reset();
     }
 
     private final MonteCarloScenario simulation;
-    @Setter
     private MonteCarloResults resultsConsumer;
+    private final int numSimulations;
+}
+
+/**
+ * This class takes (or consumes) the results of a single simulation of the model and saves the results in a manner to
+ * allow statistics to be generated from the Monte Carlo simulation.
+ */
+@Slf4j
+class Consumer implements Runnable {
+
+    /**
+     * Create the consumer object.
+     * @param queue         the queue that the consumer should check for values to consume.
+     * @param joinedResults the MonteCarloResults object to which the consumed results will be added.
+     */
+    public Consumer(final ArrayBlockingQueue<MonteCarloResults> queue, final MonteCarloResults joinedResults) {
+        this.queue = queue;
+        this.joinedResults = joinedResults;
+        joinedResults.reset();
+    }
+
+    @Override
+    public void run() {
+        log.trace("Starting Monte Carlo results consumer thread");
+        final StopWatch sw = new StopWatch();
+        sw.start();
+
+        try {
+            MonteCarloResults results = null;
+            while (!(results instanceof Poison)) {
+                results = queue.take();
+
+                if (!(results instanceof Poison)) {
+                    numSimulationsFound++;
+
+                    // get the MonteCarloResults from the q and calculate the statistics on it.
+                    joinedResults.join(results);
+
+                    // we no longer require the results so allow the memory to be freed.
+                    results = null;
+                }
+            }
+        } catch (java.lang.InterruptedException e) {
+            log.error("Error consuming Monte Carlo Results {}", Throwables.getStackTraceAsString(e));
+        }
+        sw.stop();
+        log.debug("Analysed {} simulation results in {}.", numSimulationsFound, sw);
+    }
+
+    private final ArrayBlockingQueue<MonteCarloResults> queue;
+    private final MonteCarloResults joinedResults;
+    private int numSimulationsFound = 0;
+}
+
+/**
+ * This class runs a single simulation of the model to 'produce' results (hence the name). This runnable class is run
+ * many times to create a Monte Carlo simulation.
+ */
+@Slf4j
+class Producer implements Runnable {
+
+    /**
+     * Create the producer object.
+     * @param queue          the queue on which the producers results are added.
+     * @param simulation     the model that will be run to produce results.
+     * @param numSimulations the number of simulations that are to be run and placed in the quque.
+     */
+    public Producer(final ArrayBlockingQueue<MonteCarloResults> queue, final MonteCarloScenario simulation, final int numSimulations) {
+        this.queue = queue;
+        this.simulation = (MonteCarloScenario) CloneUtils.deepClone(simulation);
+        this.numSimulations = numSimulations;
+    }
+
+    @Override
+    public void run() {
+        log.trace("Starting Monte Carlo results producer thread");
+        try {
+            final int poolSize = Runtime.getRuntime().availableProcessors();
+            final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+                    .setNameFormat("MCScenarioProducer-%d")
+                    .setDaemon(true)
+                    .build();
+            final ExecutorService es = Executors.newFixedThreadPool(poolSize, threadFactory);
+            final RNG generator = new RNG(RNG.Generator.Well44497b);
+
+            final StopWatch sw = new StopWatch();
+            sw.start();
+            for (int i = 0; i < numSimulations; i++) {
+                es.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            final MonteCarloScenario scenario = (MonteCarloScenario) CloneUtils.deepClone(simulation);
+                            final MonteCarloResults results = scenario.run(generator.getInteger(0, Integer.MAX_VALUE - 1));
+                            queue.put(results);
+                        } catch (Exception e) {
+                            log.error("Error running Monte Carlo simulation {}", Throwables.getStackTraceAsString(e));
+                        }
+                    }
+                });
+            }
+            es.shutdown();
+            while (!es.isTerminated()) {
+                es.awaitTermination(1, TimeUnit.SECONDS);
+            }
+            queue.put(new Poison());
+
+            sw.stop();
+            log.info("Finished {} simulations in {}.", numSimulations, sw);
+        } catch (Exception ex) {
+            log.error("Monte Carlo simulation error: {}", Throwables.getStackTraceAsString(ex));
+        }
+    }
+
+    private final ArrayBlockingQueue<MonteCarloResults> queue;
+    private final MonteCarloScenario simulation;
     private final int numSimulations;
 }
 
@@ -178,5 +236,10 @@ class Poison implements MonteCarloResults {
     @Override
     public final MonteCarloResults join(final MonteCarloResults results) {
         return results;
+    }
+
+    @Override
+    public void reset() {
+        // do nothing - this is a poison pill
     }
 }

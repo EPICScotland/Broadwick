@@ -40,34 +40,34 @@ public class MarkovChainMonteCarlo {
 
     /**
      * Create a Monte Carlo instance.
-     * @param model              The Monte Carlo Model to be run.
-     * @param consumer the object that will consume and aggregate the MC results.
-     * @param generator          the object that will generate the Monte Carlo chain/path.
-     * @param numMonteCarloSteps the number on MC steps to run fr each MC simulation.
+     * @param model          The Monte Carlo Model to be run.
+     * @param numSimulations The number of time the Monte Carlo model should be run at each step.
+     * @param consumer       the object that will consume and aggregate the MC results.
+     * @param generator      the object that will generate the Monte Carlo chain/path.
      */
-    public MarkovChainMonteCarlo(final MonteCarloScenario model, final MonteCarloResults consumer,
-                                 final MarkovStepGenerator generator,
-                                 final int numMonteCarloSteps) {
-        this(model, consumer, new MarkovChainMaxNumStepController(1000), generator, numMonteCarloSteps);
+    public MarkovChainMonteCarlo(final MonteCarloScenario model, final int numSimulations,
+                                 final MonteCarloResults consumer,
+                                 final MarkovStepGenerator generator) {
+        this(model, numSimulations, consumer, new MarkovChainMaxNumStepController(1000), generator);
     }
 
     /**
      * Create a Monte Carlo instance.
-     * @param model              The Monte Carlo Model to be run.
-     * @param consumer the object that will consume and aggregate the MC results.
-     * @param controller         the controller object for this class.
-     * @param generator          the object that will generate the Monte Carlo chain/path.
-     * @param numMonteCarloSteps the number on MC steps to run fr each MC simulation.
+     * @param model          The Monte Carlo Model to be run.
+     * @param numSimulations The number of time the Monte Carlo model should be run at each step.
+     * @param consumer       the object that will consume and aggregate the MC results.
+     * @param controller     the controller object for this class.
+     * @param generator      the object that will generate the Monte Carlo chain/path.
      */
-    public MarkovChainMonteCarlo(final MonteCarloScenario model, final MonteCarloResults consumer, 
-                                 final MarkovChainController controller,
-                                 final MarkovStepGenerator generator, final int numMonteCarloSteps) {
+    public MarkovChainMonteCarlo(final MonteCarloScenario model, final int numSimulations,
+                                 final MonteCarloResults consumer, final MarkovChainController controller,
+                                 final MarkovStepGenerator generator) {
         this.observers = new HashSet<>(1);
         this.model = model;
+        this.numSimulations = numSimulations;
         this.consumer = consumer;
         this.mcController = controller;
         this.pathGenerator = generator;
-        this.numMonteCarloSteps = numMonteCarloSteps;
         this.acceptor = new MetropolisHastings(GENERATOR.getInteger(Integer.MIN_VALUE, Integer.MAX_VALUE));
     }
 
@@ -90,19 +90,23 @@ public class MarkovChainMonteCarlo {
         log.info("Running Monte Carlo simulation with initial step {}", currentStep.toString());
         model.setStep(currentStep);
 
-        MonteCarlo mc = new MonteCarlo(model, numMonteCarloSteps);
+        MonteCarlo mc = new MonteCarlo(model, numSimulations);
         mc.setResultsConsumer(consumer);
         mc.run();
         MonteCarloResults prevResults = mc.getResults();
+        for (MarkovChainObserver observer : observers) {
+            observer.step();
+            observer.takeMeasurements();
+        }
         writer.write("%d,%d,%s,%s\n", numStepsTaken, 1, currentStep.toString(), prevResults.toCsv());
+        numStepsTaken++;
 
         while (mcController.goOn(this)) {
-            numStepsTaken++;
             int stepsSinceLastMeasurement = 0;
             final MonteCarloStep proposedStep = pathGenerator.generateNextStep(currentStep);
             model.setStep(proposedStep);
 
-            mc = new MonteCarlo(model, numMonteCarloSteps);
+            mc = new MonteCarlo(model, numSimulations);
             mc.setResultsConsumer(consumer);
             mc.run();
             final MonteCarloResults currentResults = mc.getResults();
@@ -130,6 +134,7 @@ public class MarkovChainMonteCarlo {
             } else {
                 log.info("Rejected Monte Carlo step {}", proposedStep.toString());
             }
+            numStepsTaken++;
         }
 
         for (MarkovChainObserver observer : observers) {
@@ -146,6 +151,7 @@ public class MarkovChainMonteCarlo {
     }
     @Getter
     private int numStepsTaken = 0;
+    private int numSimulations;
     @Getter
     @SuppressWarnings("PMD.UnusedPrivateField")
     private int numAcceptedSteps = 0;
@@ -161,10 +167,11 @@ public class MarkovChainMonteCarlo {
     private Set<MarkovChainObserver> observers;
     @Setter
     private FileOutput writer = new FileOutput();
+    @Getter
     private MonteCarloScenario model;
     private MarkovStepGenerator pathGenerator;
+    @Getter
     private MonteCarloResults consumer;
-    private int numMonteCarloSteps;
     private static final RNG GENERATOR = new RNG(RNG.Generator.Well19937c);
     // TODO measure [auto]correlation function(s)
 }
