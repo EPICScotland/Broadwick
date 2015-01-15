@@ -1,0 +1,90 @@
+<project name="${project.name}">
+  <version position="left"/>
+  <publishDate position="right"/>
+
+  <bannerLeft>
+    <name>Broadwick</name>
+    <!--<src>images/File-John_Snow_memorial_and_pub.jpg</src>-->
+    <href>.</href>
+  </bannerLeft>
+
+  <skin>
+    <groupId>org.apache.maven.skins</groupId>
+    <artifactId>maven-fluido-skin</artifactId>
+    <version>${maven-fluido-skin.version}</version>
+  </skin>
+
+  <body>
+      <!--<menu ref="reports" />-->
+
+      <menu name="${project.name}">
+	  <item name="About" href="index.html"/>
+	  <item name="Summary" href="project-summary.html"/>
+	  <item name="Team" href="team-list.html"/>
+	  <item name="License" href="license.html"/>
+	  <item name="Dependencies" href="dependencies.html"/>
+	  <item name="Plugins" href="plugins.html"/>
+	  <item name="Plugin Management" href="plugin-management.html"/>
+
+	  <item name="Manual" href="pdf/BroadwickManual.pdf"/>
+
+	  <item name="Roadmap" href="roadmap.html"/>
+	  <item name="Changes" href="changes-report.html"/>
+	  <item name="API Documentation" href="apidocs/index.html"/>
+	  <!--<item name="Test API Documentation" href="testapidocs/index.html"/>-->
+	  <item name="Source Xref" href="xref/index.html"/>
+	  <!--<item name="Test Sources Xref" href="xref-test/index.html"/>-->
+	  <item name="Test Coverage" href="jacoco/index.html"/>
+	  <item name="Todo" href="taglist.html"/>
+      </menu>
+      
+      <!--
+      ${reports}
+      -->
+      
+  </body>
+
+  <custom>
+    <fluidoSkin>
+	<topBarEnabled>true</topBarEnabled>
+	<sideBarEnabled>true</sideBarEnabled>
+	<sourceLineNumbersEnabled>true</sourceLineNumbersEnabled>
+	
+	<facebookLike />
+	<!--
+	<twitter>
+	    <user>broadwicktwitter</user>
+	    <showUser>true</showUser>
+	    <showFollowers>true</showFollowers>
+	</twitter>
+	-->
+	<!--
+        <topBarIcon>
+	   <name>Maven Fluido Skin</name>
+	   <alt>Maven Fluido Skin</alt>
+	   <src>images/File-John_Snow_memorial_and_pub.jpg</src>
+	   <href>/index.html</href>
+      </topBarIcon>
+      -->
+    </fluidoSkin>
+    <header>
+    <p>
+	Broadwick is a framework for developing sophisticated epidemiological based mathematical models, and consists of several Java libraries and bespoke packages. The components of Broadwick are written in such a way that a scientist may combine them in order to rapidly prototype a model for a new specific scenario.
+    </p>
+
+    <h2>Features</h2>
+    <ul>
+	<li>Supports single (e.g. within herd) or structured populations (e.g. multi-species or locations)</li>
+	<li>Inclusion of movement over network data (e.g. Cattle movement Tracing System)</li>
+	<li>Stochastic Individual Based simulations (including fast approximate options)</li>
+	<li>Approximate Bayesian Computation inference for estimating model parameters from data via simulations</li>
+	<li>Monte Carol Markov Chain inference for estimating model parameters from data</li>
+    </ul> 
+</header>
+  </custom>
+
+  <poweredBy>
+    <logo name="Maven" href="http://maven.apache.org/" img="http://maven.apache.org/images/logos/maven-feather.png"/>
+  </poweredBy>
+</project>
+

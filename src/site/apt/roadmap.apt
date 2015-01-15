@@ -1,0 +1,13 @@
+            ------
+            RoadMap
+            ------
+
+      * 1.0 Initial release
+
+      * 1.1 Simplify configuration file, bug fixes, Monte Carlo simulation, Markov Chain Monte Carlo.
+
+      * 1.2 Add [deterministic] ODE solver
+
+      * 1.3 Grid enable Monte Carlo and MCMC
+
+      * 2.0 Upgrade to Java 8

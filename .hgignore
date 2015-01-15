@@ -1,0 +1,26 @@
+# use glob syntax.
+syntax: glob
+
+# eclipse files
+.classpath
+.project
+.settings/*
+
+# IntelliJ Idea files
+.idea/*
+broadwick.iml
+#
+# Netbeans files
+nb-configuration.xml
+nbactions.xml
+nbaction*.xml
+
+# Sonar-runner files
+.sonar/*
+
+# project files and directories not in source control
+backups/*
+target/*
+sandbox/*
+dependency-reduced-pom.xml
+*.log

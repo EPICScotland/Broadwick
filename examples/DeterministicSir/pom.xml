@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>DeterministicSir</groupId>
+    <artifactId>DeterministicSir</artifactId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+
+    <name>BroadwickExamples:DeterministicSir</name>
+    <url>http://maven.apache.org</url>
+
+    <prerequisites>
+       <maven>3.0.0</maven>
+    </prerequisites>
+
+    <properties>
+	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+	<jdk.version>1.7</jdk.version>
+	<junit.junit.version>4.11</junit.junit.version>
+	<broadwick.version>1.2</broadwick.version>
+	<maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
+	<onejar-plugin.version>1.4.5</onejar-plugin.version>
+    </properties>
+
+    <pluginRepositories>
+	<pluginRepository>
+	    <id>onejar-maven-plugin.googlecode.com</id>
+	    <url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
+	</pluginRepository>
+    </pluginRepositories>
+
+    <dependencies>
+
+	<!-- broadwick framework dependency -->
+	<dependency>
+	    <groupId>broadwick</groupId>
+	    <artifactId>broadwick</artifactId>
+	    <version>${broadwick.version}</version>
+	</dependency>
+
+	<!-- Testing dependencies -->
+	<dependency>
+	    <groupId>junit</groupId>
+	    <artifactId>junit</artifactId>
+	    <version>${junit.junit.version}</version>
+	    <scope>test</scope>
+	</dependency>
+
+	<!-- Useful dependencies -->
+
+    </dependencies>
+
+
+    <build>
+	<plugins>
+
+	    <!-- Package all the jars into a single executable jar -->
+	    <plugin>
+		<groupId>org.dstovall</groupId>
+		<artifactId>onejar-maven-plugin</artifactId>
+		<version>${onejar-plugin.version}</version>
+		<executions>
+		    <execution>
+			<configuration>
+			    <mainClass>broadwick.Broadwick</mainClass>
+			    <attachToBuild>false</attachToBuild>
+			    <classifier>onejar</classifier>
+			</configuration>
+			<goals>
+			    <goal>one-jar</goal>
+			</goals>
+		    </execution>
+		</executions>
+	    </plugin>
+	    <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-compiler-plugin</artifactId>
+		<version>${maven-compiler-plugin.version}</version>
+	     <configuration>
+		 <source>${jdk.version}</source>
+		 <target>${jdk.version}</target>
+	     </configuration>
+	    </plugin>
+	</plugins>
+    </build>
+
+</project>

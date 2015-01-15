@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project>
+    <logs>
+	<console>
+	    <level>info</level> 
+	    <pattern>[%thread] %-5level %msg %n</pattern>
+	</console>
+	<file>
+	    <name>broadwick.stochasticSir.log</name> 
+	    <level>info</level> 
+	    <pattern>[%thread] %-5level %msg %n</pattern>
+	    <overwrite>true</overwrite>
+	</file>
+    </logs>
+   
+    <models>
+	<model id="Broadwick Project">
+	    <classname>broadwick.example.stochasticsir.StochasticSIR</classname>
+
+	    <parameter id="numS" value="100" />
+	    <parameter id="numI" value="1" />
+	    <parameter id="numR" value="0" />
+	    <parameter id="beta" value="0.004" />
+	    <parameter id="rho" value="0.04" />
+	    <parameter id="tMax" value="50" />
+
+	    <parameter id="outputFile" value="broadwick.stochasticSIR.dat" />
+
+	    <parameter id="initialSusceptibles" value="99" />
+	    <parameter id="initialInfectious" value="1" />
+	    <parameter id="initialRemoved" value="0" />
+	</model>
+    </models>
+</project>
+
+
