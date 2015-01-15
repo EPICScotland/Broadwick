@@ -13,4 +13,4 @@ Broadwick is a framework for developing sophisticated epidemiological based math
 * Inclusion of movement over network data (e.g. Cattle movement Tracing System)
 * Stochastic Individual Based simulations (including fast approximate options)
 * Approximate Bayesian Computation inference for estimating model parameters from data via simulations
-* Monte Carol Markov Chain inference for estimating model parameters from data
+* Monte Carlo Markov Chain inference for estimating model parameters from data
