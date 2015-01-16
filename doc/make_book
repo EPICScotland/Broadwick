@@ -1,0 +1,19 @@
+pdflatex BroadwickManual || { exit 1; }
+makeindex BroadwickManual.idx -s StyleInd.ist || { exit 1; }
+biber BroadwickManual || { exit 1; }
+pdflatex BroadwickManual || { exit 1; }
+pdflatex BroadwickManual || { exit 1; }
+
+rm *.aux
+
+rm BroadwickManual.bcf
+rm BroadwickManual.blg
+rm BroadwickManual.idx
+rm BroadwickManual.log
+rm BroadwickManual.out
+rm BroadwickManual.bbl
+rm BroadwickManual.ptc
+rm BroadwickManual.run.xml
+rm BroadwickManual.toc
+rm BroadwickManual.ilg
+rm BroadwickManual.ind

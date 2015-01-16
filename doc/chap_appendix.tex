@@ -1,0 +1,28 @@
+\chapter*{Appendix}
+
+\section*{Maven as a Build Tool}\index{Maven, Using}
+
+There is no requirement to use maven as a build tool but as Broadwick and it's examples are built using maven this section will give a brief outline of how maven is used to create a simple model.
+
+Maven uses an xml file to describe the classes to be built as well as the dependencies, dynamically downloading required libraries as needed. It uses the 'convention over configuration' paradigm imposing the directory structure given in the table below. 
+
+
+
+\begin{table}[h]
+\centering
+\begin{tabulary}{\textwidth}{l l}
+\toprule
+\textbf{Directory} & \textbf{Purpose}\\
+\midrule
+Project home & Contains the pom and all the subdirectories. \\
+src/main/java & Contains the java source code for the project. \\
+src/main/resources & Contains the xsd file for configuring the project. \\
+src/test/java & Contains any [Junit or TestNG] test cases for the project. \\
+src/test/resources & Contains resources necessary for testing. \\
+\bottomrule
+\end{tabulary}
+%\caption*
+{\\Maven's directory structure}
+\end{table}
+
+Maven's equivalent to a makefile or Ant's build.xml is a `project object model' which is stored in a pom.xml file. A good reference for the maven pom is http://maven.apache.org/pom.html.
