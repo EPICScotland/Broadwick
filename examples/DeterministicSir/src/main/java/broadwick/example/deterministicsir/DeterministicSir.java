@@ -24,11 +24,11 @@ import lombok.extern.slf4j.Slf4j;
 
 
 /**
- * An exmaple of how to solve a SIR model using the Runge Kutta solver. The solver add 50 new susceptibles at t=20 to
+ * An example of how to solve a SIR model using the Runge Kutta solver. The solver add 50 new susceptibles at t=20 to
  * demonstrate the use of theta events.
  */
 @Slf4j
-public class RungeKutta extends Model {
+public class DeterministicSir extends Model {
 
     @Override
     public final void init() {

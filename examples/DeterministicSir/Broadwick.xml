@@ -15,7 +15,7 @@
    
     <models>
 	<model id="Broadwick Project">
-	    <classname>broadwick.example.deterministicsir.RungeKutta</classname>
+	    <classname>broadwick.example.deterministicsir.DeterministicSir</classname>
 	    <parameter id="initialS" value="100" />
 	    <parameter id="initialI" value="1" />
 	    <parameter id="initialR" value="0" />
