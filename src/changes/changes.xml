@@ -35,6 +35,11 @@
       <release version="current"  date="2014-07-04" description="1.1">
            <action dev="Anthony O'Hare" type="add">
               Added [deterministoc] ODE solver.
+              Fully generified the RNG, no more casting from Object when selecting random elements from collections or arrays.
+              Added matrix and vector classes.
+              Added new distribution (MultivariateNormal) and truncated distributions (TruncatedNormal and TruncatedMultivariateNormal).
+              Added new graph writer class to save graphs in edgelist format.
+              Various speed improvements.
            </action>         
          </release>
    </body>
