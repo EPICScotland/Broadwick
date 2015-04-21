@@ -229,23 +229,26 @@ public class RNG implements Serializable {
 
     /**
      * Randomly pick an object from an array of objects.
+     * @param <T>     generic type of the array elements.
      * @param objects an array of objects, one of whom is to be picked.
      * @return a random element from objects.
      */
-    public final Object selectOneOf(final Object[] objects) {
+    //public final <T> T newArray(Class<T>[] objects) {
+    public final <T> T selectOneOf(final T[] objects) {
         return objects[getInteger(0, objects.length - 1)];
     }
 
     /**
      * Randomly pick an object from an array of objects.
-     * @param objects an array of objects, one of whom is to be picked.
+     * @param <T>           generic type of the array elements.
+     * @param objects       an array of objects, one of whom is to be picked.
      * @param probabilities the probabilities of selecting each of the objects.
      * @return a random element from objects.
      */
-    public final Object selectOneOf(final Object[] objects, final double[] probabilities) {
+    public final <T> T selectOneOf(final T[] objects, final double[] probabilities) {
         final double r = getDouble();
         double cdf = 0.0;
-        for (int i = 0; i<objects.length; i++) {
+        for (int i = 0; i < objects.length; i++) {
             cdf += probabilities[i];
             if (r <= cdf) {
                 return objects[i];
@@ -253,36 +256,57 @@ public class RNG implements Serializable {
         }
         return objects[objects.length];
     }
-    
+
+    /**
+     * @param set a Set in which to look for a random element
+     * @param <T> generic type of the Set elements
+     * @return a random element in the Set or null if the set is empty
+     */
+    public <T> T selectOneOf(Set<T> set) {
+        int item = getInteger(0, set.size() - 1);
+        int i = 0;
+        for (T obj : set) {
+            if (i == item) {
+                return obj;
+            }
+            i++;
+        }
+        return null;
+    }
+
     /**
      * Randomly pick an object from an array of objects.
+     * @param <T>     The type of the elements in the collection
      * @param objects an array of objects, one of whom is to be picked.
      * @return a random element from objects.
      */
-    public final Object selectOneOf(final Collection<?> objects) {        
-        
+    public final <T> T selectOneOf(final Collection<T> objects) {
+
         final int n = getInteger(0, objects.size() - 1);
         if (objects instanceof List) {
-            return ((List<?>) objects).get(n);
+            return ((List<T>) objects).get(n);
         } else {
             return com.google.common.collect.Iterators.get(objects.iterator(), n);
         }
     }
 
     /**
-     * Randomly pick N objects from an array of objects. Note, this assumes that N much much les than the size of the
+     * Randomly pick N objects from an array of objects. Note, this assumes that N much much less than the size of the
      * array being sampled from, if this is not the case this method is VERY slow.
+     * @param <T>     The type of the elements in the collection
      * @param objects an array of objects, one of whom is to be picked.
      * @param n       the number of objects we will select.
      * @return a random element from objects.
      */
-    public final List<Object> selectManyOf(final Object[] objects, final int n) {
+    public final <T> List<T> selectManyOf(final T[] objects, final int n) {
 
         if (n > objects.length) {
-            throw new IllegalArgumentException("Attempting to select more elements from an array that exist.");
+            throw new IllegalArgumentException(String.format("Cannot select %d elements from array of %d objects", n, objects.length));
         }
 
-        final List<Object> list = new ArrayList<>(n);
+        // this uses simple rejection sampling, a faster method (especially if n is close to objects.size() can be found
+        // at http://lemire.me/blog/archives/2013/08/16/picking-n-distinct-numbers-at-random-how-to-do-it-fast/
+        final List<T> list = new ArrayList<>(n);
         final Set<Integer> sampled = new TreeSet<>();
         for (int i = 0; i < n; i++) {
             int index = getInteger(0, objects.length - 1);
@@ -297,21 +321,25 @@ public class RNG implements Serializable {
     }
 
     /**
-     * Randomly pick N objects from an array of objects. Note, this assumes that N much much les than the size of the
+     * Randomly pick N objects from an array of objects. Note, this assumes that N much much less than the size of the
      * array being sampled from, if this is not the case this method is VERY slow.
+     * @param <T>     The type of the elements in the collection
      * @param objects an array of objects, one of whom is to be picked.
      * @param n       the number of objects we will select.
      * @return a random element from objects.
      */
-    public final List<Object> selectManyOf(final Collection<Object> objects, final int n) {
+    public final <T> List<T> selectManyOf(final Collection<T> objects, final int n) {
+        if (objects.size() < n) {
+            throw new IllegalArgumentException(String.format("Cannot select %d elements from a Collection of %d objects", n, objects.size()));
+        }
         final Set<Integer> s = new HashSet<>(n);
         while (s.size() < n) {
             s.add(getInteger(0, objects.size() - 1));
         }
 
-        final List<Object> list = new ArrayList<>(n);
+        final List<T> list = new ArrayList<>(n);
         int i = 0;
-        for (Object obj : objects) {
+        for (T obj : objects) {
             if (s.contains(i)) {
                 list.add(obj);
             }
@@ -324,10 +352,45 @@ public class RNG implements Serializable {
 
         return list;
     }
+
+    /**
+     * Randomly pick N objects from an array of objects. Note, this assumes that N much much less than the size of the
+     * array being sampled from, if this is not the case this method is VERY slow.
+     * @param <T>     The type of the elements in the collection
+     * @param objects an array of objects, one of whom is to be picked.
+     * @param n       the number of objects we will select.
+     * @return a random element from objects.
+     */
+    public final <T> Set<T> selectManyOf(final Set<T> objects, final int n) {
+        if (objects.size() < n) {
+            throw new IllegalArgumentException(String.format("Cannot select %d elements from a Set of %d objects", n, objects.size()));
+        }
+
+        final Set<Integer> s = new HashSet<>(n);
+        while (s.size() < n) {
+            s.add(getInteger(0, objects.size() - 1));
+        }
+
+        final Set<T> list = new HashSet<>(n);
+        int i = 0;
+        for (T obj : objects) {
+            if (s.contains(i)) {
+                list.add(obj);
+            }
+            i = i + 1;
+        }
+
+        if (list.size() != n) {
+            log.error("Could not correctly select correct number of objects from a collection of objects.");
+        }
+
+        return list;
+    }
+
     /**
      * Random number generator type.
      */
-    private RandomDataGenerator generator;
+    private final RandomDataGenerator generator;
     @SuppressWarnings("PMD.UnusedPrivateField")
     @Getter
     private String name;

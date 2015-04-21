@@ -57,10 +57,10 @@ public final class SetOperations {
     }
 
     /**
-     * Get the difference of two sets.
+     * Get the set difference A\B of the sets A and B.
      * @param <T> The genetic type of the sets used.
-     * @param setA one of two sets for the difference
-     * @param setB second of two sets for the difference
+     * @param setA the set whose elements will be retained.
+     * @param setB the set whose elements will be subtracted from A.
      * @return setA minus setB
      */
     public static <T> Set<T> difference(final Set<T> setA, final Set<T> setB) {
