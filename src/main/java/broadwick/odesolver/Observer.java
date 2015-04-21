@@ -16,11 +16,16 @@
 package broadwick.odesolver;
 
 import java.util.Collection;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 /**
- *
+ * Implementing classes are used to observe certain aspects of the solver. It is basically just
+ * an interface of methods that get called during a simulation together with some common methods useful for many types
+ * of observers.
  */
+@EqualsAndHashCode
+@SuppressWarnings("squid:S1210")
 public abstract class Observer implements Comparable<Observer> {
 
     /**

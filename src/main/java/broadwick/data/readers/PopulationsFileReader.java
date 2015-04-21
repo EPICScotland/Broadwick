@@ -105,8 +105,7 @@ public class PopulationsFileReader extends DataFileReader {
         }
 
         final StringBuilder createIndexCommand = new StringBuilder();
-        createTableCommand.append("PRIMARY KEY (").append(asCsv(primaryKeys)).append(")");
-        createTableCommand.append(");");
+        createTableCommand.append("PRIMARY KEY (").append(asCsv(primaryKeys)).append("));");
 
 //        createIndexCommand.append(" DROP INDEX IDX_POP_ID IF EXISTS;");
         createIndexCommand.append(String.format(" CREATE INDEX IDX_POP_ID ON %s (%s);",

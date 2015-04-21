@@ -16,6 +16,7 @@
 package broadwick.stochastic;
 
 import java.util.Collection;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 /**
@@ -35,6 +36,8 @@ import lombok.Getter;
  * @author Florian Erhard (copied from FERN http://www.bio.ifi.lmu.de/FERN/)
  * <p/>
  */
+@EqualsAndHashCode
+@SuppressWarnings("squid:S1210")
 public abstract class Observer implements Comparable<Observer> {
 
     /**
@@ -56,7 +59,7 @@ public abstract class Observer implements Comparable<Observer> {
         }
         return 1;
     }
-
+    
     /**
      * Gets called when the simulation has started after the initialization and before the termination condition is
      * checked the first time.

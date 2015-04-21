@@ -82,7 +82,7 @@ public abstract class StochasticSimulator {
     /**
      * Starts the simulation up to a given time. It just uses a {@link DefaultController} and calls
      * {@link StochasticSimulator#start(SimulationController)}.
-     * @param time	simulation time
+     * @param time    simulation time
      */
     public final void run(final double time) {
         if (controller == null) {
@@ -133,7 +133,7 @@ public abstract class StochasticSimulator {
             }
         } catch (Exception e) {
             log.error("Error running stochastic simulation. {}", Throwables.getStackTraceAsString(e));
-            throw (e);
+            throw e;
         }
     }
 
@@ -149,7 +149,7 @@ public abstract class StochasticSimulator {
     /**
      * Fires a reaction. It calls the observers and the {@link AmountManager}.
      * @param mu reaction to be fired.
-     * @param t	 time at which the firing occurs.
+     * @param t     time at which the firing occurs.
      */
     protected final void doEvent(final SimulationEvent mu, final double t) {
         doEvent(mu, t, 1);
@@ -158,7 +158,7 @@ public abstract class StochasticSimulator {
     /**
      * Perform an event by informing the subscribed observers and the amountManager.
      * @param event event to be performed.
-     * @param t	    time at which the firing occurs.
+     * @param t        time at which the firing occurs.
      * @param n     the number of times mu is to be fired.
      */
     protected final void doEvent(final SimulationEvent event, final double t, final int n) {
@@ -365,8 +365,8 @@ public abstract class StochasticSimulator {
     @Getter
     @Setter
     private SimulationController controller = null;
-    private ThetaQueue thetaQueue = new ThetaQueue();
+    private ThetaQueue thetaQueue;
     @Getter
-    private Set<Observer> observers = new HashSet<>(1);
+    private final Set<Observer> observers = new HashSet<>(1);
     protected boolean reverseTime = false;
 }

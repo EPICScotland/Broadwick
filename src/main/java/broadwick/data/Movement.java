@@ -22,7 +22,7 @@ import lombok.Data;
  * Utility class for movement data.
  */
 @Data
-@SuppressWarnings({"PMD.UnusedPrivateField","serial"})
+@SuppressWarnings({"PMD.UnusedPrivateField","serial","squid:S1068"})
 public class Movement implements Serializable {
 // TODO what about cutom tags??????
 

@@ -49,6 +49,7 @@ public abstract class OdeSolver {
         this.independentVariableStart = tStart;
         this.independentVariableEnd = tEnd;
         this.stepSize = stepSize;
+        this.thetaQueue = new ThetaQueue();
 
         dependentVariables = new ArrayList<>(ode.getInitialValues());
         log.debug("Created ODE solver");
@@ -133,7 +134,7 @@ public abstract class OdeSolver {
      * Manages the registered theta events. Each registered theta event is stored in a table containing the time of the
      * event the list of observers for that event and the list of events for that time.
      */
-    private class ThetaQueue {
+    private static class ThetaQueue {
 
         /**
          * Construct an empty theta queue.
@@ -230,5 +231,5 @@ public abstract class OdeSolver {
     @Getter
     @SuppressWarnings("PMD.UnusedPrivateField")
     private final Set<Observer> observers = new HashSet<>(1);
-    private final ThetaQueue thetaQueue = new ThetaQueue();
+    private ThetaQueue thetaQueue;
 }

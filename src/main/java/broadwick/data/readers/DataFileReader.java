@@ -189,7 +189,7 @@ public abstract class DataFileReader {
                 final StopWatch sw = new StopWatch();
                 sw.start();
                 List<String> data = instance.readLine();
-                while (data != null && data.size() > 0) {
+                while (data != null && !data.isEmpty()) {
                     int parameterIndex = 1;
                     for (Map.Entry<String, Integer> entry : insertedColInfo.entrySet()) {
                         if (entry.getValue() == -1) {
@@ -219,7 +219,7 @@ public abstract class DataFileReader {
                         } else {
                             log.warn("Duplicate data found for {}: continuing despite errors: {}", data.get(0), ex.getLocalizedMessage());
                             log.trace("{}", Throwables.getStackTraceAsString(ex));
-                            throw (ex);
+                            throw ex;
                         }
                     }
                     if (inserted % 250000 == 0) {

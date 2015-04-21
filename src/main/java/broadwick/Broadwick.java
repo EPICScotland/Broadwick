@@ -135,6 +135,7 @@ public final class Broadwick {
     /**
      * Run the Broadwick framework.
      */
+    @SuppressWarnings("squid:S1147")
     public void run() {
         if (project != null) {
             final StopWatch sw = new StopWatch();

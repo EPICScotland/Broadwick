@@ -59,8 +59,10 @@ public class MonteCarlo {
         final ArrayBlockingQueue<MonteCarloResults> queue = new ArrayBlockingQueue<>(numSimulations + 1);
 
         //Creating Producer and Consumer Thread
-        final Thread producer = new Thread(new Producer(queue, (MonteCarloScenario) CloneUtils.deepClone(simulation),
-                                                        numSimulations));
+        if (log.isTraceEnabled()) {
+            log.trace("Creating Monte Carlo producer and consumer");
+        }
+        final Thread producer = new Thread(new Producer(queue, simulation, numSimulations));
         final Thread consumer = new Thread(new Consumer(queue, resultsConsumer));
 
         producer.start();
@@ -118,6 +120,10 @@ class Consumer implements Runnable {
     @Override
     public void run() {
         log.trace("Starting Monte Carlo results consumer thread");
+
+        // it might seem that we should reset (or initialise) the consumer results object but
+        // the consumer object is created for each Monte Carlo step so is really not strictly necessary.
+        joinedResults.reset();
         final StopWatch sw = new StopWatch();
         sw.start();
 
@@ -131,6 +137,12 @@ class Consumer implements Runnable {
 
                     // get the MonteCarloResults from the q and calculate the statistics on it.
                     joinedResults.join(results);
+
+                    if (log.isTraceEnabled()) {
+                        log.trace("Monte Carlo consumer: consumed {}", results.getSamples().getSummary());
+                        log.trace("Monte Carlo consumer: consumed {} results, expected value={}",
+                                  numSimulationsFound, joinedResults.getExpectedValue());
+                    }
 
                     // we no longer require the results so allow the memory to be freed.
                     results = null;
@@ -163,7 +175,7 @@ class Producer implements Runnable {
      */
     public Producer(final ArrayBlockingQueue<MonteCarloResults> queue, final MonteCarloScenario simulation, final int numSimulations) {
         this.queue = queue;
-        this.simulation = (MonteCarloScenario) CloneUtils.deepClone(simulation);
+        this.simulation = simulation;
         this.numSimulations = numSimulations;
     }
 
@@ -186,8 +198,10 @@ class Producer implements Runnable {
                     @Override
                     public void run() {
                         try {
-                            final MonteCarloScenario scenario = (MonteCarloScenario) CloneUtils.deepClone(simulation);
+                            log.trace("Monte Carlo producer: creating scenario object");
+                            final MonteCarloScenario scenario = simulation.copyOf();
                             final MonteCarloResults results = scenario.run(generator.getInteger(0, Integer.MAX_VALUE - 1));
+                            log.trace("Monte Carlo producer: generated results {}", results.getExpectedValue());
                             queue.put(results);
                         } catch (Exception e) {
                             log.error("Error running Monte Carlo simulation {}", Throwables.getStackTraceAsString(e));

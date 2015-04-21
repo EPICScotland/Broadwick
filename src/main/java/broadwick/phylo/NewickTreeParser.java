@@ -143,7 +143,7 @@ public class NewickTreeParser {
                 isOk = true;
             }
 
-            if ((charAt == ',' && isOk)) {
+            if (charAt == ',' && isOk) {
                 nodes.add(tree.substring(start, i).trim());
                 start = i + 1;
             }

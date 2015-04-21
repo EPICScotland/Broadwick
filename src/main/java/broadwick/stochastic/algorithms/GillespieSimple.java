@@ -141,8 +141,8 @@ public class GillespieSimple extends StochasticSimulator {
             }
         }
         final StringBuilder sb = new StringBuilder(100);
-        sb.append("No reaction could be selected!\n");
-        sb.append("reaction = ").append(test).append("\n");
+        sb.append("No reaction could be selected!\nreaction = ");
+        sb.append(test).append("\n");
         sb.append(this.getTransitionKernel().getTransitionEvents().toString());
         throw new SimulationException(sb.toString());
     }
@@ -151,7 +151,7 @@ public class GillespieSimple extends StochasticSimulator {
      * obtains a random (but following a specific distribution) timestep as described by the direct method in chapter 5A
      * page 417ff.
      * @param sum sum of the propensities
-     * @return	tau
+     * @return    tau
      */
     protected final double directMCTau(final double sum) {
         if (Double.compare(sum, 0.0) == 0) {

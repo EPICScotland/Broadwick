@@ -15,6 +15,7 @@
  */
 package broadwick.utils;
 
+import java.io.Serializable;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,7 +30,7 @@ import lombok.Setter;
  * @param <B> the type of the second element in the pair.
  */
 @EqualsAndHashCode
-public class Pair<A, B> {
+public class Pair<A, B> implements Serializable {
 
     @Getter
     @Setter

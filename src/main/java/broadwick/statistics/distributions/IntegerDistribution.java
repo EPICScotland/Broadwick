@@ -60,6 +60,14 @@ public class IntegerDistribution implements Serializable {
     }
 
     /**
+     * Clear all the data from the distribution, after this method the distribution has no denominator or frequency.
+     */
+    @Synchronized
+    public void clear() {
+        bins.clear();
+    }
+
+    /**
      * Resets the value in each bin.
      * @param val the reset value.
      */
@@ -88,9 +96,9 @@ public class IntegerDistribution implements Serializable {
     public final void add(final IntegerDistribution hist) {
         for (Integer i : hist.getBins()) {
             if (bins.containsKey(i)) {
-                bins.put(i, this.getData(i) + hist.getData(i));
+                bins.put(i, this.getFrequency(i) + hist.getFrequency(i));
             } else {
-                bins.put(i, hist.getData(i));
+                bins.put(i, hist.getFrequency(i));
             }
         }
     }
@@ -109,7 +117,7 @@ public class IntegerDistribution implements Serializable {
      * @param bin the bin to increment.
      */
     @Synchronized
-    public final void setData(final Integer bin) {
+    public final void setFrequency(final Integer bin) {
         Integer value = 1;
         if (bins.get(bin) != null) {
             value = bins.get(bin) + 1;
@@ -123,7 +131,7 @@ public class IntegerDistribution implements Serializable {
      * @param data the data.
      */
     @Synchronized
-    public final void setData(final Integer bin, final Integer data) {
+    public final void setFrequency(final Integer bin, final Integer data) {
         bins.put(bin, data);
     }
 
@@ -133,17 +141,52 @@ public class IntegerDistribution implements Serializable {
      * @return the size of the bin, or null if the bin is not in the histogram.
      */
     @Synchronized
-    public final Integer getData(final Integer bin) {
+    public final Integer getFrequency(final Integer bin) {
         return bins.get(bin);
     }
 
     /**
+     * Increment the size of a bin.
+     * @param bin the bin to increment.
+     * @deprecated use getFrequency() instead
+     */
+    @Synchronized
+    public final void setData(final Integer bin) {
+        this.setFrequency(bin);
+    }
+
+    /**
+     * Set the value of a bin.
+     * @param bin  the bin.
+     * @param data the data.
+     * @deprecated use setFrequency() instead
+     */
+    @Synchronized
+    public final void setData(final Integer bin, final Integer data) {
+        this.setFrequency(bin, data);
+    }
+
+    /**
+     * Get the size of the histogram at the given bin.
+     * @param bin the bin.
+     * @deprecated use getFrequency() instead
+     * @return the size of the bin, or null if the bin is not in the histogram.
+     */
+    @Synchronized
+    public final Integer getData(final Integer bin) {
+        return getFrequency(bin);
+    }
+
+    /**
      * Select a random bin from the cumulative distribution of the histograms contents.
-     * @return the name of the random bin.
+     * @return the index of the random bin, or zero if no bin could be selected.
      */
     @Synchronized
     public final Integer getRandomBin() {
         final int cumulativeSum = getSumCounts();
+        if (cumulativeSum == 0) {
+            throw new IllegalArgumentException("Cannot select random bin: there are no bins!");
+        }
         final int randomBin = GENERATOR.getInteger(0, cumulativeSum);
 
         final Integer[] arr = bins.keySet().toArray(new Integer[bins.size()]);
@@ -160,11 +203,11 @@ public class IntegerDistribution implements Serializable {
     }
 
     /**
-     * Select a random bin from the cumulative distribution of the histograms contents.
+     * Select a random bin from the cumulative distribution of the frequencies and return the frequency.
      * @return the contents of the randomly selected bin.
      */
     @Synchronized
-    public final Integer getRandomBinContents() {
+    public final Integer getRandomBinFrequency() {
         final int cumulativeSum = getSumCounts();
         final int randomBin = GENERATOR.getInteger(0, cumulativeSum);
 
@@ -190,7 +233,7 @@ public class IntegerDistribution implements Serializable {
         final IntegerDistribution clone = new IntegerDistribution(bins.size());
 
         for (Integer bin : this.getBins()) {
-            clone.setData(bin, bins.get(bin));
+            clone.setFrequency(bin, bins.get(bin));
         }
 
         return clone;
@@ -283,8 +326,8 @@ public class IntegerDistribution implements Serializable {
         final IntegerDistribution data = this.copy();
 
         for (Integer bin : data.getBins()) {
-            final double d = data.getData(bin) * factor;
-            data.setData(bin, (int) d);
+            final double d = data.getFrequency(bin) * factor;
+            data.setFrequency(bin, (int) d);
         }
 
         return data;
@@ -303,10 +346,10 @@ public class IntegerDistribution implements Serializable {
         final double factor = constant / Double.valueOf(this.getSumCounts());
 
         for (Integer bin : data.getBins()) {
-            final double d = data.getData(bin) * factor;
+            final double d = data.getFrequency(bin) * factor;
             final int size = (int) Math.floor(d);
             fractions.put(bin, d - size);
-            normalisedBins.setData(bin, size);
+            normalisedBins.setFrequency(bin, size);
         }
 
         // Now normalisedBins.getSumCounts() < data.getSumCounts()/runs so we need to increment the
@@ -323,7 +366,7 @@ public class IntegerDistribution implements Serializable {
                 }
             }
             if (binMax > 0) {
-                normalisedBins.setData(binMax);
+                normalisedBins.setFrequency(binMax);
                 fractions.put(binMax, 0.0);
             }
             diff--;

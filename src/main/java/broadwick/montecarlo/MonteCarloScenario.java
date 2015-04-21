@@ -15,6 +15,7 @@
  */
 package broadwick.montecarlo;
 
+import broadwick.utils.CloneUtils;
 import java.io.Serializable;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,6 +33,16 @@ public abstract class MonteCarloScenario implements Serializable {
      * @return a Monte Carlo Results object.
      */
     public abstract MonteCarloResults run(final int seed);
+    
+    
+    /**
+     * Create a copy of the MonteCarloScenario object. This is used by the MonteCarlo producer object to create a 
+     * copy of each scenario object, allowing for each scenario to control which attributes are deep or shallow copied.
+     * @return a (deep) copy of the MonteCarloScenario object.
+     */
+    public MonteCarloScenario copyOf() {
+        return (MonteCarloScenario) CloneUtils.deepClone(this);
+    }
     
     @Getter
     @Setter

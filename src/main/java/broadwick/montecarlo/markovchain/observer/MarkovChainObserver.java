@@ -16,10 +16,13 @@
 package broadwick.montecarlo.markovchain.observer;
 
 import broadwick.montecarlo.markovchain.MarkovChainMonteCarlo;
+import lombok.EqualsAndHashCode;
 
 /**
  * Implementing classes are used to take measurements during a Monte Carlo run.
  */
+@EqualsAndHashCode
+@SuppressWarnings("squid:S1210")
 public abstract class MarkovChainObserver implements Comparable<MarkovChainObserver> {
 
     /**

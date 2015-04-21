@@ -94,8 +94,8 @@ public class FileInput implements AutoCloseable {
             }
 
         } catch (IOException e) {
-            final StringBuilder sb = new StringBuilder("Unable to read from ").append(path.getFileName());
-            sb.append(", Reason : ").append(e.getLocalizedMessage());
+            final StringBuilder sb = new StringBuilder("Unable to read from ");
+            sb.append(path.getFileName()).append(", Reason : ").append(e.getLocalizedMessage());
             log.error(sb.toString());
             sb.append("\n").append(Throwables.getStackTraceAsString(e));
             throw new IOException(sb.toString());
@@ -117,8 +117,8 @@ public class FileInput implements AutoCloseable {
                 line = reader.readLine();
             }
         } catch (IOException e) {
-            final StringBuilder sb = new StringBuilder("Unable to read from ").append(path.getFileName());
-            sb.append(", Reason : ").append(e.getLocalizedMessage());
+            final StringBuilder sb = new StringBuilder("Unable to read from ");
+            sb.append(path.getFileName()).append(", Reason : ").append(e.getLocalizedMessage());
             log.error(sb.toString());
             sb.append("\n").append(Throwables.getStackTraceAsString(e));
             throw new IOException(sb.toString());

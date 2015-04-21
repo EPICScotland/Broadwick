@@ -58,7 +58,7 @@ public abstract class AbstractTauLeapingBase extends StochasticSimulator {
                             .append(", rate = ").append(rate)
                             .append(", times = ").append(times)
                             .toString());
-                    doEvent(event, getCurrentTime(), ((int) Math.round(times)));
+                    doEvent(event, getCurrentTime(), (int) Math.round(times));
                     log.trace("fired event {} {} time(s)", event, times);
                 }
             }

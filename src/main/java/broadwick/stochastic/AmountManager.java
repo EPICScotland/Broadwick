@@ -25,7 +25,7 @@ public interface AmountManager {
     /**
      * Reflects a (multiple) firing of a reaction by adjusting the populations of the states. If a population becomes
      * negative, a <code> RuntimeException</code> is thrown.
-     * @param reaction	the index of the reaction fired
+     * @param reaction    the index of the reaction fired
      * @param times    the number of firings
      */
     void performEvent(SimulationEvent reaction, int times);

@@ -80,8 +80,8 @@ public class MarkovChainMonteCarlo {
 
         writer.write("# Steps taken [1]\n");
         writer.write("# Current step accepted? [2]\n");
-        writer.write(String.format("# Current step coordinates [3-%d]\n", (2 + currentStep.getCoordinates().size())));
-        writer.write(String.format("# Results for current step [%d-n]\n", (3 + currentStep.getCoordinates().size())));
+        writer.write(String.format("# Current step coordinates [3-%d]%n", 2 + currentStep.getCoordinates().size()));
+        writer.write(String.format("# Results for current step [%d-n]%n", 3 + currentStep.getCoordinates().size()));
 
         for (MarkovChainObserver observer : observers) {
             observer.started();
@@ -117,7 +117,7 @@ public class MarkovChainMonteCarlo {
 
             final boolean accepted = acceptor.accept(prevResults, currentResults);
 
-            writer.write("%d,%d,%s,%s\n", numStepsTaken, (accepted ? 1 : 0),
+            writer.write("%d,%d,%s,%s\n", numStepsTaken, accepted ? 1 : 0,
                          proposedStep.toString(), currentResults.toCsv());
             if (accepted) {
                 log.info("Accepted Monte Carlo step {}", proposedStep.toString());

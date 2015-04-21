@@ -22,7 +22,7 @@ import lombok.Data;
  * Utility class for test data.
  */
 @Data
-@SuppressWarnings({"PMD.UnusedPrivateField","serial"})
+@SuppressWarnings({"PMD.UnusedPrivateField","serial","squid:S1068"})
 public class Test implements Serializable {
 // TODO what about custom tags??????
 

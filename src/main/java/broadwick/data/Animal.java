@@ -22,7 +22,7 @@ import lombok.Data;
  * Utility class for location data.
  */
 @Data
-@SuppressWarnings({"PMD.UnusedPrivateField","serial"})
+@SuppressWarnings({"PMD.UnusedPrivateField","serial","squid:S1068"})
 public class Animal implements Serializable {
 // TODO what about cutom tags??????
 

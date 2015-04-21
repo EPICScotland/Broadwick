@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  * </p>
  */
 @Slf4j
-public class Normal implements Distribution {
+public class Normal implements ContinuousDistribution {
 
     /**
      * Create a normal distribution of zero mean and unit standard deviation.

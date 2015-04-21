@@ -83,12 +83,26 @@ public abstract class Model {
      * @return the prior defeind in the configuration file.
      */
     public final UniformPrior getUniformPrior(final String name) {
-        return ((UniformPrior) Iterables.find(priors, new Predicate<Prior>() {
+        return (UniformPrior) Iterables.find(priors, new Predicate<Prior>() {
             @Override
             public boolean apply(final Prior prior) {
-                return (name.equals(prior.getId()));
+                return name.equals(prior.getId());
             }
-        }));
+        });
+    }
+    
+    /**
+     * Determine whether or not a parameter exists in the config file.
+     * @param name the name of the parameter.
+     * @return true if the parameter exists in the config file, false otherwise.
+     */
+    public final boolean hasParameter(final String name) {
+        return Iterables.tryFind(parameters, new Predicate<Parameter>() {
+                @Override
+                public boolean apply(final Parameter parameter) {
+                    return name.equals(parameter.getId());
+                }
+            }).isPresent();
     }
 
     /**
@@ -101,7 +115,7 @@ public abstract class Model {
             return Iterables.find(parameters, new Predicate<Parameter>() {
                 @Override
                 public boolean apply(final Parameter parameter) {
-                    return (name.equals(parameter.getId()));
+                    return name.equals(parameter.getId());
                 }
             }).getValue();
         } catch (java.util.NoSuchElementException e) {
