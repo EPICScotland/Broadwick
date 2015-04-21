@@ -21,6 +21,7 @@ import edu.uci.ics.jung.graph.util.TreeUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,13 +35,15 @@ import lombok.extern.slf4j.Slf4j;
  * @param <E> the edge type.
  */
 @Slf4j
-public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.graph.Graph<V, E>, Serializable  {
+public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.graph.Graph<V, E>, Serializable {
 
     /**
      * Creates an instance of the tree.
      */
     public Tree() {
         tree = new DelegateTree<>();
+        vertexmaps = new HashMap<>();
+        edgemaps = new HashMap<>();
     }
 
     /**
@@ -71,12 +74,12 @@ public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.grap
 
     @Override
     public final boolean addVertex(final V vertex) {
+        vertexmaps.put(vertex.getId(), vertex);
         return tree.addVertex(vertex);
     }
 
     /**
-     * Obtain the sub-tree with
-     * <code>vertex</code> as it's root.
+     * Obtain the sub-tree with <code>vertex</code> as it's root.
      * @param vertex the root node of the subtree.
      * @return a tree object that is a subtree of the current tree.
      */
@@ -162,11 +165,13 @@ public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.grap
 
     @Override
     public final boolean addEdge(final E e, final V v1, final V v2) {
+        edgemaps.put(e.getId(), e);
         return tree.addEdge(e, v1, v2);
     }
 
     @Override
     public final boolean addEdge(final E e, final V v1, final V v2, final EdgeType edgeType) {
+        edgemaps.put(e.getId(), e);
         if (EdgeType.DIRECTED.equals(edgeType)) {
             return tree.addEdge(e, v1, v2, edu.uci.ics.jung.graph.util.EdgeType.DIRECTED);
         } else {
@@ -191,8 +196,18 @@ public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.grap
     }
 
     @Override
+    public final V getVertex(final String id) {
+        return vertexmaps.get(id);
+    }
+
+    @Override
     public final Collection<V> getVertices() {
         return tree.getVertices();
+    }
+
+    @Override
+    public final E getEdge(final String id) {
+        return edgemaps.get(id);
     }
 
     @Override
@@ -201,9 +216,8 @@ public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.grap
     }
 
     /**
-     * Get the
-     * <code>vertex</code> in this graph that is the source of the (single) edge that is incident on this vertex. A
-     * vertex on a tree has only one incident edge but several.
+     * Get the <code>vertex</code> in this graph that is the source of the (single) edge that is incident on this
+     * vertex. A vertex on a tree has only one incident edge but several.
      * @param vertex the vertex whose predecessor is to be returned
      * @return a <code>Collection</code> view of the predecessors of <code>vertex</code> in this graph
      */
@@ -217,24 +231,32 @@ public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.grap
 
     @Override
     public final boolean removeVertex(final V vertex) {
-        return tree.removeVertex(vertex);
+        boolean removed = tree.removeVertex(vertex);
+        if (removed) {
+            vertexmaps.remove(vertex.id);
+        }
+        return removed;
     }
 
     @Override
     public final boolean removeEdge(final E edge) {
-        return tree.removeEdge(edge);
+        boolean removed = tree.removeEdge(edge);
+        if (removed) {
+            edgemaps.remove(edge.id);
+        }
+        return removed;
     }
-    
+
     /**
      * Add a [sub]tree to the current tree.
-     * @param subtree the tree to be added.
-     * @param node the node at which the tree is to be added.
+     * @param subtree        the tree to be added.
+     * @param node           the node at which the tree is to be added.
      * @param connectingEdge the edge that will be used to connect <code>node</code> to the root of the subtree.
      */
-    public final void addSubtree(final Tree<V,E> subtree, final V node, final E connectingEdge) {
-       TreeUtils.addSubTree(tree, subtree.tree, node, connectingEdge);
+    public final void addSubtree(final Tree<V, E> subtree, final V node, final E connectingEdge) {
+        TreeUtils.addSubTree(tree, subtree.tree, node, connectingEdge);
     }
-    
+
     @Override
     public final EdgeType getEdgeType() {
         return EdgeType.DIRECTED;
@@ -255,5 +277,7 @@ public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.grap
     @Getter
     private final Collection<EdgeAttribute> edgeAttributes = new ArrayList<>();
     private DelegateTree<V, E> tree;
+    private final HashMap<String, V> vertexmaps;
+    private final HashMap<String, E> edgemaps;
 
 }

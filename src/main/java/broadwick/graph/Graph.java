@@ -279,6 +279,20 @@ public interface Graph<V extends Vertex, E extends Edge<V>> extends Serializable
     Collection<V> getVertices();
 
     /**
+     * Returns a view the vertex in this graph with a given id.Returns null if the edge does not exist.
+     * @param id the id of the vertex to be found.
+     * @return a view of the vertex with the given id, or null if the edges doesn't exist in the graph.
+     */
+    V getVertex(final String id);
+
+    /**
+     * Returns a view the edges in this graph with the given id. Returns null if the edge does not exist.
+     * @param id the id of the vertex to be found
+     * @return a view of the edge with the given id, or null if the edges doesn't exist in the graph.
+     */
+    E getEdge(final String id);
+
+    /**
      * Returns a view of all edges in this graph. In general, this obeys the
      * <code>Collection</code> contract, and therefore makes no guarantees about the ordering of the edges within the
      * set.

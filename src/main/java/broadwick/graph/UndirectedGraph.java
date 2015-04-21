@@ -19,6 +19,7 @@ import broadwick.utils.Pair;
 import edu.uci.ics.jung.graph.UndirectedSparseMultigraph;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import lombok.Getter;
 
 /**
@@ -35,6 +36,8 @@ public class UndirectedGraph<V extends Vertex, E extends Edge<V>> implements bro
      */
     public UndirectedGraph() {
         graph = new UndirectedSparseMultigraph<>();
+        vertexmaps = new HashMap<>();
+        edgemaps = new HashMap<>();
     }
 
     @Override
@@ -109,16 +112,19 @@ public class UndirectedGraph<V extends Vertex, E extends Edge<V>> implements bro
 
     @Override
     public final boolean addVertex(final V vertex) {
+        vertexmaps.put(vertex.getId(), vertex);
         return graph.addVertex(vertex);
     }
 
     @Override
     public final boolean addEdge(final E e, final V v1, final V v2) {
+        edgemaps.put(e.getId(), e);
         return graph.addEdge(e, v1, v2);
     }
 
     @Override
     public final boolean addEdge(final E e, final V v1, final V v2, final EdgeType edgeType) {
+        edgemaps.put(e.getId(), e);
         return graph.addEdge(e, v1, v2, edu.uci.ics.jung.graph.util.EdgeType.DIRECTED);
     }
 
@@ -142,7 +148,17 @@ public class UndirectedGraph<V extends Vertex, E extends Edge<V>> implements bro
     public final Collection<V> getVertices() {
         return graph.getVertices();
     }
+    
+    @Override
+    public final V getVertex(final String id) {
+        return vertexmaps.get(id);
+    }
 
+    @Override
+    public final E getEdge(final String id) {
+        return edgemaps.get(id);
+    }
+    
     @Override
     public final Collection<E> getEdges() {
         return graph.getEdges();
@@ -150,12 +166,20 @@ public class UndirectedGraph<V extends Vertex, E extends Edge<V>> implements bro
 
     @Override
     public final boolean removeVertex(final V vertex) {
-        return graph.removeVertex(vertex);
+        boolean removed = graph.removeVertex(vertex);
+        if (removed) {
+        vertexmaps.remove(vertex.id);
+        }
+        return removed;
     }
 
     @Override
     public final boolean removeEdge(final E edge) {
-        return graph.removeEdge(edge);
+        boolean removed = graph.removeEdge(edge);
+        if (removed) {
+        edgemaps.remove(edge.id);
+        }
+        return removed;
     }
 
     @Override
@@ -177,5 +201,7 @@ public class UndirectedGraph<V extends Vertex, E extends Edge<V>> implements bro
     private final Collection<VertexAttribute> vertexAttributes = new ArrayList<>();
     @Getter
     private final Collection<EdgeAttribute> edgeAttributes = new ArrayList<>();
-    private UndirectedSparseMultigraph<V, E> graph;
+    private final UndirectedSparseMultigraph<V, E> graph;
+    private final HashMap<String, V> vertexmaps;
+    private final HashMap<String, E> edgemaps;
 }

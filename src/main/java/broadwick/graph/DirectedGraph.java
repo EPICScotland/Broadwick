@@ -19,6 +19,7 @@ import broadwick.utils.Pair;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import lombok.Getter;
 
 /**
@@ -35,6 +36,8 @@ public class DirectedGraph<V extends Vertex, E extends Edge<V>> implements broad
      */
     public DirectedGraph() {
         graph = new DirectedSparseMultigraph<>();
+        vertexmaps = new HashMap<>();
+        edgemaps = new HashMap<>();
     }
 
     @Override
@@ -109,16 +112,19 @@ public class DirectedGraph<V extends Vertex, E extends Edge<V>> implements broad
 
     @Override
     public final boolean addVertex(final V vertex) {
+        vertexmaps.put(vertex.getId(), vertex);
         return graph.addVertex(vertex);
     }
 
     @Override
     public final boolean addEdge(final E e, final V v1, final V v2) {
+        edgemaps.put(e.getId(), e);
         return graph.addEdge(e, v1, v2);
     }
 
     @Override
     public final boolean addEdge(final E e, final V v1, final V v2, final EdgeType edgeType) {
+        edgemaps.put(e.getId(), e);
         return graph.addEdge(e, v1, v2, edu.uci.ics.jung.graph.util.EdgeType.DIRECTED);
     }
 
@@ -144,25 +150,43 @@ public class DirectedGraph<V extends Vertex, E extends Edge<V>> implements broad
     }
 
     @Override
+    public final V getVertex(final String id) {
+        return vertexmaps.get(id);
+    }
+
+    @Override
+    public final E getEdge(final String id) {
+        return edgemaps.get(id);
+    }
+
+    @Override
     public final Collection<E> getEdges() {
         return graph.getEdges();
     }
 
     @Override
     public final boolean removeVertex(final V vertex) {
-        return graph.removeVertex(vertex);
+        boolean removed = graph.removeVertex(vertex);
+        if (removed) {
+            vertexmaps.remove(vertex.id);
+        }
+        return removed;
     }
 
     @Override
     public final boolean removeEdge(final E edge) {
-        return graph.removeEdge(edge);
+        boolean removed = graph.removeEdge(edge);
+        if (removed) {
+            edgemaps.remove(edge.id);
+        }
+        return removed;
     }
 
     @Override
     public final EdgeType getEdgeType() {
         return EdgeType.DIRECTED;
     }
-    
+
     @Override
     public final void addVertexAttribute(final String name, final Class type, final String defaultValue) {
         vertexAttributes.add(new VertexAttribute(name, type, defaultValue));
@@ -172,12 +196,15 @@ public class DirectedGraph<V extends Vertex, E extends Edge<V>> implements broad
     public final void addEdgeAttribute(final String name, final Class type, final String defaultValue) {
         edgeAttributes.add(new EdgeAttribute(name, type, defaultValue));
     }
-    
+
     @Getter
     private final Collection<VertexAttribute> vertexAttributes = new ArrayList<>();
-    
+
     @Getter
     private final Collection<EdgeAttribute> edgeAttributes = new ArrayList<>();
-    
-    private DirectedSparseMultigraph<V, E> graph;
+
+    private final DirectedSparseMultigraph<V, E> graph;
+    private final HashMap<String, V> vertexmaps;
+    private final HashMap<String, E> edgemaps;
+
 }
