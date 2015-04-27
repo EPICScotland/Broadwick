@@ -98,6 +98,7 @@ public class Edge<V extends Vertex> implements Serializable {
         }
         return null;
     }
+
     /**
      * Add an attribute to the edge.
      * @param attribute the attribute to be added.
@@ -106,7 +107,13 @@ public class Edge<V extends Vertex> implements Serializable {
     public final boolean addAttribute(final EdgeAttribute attribute) {
         return attributes.add(attribute);
     }
-    
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        attributes.clear();
+    }
+
     @Getter
     protected String id = null;
     @Getter

@@ -81,7 +81,7 @@ public class MonteCarlo {
      * @return the MonteCarloResults object that contains the results of all the simulations.
      */
     public final MonteCarloResults getResults() {
-        return CloneUtils.deepClone(resultsConsumer);
+        return resultsConsumer;
     }
 
     /**

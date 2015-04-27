@@ -271,7 +271,18 @@ public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.grap
     public final void addEdgeAttribute(final String name, final Class type, final String defaultValue) {
         edgeAttributes.add(new EdgeAttribute(name, type, defaultValue));
     }
-
+    
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        tree.getEdges().clear();
+        tree.getVertices().clear();
+        vertexAttributes.clear();
+        edgeAttributes.clear();
+        vertexmaps.clear();
+        edgemaps.clear();
+    }
+    
     @Getter
     private final Collection<VertexAttribute> vertexAttributes = new ArrayList<>();
     @Getter

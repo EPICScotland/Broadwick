@@ -148,7 +148,7 @@ public class UndirectedGraph<V extends Vertex, E extends Edge<V>> implements bro
     public final Collection<V> getVertices() {
         return graph.getVertices();
     }
-    
+
     @Override
     public final V getVertex(final String id) {
         return vertexmaps.get(id);
@@ -158,7 +158,7 @@ public class UndirectedGraph<V extends Vertex, E extends Edge<V>> implements bro
     public final E getEdge(final String id) {
         return edgemaps.get(id);
     }
-    
+
     @Override
     public final Collection<E> getEdges() {
         return graph.getEdges();
@@ -168,7 +168,7 @@ public class UndirectedGraph<V extends Vertex, E extends Edge<V>> implements bro
     public final boolean removeVertex(final V vertex) {
         boolean removed = graph.removeVertex(vertex);
         if (removed) {
-        vertexmaps.remove(vertex.id);
+            vertexmaps.remove(vertex.id);
         }
         return removed;
     }
@@ -177,7 +177,7 @@ public class UndirectedGraph<V extends Vertex, E extends Edge<V>> implements bro
     public final boolean removeEdge(final E edge) {
         boolean removed = graph.removeEdge(edge);
         if (removed) {
-        edgemaps.remove(edge.id);
+            edgemaps.remove(edge.id);
         }
         return removed;
     }
@@ -195,6 +195,17 @@ public class UndirectedGraph<V extends Vertex, E extends Edge<V>> implements bro
     @Override
     public final void addEdgeAttribute(final String name, final Class type, final String defaultValue) {
         edgeAttributes.add(new EdgeAttribute(name, type, defaultValue));
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        graph.getEdges().clear();
+        graph.getVertices().clear();
+        vertexAttributes.clear();
+        edgeAttributes.clear();
+        vertexmaps.clear();
+        edgemaps.clear();
     }
 
     @Getter

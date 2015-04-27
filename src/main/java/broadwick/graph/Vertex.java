@@ -84,6 +84,12 @@ public class Vertex implements Serializable {
         attributes.add(new VertexAttribute("yCoord", Double.class, String.valueOf(y)));
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        attributes.clear();
+    }
+
     @Setter
     @Getter
     protected String id = null;

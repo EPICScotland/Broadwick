@@ -197,12 +197,21 @@ public class DirectedGraph<V extends Vertex, E extends Edge<V>> implements broad
         edgeAttributes.add(new EdgeAttribute(name, type, defaultValue));
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        graph.getEdges().clear();
+        graph.getVertices().clear();
+        vertexAttributes.clear();
+        edgeAttributes.clear();
+        vertexmaps.clear();
+        edgemaps.clear();
+    }
+
     @Getter
     private final Collection<VertexAttribute> vertexAttributes = new ArrayList<>();
-
     @Getter
     private final Collection<EdgeAttribute> edgeAttributes = new ArrayList<>();
-
     private final DirectedSparseMultigraph<V, E> graph;
     private final HashMap<String, V> vertexmaps;
     private final HashMap<String, E> edgemaps;
