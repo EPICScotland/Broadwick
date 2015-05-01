@@ -79,11 +79,11 @@ public class IntegerDistributionTest {
     public void testReset_int() {
         IntegerDistribution h1 = new IntegerDistribution(5);
         assertEquals(5, h1.getNumBins());
-        h1.setData(1, 1);
-        h1.setData(2, 2);
-        h1.setData(3, 3);
-        h1.setData(4, 4);
-        h1.setData(5, 5);
+        h1.setFrequency(1, 1);
+        h1.setFrequency(2, 2);
+        h1.setFrequency(3, 3);
+        h1.setFrequency(4, 4);
+        h1.setFrequency(5, 5);
 
         assertEquals("1,2,3,4,5", h1.toCsv());
 
@@ -100,11 +100,11 @@ public class IntegerDistributionTest {
     public void testReset_0args() {
         IntegerDistribution h1 = new IntegerDistribution(5);
         assertEquals(5, h1.getNumBins());
-        h1.setData(1, 1);
-        h1.setData(2, 2);
-        h1.setData(3, 3);
-        h1.setData(4, 4);
-        h1.setData(5, 5);
+        h1.setFrequency(1, 1);
+        h1.setFrequency(2, 2);
+        h1.setFrequency(3, 3);
+        h1.setFrequency(4, 4);
+        h1.setFrequency(5, 5);
 
         assertEquals("1,2,3,4,5", h1.toCsv());
         h1.reset();
@@ -119,8 +119,8 @@ public class IntegerDistributionTest {
         IntegerDistribution h1 = new IntegerDistribution(3);
         IntegerDistribution h2 = new IntegerDistribution(3);
 
-        h2.setData(1);
-        h2.setData(2, 4);
+        h2.setFrequency(1);
+        h2.setFrequency(2, 4);
 
         assertEquals(3, h1.getNumBins());
         assertEquals(3, h2.getNumBins());
@@ -156,14 +156,14 @@ public class IntegerDistributionTest {
     public void testSetData_Integer() {
         IntegerDistribution h = new IntegerDistribution(3);
 
-        h.setData(1);
+        h.setFrequency(1);
         assertEquals(3, h.getNumBins());
         assertEquals("1,0,0", h.toCsv());
-        h.setData(1);
+        h.setFrequency(1);
         assertEquals("2,0,0", h.toCsv());
-        h.setData(1);
-        h.setData(2);
-        h.setData(3);
+        h.setFrequency(1);
+        h.setFrequency(2);
+        h.setFrequency(3);
         assertEquals("3,1,1", h.toCsv());
     }
 
@@ -174,16 +174,16 @@ public class IntegerDistributionTest {
     public void testSetData_Integer_Integer() {
         IntegerDistribution h = new IntegerDistribution(3);
 
-        h.setData(1, 1);
+        h.setFrequency(1, 1);
         assertEquals(3, h.getNumBins());
         assertEquals("1,0,0", h.toCsv());
-        h.setData(1, 0);
+        h.setFrequency(1, 0);
         assertEquals("0,0,0", h.toCsv());
-        h.setData(1, 5);
-        h.setData(2);
-        h.setData(3, 3);
+        h.setFrequency(1, 5);
+        h.setFrequency(2);
+        h.setFrequency(3, 3);
         assertEquals("5,1,3", h.toCsv());
-        h.setData(2, -10);
+        h.setFrequency(2, -10);
         assertEquals("5,-10,3", h.toCsv());
     }
 
@@ -193,21 +193,21 @@ public class IntegerDistributionTest {
     @Test
     public void testGetData() {
         IntegerDistribution h = new IntegerDistribution(3);
-        assertEquals(Integer.valueOf(0), h.getData(1));
-        assertEquals(Integer.valueOf(0), h.getData(2));
-        assertEquals(Integer.valueOf(0), h.getData(3));
+        assertEquals(Integer.valueOf(0), h.getFrequency(1));
+        assertEquals(Integer.valueOf(0), h.getFrequency(2));
+        assertEquals(Integer.valueOf(0), h.getFrequency(3));
 
-        h.setData(1);
-        assertEquals(Integer.valueOf(1), h.getData(1));
-        assertEquals(Integer.valueOf(0), h.getData(2));
-        assertEquals(Integer.valueOf(0), h.getData(3));
+        h.setFrequency(1);
+        assertEquals(Integer.valueOf(1), h.getFrequency(1));
+        assertEquals(Integer.valueOf(0), h.getFrequency(2));
+        assertEquals(Integer.valueOf(0), h.getFrequency(3));
 
-        h.setData(1);
-        h.setData(2, 4);
-        h.setData(3, 9);
-        assertEquals(Integer.valueOf(2), h.getData(1));
-        assertEquals(Integer.valueOf(4), h.getData(2));
-        assertEquals(Integer.valueOf(9), h.getData(3));
+        h.setFrequency(1);
+        h.setFrequency(2, 4);
+        h.setFrequency(3, 9);
+        assertEquals(Integer.valueOf(2), h.getFrequency(1));
+        assertEquals(Integer.valueOf(4), h.getFrequency(2));
+        assertEquals(Integer.valueOf(9), h.getFrequency(3));
     }
 
     /**
@@ -216,11 +216,11 @@ public class IntegerDistributionTest {
     @Test
     public void testGetRandomBin() {
         IntegerDistribution h1 = new IntegerDistribution(5);
-        h1.setData(1, 11);
-        h1.setData(2, 22);
-        h1.setData(3, 33);
-        h1.setData(4, 44);
-        h1.setData(5, 55);
+        h1.setFrequency(1, 11);
+        h1.setFrequency(2, 22);
+        h1.setFrequency(3, 33);
+        h1.setFrequency(4, 44);
+        h1.setFrequency(5, 55);
         
         Integer randomBin = h1.getRandomBin();
         assertTrue(h1.getBins().contains(randomBin));
@@ -232,11 +232,11 @@ public class IntegerDistributionTest {
     @Test
     public void testGetBinContents() {
         IntegerDistribution h1 = new IntegerDistribution(5);
-        h1.setData(1, 1);
-        h1.setData(2, 2);
-        h1.setData(3, 3);
-        h1.setData(4, 4);
-        h1.setData(5, 5);
+        h1.setFrequency(1, 1);
+        h1.setFrequency(2, 2);
+        h1.setFrequency(3, 3);
+        h1.setFrequency(4, 4);
+        h1.setFrequency(5, 5);
         
         Collection<Integer> binContents = h1.getBinContents();
         assertTrue(binContents.size() == 5);
@@ -253,11 +253,11 @@ public class IntegerDistributionTest {
     @Test
     public void testCopy() {
         IntegerDistribution h = new IntegerDistribution(5);
-        h.setData(1, 0);
-        h.setData(2, 4);
-        h.setData(3);
-        h.setData(4, 2);
-        h.setData(5, 5);
+        h.setFrequency(1, 0);
+        h.setFrequency(2, 4);
+        h.setFrequency(3);
+        h.setFrequency(4, 2);
+        h.setFrequency(5, 5);
 
         assertEquals("0,4,1,2,5", h.toCsv());
         assertEquals("0,4,1,2,5", h.copy().toCsv());
@@ -270,16 +270,16 @@ public class IntegerDistributionTest {
     @Test
     public void testGetSumCounts() {
         IntegerDistribution h = new IntegerDistribution(5);
-        h.setData(1, 0);
-        h.setData(2, 4);
-        h.setData(3);
-        h.setData(4, 2);
-        h.setData(5, 5);
+        h.setFrequency(1, 0);
+        h.setFrequency(2, 4);
+        h.setFrequency(3);
+        h.setFrequency(4, 2);
+        h.setFrequency(5, 5);
 
         assertEquals(Integer.valueOf(12), h.getSumCounts());
-        h.setData(3);
+        h.setFrequency(3);
         assertEquals(Integer.valueOf(13), h.getSumCounts());
-        h.setData(1, 10);
+        h.setFrequency(1, 10);
         assertEquals(Integer.valueOf(23), h.getSumCounts());
     }
 
@@ -292,11 +292,11 @@ public class IntegerDistributionTest {
         assertEquals(5, h.getNumBins());
         assertEquals(5, h.getBins().size());
 
-        assertTrue(h.getBins().contains(Integer.valueOf(1)));
-        assertTrue(h.getBins().contains(Integer.valueOf(2)));
-        assertTrue(h.getBins().contains(Integer.valueOf(3)));
-        assertTrue(h.getBins().contains(Integer.valueOf(4)));
-        assertTrue(h.getBins().contains(Integer.valueOf(5)));
+        assertTrue(h.getBins().contains(1));
+        assertTrue(h.getBins().contains(2));
+        assertTrue(h.getBins().contains(3));
+        assertTrue(h.getBins().contains(4));
+        assertTrue(h.getBins().contains(5));
     }
 
     /**
@@ -320,11 +320,11 @@ public class IntegerDistributionTest {
     @Test
     public void testToArray() {
         IntegerDistribution h = new IntegerDistribution(5);
-        h.setData(1, 0);
-        h.setData(2, 4);
-        h.setData(3);
-        h.setData(4, 2);
-        h.setData(5, 5);
+        h.setFrequency(1, 0);
+        h.setFrequency(2, 4);
+        h.setFrequency(3);
+        h.setFrequency(4, 2);
+        h.setFrequency(5, 5);
 
         int[] arr = h.toArray();
         assertEquals(arr[0], 0);
@@ -340,11 +340,11 @@ public class IntegerDistributionTest {
     @Test
     public void testToLongArray() {
         IntegerDistribution h = new IntegerDistribution(5);
-        h.setData(1, 0);
-        h.setData(2, 4);
-        h.setData(3);
-        h.setData(4, 2);
-        h.setData(5, 5);
+        h.setFrequency(1, 0);
+        h.setFrequency(2, 4);
+        h.setFrequency(3);
+        h.setFrequency(4, 2);
+        h.setFrequency(5, 5);
 
         long[] arr = h.toLongArray();
         assertEquals(arr[0], 0);
@@ -360,39 +360,39 @@ public class IntegerDistributionTest {
     @Test
     public void testScaleBins() {
         IntegerDistribution h = new IntegerDistribution(5);
-        h.setData(1, 0);
-        h.setData(2, 4);
-        h.setData(3);
-        h.setData(4, 2);
-        h.setData(5, 5);
+        h.setFrequency(1, 0);
+        h.setFrequency(2, 4);
+        h.setFrequency(3);
+        h.setFrequency(4, 2);
+        h.setFrequency(5, 5);
 
         IntegerDistribution h2 = h.scaleBins(2.5);
-        assertEquals(Integer.valueOf(0), h2.getData(1));
-        assertEquals(Integer.valueOf(10), h2.getData(2));
-        assertEquals(Integer.valueOf(2), h2.getData(3));
-        assertEquals(Integer.valueOf(5), h2.getData(4));
-        assertEquals(Integer.valueOf(12), h2.getData(5));
+        assertEquals(Integer.valueOf(0), h2.getFrequency(1));
+        assertEquals(Integer.valueOf(10), h2.getFrequency(2));
+        assertEquals(Integer.valueOf(2), h2.getFrequency(3));
+        assertEquals(Integer.valueOf(5), h2.getFrequency(4));
+        assertEquals(Integer.valueOf(12), h2.getFrequency(5));
 
         h2 = h.scaleBins(1);
-        assertEquals(Integer.valueOf(0), h2.getData(1));
-        assertEquals(Integer.valueOf(4), h2.getData(2));
-        assertEquals(Integer.valueOf(1), h2.getData(3));
-        assertEquals(Integer.valueOf(2), h2.getData(4));
-        assertEquals(Integer.valueOf(5), h2.getData(5));
+        assertEquals(Integer.valueOf(0), h2.getFrequency(1));
+        assertEquals(Integer.valueOf(4), h2.getFrequency(2));
+        assertEquals(Integer.valueOf(1), h2.getFrequency(3));
+        assertEquals(Integer.valueOf(2), h2.getFrequency(4));
+        assertEquals(Integer.valueOf(5), h2.getFrequency(5));
 
         h2 = h2.scaleBins(2);
-        assertEquals(Integer.valueOf(0), h2.getData(1));
-        assertEquals(Integer.valueOf(8), h2.getData(2));
-        assertEquals(Integer.valueOf(2), h2.getData(3));
-        assertEquals(Integer.valueOf(4), h2.getData(4));
-        assertEquals(Integer.valueOf(10), h2.getData(5));
+        assertEquals(Integer.valueOf(0), h2.getFrequency(1));
+        assertEquals(Integer.valueOf(8), h2.getFrequency(2));
+        assertEquals(Integer.valueOf(2), h2.getFrequency(3));
+        assertEquals(Integer.valueOf(4), h2.getFrequency(4));
+        assertEquals(Integer.valueOf(10), h2.getFrequency(5));
 
         h = h2;
-        assertEquals(Integer.valueOf(0), h.getData(1));
-        assertEquals(Integer.valueOf(8), h.getData(2));
-        assertEquals(Integer.valueOf(2), h.getData(3));
-        assertEquals(Integer.valueOf(4), h.getData(4));
-        assertEquals(Integer.valueOf(10), h.getData(5));
+        assertEquals(Integer.valueOf(0), h.getFrequency(1));
+        assertEquals(Integer.valueOf(8), h.getFrequency(2));
+        assertEquals(Integer.valueOf(2), h.getFrequency(3));
+        assertEquals(Integer.valueOf(4), h.getFrequency(4));
+        assertEquals(Integer.valueOf(10), h.getFrequency(5));
     }
 
     /**
@@ -401,16 +401,16 @@ public class IntegerDistributionTest {
     @Test
     public void testNormaliseBins() {
         IntegerDistribution h = new IntegerDistribution(10);
-        h.setData(1, 9404);
-        h.setData(2, 9369);
-        h.setData(3, 4718);
-        h.setData(4, 1957);
-        h.setData(5, 897);
-        h.setData(6, 509);
-        h.setData(7, 270);
-        h.setData(8, 149);
-        h.setData(9, 103);
-        h.setData(10, 111);
+        h.setFrequency(1, 9404);
+        h.setFrequency(2, 9369);
+        h.setFrequency(3, 4718);
+        h.setFrequency(4, 1957);
+        h.setFrequency(5, 897);
+        h.setFrequency(6, 509);
+        h.setFrequency(7, 270);
+        h.setFrequency(8, 149);
+        h.setFrequency(9, 103);
+        h.setFrequency(10, 111);
 
         assertEquals("9404,9369,4718,1957,897,509,270,149,103,111", h.toCsv());
 
@@ -418,16 +418,16 @@ public class IntegerDistributionTest {
         IntegerDistribution h2 = h.normaliseBins(sumCounts);
         assertEquals(h2.getSumCounts(), sumCounts);
 
-        h.setData(1, 5951);
-        h.setData(2, 3879);
-        h.setData(3, 1325);
-        h.setData(4, 604);
-        h.setData(5, 317);
-        h.setData(6, 182);
-        h.setData(7, 99);
-        h.setData(8, 62);
-        h.setData(9, 35);
-        h.setData(10, 59);
+        h.setFrequency(1, 5951);
+        h.setFrequency(2, 3879);
+        h.setFrequency(3, 1325);
+        h.setFrequency(4, 604);
+        h.setFrequency(5, 317);
+        h.setFrequency(6, 182);
+        h.setFrequency(7, 99);
+        h.setFrequency(8, 62);
+        h.setFrequency(9, 35);
+        h.setFrequency(10, 59);
         assertEquals("5951,3879,1325,604,317,182,99,62,35,59", h.toCsv());
         h2 = h.normaliseBins(sumCounts);
         assertEquals(h2.getSumCounts(), sumCounts);
@@ -440,8 +440,8 @@ public class IntegerDistributionTest {
     public void testToString() {
         IntegerDistribution h = new IntegerDistribution(3);
 
-        h.setData(1);
-        h.setData(2, 4);
+        h.setFrequency(1);
+        h.setFrequency(2, 4);
         assertEquals(3, h.getNumBins());
 
         assertEquals("1:1\n2:4\n3:0\n", h.toString());
@@ -454,8 +454,8 @@ public class IntegerDistributionTest {
     public void testToCsv() {
         IntegerDistribution h = new IntegerDistribution(3);
 
-        h.setData(1);
-        h.setData(2, 4);
+        h.setFrequency(1);
+        h.setFrequency(2, 4);
         assertEquals(3, h.getNumBins());
 
         assertEquals("1,4,0", h.toCsv());
