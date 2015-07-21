@@ -15,6 +15,7 @@
  */
 package broadwick.statistics.distributions;
 
+import broadwick.rng.RNG;
 import lombok.Getter;
 
 /**
@@ -51,13 +52,37 @@ public class TruncatedNormalDistribution implements ContinuousDistribution {
         this.sd = sd;
         this.lower = lb;
         this.upper = ub;
-
-        this.dist = new Normal(mean, sd);
+        this.generator = new RNG(RNG.Generator.Well19937c);
     }
 
     @Override
     public double sample() {
+
+        // Sample using the method of C.P. Robert (doi: 10.1007/BF00143942, arXiv:0907.4010 [stat.CO])
+        double x = Double.NaN;
+        double rho = 0.0;
+        double u = generator.getDouble();
+
+        while (u > rho) {
+            double z = generator.getDouble(lower, upper);
+            if (0 > lower && 0 < upper) {
+                rho = Math.exp(-z * z / 2.0);
+            } else if (upper < 0) {
+                rho = Math.exp(((upper * upper) - (z * z)) / 2.0);
+            } else if (0 < lower) {
+                rho = Math.exp(((lower * lower) - (z * z)) / 2.0);
+            }
+
+            u = generator.getDouble();
+            x = z;
+        }
+
+        return x;
+    }
+
+    public double rejectionSample() {
         // use a simple rejection sampling
+        final Normal dist = new Normal(mean, sd);
         double val = dist.sample();
 
         while (val < lower || val > upper) {
@@ -72,5 +97,5 @@ public class TruncatedNormalDistribution implements ContinuousDistribution {
     private double sd;
     private double lower;
     private double upper;
-    private Normal dist;
+    private RNG generator;
 }
