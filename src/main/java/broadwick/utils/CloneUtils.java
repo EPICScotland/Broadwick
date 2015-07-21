@@ -15,6 +15,8 @@
  */
 package broadwick.utils;
 
+import broadwick.BroadwickException;
+import com.google.common.base.Throwables;
 import com.rits.cloning.Cloner;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,7 +44,12 @@ public final class CloneUtils {
      */
     @SuppressWarnings("FinalStaticMethod")
     public static <T extends Object> T deepClone(final T o) {
-        return (new Cloner()).deepClone(o);
+        try {
+            return (new Cloner()).deepClone(o);
+        } catch (Exception e) {
+            log.error("Unable to Clone object. {}", Throwables.getStackTraceAsString(e));
+            throw new BroadwickException("Unable to Clone object." + Throwables.getStackTraceAsString(e));
+        }
     }
 
 }
