@@ -22,7 +22,7 @@ import broadwick.statistics.Samples;
  * and use implementations of this class to store the results. It does do by adding the simulation results to the 
  * Samples object that is used to obtain an expected value for the simulation.
  */
-public interface MonteCarloResults extends Cloneable {
+public interface MonteCarloResults {
 
     /**
      * Get the score for the Monte Carlo simulation. The Acceptor interface and it's implementing classes require a
