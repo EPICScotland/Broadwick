@@ -15,6 +15,7 @@
  */
 package broadwick.montecarlo.markovchain;
 
+import broadwick.BroadwickException;
 import broadwick.io.FileOutput;
 import broadwick.montecarlo.MonteCarlo;
 import broadwick.montecarlo.MonteCarloResults;
@@ -26,6 +27,7 @@ import broadwick.montecarlo.markovchain.controller.MarkovChainController;
 import broadwick.montecarlo.markovchain.controller.MarkovChainMaxNumStepController;
 import broadwick.montecarlo.markovchain.observer.MarkovChainObserver;
 import broadwick.rng.RNG;
+import com.google.common.base.Throwables;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.Getter;
@@ -76,69 +78,74 @@ public class MarkovChainMonteCarlo {
      */
     public final void run() {
 
-        MonteCarloStep currentStep = pathGenerator.getInitialStep();
+        try {
+            MonteCarloStep currentStep = pathGenerator.getInitialStep();
 
-        writer.write("# Steps taken [1]\n");
-        writer.write("# Current step accepted? [2]\n");
-        writer.write(String.format("# Current step coordinates [3-%d]%n", 2 + currentStep.getCoordinates().size()));
-        writer.write(String.format("# Results for current step [%d-n]%n", 3 + currentStep.getCoordinates().size()));
-
-        for (MarkovChainObserver observer : observers) {
-            observer.started();
-        }
-
-        log.info("Running Monte Carlo simulation with initial step {}", currentStep.toString());
-        model.setStep(currentStep);
-
-        MonteCarlo mc = new MonteCarlo(model, numSimulations);
-        mc.setResultsConsumer(consumer);
-        mc.run();
-        MonteCarloResults prevResults = mc.getResults();
-        for (MarkovChainObserver observer : observers) {
-            observer.step();
-            observer.takeMeasurements();
-        }
-        writer.write("%d,%d,%s,%s\n", numStepsTaken, 1, currentStep.toString(), prevResults.toCsv());
-        numStepsTaken++;
-
-        while (mcController.goOn(this)) {
-            int stepsSinceLastMeasurement = 0;
-            final MonteCarloStep proposedStep = pathGenerator.generateNextStep(currentStep);
-            model.setStep(proposedStep);
-
-            mc = new MonteCarlo(model, numSimulations);
-            mc.setResultsConsumer(consumer);
-            mc.run();
-            final MonteCarloResults currentResults = mc.getResults();
+            writer.write("# Steps taken [1]\n");
+            writer.write("# Current step accepted? [2]\n");
+            writer.write(String.format("# Current step coordinates [3-%d]%n", 2 + currentStep.getCoordinates().size()));
+            writer.write(String.format("# Results for current step [%d-n]%n", 3 + currentStep.getCoordinates().size()));
 
             for (MarkovChainObserver observer : observers) {
+                observer.started();
+            }
+
+            log.info("Running Monte Carlo simulation with initial step {}", currentStep.toString());
+            model.setStep(currentStep);
+
+            MonteCarlo mc = new MonteCarlo(model, numSimulations);
+            mc.setResultsConsumer(consumer);
+            mc.run();
+            MonteCarloResults prevResults = mc.getResults();
+            for (MarkovChainObserver observer : observers) {
                 observer.step();
+                observer.takeMeasurements();
             }
-
-            final boolean accepted = acceptor.accept(prevResults, currentResults);
-
-            writer.write("%d,%d,%s,%s\n", numStepsTaken, accepted ? 1 : 0,
-                         proposedStep.toString(), currentResults.toCsv());
-            if (accepted) {
-                log.info("Accepted Monte Carlo step {}", proposedStep.toString());
-                numAcceptedSteps++;
-                if (numStepsTaken > burnIn
-                    && (thinningInterval == 0 || stepsSinceLastMeasurement % thinningInterval == 0)) {
-                    stepsSinceLastMeasurement++;
-                    for (MarkovChainObserver observer : observers) {
-                        observer.takeMeasurements();
-                    }
-                }
-                currentStep = proposedStep;
-                prevResults = currentResults;
-            } else {
-                log.info("Rejected Monte Carlo step {}", proposedStep.toString());
-            }
+            writer.write("%d,%d,%s,%s\n", numStepsTaken, 1, currentStep.toString(), prevResults.toCsv());
             numStepsTaken++;
-        }
 
-        for (MarkovChainObserver observer : observers) {
-            observer.finished();
+            while (mcController.goOn(this)) {
+                int stepsSinceLastMeasurement = 0;
+                final MonteCarloStep proposedStep = pathGenerator.generateNextStep(currentStep);
+                model.setStep(proposedStep);
+
+                mc = new MonteCarlo(model, numSimulations);
+                mc.setResultsConsumer(consumer);
+                mc.run();
+                final MonteCarloResults currentResults = mc.getResults();
+
+                for (MarkovChainObserver observer : observers) {
+                    observer.step();
+                }
+
+                final boolean accepted = acceptor.accept(prevResults, currentResults);
+
+                writer.write("%d,%d,%s,%s\n", numStepsTaken, accepted ? 1 : 0,
+                             proposedStep.toString(), currentResults.toCsv());
+                if (accepted) {
+                    log.info("Accepted Monte Carlo step ({})", proposedStep.toString());
+                    numAcceptedSteps++;
+                    if (numStepsTaken > burnIn
+                        && (thinningInterval == 0 || stepsSinceLastMeasurement % thinningInterval == 0)) {
+                        stepsSinceLastMeasurement++;
+                        for (MarkovChainObserver observer : observers) {
+                            observer.takeMeasurements();
+                        }
+                    }
+                    currentStep = proposedStep;
+                    prevResults = currentResults;
+                } else {
+                    log.info("Rejected Monte Carlo step ({})", proposedStep.toString());
+                }
+                numStepsTaken++;
+            }
+
+            for (MarkovChainObserver observer : observers) {
+                observer.finished();
+            }
+        } catch (Exception e) {
+            log.error("Error running Monte Carlo simulation. {}", Throwables.getStackTraceAsString(e));
+            throw new BroadwickException("Error running Monte Carlo simulation." + Throwables.getStackTraceAsString(e));
         }
     }
 

@@ -15,6 +15,7 @@
  */
 package broadwick.montecarlo;
 
+import broadwick.BroadwickException;
 import broadwick.rng.RNG;
 import broadwick.statistics.Samples;
 import broadwick.utils.CloneUtils;
@@ -41,8 +42,7 @@ public class MonteCarlo {
      * @param simulation     the simulation or scenario to be run.
      * @param numSimulations the number of times the simulation should be run.
      */
-    public MonteCarlo(final MonteCarloScenario simulation,
-                      final int numSimulations) {
+    public MonteCarlo(final MonteCarloScenario simulation, final int numSimulations) {
         this.simulation = simulation;
         this.numSimulations = numSimulations;
         this.resultsConsumer = new MonteCarloDefaultResults();
@@ -55,25 +55,23 @@ public class MonteCarlo {
      * which is monitored by a consumer thread to calculate the posterior distributions for the Monte Carlo run.
      */
     public final void run() {
-
         final ArrayBlockingQueue<MonteCarloResults> queue = new ArrayBlockingQueue<>(numSimulations + 1);
-
-        //Creating Producer and Consumer Thread
-        if (log.isTraceEnabled()) {
-            log.trace("Creating Monte Carlo producer and consumer");
-        }
-        final Thread producer = new Thread(new Producer(queue, simulation, numSimulations));
-        final Thread consumer = new Thread(new Consumer(queue, resultsConsumer));
-
-        producer.start();
-        consumer.start();
-
         try {
+
+            //Creating Producer and Consumer Thread
+            final Thread producer = new Thread(new Producer(queue, simulation, numSimulations));
+            final Thread consumer = new Thread(new Consumer(queue, resultsConsumer));
+            producer.start();
+            consumer.start();
+
             producer.join();
             consumer.join();
         } catch (Exception e) {
             log.error("Error joining Monte Carlo results {}", Throwables.getStackTraceAsString(e));
+            throw new BroadwickException("Failed to run Monte Carlo simulation. " + Throwables.getStackTraceAsString(e));
         }
+
+        queue.clear();
     }
 
     /**
@@ -81,7 +79,7 @@ public class MonteCarlo {
      * @return the MonteCarloResults object that contains the results of all the simulations.
      */
     public final MonteCarloResults getResults() {
-        return resultsConsumer;
+        return CloneUtils.deepClone(resultsConsumer);
     }
 
     /**
@@ -92,6 +90,12 @@ public class MonteCarlo {
     public final void setResultsConsumer(final MonteCarloResults consumer) {
         resultsConsumer = consumer;
         resultsConsumer.reset();
+    }
+
+    @Override
+    public void finalize() throws Throwable {
+        super.finalize();
+        resultsConsumer = null;
     }
 
     private final MonteCarloScenario simulation;
@@ -155,8 +159,14 @@ class Consumer implements Runnable {
         log.debug("Analysed {} simulation results in {}.", numSimulationsFound, sw);
     }
 
+    @Override
+    public void finalize() throws Throwable {
+        super.finalize();
+        joinedResults = null;
+    }
+
     private final ArrayBlockingQueue<MonteCarloResults> queue;
-    private final MonteCarloResults joinedResults;
+    private MonteCarloResults joinedResults;
     private int numSimulationsFound = 0;
 }
 
@@ -173,9 +183,10 @@ class Producer implements Runnable {
      * @param simulation     the model that will be run to produce results.
      * @param numSimulations the number of simulations that are to be run and placed in the quque.
      */
-    public Producer(final ArrayBlockingQueue<MonteCarloResults> queue, final MonteCarloScenario simulation, final int numSimulations) {
+    public Producer(final ArrayBlockingQueue<MonteCarloResults> queue, final MonteCarloScenario simulation,
+                    final int numSimulations) {
         this.queue = queue;
-        this.simulation = simulation;
+        this.simulation = simulation.copyOf();
         this.numSimulations = numSimulations;
     }
 
@@ -222,8 +233,14 @@ class Producer implements Runnable {
         }
     }
 
+    @Override
+    public void finalize() throws Throwable {
+        super.finalize();
+        simulation = null;
+    }
+
     private final ArrayBlockingQueue<MonteCarloResults> queue;
-    private final MonteCarloScenario simulation;
+    private MonteCarloScenario simulation;
     private final int numSimulations;
 }
 
