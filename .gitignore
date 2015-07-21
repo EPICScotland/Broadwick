@@ -1,1 +1,10 @@
 /target/
+/examples/AbcExample/target/
+/examples/DelaySir/target/
+/examples/DeterministicSir/target/
+/examples/MarkovChain/target/
+/examples/MaxLikelihoodSeirModel/*.dat
+/examples/MaxLikelihoodSeirModel/res/
+/examples/MaxLikelihoodSeirModel/target/
+/examples/MonteCarlo/target/
+/examples/StochasticSir/target/

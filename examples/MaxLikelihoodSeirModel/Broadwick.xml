@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project>
+    <logs>
+	<console>
+	    <level>info</level> 
+	    <pattern>[%thread] %-5level %msg %n</pattern>
+	</console>
+    </logs>
+   
+    <models>
+	<model id="Broadwick Project">
+            <classname>broadwick.example.mle.App</classname>
+
+            <priors>
+                <uniformPrior id="beta">
+                    <hint>Transmission term</hint>
+                    <distribution>uniform</distribution>
+                    <initialVal>0.387</initialVal>
+                    <min>0.05</min>
+                    <max>1.0</max>
+                </uniformPrior>
+                <uniformPrior id="sigma">
+                    <hint>Exposed to infectious rate term</hint>
+                    <distribution>uniform</distribution>
+                    <initialVal>0.17</initialVal>
+                    <min>0.05</min>
+                    <max>1.0</max>
+                </uniformPrior>
+                <uniformPrior id="gamma">
+                    <hint>Infectious to recovered rate term</hint>
+                    <distribution>uniform</distribution>
+                    <initialVal>0.46</initialVal>
+                    <min>0.05</min>
+                    <max>1.0</max>
+                </uniformPrior>
+            </priors>
+
+            <parameter id="maxNumSamples" value="150000" />
+            <parameter id="Adaptive_outputFile" value="mle_adaptive_x.dat" />
+            <parameter id="NSRWM_outputFile" value="mle_nsrwm_x.dat" />
+            <parameter id="SRWM_outputFile" value="mle_srwm_x.dat" />
+	    <parameter id="endT" value="100" />
+	    <parameter id="h" value="0.1" />
+	</model>
+    </models>
+</project>
+
+
