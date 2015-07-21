@@ -163,6 +163,15 @@ public class Matrix {
     public Matrix multiply(final Matrix m) {
         return new Matrix(data.multiply(m.data));
     }
+    
+        /**
+     * Returns the result of postmultiplying this by a scalar.
+     * @param d the scalar with which we will multiply this matrix
+     * @return this*d
+     */
+    public Matrix multiply(final double d) {
+        return new Matrix(data.scalarMultiply(d).getData());
+    }
 
     /**
      * Returns the result of multiplying this by the vector v.
