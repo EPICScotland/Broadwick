@@ -1,2 +1,44 @@
 \chapter{Calculation Packages}
 
+Broadwick supports several simulation and fitting models. In this chapter we will give an outline of these methods and how they can be simulated (and combing) using the Broadwick framework. We will, for the most part, dispense with the theory referring the interested reader to relevent articles.
+
+
+
+
+\section{Markov Chains}\index{Markov Chains}
+
+A Markov chain is a random sequence of states where the current state depends solely on the previous state. In this sense, it is a ``memoryless'' process as the transition from one state to the next does not depend on the sequence of states that preceeded it.
+
+A Markov Chain can be implemented in Broadwick using the MonteCarloStep and MarkovChain classes. The MonteCarloStep encapsulates the functionality of a state by maintaining a collection of the coordinates defining the state as a java.util.Map<String,Double> (i.e. the name and value of the state). A MarkovChain object is constructed using a MonteCarloStep object as an initial point and, optionally, a MarkovProposalFunction for generating the next step. The generateNextStep method uses the proposal function to generate the next step in the chain as the following code snippet demonstrates,
+
+\begin{lstlisting}
+
+final Map<String, Double> coordinates = new LinkedHashMap<>();
+        {
+            coordinates.put("x", 0.0);
+            coordinates.put("y", 0.0);
+        }
+final MonteCarloStep initialStep = new MonteCarloStep(coordinates);
+
+final MarkovChain mc = new MarkovChain(initialStep);
+for (int i = 0; i < chainLength; i++) {
+    final MonteCarloStep nextStep = mc.generateNextStep(mc.getCurrentStep());
+    mc.setCurrentStep(nextStep);
+
+    log.trace("{}", nextStep.toString());
+}
+\end{lstlisting}
+
+By default, a MarkovNormalProposal object is used to generate the next step by sampling from a Normal distribution centered on the current coordinate and with a standard deviation of 1.
+
+
+\section{Monte Carlo Simulation}\index{Monte Carlo Simulation}
+
+\subsection{Markov Chain Monte Carlo}\index{Markov Chain Monte Carlo}
+
+\section{Approximate Bayesian Computation (ABC)}\index{Approximate Bayesian Computation (ABC)}
+
+\section{Ordinary Differential Equations (ODEs)}\index{Ordinary Differential Equations (ODEs)}
+
+
+
