@@ -8,3 +8,4 @@
 /examples/MaxLikelihoodSeirModel/target/
 /examples/MonteCarlo/target/
 /examples/StochasticSir/target/
+.idea
