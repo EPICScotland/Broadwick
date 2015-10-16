@@ -4,7 +4,6 @@ Broadwick supports several simulation and fitting models. In this chapter we wil
 
 
 
-
 \section{Markov Chains}\index{Markov Chains}
 
 A Markov chain is a random sequence of states where the current state depends solely on the previous state. In this sense, it is a ``memoryless'' process as the transition from one state to the next does not depend on the sequence of states that preceeded it.
@@ -29,10 +28,103 @@ for (int i = 0; i < chainLength; i++) {
 }
 \end{lstlisting}
 
-By default, a MarkovNormalProposal object is used to generate the next step by sampling from a Normal distribution centered on the current coordinate and with a standard deviation of 1.
+By default, a MarkovNormalProposal object is used to generate the next step by sampling from a Normal distribution centered on the current coordinate and with a standard deviation of 1. New proposal classes implement the MarkovProposalFunction interface and using this object when creating the Markov Chain.
+
+\begin{lstlisting}
+    final MarkovProposalFunction myProposer = new MarkovProposalFunction();
+    final MarkovChain mc = new MarkovChain(initialStep, myProposer);
+\end{lstlisting}
 
 
 \section{Monte Carlo Simulation}\index{Monte Carlo Simulation}
+Monte Carlo simulation is a broad class of methods that reply on repeated simulation of [random] processes to derive numerical results. Broadwick uses the MonteCarloScenario abstract class to encapsulate the process to be simulated, which is used by the MonteCarlo class to implement the Monte Carlo process.
+
+Internally, the MonteCarlo class uses a producer-comsumer pattern by creating a ThreadFactory to spawn several simulation processes which are in turn consumed by a MonteCarloResults object. This MonteCarloResults object takes the results of each simulation (the producer threads) and calculates the required statistics.
+
+These classes (MonteCarloScenario, MonteCarloResults) are extended for each implementation. By way of example, we will calculate $\pi$ by throwing darts randomly at a square dartboard and calaulating the fraction that fall within the unit circle encompasses by the square.
+
+First, we implement the run() method of our class that extends the MonteCarloScenario class (this class has an internal random number generator, rng, to generate random number).
+\begin{lstlisting}
+    @Override
+    public MonteCarloResults run() {
+        final MyResultsConsumer results = new MyResultsConsumer();
+
+        final double x = rng.getDouble(-1, 1);
+        final double y = rng.getDouble(-1, 1);
+
+        final double r = Math.sqrt(x * x + y * y);
+        if (r < 1) {
+            results.addHit();
+        } else {
+            results.addMiss();
+        }
+        return results;
+    }
+\end{lstlisting}
+
+The MonteCarloResults class is responsible for both storing the results of each simulation and for acting as a consumer
+object that maintains a collection of the results returned by the producers.
+
+\begin{lstlisting}
+    class MyResultsConsumer implements MonteCarloResults {
+
+    @Override
+    public double getExpectedValue() {
+        return hits.getSum() / (hits.getSum() + misses.getSum());
+    }
+
+    @Override
+    public Samples getSamples() {
+        return hits;
+    }
+
+    @Override
+    public String toCsv() {
+        return String.format("\%d ;  \%d", hits.getSize(), misses.getSize());
+    }
+
+    @Override
+    public MonteCarloResults join(final MonteCarloResults results) {
+        // This is where the results of the producers are dealt with.
+        final MyResultsConsumer r = (MyResultsConsumer) results;
+        this.hits.add(r.hits);
+        this.misses.add(r.misses);
+
+        return this;
+    }
+
+    public void addHit() {
+        hits.add(1);
+    }
+
+    public void addMiss() {
+        misses.add(1);
+    }
+    
+    @Override
+    public void reset() {
+    }
+    
+    @Getter
+    private final Samples hits = new Samples();
+    @Getter
+    private final Samples misses = new Samples();
+}
+\end{lstlisting}
+
+These two classes are utilised thus
+\begin{lstlisting}
+    MonteCarlo mc = new MonteCarlo(new Simulation(), 1000);
+    mc.setResultsConsumer(new MyResultsConsumer());
+    mc.run();
+
+    final MyResultsConsumer results = (MyResultsConsumer) mc.getResults();
+    log.info("Hits : Misses = {}", results.toCsv());
+    log.info("Estimation of Pi = {}", 4 * results.getExpectedValue());
+\end{lstlisting}
+
+
+
 
 \subsection{Markov Chain Monte Carlo}\index{Markov Chain Monte Carlo}
 
