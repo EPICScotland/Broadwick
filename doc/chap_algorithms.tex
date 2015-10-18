@@ -1,6 +1,6 @@
 \chapter{Calculation Packages}
 
-Broadwick supports several simulation and fitting models. In this chapter we will give an outline of these methods and how they can be simulated (and combing) using the Broadwick framework. We will, for the most part, dispense with the theory referring the interested reader to relevent articles.
+Broadwick supports several simulation and fitting models. In this chapter we will give an outline of these methods and how they can be simulated (and combing) using the Broadwick framework. We will, for the most part, dispense with the theory and concentrate on how the methods are implemented in Broadwick. The code snippets in this chapter are taken from the examples that are distributed with the Broadwick source code.
 
 
 
@@ -123,10 +123,37 @@ These two classes are utilised thus
     log.info("Estimation of Pi = {}", 4 * results.getExpectedValue());
 \end{lstlisting}
 
-
-
-
 \subsection{Markov Chain Monte Carlo}\index{Markov Chain Monte Carlo}
+Markov chains can be combined with Monte Carlo simulation to explore a parameter space by using the Markov chain to `walk' through the parameter space while Monte Carlo simulation is to determine the state of the system and each step in the walk. Thus, Markov chain Monte Carlo (MCMC) methods can be used to sample from a probability distribution by using the Markov chain (coupled with a rejection function to accept or reject propsed steps) to find the desired distribution. 
+
+A MarkovChainMonteCarlo object will create a Markov chain and run the Monte Carlo simulation at each step using the Metropolis-Hastings algorithm (the MetropolisHastings class) to accept successive steps based on the results of the Monte Carlo simultaion at the given step.
+
+A MarkovChainObserver object can be added to the MarkovChainMonteCarlo object which will be informed when a step has been completed. This observer can be used to save the results of the simulation.
+
+By default a Metropolis-Hastings, but it is easy to implement an alternative (in the following example we will use the Metropolis algorithm with a log-likelihood).
+
+\begin{lstlisting}
+    final MonteCarloStep step = new MonteCarloStep(<initial step>);
+    final MarkovChainMonteCarlo mcmc = new MarkovChainMonteCarlo(
+                    myModel, <numScenarios>,
+                    myMonteCarloScenarioResults,
+                    myMarkovStepGenerator);
+
+
+    mcmc.setAcceptor(new MonteCarloAcceptor() {
+                @Override
+                public boolean accept(final MonteCarloResults oldResult, final MonteCarloResults newResult) {
+                    final double ratio = newResult.getExpectedValue() - oldResult.getExpectedValue();
+                    return Math.log(generator.getDouble()) < ratio / smoothingRatio;
+                }
+            });
+
+    MyMarkovChainObserver myMcmcObserver = new MyMarkovChainObserver(mcmc);
+    mcmc.addObserver(myMcmcObserver);
+
+    mcmc.run();
+\end{lstlisting}
+
 
 \section{Approximate Bayesian Computation (ABC)}\index{Approximate Bayesian Computation (ABC)}
 
