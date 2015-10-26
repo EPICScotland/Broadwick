@@ -6,9 +6,9 @@ Broadwick supports several simulation and fitting models. In this chapter we wil
 
 \section{Markov Chains}\index{Markov Chains}
 
-A Markov chain is a random sequence of states where the current state depends solely on the previous state. In this sense, it is a ``memoryless'' process as the transition from one state to the next does not depend on the sequence of states that preceeded it.
+A Markov chain is a random sequence of states where the current state depends solely on the previous state. In this sense, it is a ``memoryless'' process\index{Memoryless process} as the transition from one state to the next does not depend on the sequence of states that preceeded it.
 
-A Markov Chain can be implemented in Broadwick using the MonteCarloStep and MarkovChain classes. The MonteCarloStep encapsulates the functionality of a state by maintaining a collection of the coordinates defining the state as a java.util.Map<String,Double> (i.e. the name and value of the state). A MarkovChain object is constructed using a MonteCarloStep object as an initial point and, optionally, a MarkovProposalFunction for generating the next step. The generateNextStep method uses the proposal function to generate the next step in the chain as the following code snippet demonstrates,
+A Markov Chain can be implemented in Broadwick using the MonteCarloStep\index{Class!MonteCarloStep} and MarkovChain\index{Class!MarkovChain} classes. The MonteCarloStep encapsulates the functionality of a state by maintaining a collection of the coordinates defining the state as a java.util.Map<String,Double> (i.e. the name and value of the state). A MarkovChain object is constructed using a MonteCarloStep object as an initial point and, optionally, a MarkovProposalFunction\index{Class!MarkovProposalFunction} for generating the next step. The generateNextStep\index{method!generateNextStep} method uses the proposal function to generate the next step in the chain as the following code snippet demonstrates,
 
 \begin{lstlisting}
 
@@ -28,7 +28,7 @@ for (int i = 0; i < chainLength; i++) {
 }
 \end{lstlisting}
 
-By default, a MarkovNormalProposal object is used to generate the next step by sampling from a Normal distribution centered on the current coordinate and with a standard deviation of 1. New proposal classes implement the MarkovProposalFunction interface and using this object when creating the Markov Chain.
+By default, a MarkovNormalProposal\index{Class!MarkovNormalProposal} object is used to generate the next step by sampling from a Normal distribution\index{Normal distribution} centered on the current coordinate and with a standard deviation of 1. New proposal classes implement the MarkovProposalFunction\index{Class!MarkovProposalFunction} interface and using this object when creating the Markov Chain.
 
 \begin{lstlisting}
     final MarkovProposalFunction myProposer = new MarkovProposalFunction();
@@ -37,13 +37,13 @@ By default, a MarkovNormalProposal object is used to generate the next step by s
 
 
 \section{Monte Carlo Simulation}\index{Monte Carlo Simulation}
-Monte Carlo simulation is a broad class of methods that reply on repeated simulation of [random] processes to derive numerical results. Broadwick uses the MonteCarloScenario abstract class to encapsulate the process to be simulated, which is used by the MonteCarlo class to implement the Monte Carlo process.
+Monte Carlo simulation is a broad class of methods that reply on repeated simulation of [random] processes to derive numerical results. Broadwick uses the MonteCarloScenario\index{Class!MonteCarloScenario} abstract class to encapsulate the process to be simulated, which is used by the MonteCarlo\index{Class!MonteCarlo} class to implement the Monte Carlo process.
 
-Internally, the MonteCarlo class uses a producer-comsumer pattern by creating a ThreadFactory to spawn several simulation processes which are in turn consumed by a MonteCarloResults object. This MonteCarloResults object takes the results of each simulation (the producer threads) and calculates the required statistics.
+Internally, the MonteCarlo class uses a producer-comsumer pattern\index{pattern!producer-consumer} by creating a ThreadFactory\index{Class!ThreadFactory} to spawn several simulation processes which are in turn consumed by a MonteCarloResults\index{Class!MonteCarloResults} object. This MonteCarloResults object takes the results of each simulation (the producer threads) and calculates the required statistics.
 
-These classes (MonteCarloScenario, MonteCarloResults) are extended for each implementation. By way of example, we will calculate $\pi$ by throwing darts randomly at a square dartboard and calaulating the fraction that fall within the unit circle encompasses by the square.
+These classes (MonteCarloScenario, MonteCarloResults) are extended for each implementation. By way of example, we will calculate $\pi$\index{$\pi$} by throwing darts randomly at a square dartboard and calaulating the fraction that fall within the unit circle encompasses by the square.
 
-First, we implement the run() method of our class that extends the MonteCarloScenario class (this class has an internal random number generator, rng, to generate random number).
+First, we implement the run\index{method!run} method of our class that extends the MonteCarloScenario\index{Class!MonteCarloScenario} class (this class has an internal random number generator, rng, to generate random number).
 \begin{lstlisting}
     @Override
     public MonteCarloResults run() {
@@ -62,7 +62,7 @@ First, we implement the run() method of our class that extends the MonteCarloSce
     }
 \end{lstlisting}
 
-The MonteCarloResults class is responsible for both storing the results of each simulation and for acting as a consumer
+The MonteCarloResults\index{Class!MonteCarloResults} class is responsible for both storing the results of each simulation and for acting as a consumer
 object that maintains a collection of the results returned by the producers.
 
 \begin{lstlisting}
@@ -124,11 +124,11 @@ These two classes are utilised thus
 \end{lstlisting}
 
 \subsection{Markov Chain Monte Carlo}\index{Markov Chain Monte Carlo}
-Markov chains can be combined with Monte Carlo simulation to explore a parameter space by using the Markov chain to `walk' through the parameter space while Monte Carlo simulation is to determine the state of the system and each step in the walk. Thus, Markov chain Monte Carlo (MCMC) methods can be used to sample from a probability distribution by using the Markov chain (coupled with a rejection function to accept or reject propsed steps) to find the desired distribution. 
+Markov chains can be combined with Monte Carlo simulation\index{Monte carlo Simulation} to explore a parameter space by using the Markov chain to `walk' through the parameter space while Monte Carlo simulation is to determine the state of the system and each step in the walk. Thus, Markov chain Monte Carlo (MCMC) methods can be used to sample from a probability distribution by using the Markov chain (coupled with a rejection function to accept or reject propsed steps) to find the desired distribution. 
 
-A MarkovChainMonteCarlo object will create a Markov chain and run the Monte Carlo simulation at each step using the Metropolis-Hastings algorithm (the MetropolisHastings class) to accept successive steps based on the results of the Monte Carlo simultaion at the given step.
+A MarkovChainMonteCarlo\index{Class!MarkovChainMonteCarlo} object will create a Markov chain and run the Monte Carlo simulation at each step using the Metropolis-Hastings algorithm\index{algorithm!Metropolis-Hastings} (the MetropolisHastings\index{Class!MetropolisHastings} class) to accept successive steps based on the results of the Monte Carlo simultaion at the given step.
 
-A MarkovChainObserver object can be added to the MarkovChainMonteCarlo object which will be informed when a step has been completed. This observer can be used to save the results of the simulation.
+A MarkovChainObserver\index{Class!MarkovChainObserver} object can be added to the MarkovChainMonteCarlo\index{Class!MarkovChainMonteCarlo} object which will be informed when a step has been completed. This observer can be used to save the results of the simulation.
 
 By default a Metropolis-Hastings, but it is easy to implement an alternative (in the following example we will use the Metropolis algorithm with a log-likelihood).
 
@@ -138,7 +138,6 @@ By default a Metropolis-Hastings, but it is easy to implement an alternative (in
                     myModel, <numScenarios>,
                     myMonteCarloScenarioResults,
                     myMarkovStepGenerator);
-
 
     mcmc.setAcceptor(new MonteCarloAcceptor() {
                 @Override
@@ -154,10 +153,88 @@ By default a Metropolis-Hastings, but it is easy to implement an alternative (in
     mcmc.run();
 \end{lstlisting}
 
+We can attach a MarkovChainObserver\index{Class!MarkovChainObserver} to the MarkovChainMonteCarlo object that observes\index{pattern!observer} the state of the chain (at each step the chain object informs the observer of its state which can be used, e.g., to save it to file).
+
+\begin{lstlisting}
+    final MarkovChainObserver observer = new MyMCObserver();
+    mcmc.addObserver(observer);
+\end{lstlisting}
 
 \section{Approximate Bayesian Computation (ABC)}\index{Approximate Bayesian Computation (ABC)}
+Approximate Bayesian computation (ABC) is a class of computational methods based on Bayesian Statistics\index{Bayesian Statistics}~\cite{Toni2007,Marin2011,Marjoram2003,Wegmann2009}. It bypasses the evaluation of a likelihood function \index{Likelihood function}, which is often computationally expensive or even impossible.
+
+At the heart of the ABC method is the `distance function' \index{distance function} which is a measure of close the proposed sample is to the desired (posterior). The distance function in Broadwick is specified by overriding the AbcDistance class\index{Class!AbcDistance} and adding it to an ApproxBayesianComp object\index{Class!ApproxBayesianComp}, by default a simple absolute value of the difference between the proposed and observed value is used (as can be seen in the following example).
+
+An AbcController object\index{Class!AbcController} is used to control (i.e. determine when the calculation should end) the ABC process.
+
+The ApproxBayesianComp class runs the bayesian computation. It is constructed using observed data (in the form of a AbcNamedQuantity object\index{Class!AbcNamedQuantity}, which is a simple name-value map), an AbcModel object\index{Class!AbcModel}, an AbcPriorsSampler object\index{Class!AbcPriorsSampler} (which specifes how samples are drawn from a prior distribution) and a sensitivity.
+
+As a very simple example, we will sample from a posterier that is normally distributed around $\pi$ (assuming a standard deviation of 1.0). Using a uniform prior (for the mean of the posterior distribution) in [3,4] we will sample from this using a simple abs() function as the distance function. We should observe a posterior distribution [normally] distributed around $\pi$.
+
+\begin{lstlisting}
+        // first set up the observed data (the mean value of my unknown distribution).
+        final Map<String, Double> observed = new LinkedHashMap<>();
+        observed.put("value", 3.142);
+        final AbcNamedQuantity observedData = new AbcNamedQuantity(observed);
+
+        // Next create a simple controller (we will sample 20000) points from the prior distribution.
+        final AbcController controller = new AbcController() {
+            @Override
+            public boolean goOn(final ApproxBayesianComp abc) {
+                return abc.getNumSamplesTaken() <= 20000;
+            }
+        };
+
+        // Create a dummy model to run
+        final AbcModel myModel = new AbcModel() {
+            @Override
+            public AbcNamedQuantity run(final AbcNamedQuantity parameters) {
+                // this is trivially simple model. Instead of doing any calculations we just return the parameters.
+                return parameters;
+            }
+        };
+
+        // Create a method for sampling our priors.
+        final AbcPriorsSampler priors = new AbcPriorsSampler() {
+            @Override
+            public AbcNamedQuantity sample() {
+                // Another dummy method here, we uniformly sample 'value' in the range [3,4]
+                final LinkedHashMap<String, Double> sample = new LinkedHashMap<>();
+                sample.put("value", generator.getDouble(3.0, 4.0));
+                return new AbcNamedQuantity(sample);
+            }
+            private final RNG generator = new RNG(RNG.Generator.Well19937c);
+        };
+
+        final ApproxBayesianComp abc = new ApproxBayesianComp(observedData, myModel, priors, 0.05);
+        abc.setController(controller);
+        abc.run();
+\end{lstlisting}
 
 \section{Ordinary Differential Equations (ODEs)}\index{Ordinary Differential Equations (ODEs)}
+Ordinary differential equations can be solved in Broadwick using the $4^\mathrm{th}$ order Runge-Kutta method\index{Runge-Kutta method}. The RungeKutta4 object\index{Class!RungeKutta4} is constructed using an Ode object|index{Class!Ode} (which specifies the ODEs by implementing methods to specify the initial alues and derivatives of each variable), start and end times and the step size.
 
+An observer can be attached to keep track of the results generated by the solver and a controller can be used to ensure that the calculation stops (if, for example, you specify a negative step size resulting in infinite loops or obtain a negative value for a population size). 
 
+\begin{lstlisting}
+final Ode myOde = new SirModel(beta, rho, s0, i0, r0);
+final OdeSolver solver = new RungeKutta4(myOde, tStart, tEnd, stepSize);
+
+// we will need an observer to 'observe' our simulation and record the simulation states.
+solver.getObservers().clear();
+final MyObserver observer = new MyObserver(solver, outputFile);
+solver.addObserver(observer);
+
+// Create a simple controller object to tell the simulator when to stop.
+final OdeController controller = new MyOdeController(tEnd);
+solver.setController(controller);
+
+solver.run();
+\end{lstlisting}
+
+We can also add triggered events\index{triggered events} to the solver. These events occur at predetermined times and can be used to model, e.g. immigration events, vaccination or culling strategies in a population.
+\begin{lstlisting}
+// Register theta events, these are fixed events that will be triggered at set times.
+solver.registerNewTheta(observer, 20.0, new MyThetaEvent(solver));
+\end{lstlisting}
 

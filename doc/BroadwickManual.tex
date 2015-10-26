@@ -61,9 +61,27 @@
 \usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
 
 % Bibliography
-\usepackage[style=alphabetic,sorting=nyt,sortcites=true,autopunct=true,babel=hyphen,hyperref=true,abbreviate=false,backref=true,backend=biber]{biblatex}
-\addbibresource{bibliography.bib} % BibTeX bibliography file
+\usepackage[autostyle]{csquotes}
+\usepackage[
+        style=numeric-comp,
+        sorting=none, 
+        sortcites=true,
+        sortlocale=en_GB,
+        autopunct=true,
+        babel=hyphen,
+        hyperref=true,
+        url=true, 
+        abbreviate=false,
+        backref=true,
+        arxiv=abs,
+        backend=biber]{biblatex}
+\addbibresource{BroadwickManual.bib} % BibTeX bibliography file
 \defbibheading{bibempty}{}
+
+
+
+
+
 
 % Index
 \usepackage{calc} % For simpler calculation - used for spacing the index letter headings correctly
