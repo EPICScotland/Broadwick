@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>DataReader.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.data</a> &gt; <span class="el_source">DataReader.java</span></div><h1>DataReader.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.data;
+
+import broadwick.data.readers.FullMovementsFileReader;
+import broadwick.data.readers.PopulationsFileReader;
+import broadwick.data.readers.BatchedMovementsFileReader;
+import broadwick.data.readers.LocationsFileReader;
+import broadwick.data.readers.DirectedMovementsFileReader;
+import broadwick.data.readers.TestsFileReader;
+import broadwick.BroadwickException;
+import broadwick.config.generated.DataFiles;
+import broadwick.config.generated.DataFiles.BatchMovementFile;
+import broadwick.config.generated.DataFiles.DirectedMovementFile;
+import broadwick.config.generated.DataFiles.FullMovementFile;
+import broadwick.config.generated.DataFiles.LocationsFile;
+import broadwick.config.generated.DataFiles.PopulationFile;
+import broadwick.config.generated.DataFiles.TestsFile;
+import broadwick.config.generated.Project;
+import java.util.List;
+import java.util.Map;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.time.StopWatch;
+
+/**
+ * Utility class to read, store and manipulate the data files.
+ */
+<span class="nc" id="L43">@Slf4j</span>
+public class DataReader implements java.lang.AutoCloseable {
+
+    /**
+     * Create the object that will read the data element of the configuration file.
+     * @param data the &lt;data/&gt; element of the configuration file.
+     */
+<span class="nc" id="L50">    public DataReader(final Project.Data data) {</span>
+<span class="nc" id="L51">        this.data = data;</span>
+
+        // if there is a data section in the config file let's read it.
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        if (data != null) {</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">            if (data.getDatabases() != null) {</span>
+                // there is a database mentioned in the config file so let's use it
+<span class="nc" id="L57">                dbName = data.getDatabases().getName();</span>
+//                dbImpl = new FirebirdDatabase(dbName, false);
+//                dbImpl = new DerbyDatabase(dbName, false);
+//                dbImpl = new HyperSqlDatabase(dbName, false);
+<span class="nc" id="L61">                dbImpl = new H2Database(dbName, false);</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">            } else if (data.getDatafiles() != null) {</span>
+                // there is a datafiles section in the config file so we will read them and create a randomly named 
+                // database.
+<span class="nc" id="L65">                final String db = &quot;broadwick_&quot; + RandomStringUtils.randomAlphanumeric(8);</span>
+<span class="nc" id="L66">                dbName = db + &quot;_db&quot;;</span>
+//                dbImpl = new FirebirdDatabase(dbName, true);
+//                dbImpl = new DerbyDatabase(dbName, true);
+//                dbImpl = new HyperSqlDatabase(dbName, true);
+<span class="nc" id="L70">                dbImpl = new H2Database(dbName, true);</span>
+<span class="nc" id="L71">                readDataSection();</span>
+<span class="nc" id="L72">            } else {</span>
+<span class="nc" id="L73">                throw new BroadwickException(&quot;There is a &lt;data&gt; section in the configuration file but neither a &lt;database&gt; nor &lt;datafiles&gt; section.&quot;);</span>
+            }
+
+<span class="nc" id="L76">            lookup = new Lookup(dbImpl);</span>
+<span class="nc" id="L77">            logDbStatistics();</span>
+        }
+
+<span class="nc" id="L80">    }</span>
+
+    /**
+     * Read the data section from the configuration file. If a database section is found then it is used and any files
+     * specified are ignored.
+     */
+    public final void readDataSection() {
+<span class="nc" id="L87">        final StopWatch sw = new StopWatch();</span>
+<span class="nc" id="L88">        final DataFiles files = data.getDatafiles();</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        if (files != null) {</span>
+<span class="nc" id="L90">            sw.start();</span>
+<span class="nc" id="L91">            readDataFiles(files);</span>
+<span class="nc" id="L92">            sw.stop();</span>
+<span class="nc" id="L93">            log.info(&quot;Processed input data in {} ms&quot;, sw.toString());</span>
+<span class="nc" id="L94">            log.info(&quot;Data stored internally in {}.&quot;, dbName);</span>
+        }
+<span class="nc" id="L96">    }</span>
+
+    @Override
+    public final void close() {
+<span class="nc bnc" id="L100" title="All 2 branches missed.">        if (dbImpl != null) {</span>
+<span class="nc" id="L101">            log.trace(&quot;Closing database connection&quot;);</span>
+<span class="nc" id="L102">            dbImpl.close();</span>
+        }
+<span class="nc" id="L104">    }</span>
+
+    /**
+     * Save a message giving the numbers of elements in the database.
+     */
+    private void logDbStatistics() {
+<span class="nc" id="L110">        log.info(&quot;Read {} population data from the database.&quot;, lookup.getNumAnimals());</span>
+<span class="nc" id="L111">        log.info(&quot;Read {} locations data from the database.&quot;, lookup.getNumLocations());</span>
+<span class="nc" id="L112">        log.info(&quot;Read {} tests data from the database.&quot;, lookup.getNumTests());</span>
+<span class="nc" id="L113">        log.info(&quot;Read {} movements data from the database.&quot;, lookup.getNumMovements());</span>
+<span class="nc" id="L114">    }</span>
+
+    /**
+     * Read the datafiles, each section type of the &lt;datafiles/&gt; element (e.g. all the &lt;MovementFile/&gt;s) are read in
+     * parallel and each individual element is its read in parallel with the data saved to an internal database. Once
+     * the datafiles have been read some post-processing is run to determine the locations of individuals at each time
+     * step throughout the simulation.
+     * @param files the Datafiles object from the configuration file.
+     */
+    private void readDataFiles(final DataFiles files) {
+
+        try {
+<span class="nc" id="L126">            final String addingFileMsg = &quot;Reading %s ...&quot;;</span>
+
+<span class="nc" id="L128">            readAllLocationSections(files.getLocationsFile(), addingFileMsg);</span>
+<span class="nc" id="L129">            readAllPopulationSections(files.getPopulationFile(), addingFileMsg);</span>
+<span class="nc" id="L130">            readAllTestSections(files.getTestsFile(), addingFileMsg);</span>
+<span class="nc" id="L131">            readAllFullMovementSections(files.getFullMovementFile(), addingFileMsg);</span>
+<span class="nc" id="L132">            readAllDirectedMovementSections(files.getDirectedMovementFile(), addingFileMsg);</span>
+<span class="nc" id="L133">            readAllBatchedMovementSections(files.getBatchMovementFile(), addingFileMsg);</span>
+<span class="nc" id="L134">        } catch (Exception e) {</span>
+<span class="nc" id="L135">            log.error(&quot;Failure reading data file section. {}&quot;, e.getLocalizedMessage());</span>
+<span class="nc" id="L136">            throw new BroadwickException(String.format(&quot;Failure reading data file section. %s&quot;, e.getLocalizedMessage()));</span>
+<span class="nc" id="L137">        }</span>
+<span class="nc" id="L138">    }</span>
+
+    /**
+     * Add a description of a configuration file section to an internal key value pair so that the correct column of a
+     * data file can be read. Each &lt;datafile&gt; section in the configuration contains an element and the column location
+     * in the data file where this element can be found. This method update a key-value pair of the element name and
+     * location, recording errors as it finds them.
+     * @param elementName     the name of the element in the configuration file.
+     * @param indexInDataFile the location of the element in each row of the data file.
+     * @param keyValueMapping a table of the keyValueMapping name index and type.
+     * @param errors          a description of any parsing errors found.
+     * @param recordErrors    flag to control whether or not error are recorded in the errors parameter.
+     * @param sectionName     the name of the section from which the element being added to the table has been read.
+     */
+    protected final void updateSectionDefiniton(final String elementName, final int indexInDataFile,
+                                                final Map&lt;String, Integer&gt; keyValueMapping, final StringBuilder errors,
+                                                final boolean recordErrors, final String sectionName) {
+<span class="nc bnc" id="L155" title="All 2 branches missed.">        if (indexInDataFile != 0) {</span>
+<span class="nc" id="L156">            keyValueMapping.put(elementName, indexInDataFile);</span>
+        } else {
+<span class="nc bnc" id="L158" title="All 2 branches missed.">            if (recordErrors) {</span>
+<span class="nc" id="L159">                errors.append(&quot;No &quot;).append(elementName).append(&quot; column set in &quot;).append(sectionName).append(&quot; section\n&quot;);</span>
+            }
+        }
+<span class="nc" id="L162">    }</span>
+
+    /**
+     * Read the directed movements sections of the configuration file.
+     * @param directedMovementFiles a collection of directedMovement sections.
+     * @param addingFileMsg         formatted string (in the form &quot;Adding %s to reading list&quot;) to be added to log files.
+     * @return the number of movements read.
+     */
+    private int readAllDirectedMovementSections(final List&lt;DirectedMovementFile&gt; directedMovementFiles, final String addingFileMsg) {
+<span class="nc" id="L171">        int elementsRead = 0;</span>
+
+<span class="nc bnc" id="L173" title="All 2 branches missed.">        for (DataFiles.DirectedMovementFile file : directedMovementFiles) {</span>
+<span class="nc" id="L174">            log.trace(String.format(addingFileMsg, file.getName()));</span>
+<span class="nc" id="L175">            final DirectedMovementsFileReader movementsFileReader = new DirectedMovementsFileReader(file, dbImpl);</span>
+<span class="nc" id="L176">            elementsRead += movementsFileReader.insert();</span>
+<span class="nc" id="L177">        }</span>
+
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        if (elementsRead &gt; 0) {</span>
+<span class="nc" id="L180">            log.info(&quot;Read {} directed movements from {} files.&quot;, elementsRead, directedMovementFiles.size());</span>
+        }
+<span class="nc" id="L182">        return elementsRead;</span>
+    }
+
+    /**
+     * Read the full movements sections of the configuration file.
+     * @param fullMovementFiles a collection of fullMovement sections.
+     * @param addingFileMsg     formatted string (in the form &quot;Adding %s to reading list&quot;) to be added to log files.
+     * @return the number of movements read.
+     */
+    private int readAllFullMovementSections(final List&lt;FullMovementFile&gt; fullMovementFiles, final String addingFileMsg) {
+<span class="nc" id="L192">        int elementsRead = 0;</span>
+
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        for (DataFiles.FullMovementFile file : fullMovementFiles) {</span>
+<span class="nc" id="L195">            log.trace(String.format(addingFileMsg, file.getName()));</span>
+<span class="nc" id="L196">            final FullMovementsFileReader movementsFileReader = new FullMovementsFileReader(file, dbImpl);</span>
+<span class="nc" id="L197">            elementsRead += movementsFileReader.insert();</span>
+<span class="nc" id="L198">        }</span>
+
+<span class="nc bnc" id="L200" title="All 2 branches missed.">        if (elementsRead &gt; 0) {</span>
+<span class="nc" id="L201">            log.info(&quot;Read {} full movements from {} files.&quot;, elementsRead, fullMovementFiles.size());</span>
+        }
+<span class="nc" id="L203">        return elementsRead;</span>
+    }
+
+    /**
+     * Read the batched movements sections of the configuration file.
+     * @param batchMovementFiles a collection of batchMovement sections.
+     * @param addingFileMsg      formatted string (in the form &quot;Adding %s to reading list&quot;) to be added to log files.
+     * @return the number of movements read.
+     */
+    private int readAllBatchedMovementSections(final List&lt;BatchMovementFile&gt; batchMovementFiles, final String addingFileMsg) {
+<span class="nc" id="L213">        int elementsRead = 0;</span>
+
+<span class="nc bnc" id="L215" title="All 2 branches missed.">        for (DataFiles.BatchMovementFile file : batchMovementFiles) {</span>
+<span class="nc" id="L216">            log.trace(String.format(addingFileMsg, file.getName()));</span>
+<span class="nc" id="L217">            final BatchedMovementsFileReader movementsFileReader = new BatchedMovementsFileReader(file, dbImpl);</span>
+<span class="nc" id="L218">            elementsRead += movementsFileReader.insert();</span>
+<span class="nc" id="L219">        }</span>
+
+<span class="nc bnc" id="L221" title="All 2 branches missed.">        if (elementsRead &gt; 0) {</span>
+<span class="nc" id="L222">            log.info(&quot;Read {} batched ovements from {} files.&quot;, elementsRead, batchMovementFiles.size());</span>
+        }
+<span class="nc" id="L224">        return elementsRead;</span>
+    }
+
+    /**
+     * Read the location sections of the configuration file.
+     * @param locationsFile a collection of locations sections.
+     * @param addingFileMsg formatted string (in the form &quot;Adding %s to reading list&quot;) to be added to log files.
+     * @return the number of locations read.
+     */
+    private int readAllLocationSections(final List&lt;LocationsFile&gt; locationsFile, final String addingFileMsg) {
+<span class="nc" id="L234">        int elementsRead = 0;</span>
+
+<span class="nc bnc" id="L236" title="All 2 branches missed.">        for (DataFiles.LocationsFile file : locationsFile) {</span>
+<span class="nc" id="L237">            log.trace(String.format(addingFileMsg, file.getName()));</span>
+<span class="nc" id="L238">            final LocationsFileReader locationsFileReader = new LocationsFileReader(file, dbImpl);</span>
+<span class="nc" id="L239">            elementsRead += locationsFileReader.insert();</span>
+<span class="nc" id="L240">        }</span>
+
+<span class="nc bnc" id="L242" title="All 2 branches missed.">        if (elementsRead &gt; 0) {</span>
+<span class="nc" id="L243">            log.info(&quot;Read {} locations from {} files.&quot;, elementsRead, locationsFile.size());</span>
+        }
+<span class="nc" id="L245">        return elementsRead;</span>
+    }
+
+    /**
+     * Read the test sections of the configuration file.
+     * @param testsFile     a collection of locations sections.
+     * @param addingFileMsg formatted string (in the form &quot;Adding %s to reading list&quot;) to be added to log files.
+     * @return the number of tests read.
+     */
+    private int readAllTestSections(final List&lt;TestsFile&gt; testsFile, final String addingFileMsg) {
+<span class="nc" id="L255">        int elementsRead = 0;</span>
+
+<span class="nc bnc" id="L257" title="All 2 branches missed.">        for (DataFiles.TestsFile file : testsFile) {</span>
+<span class="nc" id="L258">            log.trace(String.format(addingFileMsg, file.getName()));</span>
+<span class="nc" id="L259">            final TestsFileReader testsFileReader = new TestsFileReader(file, dbImpl);</span>
+<span class="nc" id="L260">            elementsRead += testsFileReader.insert();</span>
+<span class="nc" id="L261">        }</span>
+
+<span class="nc bnc" id="L263" title="All 2 branches missed.">        if (elementsRead &gt; 0) {</span>
+<span class="nc" id="L264">            log.info(&quot;Read {} tests from {} files.&quot;, elementsRead, testsFile.size());</span>
+        }
+<span class="nc" id="L266">        return elementsRead;</span>
+    }
+
+    /**
+     * Read the populations sections of the configuration file.
+     * @param populationsFiles a collection of populations sections.
+     * @param addingFileMsg    formatted string (in the form &quot;Adding %s to reading list&quot;) to be added to log files.
+     * @return the number of populations read.
+     */
+    private int readAllPopulationSections(final List&lt;PopulationFile&gt; populationsFiles, final String addingFileMsg) {
+<span class="nc" id="L276">        int elementsRead = 0;</span>
+
+<span class="nc bnc" id="L278" title="All 2 branches missed.">        for (DataFiles.PopulationFile file : populationsFiles) {</span>
+<span class="nc" id="L279">            log.trace(String.format(addingFileMsg, file.getName()));</span>
+<span class="nc" id="L280">            final PopulationsFileReader populationsFileReader = new PopulationsFileReader(file, dbImpl);</span>
+<span class="nc" id="L281">            elementsRead += populationsFileReader.insert();</span>
+<span class="nc" id="L282">        }</span>
+
+<span class="nc bnc" id="L284" title="All 2 branches missed.">        if (elementsRead &gt; 0) {</span>
+<span class="nc" id="L285">            log.info(&quot;Read {} population data from {} files.&quot;, elementsRead, populationsFiles.size());</span>
+        }
+<span class="nc" id="L287">        return elementsRead;</span>
+    }
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+<span class="nc" id="L290">    @Getter</span>
+    private Lookup lookup;
+    private Project.Data data;
+    private DatabaseImpl dbImpl;
+    private String dbName;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

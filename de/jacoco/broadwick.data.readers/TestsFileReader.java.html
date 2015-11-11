@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>TestsFileReader.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.data.readers</a> &gt; <span class="el_source">TestsFileReader.java</span></div><h1>TestsFileReader.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.data.readers;
+
+import broadwick.BroadwickException;
+import broadwick.config.generated.CustomTags;
+import broadwick.config.generated.DataFiles;
+import broadwick.data.DatabaseImpl;
+import com.google.common.base.Throwables;
+import java.sql.Connection;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.TreeMap;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Read a file containing the results of tests.
+ */
+<span class="nc" id="L34">@Slf4j</span>
+public class TestsFileReader extends DataFileReader {
+
+    /**
+     * Create the tests file reader.
+     * @param testsFile the [xml] tag of the config file that is to be read.
+     * @param dbImpl    the implementation of the database object.
+     */
+    public TestsFileReader(final DataFiles.TestsFile testsFile,
+                           final DatabaseImpl dbImpl) {
+
+<span class="nc" id="L45">        super();</span>
+<span class="nc" id="L46">        this.database = dbImpl;</span>
+<span class="nc" id="L47">        this.dataFile = testsFile.getName();</span>
+<span class="nc" id="L48">        this.dateFields = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L49">        this.dateFormat = testsFile.getDateFormat();</span>
+<span class="nc" id="L50">        this.insertedColInfo = new TreeMap&lt;&gt;();</span>
+<span class="nc" id="L51">        final StringBuilder errors = new StringBuilder();</span>
+
+<span class="nc" id="L53">        this.createTableCommand = new StringBuilder();</span>
+<span class="nc" id="L54">        updateCreateTableCommand(ID, testsFile.getIdColumn(), &quot; VARCHAR(128), &quot;,</span>
+                                 insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+<span class="nc" id="L56">        updateCreateTableCommand(GROUP_ID, testsFile.getGroupIdColumn(), &quot; VARCHAR(128), &quot;,</span>
+                                 insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+<span class="nc" id="L58">        updateCreateTableCommand(LOCATION_ID, testsFile.getLocationIdColumn(), &quot; VARCHAR(128), &quot;,</span>
+                                 insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+<span class="nc" id="L60">        updateCreateTableCommand(TEST_DATE, testsFile.getTestDateColumn(), &quot; INT, &quot;,</span>
+                                 insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+<span class="nc" id="L62">        updateCreateTableCommand(POSITIVE_RESULT, testsFile.getPostiveResultColumn(), &quot; INT, &quot;,</span>
+                                 insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+<span class="nc" id="L64">        updateCreateTableCommand(NEGATIVE_RESULT, testsFile.getNegativeResultColumn(), &quot; INT, &quot;,</span>
+                                 insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        if (testsFile.getTestDateColumn() &gt; 0) {</span>
+<span class="nc" id="L68">            dateFields.add(testsFile.getTestDateColumn());</span>
+        }
+
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if (testsFile.getCustomTags() != null) {</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">            for (CustomTags.CustomTag tag : testsFile.getCustomTags().getCustomTag()) {</span>
+<span class="nc" id="L73">                updateCreateTableCommand(tag.getName(), tag.getColumn(), &quot; VARCHAR(128), &quot;,</span>
+                                         insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
+<span class="nc bnc" id="L75" title="All 2 branches missed.">                if (&quot;date&quot;.equals(tag.getType())) {</span>
+<span class="nc" id="L76">                    dateFields.add(tag.getColumn());</span>
+                }
+<span class="nc" id="L78">            }</span>
+        }
+
+<span class="nc" id="L81">        final StringBuilder createIndexCommand = new StringBuilder();</span>
+<span class="nc" id="L82">        String primaryKeyId = ID;</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if (testsFile.getIdColumn() != null) {</span>
+<span class="nc" id="L84">            primaryKeyId = ID;</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        } else if (testsFile.getGroupIdColumn() != null) {</span>
+<span class="nc" id="L86">            primaryKeyId = GROUP_ID;</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        } else if (testsFile.getLocationIdColumn() != null) {</span>
+<span class="nc" id="L88">            primaryKeyId = LOCATION_ID;</span>
+        }
+//        // we arent adding a primary key. 
+//        createTableCommand.append(String.format(&quot;PRIMARY KEY (%s,%s,%s,%s) );&quot;, primaryKeyId, TEST_DATE, POSITIVE_RESULT, NEGATIVE_RESULT)); 
+
+<span class="nc" id="L93">        createTableCommand.deleteCharAt(createTableCommand.length() - 1);</span>
+<span class="nc" id="L94">        createTableCommand.append(&quot;);&quot;);</span>
+
+<span class="nc" id="L96">        createIndexCommand.append(String.format(&quot; CREATE INDEX IF NOT EXISTS IDX_TEST_ID ON %s (%s);&quot;,</span>
+                                                TABLE_NAME, primaryKeyId));
+<span class="nc" id="L98">        createIndexCommand.append(String.format(&quot; CREATE INDEX IF NOT EXISTS IDX_TEST_POS ON %s (%s,%s,%s);&quot;,</span>
+                                                TABLE_NAME, primaryKeyId, TEST_DATE, POSITIVE_RESULT));
+<span class="nc" id="L100">        createIndexCommand.append(String.format(&quot; CREATE INDEX IF NOT EXISTS IDX_TEST_ALL ON %s (%s,%s,%s,%s);&quot;,</span>
+                                                TABLE_NAME, primaryKeyId, TEST_DATE, POSITIVE_RESULT, NEGATIVE_RESULT));
+
+<span class="nc" id="L103">        createTableCommand.append(createIndexCommand.toString());</span>
+
+<span class="nc" id="L105">        insertString = String.format(&quot;INSERT INTO %s (%s) VALUES (%s)&quot;,</span>
+<span class="nc" id="L106">                                     TABLE_NAME, asCsv(insertedColInfo.keySet()), asQuestionCsv(insertedColInfo.keySet()));</span>
+
+<span class="nc bnc" id="L108" title="All 2 branches missed.">        if (errors.length() &gt; 0) {</span>
+<span class="nc" id="L109">            log.error(errors.toString());</span>
+<span class="nc" id="L110">            throw new BroadwickException(errors.toString());</span>
+        }
+<span class="nc" id="L112">    }</span>
+
+    @Override
+    public final int insert() {
+<span class="nc" id="L116">        log.trace(&quot;TestsFileReader insert&quot;);</span>
+
+<span class="nc" id="L118">        int inserted = 0;</span>
+<span class="nc" id="L119">        try (Connection connection = database.getConnection()) {</span>
+<span class="nc" id="L120">            createTable(TABLE_NAME, createTableCommand.toString(), connection);</span>
+
+<span class="nc" id="L122">            inserted = insert(connection, TABLE_NAME, insertString, dataFile, dateFormat, insertedColInfo, dateFields);</span>
+<span class="nc bnc" id="L123" title="All 8 branches missed.">        } catch (Exception ex) {</span>
+<span class="nc" id="L124">            log.error(&quot;Error reading test data {}. {}&quot;, ex.getLocalizedMessage(), Throwables.getStackTraceAsString(ex));</span>
+<span class="nc" id="L125">            throw new BroadwickException(ex);</span>
+<span class="nc" id="L126">        }</span>
+<span class="nc" id="L127">        return inserted;</span>
+    }
+
+    private DatabaseImpl database;
+    private String dataFile;
+    private String dateFormat;
+<span class="nc" id="L133">    @Getter</span>
+    private static final String TABLE_NAME = &quot;Tests&quot;;
+    private StringBuilder createTableCommand;
+    private String insertString;
+    private Map&lt;String, Integer&gt; insertedColInfo;
+    private Collection&lt;Integer&gt; dateFields;
+<span class="nc" id="L139">    @Getter</span>
+    private static final String ID = &quot;ID&quot;;
+<span class="nc" id="L141">    @Getter</span>
+    private static final String GROUP_ID = &quot;GROUPID&quot;;
+<span class="nc" id="L143">    @Getter</span>
+    private static final String LOCATION_ID = &quot;LOCATIONID&quot;;
+<span class="nc" id="L145">    @Getter</span>
+    private static final String TEST_DATE = &quot;TESTDATE&quot;;
+<span class="nc" id="L147">    @Getter</span>
+    private static final String POSITIVE_RESULT = &quot;POSITIVERESULT&quot;;
+<span class="nc" id="L149">    @Getter</span>
+    private static final String NEGATIVE_RESULT = &quot;NEGATIVERESULT&quot;;
+    private static final String SECTION_NAME = &quot;TestsFile&quot;;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>NewickTreeParser.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.phylo</a> &gt; <span class="el_source">NewickTreeParser.java</span></div><h1>NewickTreeParser.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.phylo;
+
+import broadwick.graph.Edge;
+import broadwick.graph.Tree;
+import broadwick.io.FileInput;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
+/**
+ * Parser for a Newick tree. This has limited functionality and only works for Newick trees &lt;ul&gt; &lt;li&gt; with unique node
+ * names (e.g. one node can be unnamed but the rest must be uniquely named)&lt;/li&gt; &lt;li&gt; with defined branch lengths (e.g.
+ * (A:0.1,B:0.2,(C:0.3,D:0.4)E:0.5)F:0.0;)&lt;/li&gt; &lt;/ul&gt;
+ */
+<span class="fc" id="L32">@Slf4j</span>
+public class NewickTreeParser {
+
+    /**
+     * Create the parser.
+     * @param newickFile the name of the file containing the tree.
+     */
+<span class="fc" id="L39">    public NewickTreeParser(final String newickFile) {</span>
+<span class="pc" id="L40">        try (FileInput file = new FileInput(newickFile)) {</span>
+<span class="fc" id="L41">            newickString = file.read();</span>
+<span class="pc bpc" id="L42" title="6 of 8 branches missed.">        } catch (IOException ex) {</span>
+<span class="nc" id="L43">            log.error(&quot;Could not read Newick file {}. {}&quot;, newickFile, ex.getLocalizedMessage());</span>
+<span class="fc" id="L44">        }</span>
+<span class="fc" id="L45">    }</span>
+
+    /**
+     * Create the parser.
+     */
+<span class="fc" id="L50">    public NewickTreeParser() {</span>
+<span class="fc" id="L51">        newickString = null;</span>
+<span class="fc" id="L52">    }</span>
+
+    /**
+     * Parse a given string that MUST be a valid Newick format.
+     * @param newickStr the string to parse.
+     * @return a Tree created from the parsed string.
+     */
+    public final Tree&lt;PhyloNode, Edge&lt;PhyloNode&gt;&gt; parse(final String newickStr) {
+<span class="fc" id="L60">        branchLabel = 0;</span>
+
+<span class="fc" id="L62">        final Tree&lt;PhyloNode, Edge&lt;PhyloNode&gt;&gt; phyloTree = new Tree&lt;&gt;();</span>
+        // first remove the trailing ; if any
+<span class="fc" id="L64">        String stringToParse = StringUtils.removeEnd(newickStr.trim(), &quot;;&quot;).trim();</span>
+
+<span class="fc bfc" id="L66" title="All 4 branches covered.">        if (stringToParse.charAt(0) == '(' &amp;&amp; getClosingParenthesis(stringToParse) == stringToParse.length() - 1) {</span>
+<span class="fc" id="L67">            stringToParse = stringToParse.substring(1, stringToParse.length() - 1);</span>
+        }
+
+        // extract the information for the root node, this will be after the last closing parenthesis iff there is
+        // a colon (TODO is this right? e.g. (A,B,(C,D),E)F; )
+<span class="fc" id="L72">        double distance = 0.0;</span>
+<span class="fc" id="L73">        String rootName = &quot;&quot;;</span>
+<span class="fc" id="L74">        final int rparen = stringToParse.lastIndexOf(')');</span>
+<span class="fc" id="L75">        final int rcolon = stringToParse.lastIndexOf(':');</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        if (rparen &lt; rcolon) {</span>
+<span class="fc" id="L77">            distance = Double.parseDouble(stringToParse.substring(rcolon + 1));</span>
+<span class="fc" id="L78">            rootName = stringToParse.substring(rparen + 1, rcolon);</span>
+<span class="fc" id="L79">            stringToParse = stringToParse.substring(0, rcolon - rootName.length()).trim(); // adjust the string to exclude the distance</span>
+        }
+
+        // create a new node for this root and add it to the tree.
+<span class="fc" id="L83">        final PhyloNode root = new PhyloNode(rootName, distance);</span>
+<span class="fc" id="L84">        log.trace(&quot;Parsing Newick file: Adding root node {}&quot;, root);</span>
+<span class="fc" id="L85">        phyloTree.addVertex(root);</span>
+
+        // if we don't have a comma we are just have the root node
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        if (stringToParse.indexOf(',') == -1) {</span>
+<span class="fc" id="L89">            return phyloTree;</span>
+        }
+
+<span class="pc bpc" id="L92" title="1 of 4 branches missed.">        if (stringToParse.charAt(0) == '(' &amp;&amp; getClosingParenthesis(stringToParse) == stringToParse.length() - 1) {</span>
+<span class="fc" id="L93">            stringToParse = stringToParse.substring(1, stringToParse.length() - 1);</span>
+        }
+
+<span class="fc" id="L96">        parseString(stringToParse, root, phyloTree);</span>
+<span class="fc" id="L97">        return phyloTree;</span>
+    }
+
+    /**
+     * Parse a string from a Newick file.
+     * @return a generated Tree object.
+     */
+    public final Tree&lt;PhyloNode, Edge&lt;PhyloNode&gt;&gt; parse() {
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">        if (newickString == null) {</span>
+<span class="nc" id="L106">            throw new IllegalArgumentException(&quot;NewickParser created but no string to parse found. Did you create the parser without specifying a file?&quot;);</span>
+        }
+<span class="fc" id="L108">        return parse(newickString);</span>
+    }
+
+    /**
+     * Parse a string in Newick format (where the root node has been removed) recursively.
+     * @param stringToParse the string to be parsed.
+     * @param parent        the parent node for the string (initially this is the root node but will be a brach node if
+     *                      this method is called recursively).
+     * @param tree          the tree to which the created nodes will be attached.
+     */
+    private void parseString(final String stringToParse, final PhyloNode parent,
+                             final Tree&lt;PhyloNode, Edge&lt;PhyloNode&gt;&gt; tree) {
+<span class="fc bfc" id="L120" title="All 2 branches covered.">        for (String node : findNodes(stringToParse)) {</span>
+<span class="fc" id="L121">            parseNode(node, tree, parent);</span>
+<span class="fc" id="L122">        }</span>
+<span class="fc" id="L123">    }</span>
+
+    /**
+     * Parse a tree splitting it into top level nodes and subtrees.
+     * @param tree the tree tp be parsed.
+     * @return a collection of nodes and subtrees contained in the parsed string
+     */
+    private Collection&lt;String&gt; findNodes(final String tree) {
+<span class="fc" id="L131">        final Collection&lt;String&gt; nodes = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L133">        int start = 0;</span>
+<span class="fc" id="L134">        int depth = 0;</span>
+<span class="fc" id="L135">        boolean isOk = true;</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        for (int i = 0; i &lt; tree.length(); i++) {</span>
+<span class="fc" id="L137">            final char charAt = tree.charAt(i);</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">            if (charAt == '(') {</span>
+<span class="fc" id="L139">                depth++;</span>
+<span class="fc" id="L140">                isOk = false;</span>
+            }
+<span class="fc bfc" id="L142" title="All 4 branches covered.">            if (charAt == ')' &amp;&amp; --depth == 0) {</span>
+<span class="fc" id="L143">                isOk = true;</span>
+            }
+
+<span class="fc bfc" id="L146" title="All 4 branches covered.">            if (charAt == ',' &amp;&amp; isOk) {</span>
+<span class="fc" id="L147">                nodes.add(tree.substring(start, i).trim());</span>
+<span class="fc" id="L148">                start = i + 1;</span>
+            }
+        }
+<span class="fc" id="L151">        nodes.add(tree.substring(start).trim());</span>
+
+<span class="fc" id="L153">        return nodes;</span>
+    }
+
+    /**
+     * Get the index of the closing parenthesis in a string that starts with an opening parenthesis. If the string does
+     * not start with an opening parenthesis then an IllegalArgumentException is thrown. The algorithm for finding the
+     * closing parenthesis is simple - keep reading the string incrementing a count of the number of opening parentheses
+     * we find and decrementing the count if we encounter a closing parenthesis. When we read a closing parenthesis AND
+     * the count becomes zero we have our closing parenthesis.
+     * @param strng the string to examine.
+     * @return the index in the string of the closing parenthesis, -1 if none is found.
+     */
+    private int getClosingParenthesis(final String strng) {
+
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">        if (!strng.trim().startsWith(&quot;(&quot;)) {</span>
+<span class="nc" id="L168">            throw new IllegalArgumentException(String.format(&quot;Illegal Argument [%s] does not start with an opening parenthesis&quot;, strng));</span>
+        }
+
+<span class="fc" id="L171">        int depth = 0;</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">        for (int i = 0; i &lt; strng.length(); i++) {</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">            if (strng.charAt(i) == '(') {</span>
+<span class="fc" id="L174">                depth++;</span>
+            }
+<span class="fc bfc" id="L176" title="All 4 branches covered.">            if (strng.charAt(i) == ')' &amp;&amp; (--depth == 0)) {</span>
+<span class="fc" id="L177">                return i;</span>
+            }
+        }
+<span class="nc" id="L180">        return -1;</span>
+    }
+
+    /**
+     * Parse a string containing information on a node in Newick format and attach it to a given tree.
+     * @param node   the string containing the node information.
+     * @param tree   the tree to which the created node will be attached.
+     * @param parent the node on the tree to which the new node will be created.
+     */
+    private void parseNode(final String node, final Tree&lt;PhyloNode, Edge&lt;PhyloNode&gt;&gt; tree, final PhyloNode parent) {
+<span class="fc" id="L190">        log.trace(&quot;parsing {} from parent node {} &quot;, node, parent.getId());</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">        if (node.charAt(0) == '(') {</span>
+            // this is a branch so create a branch node and set the parent
+<span class="fc" id="L193">            final int rparen = node.lastIndexOf(')');</span>
+<span class="fc" id="L194">            final PhyloNode branchNode = addNodeToTree(node.substring(rparen + 1), tree, parent, true);</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">            for (String nd : findNodes(node.substring(1, rparen))) {</span>
+<span class="fc" id="L196">                parseNode(nd, tree, branchNode);</span>
+<span class="fc" id="L197">            }</span>
+<span class="pc bpc" id="L198" title="1 of 2 branches missed.">        } else if (node.indexOf(',') != -1) {</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">            for (String nd : findNodes(node)) {</span>
+<span class="nc" id="L200">                parseNode(nd, tree, parent);</span>
+<span class="nc" id="L201">            }</span>
+        } else {
+            // this is a single node
+<span class="fc" id="L204">            addNodeToTree(node, tree, parent, false);</span>
+        }
+<span class="fc" id="L206">    }</span>
+
+    /**
+     * Given a string that represents a node in the tree, split in into its constituent name and distance components and
+     * add it to the tree. If the string is empty then a dummy node is added, this is useful fro creating (unnamed)
+     * branches.
+     * @param node             the string representing the node.
+     * @param tree             the tree object on which the node will be placed.
+     * @param parent           the parent node to which this node is attached.
+     * @param createUniqueName if the name of the node is not unique then add create a unique one if this is true.
+     * @return the node added to the tree.
+     */
+    private PhyloNode addNodeToTree(final String node, final Tree&lt;PhyloNode, Edge&lt;PhyloNode&gt;&gt; tree, final PhyloNode parent,
+                                    final boolean createUniqueName) {
+<span class="fc" id="L220">        log.trace(&quot;Adding {} to tree at {}.&quot;, node, parent);</span>
+        PhyloNode phyloNode;
+
+<span class="fc" id="L223">        final int lcolon = node.indexOf(':');</span>
+        String nodeName;
+<span class="fc" id="L225">        double distance = 0.0;</span>
+
+<span class="fc bfc" id="L227" title="All 2 branches covered.">        if (node.isEmpty()) {</span>
+            // no details so use default values.
+<span class="fc" id="L229">            nodeName = String.format(&quot;branch-%d&quot;, branchLabel++);</span>
+<span class="fc" id="L230">            distance = 0.0;</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">        } else if (lcolon == -1) {</span>
+            // we just have a node name and no distance.
+<span class="fc" id="L233">            distance = 0.0;</span>
+<span class="fc" id="L234">            nodeName = node;</span>
+        } else {
+            // we have a node name and a distance.
+<span class="fc" id="L237">            distance = Double.parseDouble(node.substring(lcolon + 1));</span>
+<span class="fc" id="L238">            nodeName = node.substring(0, lcolon);</span>
+        }
+
+<span class="fc" id="L241">        phyloNode = new PhyloNode(nodeName, distance);</span>
+
+        try {
+<span class="fc" id="L244">            tree.addEdge(new Edge&lt;&gt;(parent, phyloNode, distance), parent, phyloNode);</span>
+<span class="nc" id="L245">        } catch (IllegalArgumentException e) {</span>
+            // we may have non-unique branch names in the data file, if we encounter one here and we want to rename
+            // it we do it now. This is not very good as we are searching for an error message but it's the best as can
+            // be done.
+<span class="nc bnc" id="L249" title="All 4 branches missed.">            if (e.getLocalizedMessage().contains(&quot;already exists in this graph&quot;) &amp;&amp; createUniqueName) {</span>
+<span class="nc" id="L250">                nodeName = String.format(&quot;branch-%d&quot;, branchLabel++);</span>
+<span class="nc" id="L251">                phyloNode = new PhyloNode(nodeName, distance);</span>
+<span class="nc" id="L252">                tree.addEdge(new Edge&lt;&gt;(parent, phyloNode), parent, phyloNode);</span>
+            }
+<span class="fc" id="L254">        }</span>
+
+<span class="fc" id="L256">        return phyloNode;</span>
+    }
+    private String newickString;
+<span class="fc" id="L259">    private int branchLabel = 0;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

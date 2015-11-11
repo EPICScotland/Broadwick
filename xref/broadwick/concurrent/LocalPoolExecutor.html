@@ -135,7 +135,7 @@
 <a class="jxr_linenumber" name="125" href="#125">125</a>                 <strong class="jxr_keyword">break</strong>;
 <a class="jxr_linenumber" name="126" href="#126">126</a>             } <strong class="jxr_keyword">catch</strong> (ExecutionException e) {
 <a class="jxr_linenumber" name="127" href="#127">127</a>                 <em class="jxr_comment">// One of the submitted jobs threw an exception, we need to stop all the currently running threads.</em>
-<a class="jxr_linenumber" name="128" href="#128">128</a>                 log.error(<span class="jxr_string">"{}"</span>, Throwables.getStackTraceAsString(e));
+<a class="jxr_linenumber" name="128" href="#128">128</a>                 log.error(<span class="jxr_string">"LocalPoolExecutor detected an error: {}"</span>, Throwables.getStackTraceAsString(e));
 <a class="jxr_linenumber" name="129" href="#129">129</a>                 stopAllTasks(tasks);
 <a class="jxr_linenumber" name="130" href="#130">130</a>                 service.shutdown();
 <a class="jxr_linenumber" name="131" href="#131">131</a>                 status = Executor.Status.TERMINATED;

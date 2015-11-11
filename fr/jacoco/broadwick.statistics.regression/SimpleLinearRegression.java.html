@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>SimpleLinearRegression.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.statistics.regression</a> &gt; <span class="el_source">SimpleLinearRegression.java</span></div><h1>SimpleLinearRegression.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.statistics.regression;
+
+import org.apache.commons.math3.stat.regression.SimpleRegression;
+
+/**
+ * Estimates an ordinary least squares regression model with one independent variable. y = intercept + slope * x
+ */
+public class SimpleLinearRegression {
+
+    /**
+     * Create an empty SimpleLinearRegression instance.
+     */
+<span class="nc" id="L28">    public SimpleLinearRegression() {</span>
+<span class="nc" id="L29">        regression = new SimpleRegression();</span>
+<span class="nc" id="L30">    }</span>
+
+    /**
+     * Adds the observation (x,y) to the regression data set. Uses updating formulas for means and sums of squares
+     * defined in &quot;Algorithms for Computing the Sample Variance: Analysis and Recommendations&quot;, Chan, T.F., Golub, G.H.,
+     * and LeVeque, R.J. 1983, American Statistician, vol. 37, pp. 242-247, referenced in Weisberg, S. &quot;Applied Linear
+     * Regression&quot;. 2nd Ed. 1985. Note: this uses the apache commons math library.
+     * @param x independent variable value
+     * @param y dependent variable value
+     */
+    public final void addData(final double x, final double y) {
+<span class="nc" id="L41">        regression.addData(x, y);</span>
+<span class="nc" id="L42">    }</span>
+    
+    
+    /**
+     * Removes the observation (x,y) from the regression data set, mirroring the addData method. 
+     * The method has no effect if there are no points of data (i.e. n=0)
+     * @param x independent variable value
+     * @param y dependent variable value
+     */
+    public final void removeData(final double x, final double y) {
+<span class="nc" id="L52">        regression.removeData(x, y);</span>
+<span class="nc" id="L53">    }</span>
+
+    /**
+     * Returns the slope of the estimated regression line. At least two observations (with at least two different x
+     * values) must have been added before invoking this method. If this method is invoked before a model can be
+     * estimated,
+     * &lt;code&gt;Double,NaN&lt;/code&gt; is returned.
+     * @return the slope of the regression line
+     */
+    public final double getSlope() {
+<span class="nc" id="L63">        return regression.getSlope();</span>
+    }
+
+    /**
+     * Returns the intercept of the estimated regression line. At least two observations (with at least two different x
+     * values) must have been added before invoking this method. If this method is invoked before a model can be
+     * estimated,
+     * &lt;code&gt;Double,NaN&lt;/code&gt; is returned.
+     * @return the intercept of the regression line
+     */
+    public final double getIntercept() {
+<span class="nc" id="L74">        return regression.getIntercept();</span>
+    }
+
+    /**
+     * Returns the number of observations that have been added to the model.
+     * @return n number of observations that have been added.
+     */
+    public final long getN() {
+<span class="nc" id="L82">        return regression.getN();</span>
+    }
+
+    /**
+     * Returns the &quot;predicted&quot;
+     * &lt;code&gt;y&lt;/code&gt; value associated with the supplied
+     * &lt;code&gt;x&lt;/code&gt; value, based on the data that has been added to the model when this method is activated.
+     * &lt;p&gt;
+     * &lt;code&gt; predict(x) = intercept + slope * x &lt;/code&gt;
+     * &lt;/p&gt;
+     * At least two observations (with at least two different x values) must have been added before invoking this
+     * method. If this method is invoked before a model can be estimated,
+     * &lt;code&gt;Double,NaN&lt;/code&gt; is returned.
+     * @param x input &lt;code&gt;x&lt;/code&gt; value
+     * @return predicted &lt;code&gt;y&lt;/code&gt; value
+     */
+    public final double predict(final double x) {
+<span class="nc" id="L99">        return regression.predict(x);</span>
+    }
+
+    /**
+     * Returns &lt;a href=&quot;http://mathworld.wolfram.com/CorrelationCoefficient.html&quot;&gt; Pearson's product moment correlation
+     * coefficient&lt;/a&gt;, usually denoted r. At least two observations (with at least two different x values) must have
+     * been added before invoking this method. If this method is invoked before a model can be estimated,
+     * &lt;code&gt;Double,NaN&lt;/code&gt; is returned.
+     * &lt;p/&gt;
+     * @return Pearson's r
+     */
+    public final double getR() {
+<span class="nc" id="L111">        return regression.getR();</span>
+    }
+
+    /**
+     * Returns the &lt;a href=&quot;http://www.xycoon.com/standarderrorb0.htm&quot;&gt;
+     * standard error of the intercept estimate&lt;/a&gt;, usually denoted s(b0). If there are fewer that
+     * &lt;strong&gt;three&lt;/strong&gt; observations in the model, or if there is no variation in x, this returns
+     * &lt;code&gt;Double.NaN&lt;/code&gt;.
+     * @return standard error associated with intercept estimate
+     */
+    public final double getInterceptStdErr() {
+<span class="nc" id="L122">        return regression.getInterceptStdErr();</span>
+    }
+
+    /**
+     * Returns the &lt;a href=&quot;http://www.xycoon.com/standerrorb(1).htm&quot;&gt;standard error of the slope estimate&lt;/a&gt;. If there
+     * are fewer that &lt;strong&gt;three&lt;/strong&gt; data pairs in the model, or if there is no variation in x, this returns
+     * &lt;code&gt;Double.NaN&lt;/code&gt;.
+     * @return standard error associated with slope estimate
+     */
+    public final double getSlopeStdErr() {
+<span class="nc" id="L132">        return regression.getSlopeStdErr();</span>
+    }
+    
+    @Override
+    public final String toString() {
+<span class="nc" id="L137">        return String.format(&quot;Slope [%f], Intercept [%f]. N=%d&quot;, getSlope(), getIntercept(), getN());</span>
+    }
+    private SimpleRegression regression;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

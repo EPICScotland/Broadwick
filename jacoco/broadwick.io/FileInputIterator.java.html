@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>FileInputIterator.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.io</a> &gt; <span class="el_source">FileInputIterator.java</span></div><h1>FileInputIterator.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.io;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Iterator;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Iterator object for a FileInput object.
+ */
+<span class="nc" id="L26">@Slf4j</span>
+public class FileInputIterator implements Iterator&lt;String&gt; {
+
+    /**
+     * Create a iterator over the contents of a file.
+     * @param fileInput the FileInput object over which the iterator should run.
+     */
+<span class="nc" id="L33">    public FileInputIterator(final FileInput fileInput) {</span>
+<span class="nc" id="L34">        this.fileInput = fileInput;</span>
+<span class="nc" id="L35">        this.reader = fileInput.reader;</span>
+<span class="nc" id="L36">    }</span>
+
+    @Override
+    public final boolean hasNext() {
+        try {
+<span class="nc" id="L41">            return reader.ready();</span>
+<span class="nc" id="L42">        } catch (IOException ioe) {</span>
+<span class="nc" id="L43">            log.error(&quot;Could not determine if FileInputReader hasNext()? {}&quot;, ioe.getLocalizedMessage());</span>
+<span class="nc" id="L44">            return false;</span>
+        }
+
+    }
+
+    @Override
+    public final String next() {
+        try {
+<span class="nc" id="L52">            return fileInput.readNextLine();</span>
+<span class="nc" id="L53">        } catch (IOException ioe) {</span>
+<span class="nc" id="L54">            log.error(&quot;Could not get next from FileInputIterator. {}&quot;, ioe.getLocalizedMessage());</span>
+<span class="nc" id="L55">            return null;</span>
+        }
+    }
+
+    @Override
+    public final void remove() {
+<span class="nc" id="L61">        throw new UnsupportedOperationException(&quot;FileInputIterator.remove() is not supported&quot;);</span>
+    }
+    private FileInput fileInput;
+    private BufferedReader reader;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

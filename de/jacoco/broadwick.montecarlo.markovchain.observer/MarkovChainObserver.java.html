@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MarkovChainObserver.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.montecarlo.markovchain.observer</a> &gt; <span class="el_source">MarkovChainObserver.java</span></div><h1>MarkovChainObserver.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.montecarlo.markovchain.observer;
+
+import broadwick.montecarlo.markovchain.MarkovChainMonteCarlo;
+import lombok.EqualsAndHashCode;
+
+/**
+ * Implementing classes are used to take measurements during a Monte Carlo run.
+ */
+<span class="nc bnc" id="L24" title="All 14 branches missed.">@EqualsAndHashCode</span>
+@SuppressWarnings(&quot;squid:S1210&quot;)
+public abstract class MarkovChainObserver implements Comparable&lt;MarkovChainObserver&gt; {
+
+    /**
+     * Creates an observer dedicated to one Monte Carlo process.
+     * @param mc the Monte Carlo process
+     */
+<span class="nc" id="L32">    public MarkovChainObserver(final MarkovChainMonteCarlo mc) {</span>
+<span class="nc" id="L33">        this.monteCarlo = mc;</span>
+<span class="nc" id="L34">    }</span>
+
+    @Override
+    public final int compareTo(final MarkovChainObserver o) {
+        // We really are only interested in determining if the Observers are equal so that a tree based table 
+        // can distinguish between observers. Order does NOT matter so we return 1 if the objects are not equal.
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (this == o) {</span>
+<span class="nc" id="L41">            return 0;</span>
+        }
+<span class="nc" id="L43">        return 1;</span>
+    }
+
+    /**
+     * Gets called when the simulation has started after the initialization and before the termination condition is
+     * checked the first time.
+     */
+    public abstract void started();
+
+    /**
+     * Gets called when the simulation has taken a step, whether or not the step is accepted or not or if the 
+     * burn-in period has elapsed.
+     */
+    public abstract void step();
+
+
+    /**
+     * Gets called by the Monte Carlo process after the burnin period has elaspsed.
+     */
+    public abstract void takeMeasurements();
+
+    /**
+     * Gets called when a simulation has finished, directly after the termination check.
+     */
+    public abstract void finished();
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+    protected final MarkovChainMonteCarlo monteCarlo;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

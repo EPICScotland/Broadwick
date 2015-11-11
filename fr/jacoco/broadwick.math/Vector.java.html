@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Vector.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.math</a> &gt; <span class="el_source">Vector.java</span></div><h1>Vector.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2015 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.math;
+
+/**
+ * Implementation of mathematical vector (not to be confused with the data structure). It is perhaps best to think of
+ * this as a row-vector as several underlying operations (such as multiplying by a matrix) are implemented by casting
+ * the vector into a 1D (row) matrix which can be transposed etc internally.
+ */
+public class Vector {
+
+    /**
+     * Create a vector of a given dimension. Each element will be set to 0.
+     * @param dimension the dimension of the vector.
+     */
+<span class="nc" id="L29">    public Vector(final int dimension) {</span>
+<span class="nc" id="L30">        data = new double[dimension];</span>
+
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        for (int i = 0; i &lt; dimension; i++) {</span>
+<span class="nc" id="L33">            data[i] = 0.0;</span>
+        }
+<span class="nc" id="L35">    }</span>
+
+    /**
+     * Copy constructor.
+     * @param v the vector to be copied.
+     */
+    public Vector(final Vector v) {
+<span class="nc" id="L42">        this(v.data);</span>
+<span class="nc" id="L43">    }</span>
+
+    /**
+     * Copy constructor.
+     * @param data an array that will be copied.
+     */
+<span class="nc" id="L49">    public Vector(final double[] data) {</span>
+<span class="nc" id="L50">        this.data = new double[data.length];</span>
+
+<span class="nc" id="L52">        System.arraycopy(data, 0, this.data, 0, data.length);</span>
+<span class="nc" id="L53">    }</span>
+
+    /**
+     * Get the element at the given index.
+     * @param i the vector element to be found.
+     * @return the vector element
+     */
+    public double element(final int i) {
+<span class="nc" id="L61">        return data[i];</span>
+    }
+
+    /**
+     * Set the value of the vector at a given index.
+     * @param i     the coordinate of the vector to be set
+     * @param value the value of the vector element.
+     * @return the updated value.
+     */
+    public double setEntry(final int i, final double value) {
+<span class="nc" id="L71">        data[i] = value;</span>
+<span class="nc" id="L72">        return data[i];</span>
+    }
+
+    /**
+     * Return a copy of the vector as an array.
+     * @return a copy of the vector as an array.
+     */
+    public double[] toArray() {
+<span class="nc" id="L80">        return data.clone();</span>
+    }
+
+    /**
+     * Obtain the length, i.e. the number of components of this vector.
+     * @return the number of elements in the vector.
+     */
+    public int length() {
+<span class="nc" id="L88">        return data.length;</span>
+    }
+
+    /**
+     * Add a vector to this one.
+     * @param v the vector to be added to this one.
+     * @return this (updated) vector.
+     */
+    public Vector add(final Vector v) {
+<span class="nc" id="L97">        Vector v1 = new Vector(data);</span>
+
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        for (int i = 0; i &lt; data.length; i++) {</span>
+<span class="nc" id="L100">            v1.setEntry(i, v1.element(i) + v.element(i));</span>
+        }
+<span class="nc" id="L102">        return v1;</span>
+    }
+
+    /**
+     * Subtract a vector from this one.
+     * @param v the vector to be subtracted from this one.
+     * @return this (updated) vector.
+     */
+    public Vector subtract(final Vector v) {
+<span class="nc" id="L111">        Vector v1 = new Vector(data);</span>
+
+<span class="nc bnc" id="L113" title="All 2 branches missed.">        for (int i = 0; i &lt; data.length; i++) {</span>
+<span class="nc" id="L114">            v1.setEntry(i, v1.element(i) - v.element(i));</span>
+        }
+<span class="nc" id="L116">        return v1;</span>
+    }
+
+    /**
+     * Calculate the dot product of this vector with v.
+     * @param v the vector to be dotted.
+     * @return this (updated) vector.
+     */
+    public double multiply(final Vector v) {
+<span class="nc" id="L125">        double d = 0.0;</span>
+
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        for (int i = 0; i &lt; data.length; i++) {</span>
+<span class="nc" id="L128">            d += data[i] * v.element(i);</span>
+        }
+<span class="nc" id="L130">        return d;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L135">        StringBuilder sb = new StringBuilder(&quot;(&quot;);</span>
+
+<span class="nc bnc" id="L137" title="All 2 branches missed.">        for (int i = 0; i &lt; data.length; i++) {</span>
+<span class="nc" id="L138">            sb.append(data[i]).append(&quot;,&quot;);</span>
+        }
+<span class="nc" id="L140">        sb.deleteCharAt(sb.length() - 1);</span>
+<span class="nc" id="L141">        sb.append(&quot;)&quot;);</span>
+<span class="nc" id="L142">        return sb.toString();</span>
+    }
+
+    private final double[] data;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

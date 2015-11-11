@@ -1,8 +1,8 @@
 <map id="G" name="G">
-<area shape="rect" id="node1_0" href="./LocalPoolExecutor.html" title="broadwick.concurrent.LocalPoolExecutor" alt="" coords="16,173,531,405"/>
-<area shape="rect" id="node1" href="./LocalPoolExecutor.html" title="&lt;TABLE&gt;" alt="" coords="5,168,541,411"/>
-<area shape="rect" id="node3_1" href="./Executor.Status.html" title="broadwick.concurrent.Executor.Status" alt="" coords="223,464,324,600"/>
-<area shape="rect" id="node3" href="./Executor.Status.html" title="&lt;TABLE&gt;" alt="" coords="212,459,335,605"/>
-<area shape="rect" id="node2_2" href="./Executor.html" title="broadwick.concurrent.Executor" alt="" coords="179,11,368,115"/>
-<area shape="rect" id="node2" href="./Executor.html" title="&lt;TABLE&gt;" alt="" coords="168,5,379,120"/>
+<area shape="rect" id="node1_0" href="./LocalPoolExecutor.html" title="broadwick.concurrent.LocalPoolExecutor" alt="" coords="16,173,517,405"/>
+<area shape="rect" id="node1" href="./LocalPoolExecutor.html" title="&lt;TABLE&gt;" alt="" coords="5,168,528,411"/>
+<area shape="rect" id="node3_1" href="./Executor.Status.html" title="broadwick.concurrent.Executor.Status" alt="" coords="217,464,316,600"/>
+<area shape="rect" id="node3" href="./Executor.Status.html" title="&lt;TABLE&gt;" alt="" coords="207,459,327,605"/>
+<area shape="rect" id="node2_2" href="./Executor.html" title="broadwick.concurrent.Executor" alt="" coords="176,11,357,115"/>
+<area shape="rect" id="node2" href="./Executor.html" title="&lt;TABLE&gt;" alt="" coords="165,5,368,120"/>
 </map>

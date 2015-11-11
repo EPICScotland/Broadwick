@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Edge.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.graph</a> &gt; <span class="el_source">Edge.java</span></div><h1>Edge.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.graph;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.commons.lang.StringUtils;
+
+/**
+ * This class represents a generic edge in a graph.
+ * @param &lt;V&gt; the type of vertices on the edges.
+ */
+public class Edge&lt;V extends Vertex&gt; implements Serializable {
+
+    /**
+     * A generic edge for a graph object.
+     * @param id an id for the edge.
+     */
+<span class="nc" id="L35">    public Edge(final String id) {</span>
+<span class="nc" id="L36">        this.id = id;</span>
+<span class="nc" id="L37">    }</span>
+
+    /**
+     * A generic edge for a graph object.
+     * @param id          an id for the edge.
+     * @param source      the source of the edge.
+     * @param destination the destination of the edge.
+     */
+    public Edge(final String id, final V source, final V destination) {
+<span class="nc" id="L46">        this(id, source, destination, 0.0);</span>
+
+<span class="nc" id="L48">    }</span>
+
+    /**
+     * A generic edge for a graph object.
+     * @param source      the source of the edge.
+     * @param destination the destination of the edge.
+     */
+    public Edge(final V source, final V destination) {
+<span class="nc" id="L56">        this(String.format(&quot;%s-%s&quot;, source.getId(), destination.getId()), source, destination, 0.0);</span>
+<span class="nc" id="L57">    }</span>
+
+    /**
+     * A generic edge for a graph object.
+     * @param source      the source of the edge.
+     * @param destination the destination of the edge.
+     * @param weight      the weight attached to the edge.
+     */
+    public Edge(final V source, final V destination, final Double weight) {
+<span class="fc" id="L66">        this(String.format(&quot;%s-%s&quot;, source.getId(), destination.getId()), source, destination, weight);</span>
+<span class="fc" id="L67">    }</span>
+
+    /**
+     * A generic edge for a graph object.
+     * @param id          an id for the edge.
+     * @param source      the source of the edge.
+     * @param destination the destination of the edge.
+     * @param weight      the weight attached to the edge.
+     */
+<span class="fc" id="L76">    public Edge(final String id, final V source, final V destination, final Double weight) {</span>
+<span class="fc" id="L77">        this.id = id;</span>
+<span class="fc" id="L78">        this.source = source;</span>
+<span class="fc" id="L79">        this.destination = destination;</span>
+<span class="fc" id="L80">        this.weight = weight;</span>
+<span class="fc" id="L81">    }</span>
+
+    @Override
+    public String toString() {
+<span class="nc" id="L85">        return String.format(&quot;%s-&gt;%s&quot;, source.getId(), destination.getId());</span>
+    }
+
+    /**
+     * Obtain an attribute of this edge by the attributes name.
+     * @param attributeName the name of the attribute to be found.
+     * @return the attribute (or null if no attribute matches the name).
+     */
+    public final EdgeAttribute getAttributeByName(final String attributeName) {
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        for (EdgeAttribute attr : attributes) {</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">            if (StringUtils.equalsIgnoreCase(attributeName, attr.getName())) {</span>
+<span class="nc" id="L96">                return attr;</span>
+            }
+<span class="nc" id="L98">        }</span>
+<span class="nc" id="L99">        return null;</span>
+    }
+
+    /**
+     * Add an attribute to the edge.
+     * @param attribute the attribute to be added.
+     * @return true if the collection of attributes changed as a result of the call
+     */
+    public final boolean addAttribute(final EdgeAttribute attribute) {
+<span class="nc" id="L108">        return attributes.add(attribute);</span>
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+<span class="nc" id="L113">        super.finalize();</span>
+<span class="nc" id="L114">        attributes.clear();</span>
+<span class="nc" id="L115">    }</span>
+
+<span class="pc" id="L117">    @Getter</span>
+    protected String id = null;
+<span class="pc" id="L119">    @Getter</span>
+    protected V source = null;
+<span class="pc" id="L121">    @Getter</span>
+    protected V destination = null;
+<span class="pc" id="L123">    @Setter</span>
+<span class="nc" id="L124">    @Getter</span>
+<span class="pc" id="L125">    protected Double weight = 1.0;</span>
+<span class="pc" id="L126">    @Getter</span>
+    private Collection&lt;EdgeAttribute&gt; attributes = new ArrayList&lt;&gt;();
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

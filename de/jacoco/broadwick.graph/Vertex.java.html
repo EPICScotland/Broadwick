@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Vertex.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.graph</a> &gt; <span class="el_source">Vertex.java</span></div><h1>Vertex.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.graph;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.apache.commons.lang.StringUtils;
+
+/**
+ * This class represents a generic vertex (node) in a graph.
+ */
+<span class="nc" id="L29">@ToString</span>
+public class Vertex implements Serializable {
+
+    /**
+     * A generic vertex for a graph object.
+     * @param id an id for the vertex.
+     */
+<span class="fc" id="L36">    public Vertex(final String id) {</span>
+<span class="fc" id="L37">        this.id = id;</span>
+<span class="fc" id="L38">    }</span>
+
+    /**
+     * Obtain an attribute of this vertex by the attributes name.
+     * @param attributeName the name of the attribute to be found.
+     * @return the attribute (or null if no attribute matches the name).
+     */
+    public final VertexAttribute getAttributeByName(final String attributeName) {
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        for (VertexAttribute attr : attributes) {</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">            if (StringUtils.equalsIgnoreCase(attributeName, attr.getName())) {</span>
+<span class="nc" id="L48">                return attr;</span>
+            }
+<span class="nc" id="L50">        }</span>
+<span class="nc" id="L51">        return null;</span>
+    }
+
+    /**
+     * Add an attribute to the vertex, overwriting any attribute of the same name.
+     * @param attribute the attribute to be added.
+     * @return true if the collection of attributes changed as a result of the call
+     */
+    public final boolean addAttribute(final VertexAttribute attribute) {
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        for (VertexAttribute attr : attributes) {</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">            if (StringUtils.equalsIgnoreCase(attribute.getName(), attr.getName())) {</span>
+<span class="nc" id="L62">                attributes.remove(attr);</span>
+<span class="nc" id="L63">                break;</span>
+            }
+<span class="nc" id="L65">        }</span>
+<span class="nc" id="L66">        return attributes.add(attribute);</span>
+    }
+
+    /**
+     * Set the x coordinate for the vertex.
+     * @param x the x coordinate for the vertex.
+     */
+    public final void setXCoord(final double x) {
+<span class="nc" id="L74">        xCoord = x;</span>
+<span class="nc" id="L75">        attributes.add(new VertexAttribute(&quot;xCoord&quot;, Double.class, String.valueOf(x)));</span>
+<span class="nc" id="L76">    }</span>
+
+    /**
+     * Set the y coordinate for the vertex.
+     * @param y the y coordinate for the vertex.
+     */
+    public final void setYCoord(final double y) {
+<span class="nc" id="L83">        yCoord = y;</span>
+<span class="nc" id="L84">        attributes.add(new VertexAttribute(&quot;yCoord&quot;, Double.class, String.valueOf(y)));</span>
+<span class="nc" id="L85">    }</span>
+
+    @Override
+    protected void finalize() throws Throwable {
+<span class="nc" id="L89">        super.finalize();</span>
+<span class="nc" id="L90">        attributes.clear();</span>
+<span class="nc" id="L91">    }</span>
+
+<span class="pc" id="L93">    @Setter</span>
+<span class="fc" id="L94">    @Getter</span>
+    protected String id = null;
+
+<span class="pc" id="L97">    @Getter</span>
+    protected double xCoord = 0.0;
+
+<span class="pc" id="L100">    @Getter</span>
+    protected double yCoord = 0.0;
+
+<span class="pc" id="L103">    @Getter</span>
+    private Collection&lt;VertexAttribute&gt; attributes = new ArrayList&lt;&gt;();
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

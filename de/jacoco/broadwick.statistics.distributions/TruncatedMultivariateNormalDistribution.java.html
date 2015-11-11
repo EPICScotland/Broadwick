@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>TruncatedMultivariateNormalDistribution.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.statistics.distributions</a> &gt; <span class="el_source">TruncatedMultivariateNormalDistribution.java</span></div><h1>TruncatedMultivariateNormalDistribution.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2015 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.statistics.distributions;
+
+import broadwick.math.Matrix;
+import broadwick.math.Vector;
+
+/**
+ * Sample from a truncated Multivariate Normal (Gaussian) Distribution, i.e. a normal distribution whose value is
+ * bounded either above, below or both.
+ * &lt;p&gt;
+ * References:&lt;/p&gt;&lt;p&gt;
+ * &lt;ul&gt;
+ * &lt;li&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/Multivariate_normal_distribution&quot;&gt; Multivariatenormal Distribution&lt;/a&gt;&lt;/li&gt;
+ * &lt;/ul&gt;
+ * &lt;/p&gt;
+ */
+public class TruncatedMultivariateNormalDistribution implements ContinuousMultivariateDistribution {
+
+    /**
+     * Create an instance of a multivariate distribution that is bounded.
+     * @param means       the [mathematical] vector of the means of each variable.
+     * @param covariances the [mathematical] matrix of the covariances of each variable.
+     * @param lb          the [mathematical] vector of the lower bounds of each variable.
+     * @param ub          the [mathematical] vector of the upper bounds of each variable.
+     */
+    public TruncatedMultivariateNormalDistribution(final Vector means, final Matrix covariances,
+<span class="nc" id="L41">                                                   final Vector lb, final Vector ub) {</span>
+        
+<span class="nc bnc" id="L43" title="All 4 branches missed.">        if (means.length() != lb.length() || lb.length() != ub.length() </span>
+<span class="nc bnc" id="L44" title="All 4 branches missed.">            || ub.length() != covariances.rows() || covariances.rows() != covariances.columns()) {</span>
+<span class="nc" id="L45">                throw new IllegalArgumentException(&quot;The lengths of the input vectors must be equal and the covariances matirx must be square with the same size as the input vectors.&quot;);</span>
+        }
+        
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        for (int i=0; i&lt; means.length(); i++) {</span>
+<span class="nc bnc" id="L49" title="All 4 branches missed.">            if (means.element(i) &lt; lb.element(i) || means.element(i) &gt; ub.element(i)) {</span>
+<span class="nc" id="L50">                throw new IllegalArgumentException(&quot;The means of the distribution must lie between the lower and upper bounds&quot;);</span>
+            }
+            
+<span class="nc bnc" id="L53" title="All 2 branches missed.">            if (lb.element(i) &gt; ub.element(i)) {</span>
+<span class="nc" id="L54">                throw new IllegalArgumentException(&quot;The lower bound of the distribution must be less than the upper bound&quot;);</span>
+            }
+        }
+        
+<span class="nc" id="L58">        this.means = means;</span>
+<span class="nc" id="L59">        this.covariances = covariances;</span>
+<span class="nc" id="L60">        this.upperBounds = ub;</span>
+<span class="nc" id="L61">        this.lowerBounds = lb;</span>
+<span class="nc" id="L62">        this.n = means.toArray().length;</span>
+<span class="nc" id="L63">    }</span>
+
+    @Override
+    public Vector sample() {
+
+<span class="nc" id="L68">        Vector proposal = new Vector(n);</span>
+
+        // Gibbs sampler of Christian Robert (arxiv:0907.4010v1 [stat.CO])
+        // Robert, C.P, &quot;Simulation of truncated normal variables&quot;,
+        //   Statistics and Computing, pp. 121-125 (1995).
+<span class="nc" id="L73">        Matrix covInv = covariances.inverse();</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        for (int i = 0; i &lt; n; i++) {</span>
+            // get the (n-1) vector from the i-th column of the covariances matrix, removing the i-th row.
+<span class="nc" id="L76">            Matrix sigmaI = new Matrix(n - 1, 1);</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">            for (int j = 0; j &lt; n - 1; j++) {</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">                if (j != i) {</span>
+<span class="nc" id="L79">                    sigmaI.setEntry(j, 0, covariances.element(j, i));</span>
+                }
+            }
+
+            // Get the inverse of the (n-1)(n-1) matrix obtained from the covariance matrix removing the
+            // ith row and column.
+<span class="nc" id="L85">            Matrix sigmaIinv = new Matrix(n - 1, n - 1);</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">            for (int j = 0; j &lt; n - 1; j++) {</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">                if (j != i) {</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                    for (int k = 0; k &lt; n - 1; k++) {</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">                        if (k != i) {</span>
+<span class="nc" id="L90">                            sigmaIinv.setEntry(j, k, covInv.element(j, k));</span>
+                        }
+                    }
+                }
+            }
+
+            // x_i is the (n-1) vector of components not being updated at this iteration.
+<span class="nc" id="L97">            Matrix xI = new Matrix(1, n - 1);</span>
+<span class="nc" id="L98">            Matrix muI = new Matrix(1, n - 1);</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">            for (int j = 0; j &lt; n - 1; j++) {</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">                if (j != i) {</span>
+<span class="nc" id="L101">                    xI.setEntry(0, j, means.element(j));</span>
+<span class="nc" id="L102">                    muI.setEntry(0, j, means.element(j));</span>
+                }
+            }
+
+            // mui is E(xi|x_i)
+            //  mui = mu(i) + sigmai_i * sigma_i_iInv * (x_i - mu_i);
+<span class="nc" id="L108">            Matrix diff = xI.transpose().subtract(muI.transpose());</span>
+<span class="nc" id="L109">            double mui = means.element(i) + sigmaI.transpose().multiply(sigmaIinv).multiply(diff).element(0, 0);</span>
+<span class="nc" id="L110">            double s2i = covariances.element(i, i) - sigmaI.transpose().multiply(sigmaIinv).multiply(sigmaI).element(0, 0);</span>
+
+            // now draw from the 1-d normal truncated to [lb, ub]
+<span class="nc" id="L113">            TruncatedNormalDistribution dist = new TruncatedNormalDistribution(mui, Math.sqrt(s2i),</span>
+<span class="nc" id="L114">                                                                               lowerBounds.element(i),</span>
+<span class="nc" id="L115">                                                                               upperBounds.element(i));</span>
+<span class="nc" id="L116">            proposal.setEntry(i, dist.sample());</span>
+
+        }
+
+        /*
+         // Use rejection sampling to find the mvn variate.
+         boolean proposedStepOutOfBounds;
+         int attempts = 0;
+         Vector proposal = new Vector(n);
+         do {
+         proposedStepOutOfBounds = false;
+         proposal = mvn.sample();
+
+         for (int i = 0; i &lt; n; i++) {
+         if (proposal.element(i) &lt; lowerBounds.element(i)
+         || proposal.element(i) &gt; upperBounds.element(i)
+         || Math.abs(proposal.element(i)) &lt; 0.00001) {
+         proposedStepOutOfBounds = true;
+         System.out.println(String.format(&quot;Failed to pick proposal [attempt %d]. %f&lt;%f&lt;%f&quot;, attempts,
+         lowerBounds.element(i), proposal.element(i), upperBounds.element(i)));
+         break;
+         }
+         }
+         attempts++;
+         } while (proposedStepOutOfBounds);
+         */
+<span class="nc" id="L142">        return proposal;</span>
+    }
+
+    private final int n;
+    private final Vector lowerBounds;
+    private final Vector upperBounds;
+    private final Vector means;
+    private final Matrix covariances;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

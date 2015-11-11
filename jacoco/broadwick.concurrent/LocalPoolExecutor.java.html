@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>LocalPoolExecutor.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.concurrent</a> &gt; <span class="el_source">LocalPoolExecutor.java</span></div><h1>LocalPoolExecutor.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.concurrent;
+
+import broadwick.BroadwickException;
+import com.google.common.base.Throwables;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * This Executor controls the execution of several threads using a fixed thread pool. Several instances of the callable
+ * object are added to the execution pool which monitors their execution, if any fails, i.e. any of the jobs throws an
+ * exception, then all non-running jobs are canceled and currently running jobs are terminated.
+ */
+<span class="nc" id="L38">@Slf4j</span>
+public class LocalPoolExecutor implements Executor {
+
+    /**
+     * Create the Callable executor that will run a supplied number of instances of a supplied callable, canceling the execution
+     * if a thread throws an exception.
+     * @param threadPoolSize    the number of concurrent threads to be run (the size of the thread pool)
+     * @param numInstancesToRun the number of threads to be run.
+     * @param callable          the actual Callable instance that is to be executed in the pool.
+     */
+<span class="nc" id="L48">    public LocalPoolExecutor(final int threadPoolSize, final int numInstancesToRun, final Callable&lt;?&gt; callable) {</span>
+<span class="nc" id="L49">        poolSize = threadPoolSize;</span>
+<span class="nc" id="L50">        numRuns = numInstancesToRun;</span>
+<span class="nc" id="L51">        job = callable;</span>
+<span class="nc" id="L52">        service = Executors.newFixedThreadPool(poolSize);</span>
+<span class="nc" id="L53">    }</span>
+
+    /**
+     * Create the Callable executor that will run each callable in a collection, canceling the execution
+     * if a thread throws an exception.
+     * @param threadPoolSize    the number of concurrent threads to be run (the size of the thread pool)
+     * @param jobs          a collection of [Callable] jobs to be run.
+     */
+<span class="nc" id="L61">    public LocalPoolExecutor(final int threadPoolSize, final List&lt;Callable&lt;?&gt;&gt; jobs) {</span>
+<span class="nc" id="L62">        poolSize = threadPoolSize;</span>
+<span class="nc" id="L63">        numRuns = jobs.size();</span>
+<span class="nc" id="L64">        job = null;</span>
+<span class="nc" id="L65">        service = Executors.newFixedThreadPool(poolSize);</span>
+<span class="nc" id="L66">    }</span>
+
+    @Override
+    public final Status getStatus() {
+<span class="nc" id="L70">        return status;</span>
+    }
+
+    @Override
+    public final void run() {
+
+<span class="nc" id="L76">        final List&lt;Future&lt;?&gt;&gt; tasks = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L77">        final CountDownLatch latch = new CountDownLatch(numRuns);</span>
+
+<span class="nc" id="L79">        status = Executor.Status.RUNNING;</span>
+
+        // Submit all the Callable objects to the executor, counting down the latch
+        // when each submitted job is finished. If any of the jobs throws an exception,
+        // it will be wrapped in an ExecutionException by the Future and we will check for it later.
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        for (int i = 0; i &lt; numRuns; i++) {</span>
+<span class="nc" id="L85">            final int taskId = i;</span>
+<span class="nc" id="L86">            log.trace(&quot;Adding task {} to the executor service.&quot;, i);</span>
+<span class="nc" id="L87">            tasks.add(service.submit(new Runnable() {</span>
+                @Override
+                public void run() {
+                    try {
+<span class="nc" id="L91">                        job.call();</span>
+<span class="nc" id="L92">                    } catch (Exception e) {</span>
+<span class="nc" id="L93">                        ok = false;</span>
+<span class="nc" id="L94">                        throw new BroadwickException(e);</span>
+                    } finally {
+<span class="nc" id="L96">                        log.debug(&quot;Completed task {}&quot;, taskId);</span>
+<span class="nc" id="L97">                        latch.countDown();</span>
+<span class="nc" id="L98">                    }</span>
+<span class="nc" id="L99">                }</span>
+            }));
+        }
+
+        // We now have all the jobs submitted to the executor service. Now we iteratively check the status of each 
+        // job (sleeping for 100ms between checks) to determine if each job has been completed. If any job
+        // fails then we catch the resultant ExecutionException and cancel all remaining jobs.
+<span class="nc" id="L106">        int completedTasks = 0;</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        while (completedTasks &lt; tasks.size()) {</span>
+            try {
+<span class="nc" id="L109">                final Iterator&lt;Future&lt;?&gt;&gt; iterator = tasks.iterator();</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">                while (iterator.hasNext()) {</span>
+<span class="nc" id="L111">                    final Future&lt;?&gt; task = iterator.next();</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">                    if (task.isDone()) {</span>
+<span class="nc" id="L113">                        completedTasks++;</span>
+<span class="nc" id="L114">                        task.get();</span>
+<span class="nc" id="L115">                        iterator.remove();</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">                    } else if (task.isCancelled()) {</span>
+<span class="nc" id="L117">                        stopAllTasks(tasks);</span>
+                    }
+<span class="nc" id="L119">                }</span>
+<span class="nc" id="L120">                Thread.sleep(10);</span>
+<span class="nc" id="L121">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L122">                Thread.currentThread().interrupt();</span>
+<span class="nc" id="L123">                status = Executor.Status.TERMINATED;</span>
+<span class="nc" id="L124">                ok = false;</span>
+<span class="nc" id="L125">                break;</span>
+<span class="nc" id="L126">            } catch (ExecutionException e) {</span>
+                // One of the submitted jobs threw an exception, we need to stop all the currently running threads.
+<span class="nc" id="L128">                log.error(&quot;LocalPoolExecutor detected an error: {}&quot;, Throwables.getStackTraceAsString(e));</span>
+<span class="nc" id="L129">                stopAllTasks(tasks);</span>
+<span class="nc" id="L130">                service.shutdown();</span>
+<span class="nc" id="L131">                status = Executor.Status.TERMINATED;</span>
+<span class="nc" id="L132">                ok = false;</span>
+<span class="nc" id="L133">                break;</span>
+<span class="nc" id="L134">            }</span>
+        }
+
+        try {
+<span class="nc bnc" id="L138" title="All 2 branches missed.">            if (status != Executor.Status.TERMINATED) {</span>
+<span class="nc" id="L139">                latch.await();</span>
+            }
+<span class="nc" id="L141">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L142">            log.error(&quot;Caught exception closing failed tasks&quot;);</span>
+<span class="nc" id="L143">            status = Executor.Status.TERMINATED;</span>
+
+<span class="nc" id="L145">        }</span>
+
+<span class="nc" id="L147">        shutdown();</span>
+<span class="nc" id="L148">    }</span>
+
+    /**
+     * Send a message to all the futures to cancel their execution. On completion the status of the executor is set to
+     * Executor.Status.TERMINATED.
+     * @param tasks a collection of future object that are to be stopped.
+     */
+    private void stopAllTasks(final List&lt;Future&lt;?&gt;&gt; tasks) {
+<span class="nc bnc" id="L156" title="All 2 branches missed.">        for (Future&lt;?&gt; task : tasks) {</span>
+<span class="nc" id="L157">            task.cancel(true);</span>
+<span class="nc" id="L158">        }</span>
+<span class="nc" id="L159">        status = Executor.Status.TERMINATED;</span>
+<span class="nc" id="L160">    }</span>
+
+    /**
+     * Shutdown the ExecutionService, blocking until ALL the threads have finished before returning.
+     */
+    private void shutdown() {
+<span class="nc" id="L166">        log.trace(&quot;Shutting down the LocalPoolExecutor&quot;);</span>
+        try {
+<span class="nc" id="L168">            service.shutdown();</span>
+<span class="nc" id="L169">            service.awaitTermination(1000, TimeUnit.MILLISECONDS);</span>
+
+<span class="nc" id="L171">            log.trace(&quot;LocalPoolExecutor succesfully shutdown&quot;);</span>
+<span class="nc" id="L172">            status = Executor.Status.COMPLETED;</span>
+
+<span class="nc" id="L174">        } catch (InterruptedException e) {</span>
+            // Nothing to do - we are shuting done the service
+<span class="nc" id="L176">            Thread.currentThread().interrupt();</span>
+<span class="nc" id="L177">            status = Executor.Status.TERMINATED;</span>
+<span class="nc" id="L178">        } catch (Exception e) {</span>
+            // Nothing to do - we are shuting done the service
+<span class="nc" id="L180">            status = Executor.Status.TERMINATED;</span>
+<span class="nc" id="L181">        }</span>
+<span class="nc" id="L182">    }</span>
+    private final int poolSize;
+    private final int numRuns;
+    private final Callable&lt;?&gt; job;
+    private final ExecutorService service;
+<span class="nc" id="L187">    private Status status = Executor.Status.NOT_STARTED;</span>
+<span class="nc" id="L188">    @Getter</span>
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+    private boolean ok = true; /// true if the underlying task completed without error, false otherwise
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

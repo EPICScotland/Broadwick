@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>DirectedGraph.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.graph</a> &gt; <span class="el_source">DirectedGraph.java</span></div><h1>DirectedGraph.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.graph;
+
+import broadwick.utils.Pair;
+import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import lombok.Getter;
+
+/**
+ * A &lt;code&gt;DirectedGraph&lt;/code&gt;, suitable for sparse graphs, that permits parallel edges..
+ * &lt;p/&gt;
+ * The implementation here is backed by the DelegateTree implementation in the JUNG library.
+ * @param &lt;V&gt; the vertex type.
+ * @param &lt;E&gt; the edge type.
+ */
+public class DirectedGraph&lt;V extends Vertex, E extends Edge&lt;V&gt;&gt; implements broadwick.graph.Graph&lt;V, E&gt; {
+
+    /**
+     * Creates an instance of the graph.
+     */
+<span class="nc" id="L37">    public DirectedGraph() {</span>
+<span class="nc" id="L38">        graph = new DirectedSparseMultigraph&lt;&gt;();</span>
+<span class="nc" id="L39">        vertexmaps = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L40">        edgemaps = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L41">    }</span>
+
+    @Override
+    public final Collection&lt;E&gt; getInEdges(final V vertex) {
+<span class="nc" id="L45">        return graph.getInEdges(vertex);</span>
+    }
+
+    @Override
+    public final Collection&lt;E&gt; getOutEdges(final V vertex) {
+<span class="nc" id="L50">        return graph.getOutEdges(vertex);</span>
+    }
+
+    @Override
+    public final Collection&lt;V&gt; getPredecessors(final V vertex) {
+<span class="nc" id="L55">        return graph.getPredecessors(vertex);</span>
+    }
+
+    @Override
+    public final Collection&lt;V&gt; getSuccessors(final V vertex) {
+<span class="nc" id="L60">        return graph.getSuccessors(vertex);</span>
+    }
+
+    @Override
+    public final int inDegree(final V vertex) {
+<span class="nc" id="L65">        return graph.inDegree(vertex);</span>
+    }
+
+    @Override
+    public final int outDegree(final V vertex) {
+<span class="nc" id="L70">        return graph.outDegree(vertex);</span>
+    }
+
+    @Override
+    public final boolean isPredecessor(final V v1, final V v2) {
+<span class="nc" id="L75">        return graph.isPredecessor(v1, v2);</span>
+    }
+
+    @Override
+    public final boolean isSuccessor(final V v1, final V v2) {
+<span class="nc" id="L80">        return graph.isSuccessor(v1, v2);</span>
+    }
+
+    @Override
+    public final int getPredecessorCount(final V vertex) {
+<span class="nc" id="L85">        return graph.getPredecessorCount(vertex);</span>
+    }
+
+    @Override
+    public final int getSuccessorCount(final V vertex) {
+<span class="nc" id="L90">        return graph.getSuccessorCount(vertex);</span>
+    }
+
+    @Override
+    public final V getSource(final E directedEdge) {
+<span class="nc" id="L95">        return graph.getSource(directedEdge);</span>
+    }
+
+    @Override
+    public final V getDest(final E directedEdge) {
+<span class="nc" id="L100">        return graph.getDest(directedEdge);</span>
+    }
+
+    @Override
+    public final boolean isSource(final V vertex, final E edge) {
+<span class="nc" id="L105">        return graph.isSource(vertex, edge);</span>
+    }
+
+    @Override
+    public final boolean isDest(final V vertex, final E edge) {
+<span class="nc" id="L110">        return graph.isDest(vertex, edge);</span>
+    }
+
+    @Override
+    public final boolean addVertex(final V vertex) {
+<span class="nc" id="L115">        vertexmaps.put(vertex.getId(), vertex);</span>
+<span class="nc" id="L116">        return graph.addVertex(vertex);</span>
+    }
+
+    @Override
+    public final boolean addEdge(final E e, final V v1, final V v2) {
+<span class="nc" id="L121">        edgemaps.put(e.getId(), e);</span>
+<span class="nc" id="L122">        return graph.addEdge(e, v1, v2);</span>
+    }
+
+    @Override
+    public final boolean addEdge(final E e, final V v1, final V v2, final EdgeType edgeType) {
+<span class="nc" id="L127">        edgemaps.put(e.getId(), e);</span>
+<span class="nc" id="L128">        return graph.addEdge(e, v1, v2, edu.uci.ics.jung.graph.util.EdgeType.DIRECTED);</span>
+    }
+
+    @Override
+    public final Pair&lt;V, V&gt; getEndpoints(final E edge) {
+<span class="nc" id="L133">        final edu.uci.ics.jung.graph.util.Pair&lt;V&gt; endpoints = graph.getEndpoints(edge);</span>
+<span class="nc" id="L134">        return new Pair&lt;&gt;(endpoints.getFirst(), endpoints.getSecond());</span>
+    }
+
+    @Override
+    public final V getOpposite(final V vertex, final E edge) {
+<span class="nc" id="L139">        return graph.getOpposite(vertex, edge);</span>
+    }
+
+    @Override
+    public final int getVertexCount() {
+<span class="nc" id="L144">        return graph.getVertexCount();</span>
+    }
+
+    @Override
+    public final Collection&lt;V&gt; getVertices() {
+<span class="nc" id="L149">        return graph.getVertices();</span>
+    }
+
+    @Override
+    public final V getVertex(final String id) {
+<span class="nc" id="L154">        return vertexmaps.get(id);</span>
+    }
+
+    @Override
+    public final E getEdge(final String id) {
+<span class="nc" id="L159">        return edgemaps.get(id);</span>
+    }
+
+    @Override
+    public final Collection&lt;E&gt; getEdges() {
+<span class="nc" id="L164">        return graph.getEdges();</span>
+    }
+
+    @Override
+    public final boolean removeVertex(final V vertex) {
+<span class="nc" id="L169">        boolean removed = graph.removeVertex(vertex);</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">        if (removed) {</span>
+<span class="nc" id="L171">            vertexmaps.remove(vertex.id);</span>
+        }
+<span class="nc" id="L173">        return removed;</span>
+    }
+
+    @Override
+    public final boolean removeEdge(final E edge) {
+<span class="nc" id="L178">        boolean removed = graph.removeEdge(edge);</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        if (removed) {</span>
+<span class="nc" id="L180">            edgemaps.remove(edge.id);</span>
+        }
+<span class="nc" id="L182">        return removed;</span>
+    }
+
+    @Override
+    public final EdgeType getEdgeType() {
+<span class="nc" id="L187">        return EdgeType.DIRECTED;</span>
+    }
+
+    @Override
+    public final void addVertexAttribute(final String name, final Class type, final String defaultValue) {
+<span class="nc" id="L192">        vertexAttributes.add(new VertexAttribute(name, type, defaultValue));</span>
+<span class="nc" id="L193">    }</span>
+
+    @Override
+    public final void addEdgeAttribute(final String name, final Class type, final String defaultValue) {
+<span class="nc" id="L197">        edgeAttributes.add(new EdgeAttribute(name, type, defaultValue));</span>
+<span class="nc" id="L198">    }</span>
+
+    @Override
+    protected void finalize() throws Throwable {
+<span class="nc" id="L202">        super.finalize();</span>
+<span class="nc" id="L203">        graph.getEdges().clear();</span>
+<span class="nc" id="L204">        graph.getVertices().clear();</span>
+<span class="nc" id="L205">        vertexAttributes.clear();</span>
+<span class="nc" id="L206">        edgeAttributes.clear();</span>
+<span class="nc" id="L207">        vertexmaps.clear();</span>
+<span class="nc" id="L208">        edgemaps.clear();</span>
+<span class="nc" id="L209">    }</span>
+
+<span class="nc" id="L211">    @Getter</span>
+    private final Collection&lt;VertexAttribute&gt; vertexAttributes = new ArrayList&lt;&gt;();
+<span class="nc" id="L213">    @Getter</span>
+    private final Collection&lt;EdgeAttribute&gt; edgeAttributes = new ArrayList&lt;&gt;();
+    private final DirectedSparseMultigraph&lt;V, E&gt; graph;
+    private final HashMap&lt;String, V&gt; vertexmaps;
+    private final HashMap&lt;String, E&gt; edgemaps;
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

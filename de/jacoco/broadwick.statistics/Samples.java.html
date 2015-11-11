@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Samples.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.statistics</a> &gt; <span class="el_source">Samples.java</span></div><h1>Samples.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.statistics;
+
+import java.io.Serializable;
+import java.text.DecimalFormat;
+
+/**
+ * This class collects data values and calculates their mean and variance.
+ */
+public class Samples implements Serializable {
+
+    /**
+     * Empty object where the internal values are initialised to 0. Getting any statistics from this object will result
+     * in a divide by zero exceptions since there are zero elements in the accumulator.
+     */
+<span class="fc" id="L30">    public Samples() {</span>
+<span class="fc" id="L31">        sum = 0.0;</span>
+<span class="fc" id="L32">        sumSqr = 0.0;</span>
+<span class="fc" id="L33">        product = 0.0;</span>
+<span class="fc" id="L34">        sumInv = 0.0;</span>
+<span class="fc" id="L35">        total = 0;</span>
+<span class="fc" id="L36">    }</span>
+
+    /**
+     * Initialise the internal values of the accumulator with the argument given.
+     * @param value the value to initialise the internal variables.
+     */
+<span class="nc" id="L42">    public Samples(final double value) {</span>
+<span class="nc" id="L43">        sum = value;</span>
+<span class="nc" id="L44">        sumSqr = value * value;</span>
+<span class="nc" id="L45">        product = value;</span>
+<span class="nc" id="L46">        sumInv = 1.0 / value;</span>
+<span class="nc" id="L47">        total = 1;</span>
+<span class="nc" id="L48">    }</span>
+
+    /**
+     * Add an observable (value) to the accumulator.
+     * @param value add the value to the accumulated values.
+     * @return the current accumulator object.
+     */
+    public final Samples add(final double value) {
+<span class="fc" id="L56">        sum += value;</span>
+<span class="fc" id="L57">        sumSqr += (value * value);</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        product = (product == 0) ? value : product * value;</span>
+<span class="fc" id="L59">        sumInv += (1.0 / value);</span>
+<span class="fc" id="L60">        total++;</span>
+<span class="fc" id="L61">        return this;</span>
+    }
+
+    /**
+     * Add the contents of anther accumulator to this accumulator.
+     * @param value add the value to the accumulated values.
+     * @return the current accumulator object.
+     */
+    public final Samples add(final Samples value) {
+<span class="fc" id="L70">        sum += value.sum;</span>
+<span class="fc" id="L71">        sumSqr += value.sumSqr;</span>
+<span class="fc" id="L72">        product += value.product;</span>
+<span class="fc" id="L73">        sumInv += value.sumInv;</span>
+<span class="fc" id="L74">        total += value.getSize();</span>
+<span class="fc" id="L75">        return this;</span>
+    }
+
+    /**
+     * Obtain the mean of the set of observables in the accumulator.
+     * @return double the mean in the observed values.
+     */
+    public final double getMean() {
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        final int tot = (total == 0) ? 1 : total;</span>
+<span class="fc" id="L84">        return sum / tot;</span>
+    }
+
+    /**
+     * Obtain the root mean square of the set of observables in the accumulator.
+     * @return double the root mean square in the observed values.
+     */
+    public final double getRootMeanSquare() {
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">        final int tot = (total == 0) ? 1 : total;</span>
+<span class="fc" id="L93">        return Math.sqrt(sumSqr / tot);</span>
+    }
+
+    /**
+     * Obtain the geometric mean of the set of observables in the accumulator.
+     * @return double the geometric mean in the observed values.
+     */
+    public final double getGeometricMean() {
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        final int tot = (total == 0) ? 1 : total;</span>
+<span class="fc" id="L102">        return Math.pow(product, 1.0 / tot);</span>
+    }
+
+    /**
+     * Obtain the harmonic mean of the set of observables in the accumulator.
+     * @return double the harmonic mean in the observed values.
+     */
+    public final double getHarmonicMean() {
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">        final double inv = (sumInv == 0) ? 1 : sumInv;</span>
+<span class="fc" id="L111">        return total / inv;</span>
+    }
+
+    /**
+     * Get the sum of the values held in the accumulator.
+     * @return the sum of all the values added to the accumulator.
+     */
+    public final double getSum() {
+<span class="fc" id="L119">        return sum;</span>
+    }
+
+    /**
+     * Get the number of items added to the Accumulator.
+     * @return the number of items added to the Accumulator.
+     */
+    public final int getSize() {
+<span class="fc" id="L127">        return total;</span>
+    }
+
+    /**
+     * Default sample variance implementation based on the second moment \f$ M_n^{(2)} \f$ moment&lt;2&gt;, mean and count.
+     * \f[ \sigma_n^2 = M_n^{(2)} - \mu_n^2. \f] where \f[ \mu_n = \frac{1}{n} \sum_{i = 1}^n x_i. \f] is the estimate
+     * of the sample mean and \f$n\f$ is the number of samples.
+     * @return double the variance of the observed values.
+     */
+    public final double getVariance() {
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        final int tot = (total == 0) ? 1 : total;</span>
+<span class="fc" id="L138">        final double mn = sum / tot;</span>
+
+<span class="fc" id="L140">        return (sumSqr / tot - (mn * mn)) / tot;</span>
+    }
+
+    /**
+     * Obtain the standard deviation (error in the mean) of the set of observeables in the accumulator.
+     * @return double the standard deviation in the observed values.
+     */
+    public final double getStdDev() {
+<span class="fc" id="L148">        return Math.sqrt(this.getVariance());</span>
+    }
+
+    /**
+     * Clear the contents of the accumulator. Sets all the internal counts back to zero.
+     */
+    public final void clear() {
+<span class="fc" id="L155">        sum = 0.0;</span>
+<span class="fc" id="L156">        sumSqr = 0.0;</span>
+<span class="fc" id="L157">        product = 0.0;</span>
+<span class="fc" id="L158">        sumInv = 0.0;</span>
+<span class="fc" id="L159">        total = 0;</span>
+<span class="fc" id="L160">    }</span>
+
+    /**
+     * Get a tab delimited string of the mean and standard deviation of the values in the accumulator.
+     * @return a string in the form &quot;\tmean\tdev&quot;
+     */
+    public final String getSummary() {
+<span class="fc" id="L167">        final StringBuilder sb = new StringBuilder(10);</span>
+<span class="fc" id="L168">        sb.append(&quot;\t&quot;).append(new DecimalFormat(&quot;0.0000E0&quot;).format(getMean()));</span>
+<span class="fc" id="L169">        sb.append(&quot;\t&quot;).append(new DecimalFormat(&quot;0.0000E0&quot;).format(getStdDev()));</span>
+<span class="fc" id="L170">        return sb.toString();</span>
+    }
+
+<span class="pc" id="L173">    private double sum = 0.0; // The sum of all values added to the accumulator.</span>
+<span class="pc" id="L174">    private double sumSqr = 0.0; // The sum of all values squared added to the accumulator.</span>
+<span class="pc" id="L175">    private double product = 0.0; // The product of all values added to the accumulator.</span>
+<span class="pc" id="L176">    private double sumInv = 0.0; // The sum of the 1/value.</span>
+<span class="pc" id="L177">    private int total = 0; // The total number of values added to the accumulator.</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

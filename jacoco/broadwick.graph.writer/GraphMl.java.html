@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>GraphMl.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.graph.writer</a> &gt; <span class="el_source">GraphMl.java</span></div><h1>GraphMl.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2014 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.graph.writer;
+
+import broadwick.graph.Edge;
+import broadwick.graph.EdgeAttribute;
+import broadwick.graph.Graph;
+import broadwick.graph.Vertex;
+import broadwick.graph.VertexAttribute;
+import broadwick.io.FileOutput;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.UnmodifiableIterator;
+import java.util.Iterator;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
+
+/**
+ * Simple class to write the nodes/edges of a network in graphML format.
+ */
+public final class GraphMl {
+
+    /**
+     * hidden constructor for static class.
+     */
+<span class="nc" id="L41">    private GraphMl() {</span>
+        // no constructor
+<span class="nc" id="L43">    }</span>
+
+    /**
+     * Get the string representation of the network.
+     * @param network  the network object to be written.
+     * @param directed a boolean flag, true if the network is directed.
+     * @return a string representing a document.
+     */
+    public static String toString(final Graph&lt;? extends Vertex, ? extends Edge&lt;?&gt;&gt; network, final boolean directed) {
+        // graphml document header
+<span class="nc" id="L53">        final Element graphml = new Element(&quot;graphml&quot;, &quot;http://graphml.graphdrawing.org/xmlns&quot;);</span>
+<span class="nc" id="L54">        final Document document = new Document(graphml);</span>
+<span class="nc" id="L55">        final Namespace xsi = Namespace.getNamespace(&quot;xsi&quot;, &quot;http://www.w3.org/2001/XMLSchema-instance&quot;);</span>
+<span class="nc" id="L56">        final Namespace schemLocation = Namespace.getNamespace(&quot;schemLocation&quot;, &quot;http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0rc/graphml.xsd&quot;);</span>
+
+        // add Namespace
+<span class="nc" id="L59">        graphml.addNamespaceDeclaration(xsi);</span>
+<span class="nc" id="L60">        graphml.addNamespaceDeclaration(schemLocation);</span>
+
+        // keys for graphic representation
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        for (VertexAttribute attr : network.getVertexAttributes()) {</span>
+<span class="nc" id="L64">            final Element element = new Element(&quot;key&quot;);</span>
+<span class="nc" id="L65">            element.setAttribute(&quot;id&quot;, attr.getName());</span>
+<span class="nc" id="L66">            element.setAttribute(&quot;for&quot;, &quot;node&quot;);</span>
+<span class="nc" id="L67">            element.setAttribute(&quot;attr.name&quot;, attr.getName());</span>
+<span class="nc" id="L68">            element.setAttribute(&quot;attr.type&quot;, attr.getType().getName());</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">            if (attr.getDefaultValue() != null) {</span>
+<span class="nc" id="L70">                final Element defaultValueElement = new Element(&quot;default&quot;);</span>
+<span class="nc" id="L71">                defaultValueElement.addContent(attr.getDefaultValue().toString());</span>
+<span class="nc" id="L72">                element.addContent(defaultValueElement);</span>
+            }
+<span class="nc" id="L74">            graphml.addContent(element);</span>
+<span class="nc" id="L75">        }</span>
+
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        for (EdgeAttribute attr : network.getEdgeAttributes()) {</span>
+<span class="nc" id="L78">            final Element element = new Element(&quot;key&quot;);</span>
+<span class="nc" id="L79">            element.setAttribute(&quot;id&quot;, attr.getName());</span>
+<span class="nc" id="L80">            element.setAttribute(&quot;for&quot;, &quot;edge&quot;);</span>
+<span class="nc" id="L81">            element.setAttribute(&quot;attr.name&quot;, attr.getName());</span>
+<span class="nc" id="L82">            element.setAttribute(&quot;attr.type&quot;, attr.getType().getName());</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">            if (attr.getDefaultValue() != null) {</span>
+<span class="nc" id="L84">                final Element defaultValueElement = new Element(&quot;default&quot;);</span>
+<span class="nc" id="L85">                defaultValueElement.addContent(attr.getDefaultValue());</span>
+<span class="nc" id="L86">                element.addContent(defaultValueElement);</span>
+            }
+<span class="nc" id="L88">            graphml.addContent(element);</span>
+<span class="nc" id="L89">        }</span>
+
+<span class="nc" id="L91">        final Element graph = new Element(&quot;graph&quot;);</span>
+<span class="nc" id="L92">        graph.setAttribute(&quot;id&quot;, &quot;G&quot;);</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        if (directed) {</span>
+<span class="nc" id="L94">            graph.setAttribute(&quot;edgedefault&quot;, &quot;directed&quot;);</span>
+        } else {
+<span class="nc" id="L96">            graph.setAttribute(&quot;edgedefault&quot;, &quot;undirected&quot;);</span>
+        }
+<span class="nc" id="L98">        graphml.addContent(graph);</span>
+
+<span class="nc" id="L100">        final ImmutableList&lt;Vertex&gt; vertices = ImmutableList.copyOf(network.getVertices());</span>
+<span class="nc" id="L101">        final Iterator&lt;Vertex&gt; vertexIterator = vertices.iterator();</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        while (vertexIterator.hasNext()) {</span>
+<span class="nc" id="L103">            final Vertex vertex = vertexIterator.next();</span>
+<span class="nc" id="L104">            addNode(vertex, graph);</span>
+<span class="nc" id="L105">        }</span>
+
+        final ImmutableList&lt;Edge&lt;? extends Vertex&gt;&gt; edges;
+<span class="nc" id="L108">        edges = (ImmutableList&lt;Edge&lt;? extends Vertex&gt;&gt;) ImmutableList.copyOf(network.getEdges());</span>
+<span class="nc" id="L109">        final UnmodifiableIterator&lt;Edge&lt;? extends Vertex&gt;&gt; edgeIterator = edges.iterator();</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        while (edgeIterator.hasNext()) {</span>
+<span class="nc" id="L111">            addEdge(edgeIterator.next(), graph);</span>
+        }
+
+<span class="nc" id="L114">        final XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());</span>
+<span class="nc" id="L115">        return outputter.outputString(document).replaceAll(&quot;xmlns=\&quot;\&quot; &quot;, &quot;&quot;);</span>
+    }
+
+    /**
+     * Get the string representation of the network.
+     * @param network the network object to be written.
+     * @return a string representing a document.
+     */
+    public static String toString(final Graph&lt;? extends Vertex, ? extends Edge&lt;?&gt;&gt; network) {
+<span class="nc" id="L124">        return GraphMl.toString(network, false);</span>
+    }
+
+    /**
+     * Save the graph as in graphML format in the given file.
+     * @param network the network object to be saved.
+     * @param file    the name of the file in which the graph will be saved.
+     */
+    public static void save(final String file, final Graph&lt;? extends Vertex, ? extends Edge&lt;Vertex&gt;&gt; network) {
+<span class="nc" id="L133">        try (FileOutput fo = new FileOutput(file)) {</span>
+<span class="nc" id="L134">            fo.write(GraphMl.toString(network));</span>
+<span class="nc bnc" id="L135" title="All 8 branches missed.">        }</span>
+<span class="nc" id="L136">    }</span>
+
+    /**
+     * Add an edge to the graphML document.
+     * @param edge    the edge to be added to the graph element.
+     * @param element the graph element of the graphML document
+     */
+    private static void addEdge(final Edge edge, final Element element) {
+
+<span class="nc" id="L145">        final String id = edge.getId();</span>
+
+<span class="nc" id="L147">        final String source = edge.getSource().getId();</span>
+<span class="nc" id="L148">        final String target = edge.getDestination().getId();</span>
+
+<span class="nc" id="L150">        final Element elem = new Element(&quot;edge&quot;);</span>
+<span class="nc" id="L151">        elem.setAttribute(&quot;id&quot;, &quot;e&quot; + id);</span>
+<span class="nc" id="L152">        elem.setAttribute(&quot;source&quot;, source);</span>
+<span class="nc" id="L153">        elem.setAttribute(&quot;target&quot;, target);</span>
+
+<span class="nc bnc" id="L155" title="All 2 branches missed.">        for (final Iterator it = edge.getAttributes().iterator(); it.hasNext();) {</span>
+<span class="nc" id="L156">            final EdgeAttribute attr = (EdgeAttribute) it.next();</span>
+<span class="nc" id="L157">            final Element data = new Element(&quot;data&quot;);</span>
+<span class="nc" id="L158">            data.setAttribute(&quot;key&quot;, attr.getName());</span>
+<span class="nc" id="L159">            data.setText(attr.getValue());</span>
+<span class="nc" id="L160">            elem.addContent(data);</span>
+<span class="nc" id="L161">        }</span>
+
+<span class="nc" id="L163">        element.addContent(elem);</span>
+<span class="nc" id="L164">    }</span>
+
+    /**
+     * Add a node to the graphML document.
+     * @param vertex  the id of the node.
+     * @param element the graph element of the graphML document.
+     */
+    private static void addNode(final Vertex vertex, final Element element) {
+<span class="nc" id="L172">        final Element node = new Element(&quot;node&quot;);</span>
+<span class="nc" id="L173">        node.setAttribute(&quot;id&quot;, vertex.getId());</span>
+
+<span class="nc bnc" id="L175" title="All 2 branches missed.">        for (VertexAttribute attr : vertex.getAttributes()) {</span>
+<span class="nc" id="L176">            final Element data = new Element(&quot;data&quot;);</span>
+<span class="nc" id="L177">            data.setAttribute(&quot;key&quot;, attr.getName());</span>
+<span class="nc" id="L178">            data.setText(attr.getValue().toString());</span>
+<span class="nc" id="L179">            node.addContent(data);</span>
+<span class="nc" id="L180">        }</span>
+
+<span class="nc" id="L182">        element.addContent(node);</span>
+<span class="nc" id="L183">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

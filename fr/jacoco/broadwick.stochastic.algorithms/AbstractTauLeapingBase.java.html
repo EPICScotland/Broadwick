@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>AbstractTauLeapingBase.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.stochastic.algorithms</a> &gt; <span class="el_source">AbstractTauLeapingBase.java</span></div><h1>AbstractTauLeapingBase.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.stochastic.algorithms;
+
+import broadwick.rng.RNG;
+import broadwick.stochastic.AmountManager;
+import broadwick.stochastic.SimulationEvent;
+import broadwick.stochastic.StochasticSimulator;
+import broadwick.stochastic.TransitionKernel;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Abstract base class for tau leaping classes.
+ */
+<span class="nc" id="L30">@Slf4j</span>
+public abstract class AbstractTauLeapingBase extends StochasticSimulator {
+
+    /**
+     * Create the tau-leaping object.
+     * @param amountManager the amount manager used in the simulator.
+     * @param transitionKernel the transition kernel to be used with the stochastic solver.
+     */
+    public AbstractTauLeapingBase(final AmountManager amountManager, final TransitionKernel transitionKernel) {
+<span class="nc" id="L39">        super(amountManager, transitionKernel);</span>
+<span class="nc" id="L40">    }</span>
+
+    /**
+     * Update all the reactions/transitions that have occurred in the tau step.
+     * @param tau the step size.
+     */
+    protected final void updateStates(final double tau) {
+<span class="nc" id="L47">        log.trace(&quot;AbstractTauLeapingBase: Updating states at {} using a step size of {}&quot;, getCurrentTime(), tau);</span>
+<span class="nc" id="L48">        final Set&lt;SimulationEvent&gt; transitionEvents = new LinkedHashSet&lt;&gt;();</span>
+<span class="nc" id="L49">        transitionEvents.addAll(getTransitionKernel().getTransitionEvents());</span>
+        
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        for (SimulationEvent event : transitionEvents) {</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">            if (getTransitionKernel().getTransitionEvents().contains(event)) {</span>
+<span class="nc" id="L53">                final double rate = getTransitionKernel().getTransitionProbability(event);</span>
+<span class="nc" id="L54">                final double times = GENERATOR.getPoisson(rate * tau);</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">                if (times &gt; 0) {</span>
+<span class="nc" id="L56">                    log.trace(&quot;Updating states {}&quot;, new StringBuilder()</span>
+<span class="nc" id="L57">                            .append(&quot;for event &quot;).append(event.toString())</span>
+<span class="nc" id="L58">                            .append(&quot;, rate = &quot;).append(rate)</span>
+<span class="nc" id="L59">                            .append(&quot;, times = &quot;).append(times)</span>
+<span class="nc" id="L60">                            .toString());</span>
+<span class="nc" id="L61">                    doEvent(event, getCurrentTime(), (int) Math.round(times));</span>
+<span class="nc" id="L62">                    log.trace(&quot;fired event {} {} time(s)&quot;, event, times);</span>
+                }
+            }
+<span class="nc" id="L65">        }</span>
+<span class="nc" id="L66">    }</span>
+
+    /**
+     * Determine of there is a theta event in the current time step, taking into
+     * account possible reverse time jumps.
+     * @param tau the time interval (will be negative for reverse time).
+     * @return true if a theta event is found.
+     */
+    protected final boolean isThetaEventInCurrentStep(final double tau) {
+<span class="nc" id="L75">        final double nextEventTime = getNextThetaEventTime();</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        if (reverseTime) {</span>
+<span class="nc bnc" id="L77" title="All 4 branches missed.">            return getCurrentTime() &gt;= nextEventTime &amp;&amp; getCurrentTime() + tau &lt; nextEventTime;</span>
+        } else {
+<span class="nc bnc" id="L79" title="All 4 branches missed.">            return getCurrentTime() &lt;= nextEventTime &amp;&amp; getCurrentTime() + tau &gt; nextEventTime;</span>
+        }
+    }
+<span class="nc" id="L82">    protected static final RNG GENERATOR = new RNG(RNG.Generator.Well19937c);</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

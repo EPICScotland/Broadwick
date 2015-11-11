@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>TruncatedNormalDistribution.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.statistics.distributions</a> &gt; <span class="el_source">TruncatedNormalDistribution.java</span></div><h1>TruncatedNormalDistribution.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2015 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.statistics.distributions;
+
+import broadwick.rng.RNG;
+import lombok.Getter;
+
+/**
+ * An implementation of the truncated normal distribution, i.e. a normal distribution whose value is bounded either
+ * above, below or both.
+ * &lt;p&gt;
+ * References:&lt;/p&gt;&lt;p&gt;
+ * &lt;ul&gt;
+ * &lt;li&gt;&lt;a href=&quot;http://mathworld.wolfram.com/NormalDistribution.html&quot;&gt; Normal Distribution&lt;/a&gt;&lt;/li&gt;
+ * &lt;/ul&gt;
+ */
+public class TruncatedNormalDistribution implements ContinuousDistribution {
+
+    /**
+     * Create an instance of the normal distribution distribution truncated to given limits.
+     * @param mean the mean of the normal distribution.
+     * @param sd   the standard deviation of the distribution.
+     * @param lb   the lower bound of the distribution, no values lower than this will be returned.
+     * @param ub   the upper bound of the distribution, no values higher1 than this will be returned.
+     */
+    public TruncatedNormalDistribution(final double mean, final double sd,
+<span class="nc" id="L40">                                       final double lb, final double ub) {</span>
+
+<span class="nc bnc" id="L42" title="All 8 branches missed.">        if (mean == Double.NaN || sd == Double.NaN</span>
+            || lb == Double.NaN || ub == Double.NaN) {
+<span class="nc" id="L44">            throw new IllegalArgumentException(&quot;Invalid argument: TruncatedNormalDistribution cannot take NaN as argument&quot;);</span>
+        }
+
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        if (lb &gt; ub) {</span>
+<span class="nc" id="L48">            throw new IllegalArgumentException(&quot;Invalid argument: lower bound greater than upper bound&quot;);</span>
+        }
+
+<span class="nc" id="L51">        this.mean = mean;</span>
+<span class="nc" id="L52">        this.sd = sd;</span>
+<span class="nc" id="L53">        this.lower = lb;</span>
+<span class="nc" id="L54">        this.upper = ub;</span>
+<span class="nc" id="L55">        this.generator = new RNG(RNG.Generator.Well19937c);</span>
+<span class="nc" id="L56">    }</span>
+
+    @Override
+    public double sample() {
+
+        // Sample using the method of C.P. Robert (doi: 10.1007/BF00143942, arXiv:0907.4010 [stat.CO])
+<span class="nc" id="L62">        double x = Double.NaN;</span>
+<span class="nc" id="L63">        double rho = 0.0;</span>
+<span class="nc" id="L64">        double u = generator.getDouble();</span>
+
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        while (u &gt; rho) {</span>
+<span class="nc" id="L67">            double z = generator.getDouble(lower, upper);</span>
+<span class="nc bnc" id="L68" title="All 4 branches missed.">            if (0 &gt; lower &amp;&amp; 0 &lt; upper) {</span>
+<span class="nc" id="L69">                rho = Math.exp(-z * z / 2.0);</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">            } else if (upper &lt; 0) {</span>
+<span class="nc" id="L71">                rho = Math.exp(((upper * upper) - (z * z)) / 2.0);</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">            } else if (0 &lt; lower) {</span>
+<span class="nc" id="L73">                rho = Math.exp(((lower * lower) - (z * z)) / 2.0);</span>
+            }
+
+<span class="nc" id="L76">            u = generator.getDouble();</span>
+<span class="nc" id="L77">            x = z;</span>
+<span class="nc" id="L78">        }</span>
+
+<span class="nc" id="L80">        return x;</span>
+    }
+
+    public double rejectionSample() {
+        // use a simple rejection sampling
+<span class="nc" id="L85">        final Normal dist = new Normal(mean, sd);</span>
+<span class="nc" id="L86">        double val = dist.sample();</span>
+
+<span class="nc bnc" id="L88" title="All 4 branches missed.">        while (val &lt; lower || val &gt; upper) {</span>
+<span class="nc" id="L89">            val = dist.sample();</span>
+        }
+<span class="nc" id="L91">        return val;</span>
+    }
+
+<span class="nc" id="L94">    @Getter</span>
+    private double mean;
+<span class="nc" id="L96">    @Getter</span>
+    private double sd;
+    private double lower;
+    private double upper;
+    private RNG generator;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

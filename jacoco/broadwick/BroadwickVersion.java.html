@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>BroadwickVersion.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick</a> &gt; <span class="el_source">BroadwickVersion.java</span></div><h1>BroadwickVersion.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * This is a simple class to obtain the version number of the project from the manifest file of the packaged jar.
+ * To locate the version and build information of the framework, we locate the jar in which this object resides and
+ * interrogate the Manifest.MF file of that jar for the build info. This approach depends very much on how the jar 
+ * file is used, for example, if the project using the jar in which this framework is delivered uses one-jar (and the 
+ * maven plug-in top use this) then the framework jar is contained neatly with the other dependent jars. Using the
+ * maven assembly plug-in though expands the dependent jar files (and overwrites the manifest files and any other 
+ * files with duplicate names it finds) so that at best the manifest file that is found will be the one of the project
+ * using the framework and it is that build info that will be displayed and NOT the frameworks.
+ */
+<span class="nc" id="L36">@Slf4j</span>
+public final class BroadwickVersion {
+
+    static {
+<span class="nc" id="L40">        version = new BroadwickVersion();</span>
+<span class="nc" id="L41">    }</span>
+
+    /**
+     * Private constructor to provide a singleton instance.
+     */
+<span class="nc" id="L46">    private BroadwickVersion() {</span>
+<span class="nc" id="L47">    }</span>
+
+    /**
+     * Get the implementation number defined in the Manifest.MF of the jar. The build process get the label/tag of the
+     * most recent commit to the SCM and adds it as the implementation number to the jars manifest.
+     * @return the project version number that is obtained from the SCM.
+     */
+    public static String getImplementationVersion() {
+<span class="nc" id="L55">        return BroadwickVersion.getImplementationVersion(getManifest());</span>
+    }
+
+    /**
+     * Get the build time in the Manifest.MF of the jar. The build process adds the time of the build to the jars
+     * manifest.
+     * @return the project build timestamp that is obtained from the SCM.
+     */
+    public static String getImplementationTimeStamp() {
+<span class="nc" id="L64">        return BroadwickVersion.getImplementationTimeStamp(getManifest());</span>
+    }
+
+    /**
+     * Get the object corresponding to the Manifest.mf file.
+     * @return the object for the Manifest file.
+     */
+    private static Manifest getManifest() {
+<span class="nc" id="L72">        Manifest manifest = null;</span>
+        try {
+            // First find the jar that contains this object.
+<span class="nc" id="L75">            final String className = version.getClass().getSimpleName() + &quot;.class&quot;;</span>
+<span class="nc" id="L76">            final String classPath = version.getClass().getResource(className).toString();</span>
+<span class="nc" id="L77">            final String manifestPath = classPath.substring(0, classPath.lastIndexOf('!') + 1) + &quot;/META-INF/MANIFEST.MF&quot;;</span>
+
+<span class="nc bnc" id="L79" title="All 2 branches missed.">            if (classPath.startsWith(&quot;jar&quot;)) {</span>
+
+                // Find the manifest path in the list of resources in the current jar file.
+<span class="nc" id="L82">                final Enumeration&lt;URL&gt; allManifestFilesInJar = version.getClass().getClassLoader().getResources(java.util.jar.JarFile.MANIFEST_NAME);</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">                while (allManifestFilesInJar.hasMoreElements()) {</span>
+<span class="nc" id="L84">                    final URL element = allManifestFilesInJar.nextElement();</span>
+
+<span class="nc bnc" id="L86" title="All 2 branches missed.">                    if (element.toString().equals(manifestPath)) {</span>
+<span class="nc" id="L87">                        manifest = new Manifest(element.openStream());</span>
+<span class="nc" id="L88">                        break;</span>
+                    }
+<span class="nc" id="L90">                }</span>
+            }
+<span class="nc" id="L92">        } catch (IOException ex) {</span>
+<span class="nc" id="L93">            log.error(&quot;Cannot read manifest file, {}&quot;, ex.getLocalizedMessage());</span>
+<span class="nc" id="L94">        }</span>
+<span class="nc" id="L95">        return manifest;</span>
+    }
+
+    /**
+     * Get the build timestamp from the supplied Manifest.mf file.
+     * @param manifest the manifest file containing the timestamp info.
+     * @return a string containing the project build timestamp.
+     */
+    private static String getImplementationTimeStamp(final Manifest manifest) {
+<span class="nc" id="L104">        final StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L105">        final Attributes attr = manifest.getMainAttributes();</span>
+
+<span class="nc" id="L107">        sb.append(attr.getValue(BUILD_TIMESTAMP));</span>
+
+<span class="nc" id="L109">        return sb.toString();</span>
+    }
+
+    /**
+     * Get the build version number from the supplied Manifest.mf file..
+     * @param manifest the manifest file containing the version info.
+     * @return a string containing the project version.
+     */
+    private static String getImplementationVersion(final Manifest manifest) {
+<span class="nc" id="L118">        final StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L119">        final Attributes attr = manifest.getMainAttributes();</span>
+
+<span class="nc" id="L121">        sb.append(attr.getValue(IMPL_VERSION));</span>
+<span class="nc" id="L122">        sb.append(String.format(BUILD_STRING_FORMAT, attr.getValue(IMPL_BUILD)));</span>
+
+<span class="nc" id="L124">        return sb.toString();</span>
+    }
+
+    /**
+     * Get the build version number and timestamp. This gets the following attributes in the manifest file
+     * &lt;code&gt;Implementation-Version&lt;/code&gt;
+     * &lt;code&gt;Implementation-Build&lt;/code&gt;
+     * &lt;code&gt;Build-timestamp&lt;/code&gt; If the manifest file is NOT the one for the framework (i.e. a model that utilises
+     * the framework) then it will report the versions of both.
+     * @return a string containing the version and timestamp.
+     */
+    public static String getVersionAndTimeStamp() {
+        try {
+<span class="nc" id="L137">            final Manifest manifest = getManifest();</span>
+<span class="nc" id="L138">            final StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L139">            final Attributes attr = manifest.getMainAttributes();</span>
+
+<span class="nc" id="L141">            sb.append(String.format(&quot;Version %s &quot;, attr.getValue(IMPL_VERSION)));</span>
+<span class="nc" id="L142">            sb.append(String.format(&quot;Build (%s - %s : %s) &quot;, InetAddress.getLocalHost().getHostName(),</span>
+<span class="nc" id="L143">                                    attr.getValue(IMPL_BUILD), attr.getValue(BUILD_TIMESTAMP)));</span>
+<span class="nc" id="L144">            return sb.toString();</span>
+<span class="nc" id="L145">        } catch (Exception e) {</span>
+<span class="nc" id="L146">            return &quot;UNKNOWN VERSION&quot;;</span>
+        }
+    }
+
+    private static BroadwickVersion version;
+    private static final String BUILD_STRING_FORMAT = &quot; : build %s &quot;;
+    private static final String IMPL_VERSION = &quot;Implementation-Version&quot;;
+    private static final String IMPL_BUILD = &quot;Implementation-Build&quot;;
+    private static final String BUILD_TIMESTAMP = &quot;Build-timestamp&quot;;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

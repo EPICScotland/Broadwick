@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MonteCarlo.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.montecarlo</a> &gt; <span class="el_source">MonteCarlo.java</span></div><h1>MonteCarlo.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2014 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.montecarlo;
+
+import broadwick.BroadwickException;
+import broadwick.rng.RNG;
+import broadwick.statistics.Samples;
+import broadwick.utils.CloneUtils;
+import com.google.common.base.Throwables;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
+
+/**
+ * An implementation of the Monte Carlo method, it runs many MonteCarloSimulations and gathers the statistics of their
+ * outputs. Note, each simulation object is cloned and each of these clones are run independently
+ * &lt;code&gt;numSimulations&lt;/code&gt; times.
+ */
+<span class="nc" id="L37">@Slf4j</span>
+public class MonteCarlo {
+
+    /**
+     * Create a Monte Carlo object that is capable of running &lt;code&gt;numSimulation&lt;/code&gt; MonteCarloScenarios.
+     * @param simulation     the simulation or scenario to be run.
+     * @param numSimulations the number of times the simulation should be run.
+     */
+<span class="nc" id="L45">    public MonteCarlo(final MonteCarloScenario simulation, final int numSimulations) {</span>
+<span class="nc" id="L46">        this.simulation = simulation;</span>
+<span class="nc" id="L47">        this.numSimulations = numSimulations;</span>
+<span class="nc" id="L48">        this.resultsConsumer = new MonteCarloDefaultResults();</span>
+<span class="nc" id="L49">    }</span>
+
+    /**
+     * Run the Monte Carlo simulations. Two threads (a producer and consumer) are created to asynchronously run the
+     * simulations (the producer) and to handle the results from each simulation as they are calculated (the consumer).
+     * The producer thread uses an execution pool to manage running each simulation and places the results on a queue
+     * which is monitored by a consumer thread to calculate the posterior distributions for the Monte Carlo run.
+     */
+    public final void run() {
+<span class="nc" id="L58">        final ArrayBlockingQueue&lt;MonteCarloResults&gt; queue = new ArrayBlockingQueue&lt;&gt;(numSimulations + 1);</span>
+        try {
+
+            //Creating Producer and Consumer Thread
+<span class="nc" id="L62">            final Thread producer = new Thread(new Producer(queue, simulation, numSimulations));</span>
+<span class="nc" id="L63">            final Thread consumer = new Thread(new Consumer(queue, resultsConsumer));</span>
+<span class="nc" id="L64">            producer.start();</span>
+<span class="nc" id="L65">            consumer.start();</span>
+
+<span class="nc" id="L67">            producer.join();</span>
+<span class="nc" id="L68">            consumer.join();</span>
+<span class="nc" id="L69">        } catch (Exception e) {</span>
+<span class="nc" id="L70">            log.error(&quot;Error joining Monte Carlo results {}&quot;, Throwables.getStackTraceAsString(e));</span>
+<span class="nc" id="L71">            throw new BroadwickException(&quot;Failed to run Monte Carlo simulation. &quot; + Throwables.getStackTraceAsString(e));</span>
+<span class="nc" id="L72">        }</span>
+
+<span class="nc" id="L74">        queue.clear();</span>
+<span class="nc" id="L75">    }</span>
+
+    /**
+     * Get a copy of the results from the simulation. This method MUST return a copy of the results NOT a reference.
+     * @return the MonteCarloResults object that contains the results of all the simulations.
+     */
+    public final MonteCarloResults getResults() {
+<span class="nc" id="L82">        return CloneUtils.deepClone(resultsConsumer);</span>
+    }
+
+    /**
+     * Set the consumer object for this Monte Carlo simulation. A consumer is simply a MonteCarloResults class that
+     * 'joins' each result that is consumes so that statistics can be calculated at the end of the simulation.
+     * @param consumer the results object to use as a consumer.
+     */
+    public final void setResultsConsumer(final MonteCarloResults consumer) {
+<span class="nc" id="L91">        resultsConsumer = consumer;</span>
+<span class="nc" id="L92">        resultsConsumer.reset();</span>
+<span class="nc" id="L93">    }</span>
+
+    @Override
+    public void finalize() throws Throwable {
+<span class="nc" id="L97">        super.finalize();</span>
+<span class="nc" id="L98">        resultsConsumer = null;</span>
+<span class="nc" id="L99">    }</span>
+
+    private final MonteCarloScenario simulation;
+    private MonteCarloResults resultsConsumer;
+    private final int numSimulations;
+}
+
+/**
+ * This class takes (or consumes) the results of a single simulation of the model and saves the results in a manner to
+ * allow statistics to be generated from the Monte Carlo simulation.
+ */
+<span class="nc" id="L110">@Slf4j</span>
+class Consumer implements Runnable {
+
+    /**
+     * Create the consumer object.
+     * @param queue         the queue that the consumer should check for values to consume.
+     * @param joinedResults the MonteCarloResults object to which the consumed results will be added.
+     */
+<span class="nc" id="L118">    public Consumer(final ArrayBlockingQueue&lt;MonteCarloResults&gt; queue, final MonteCarloResults joinedResults) {</span>
+<span class="nc" id="L119">        this.queue = queue;</span>
+<span class="nc" id="L120">        this.joinedResults = joinedResults;</span>
+<span class="nc" id="L121">        joinedResults.reset();</span>
+<span class="nc" id="L122">    }</span>
+
+    @Override
+    public void run() {
+<span class="nc" id="L126">        log.trace(&quot;Starting Monte Carlo results consumer thread&quot;);</span>
+
+        // it might seem that we should reset (or initialise) the consumer results object but
+        // the consumer object is created for each Monte Carlo step so is really not strictly necessary.
+<span class="nc" id="L130">        joinedResults.reset();</span>
+<span class="nc" id="L131">        final StopWatch sw = new StopWatch();</span>
+<span class="nc" id="L132">        sw.start();</span>
+
+        try {
+<span class="nc" id="L135">            MonteCarloResults results = null;</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            while (!(results instanceof Poison)) {</span>
+<span class="nc" id="L137">                results = queue.take();</span>
+
+<span class="nc bnc" id="L139" title="All 2 branches missed.">                if (!(results instanceof Poison)) {</span>
+<span class="nc" id="L140">                    numSimulationsFound++;</span>
+
+                    // get the MonteCarloResults from the q and calculate the statistics on it.
+<span class="nc" id="L143">                    joinedResults.join(results);</span>
+
+<span class="nc bnc" id="L145" title="All 2 branches missed.">                    if (log.isTraceEnabled()) {</span>
+<span class="nc" id="L146">                        log.trace(&quot;Monte Carlo consumer: consumed {}&quot;, results.getSamples().getSummary());</span>
+<span class="nc" id="L147">                        log.trace(&quot;Monte Carlo consumer: consumed {} results, expected value={}&quot;,</span>
+<span class="nc" id="L148">                                  numSimulationsFound, joinedResults.getExpectedValue());</span>
+                    }
+
+                    // we no longer require the results so allow the memory to be freed.
+<span class="nc" id="L152">                    results = null;</span>
+                }
+            }
+<span class="nc" id="L155">        } catch (java.lang.InterruptedException e) {</span>
+<span class="nc" id="L156">            log.error(&quot;Error consuming Monte Carlo Results {}&quot;, Throwables.getStackTraceAsString(e));</span>
+<span class="nc" id="L157">        }</span>
+<span class="nc" id="L158">        sw.stop();</span>
+<span class="nc" id="L159">        log.debug(&quot;Analysed {} simulation results in {}.&quot;, numSimulationsFound, sw);</span>
+<span class="nc" id="L160">    }</span>
+
+    @Override
+    public void finalize() throws Throwable {
+<span class="nc" id="L164">        super.finalize();</span>
+<span class="nc" id="L165">        joinedResults = null;</span>
+<span class="nc" id="L166">    }</span>
+
+    private final ArrayBlockingQueue&lt;MonteCarloResults&gt; queue;
+    private MonteCarloResults joinedResults;
+<span class="nc" id="L170">    private int numSimulationsFound = 0;</span>
+}
+
+/**
+ * This class runs a single simulation of the model to 'produce' results (hence the name). This runnable class is run
+ * many times to create a Monte Carlo simulation.
+ */
+<span class="nc" id="L177">@Slf4j</span>
+class Producer implements Runnable {
+
+    /**
+     * Create the producer object.
+     * @param queue          the queue on which the producers results are added.
+     * @param simulation     the model that will be run to produce results.
+     * @param numSimulations the number of simulations that are to be run and placed in the quque.
+     */
+    public Producer(final ArrayBlockingQueue&lt;MonteCarloResults&gt; queue, final MonteCarloScenario simulation,
+<span class="nc" id="L187">                    final int numSimulations) {</span>
+<span class="nc" id="L188">        this.queue = queue;</span>
+<span class="nc" id="L189">        this.simulation = simulation.copyOf();</span>
+<span class="nc" id="L190">        this.numSimulations = numSimulations;</span>
+<span class="nc" id="L191">    }</span>
+
+    @Override
+    public void run() {
+<span class="nc" id="L195">        log.trace(&quot;Starting Monte Carlo results producer thread&quot;);</span>
+        try {
+<span class="nc" id="L197">            final int poolSize = Runtime.getRuntime().availableProcessors();</span>
+<span class="nc" id="L198">            final ThreadFactory threadFactory = new ThreadFactoryBuilder()</span>
+<span class="nc" id="L199">                    .setNameFormat(&quot;MCScenarioProducer-%d&quot;)</span>
+<span class="nc" id="L200">                    .setDaemon(true)</span>
+<span class="nc" id="L201">                    .build();</span>
+<span class="nc" id="L202">            final ExecutorService es = Executors.newFixedThreadPool(poolSize, threadFactory);</span>
+<span class="nc" id="L203">            final RNG generator = new RNG(RNG.Generator.Well44497b);</span>
+
+<span class="nc" id="L205">            final StopWatch sw = new StopWatch();</span>
+<span class="nc" id="L206">            sw.start();</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">            for (int i = 0; i &lt; numSimulations; i++) {</span>
+<span class="nc" id="L208">                es.submit(new Runnable() {</span>
+                    @Override
+                    public void run() {
+                        try {
+<span class="nc" id="L212">                            log.trace(&quot;Monte Carlo producer: creating scenario object&quot;);</span>
+<span class="nc" id="L213">                            final MonteCarloScenario scenario = simulation.copyOf();</span>
+<span class="nc" id="L214">                            final MonteCarloResults results = scenario.run(generator.getInteger(0, Integer.MAX_VALUE - 1));</span>
+<span class="nc" id="L215">                            log.trace(&quot;Monte Carlo producer: generated results {}&quot;, results.getExpectedValue());</span>
+<span class="nc" id="L216">                            queue.put(results);</span>
+<span class="nc" id="L217">                        } catch (Exception e) {</span>
+<span class="nc" id="L218">                            log.error(&quot;Error running Monte Carlo simulation {}&quot;, Throwables.getStackTraceAsString(e));</span>
+<span class="nc" id="L219">                        }</span>
+<span class="nc" id="L220">                    }</span>
+                });
+            }
+<span class="nc" id="L223">            es.shutdown();</span>
+<span class="nc bnc" id="L224" title="All 2 branches missed.">            while (!es.isTerminated()) {</span>
+<span class="nc" id="L225">                es.awaitTermination(1, TimeUnit.SECONDS);</span>
+            }
+<span class="nc" id="L227">            queue.put(new Poison());</span>
+
+<span class="nc" id="L229">            sw.stop();</span>
+<span class="nc" id="L230">            log.info(&quot;Finished {} simulations in {}.&quot;, numSimulations, sw);</span>
+<span class="nc" id="L231">        } catch (Exception ex) {</span>
+<span class="nc" id="L232">            log.error(&quot;Monte Carlo simulation error: {}&quot;, Throwables.getStackTraceAsString(ex));</span>
+<span class="nc" id="L233">        }</span>
+<span class="nc" id="L234">    }</span>
+
+    @Override
+    public void finalize() throws Throwable {
+<span class="nc" id="L238">        super.finalize();</span>
+<span class="nc" id="L239">        simulation = null;</span>
+<span class="nc" id="L240">    }</span>
+
+    private final ArrayBlockingQueue&lt;MonteCarloResults&gt; queue;
+    private MonteCarloScenario simulation;
+    private final int numSimulations;
+}
+
+/**
+ * Poison object that causes the consumer of the MonteCarlo results to stop looking for objects on the queue.
+ */
+<span class="nc" id="L250">class Poison implements MonteCarloResults {</span>
+
+    @Override
+    public double getExpectedValue() {
+<span class="nc" id="L254">        return Double.NEGATIVE_INFINITY;</span>
+    }
+
+    @Override
+    public Samples getSamples() {
+<span class="nc" id="L259">        return new Samples();</span>
+    }
+
+    @Override
+    public String toCsv() {
+<span class="nc" id="L264">        return &quot;POISON&quot;;</span>
+    }
+
+    @Override
+    public final MonteCarloResults join(final MonteCarloResults results) {
+<span class="nc" id="L269">        return results;</span>
+    }
+
+    @Override
+    public void reset() {
+        // do nothing - this is a poison pill
+<span class="nc" id="L275">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

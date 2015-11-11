@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>TransitionKernel.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.stochastic</a> &gt; <span class="el_source">TransitionKernel.java</span></div><h1>TransitionKernel.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.stochastic;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Class that holds the transition kernel for a stochastic simulation. The kernel comprises of a map of SimulationEvents
+ * to the probability of that event occurring. This is NOT thread safe.
+ */
+<span class="nc" id="L28">@ToString</span>
+<span class="nc" id="L29">@Slf4j</span>
+public class TransitionKernel implements Cloneable {
+
+    /**
+     * Create a transition kernel object to hold the transition probabilities between vents.
+     */
+<span class="nc" id="L35">    public TransitionKernel() {</span>
+<span class="nc" id="L36">    }</span>
+
+    /**
+     * Copy this kernel object.
+     * @return a copy of this object.
+     * @throws CloneNotSupportedException if cloneable is not implemented.
+     * @see{@code Object.clone()}
+     */
+    @Override
+    public final Object clone() throws CloneNotSupportedException {
+<span class="nc" id="L46">        super.clone();</span>
+<span class="nc" id="L47">        final TransitionKernel newKernel = new TransitionKernel();</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        for (Map.Entry&lt;SimulationEvent, Double&gt; entry : kernel.entrySet()) {</span>
+<span class="nc" id="L49">            newKernel.addToKernel(entry.getKey(), entry.getValue());</span>
+<span class="nc" id="L50">        }</span>
+<span class="nc" id="L51">        return newKernel;</span>
+    } 
+    
+    /**
+     * Add the transition rate for a given event.
+     * @param event the event to be added to the kernel
+     * @param rate the rate at which this event occurs.
+     */
+    public final void addToKernel(final SimulationEvent event, final Double rate) {
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        if (rate &gt; 0.0) {</span>
+<span class="nc" id="L61">            double eventRate = rate;</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">            if (kernel.containsKey(event)) {</span>
+<span class="nc" id="L63">                eventRate += kernel.get(event);</span>
+<span class="nc" id="L64">                log.trace(&quot;Kernel already contains event {}, updating rate by {}&quot;, event, rate);</span>
+            } 
+<span class="nc" id="L66">            kernel.put(event, eventRate);</span>
+        }
+<span class="nc" id="L68">    }</span>
+
+    /**
+     * Clear all the events from the kernel.
+     */
+    public final void clear() {
+<span class="nc" id="L74">        kernel.clear();</span>
+<span class="nc" id="L75">    }</span>
+
+    /**
+     * Get the collection of events stored in the transition kernel. This actually returns the
+     * keyset from the transition rates since they are always present and will always be in the kernel.
+     * @return the events in the kernel.
+     */
+    public final Set&lt;SimulationEvent&gt; getTransitionEvents() {
+<span class="nc" id="L83">        return kernel.keySet();</span>
+    }
+
+    /**
+     * Get the probability of an event occurring.
+     * @param event the event
+     * @return the probability of the event occurring.
+     */
+    public final Double getTransitionProbability(final SimulationEvent event) {
+<span class="nc" id="L92">        return kernel.get(event);</span>
+    }
+
+    /**
+     * Set the transition probabilities between states.
+     * @param probabilities the new set of probabilities.
+     */
+    public final void setTransitionProbabilities(final Map&lt;SimulationEvent, Double&gt; probabilities) {
+<span class="nc" id="L100">        kernel.clear();</span>
+<span class="nc" id="L101">        kernel.putAll(probabilities);</span>
+<span class="nc" id="L102">    }</span>
+
+    /**
+     * Get the cumulativeDistFn for this transition kernel.
+     * @return the cumulativeDistFn;
+     */
+    public final Map&lt;SimulationEvent, Double&gt; getCDF() {
+
+<span class="nc" id="L110">        double cumulativeProb = 0.0;</span>
+<span class="nc" id="L111">        final Map&lt;SimulationEvent, Double&gt; cumulativeDistFn = new LinkedHashMap&lt;&gt;(5);</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        for (SimulationEvent e : getTransitionEvents()) {</span>
+<span class="nc" id="L113">            cumulativeProb += getTransitionProbability(e);</span>
+<span class="nc" id="L114">            cumulativeDistFn.put(e, cumulativeProb);</span>
+<span class="nc" id="L115">        }</span>
+
+<span class="nc" id="L117">        return cumulativeDistFn;</span>
+    }
+
+    // A collection of probabilities of progressing from one state to another.
+<span class="nc" id="L121">    private Map&lt;SimulationEvent, Double&gt; kernel = new LinkedHashMap&lt;&gt;(5);</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

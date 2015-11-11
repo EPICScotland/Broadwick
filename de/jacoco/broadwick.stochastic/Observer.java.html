@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Observer.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.stochastic</a> &gt; <span class="el_source">Observer.java</span></div><h1>Observer.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.stochastic;
+
+import java.util.Collection;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
+/**
+ * Implementing classes are used to observe certain aspects of simulations (stochastic processes). It is basically just
+ * an interface of methods that get called during a simulation together with some common methods useful for many types
+ * of observers.
+ * &lt;p/&gt;
+ * Some observers take repeats into account. If you repeat the simulations, they will yield average data.
+ * &lt;p/&gt;
+ * Each observer should override the
+ * &lt;code&gt;toString&lt;/code&gt; method which should return a string representation of its data.
+ * &lt;p/&gt;
+ * You can register a {@link PrintWriter} to the
+ * &lt;code&gt;Observer&lt;/code&gt;. If you have, the return value of
+ * &lt;code&gt;toString&lt;/code&gt; is printed if a simulation has finished.
+ * &lt;p/&gt;
+ * @author Florian Erhard (copied from FERN http://www.bio.ifi.lmu.de/FERN/)
+ * &lt;p/&gt;
+ */
+<span class="pc bpc" id="L39" title="13 of 14 branches missed.">@EqualsAndHashCode</span>
+@SuppressWarnings(&quot;squid:S1210&quot;)
+public abstract class Observer implements Comparable&lt;Observer&gt; {
+
+    /**
+     * Creates an observer dedicated to one process. The observer is NOT registered at the process, you have to call
+     * {@link Simulator#addObserver(Observer)} in order to do this.
+     * &lt;p/&gt;
+     * @param sim the process
+     */
+<span class="fc" id="L49">    public Observer(final StochasticSimulator sim) {</span>
+<span class="fc" id="L50">        this.process = sim;</span>
+<span class="fc" id="L51">    }</span>
+
+    @Override
+    public final int compareTo(final Observer o) {
+        // We really are only interested in determining if the Observers are equal so that a tree based table 
+        // can distinguish between observers. Order does NOT matter so we return 1 if the objects are not equal.
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        if (this == o) {</span>
+<span class="fc" id="L58">            return 0;</span>
+        }
+<span class="nc" id="L60">        return 1;</span>
+    }
+    
+    /**
+     * Gets called when the simulation has started after the initialization and before the termination condition is
+     * checked the first time.
+     */
+    public abstract void started();
+
+    /**
+     * Gets called after each termination check and before
+     * {@link Simulator#performStep(fern.simulation.controller.SimulationController)} is called.
+     */
+    public abstract void step();
+
+    /**
+     * Gets called when a simulation has finished, directly after the termination check.
+     */
+    public abstract void finished();
+
+    /**
+     * Gets called by simulators when a certain moment in time is reached. This moment in time has to be registered with
+     * the observer in the StochasticSimulator.
+     * @param thetaTime moment in time
+     * @param events    a collection of events that occur at thetaTime.
+     */
+    public abstract void theta(final double thetaTime, final Collection&lt;Object&gt; events);
+
+    /**
+     * Gets called before an event is triggered.
+     * @param event the event which is supposed to fire
+     * @param tau   the time the event occurs (at this time {@link Simulator#getTime()}
+     * @param times the number of firings
+     */
+    public abstract void observeEvent(final SimulationEvent event, final double tau, final int times);
+
+<span class="fc" id="L96">    @Getter</span>
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+    private StochasticSimulator process;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

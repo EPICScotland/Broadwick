@@ -1,0 +1,1048 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Lookup.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.data</a> &gt; <span class="el_source">Lookup.java</span></div><h1>Lookup.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.data;
+
+import broadwick.data.readers.BatchedMovementsFileReader;
+import broadwick.data.readers.DirectedMovementsFileReader;
+import broadwick.data.readers.FullMovementsFileReader;
+import broadwick.data.readers.LocationsFileReader;
+import broadwick.data.readers.PopulationsFileReader;
+import broadwick.data.readers.TestsFileReader;
+import com.google.common.base.Throwables;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Record1;
+import org.jooq.Record2;
+import org.jooq.Result;
+import org.jooq.conf.Settings;
+import org.jooq.exception.DataAccessException;
+import org.jooq.impl.DSL;
+
+/**
+ * This class works as an interface to the databases holding the movements, locations and animal data read from the
+ * configuration file. When the methods to retrieve all the data in the DB (e.g. getMovements()) are called the results
+ * are stored in a cache for speedier retrieval. This cache is not permanent however, freeing memory when required.
+ */
+<span class="nc" id="L53">@Slf4j</span>
+public final class Lookup {
+
+    /**
+     * Create the lookup object for accessing data in the internal databases.
+     * @param dbFacade the object that is responsible for accessing the internal databases.
+     */
+<span class="nc" id="L60">    public Lookup(final DatabaseImpl dbFacade) {</span>
+        try {
+<span class="nc" id="L62">            connection = dbFacade.getConnection();</span>
+<span class="nc" id="L63">            final Settings settings = new Settings();</span>
+<span class="nc" id="L64">            settings.setExecuteLogging(Boolean.FALSE);</span>
+<span class="nc" id="L65">            jooq = DSL.using(dbFacade.getConnection(), dbFacade.getDialect(), settings);</span>
+<span class="nc" id="L66">        } catch (SQLException e) {</span>
+<span class="nc" id="L67">            log.error(&quot;Could not create database lookup object. {}&quot;, Throwables.getStackTraceAsString(e));</span>
+<span class="nc" id="L68">        }</span>
+<span class="nc" id="L69">    }</span>
+
+    /**
+     * Get the number of tests stored in the internal database.
+     * @return the number of tests in the database.
+     */
+    public int getNumTests() {
+<span class="nc" id="L76">        int numTests = 0;</span>
+        try {
+<span class="nc" id="L78">            final Result&lt;Record1&lt;Integer&gt;&gt; fetch = jooq.selectCount().from(TestsFileReader.getTABLE_NAME()).fetch();</span>
+<span class="nc" id="L79">            numTests = fetch.get(0).value1();</span>
+<span class="nc" id="L80">        } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L81">            log.trace(&quot;Could not get number of tests - perhaps the table hasn't been created.&quot;);</span>
+<span class="nc" id="L82">        }</span>
+<span class="nc" id="L83">        return numTests;</span>
+    }
+
+    /**
+     * Get the number of animals stored in the internal database.
+     * @return the number of animals in the database.
+     */
+    public int getNumAnimals() {
+<span class="nc" id="L91">        int numAnimals = 0;</span>
+        try {
+<span class="nc" id="L93">            final Result&lt;Record1&lt;Integer&gt;&gt; fetch = jooq.selectCount().from(PopulationsFileReader.getLIFE_HISTORIES_TABLE_NAME()).fetch();</span>
+<span class="nc" id="L94">            numAnimals = fetch.get(0).value1();</span>
+<span class="nc" id="L95">        } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L96">            log.trace(&quot;Could not get number of animals - perhaps the table hasn't been created.&quot;);</span>
+<span class="nc" id="L97">        }</span>
+<span class="nc" id="L98">        return numAnimals;</span>
+    }
+
+    /**
+     * Get the number of locations stored in the internal database.
+     * @return the number of locations in the database.
+     */
+    public int getNumLocations() {
+<span class="nc" id="L106">        int numLocations = 0;</span>
+        try {
+<span class="nc" id="L108">            final Result&lt;Record1&lt;Integer&gt;&gt; fetch = jooq.selectCount().from(LocationsFileReader.getTABLE_NAME()).fetch();</span>
+<span class="nc" id="L109">            numLocations = fetch.get(0).value1();</span>
+<span class="nc" id="L110">        } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L111">            log.trace(&quot;Could not get number of locations - perhaps the table hasn't been created.&quot;);</span>
+<span class="nc" id="L112">        }</span>
+<span class="nc" id="L113">        return numLocations;</span>
+    }
+
+    /**
+     * Get the number of movements stored in the internal database.
+     * @return the number of movements in the database.
+     */
+    public int getNumMovements() {
+<span class="nc" id="L121">        int numMovements = 0;</span>
+
+        try {
+<span class="nc" id="L124">            numMovements = jooq.selectCount().from(BatchedMovementsFileReader.getTABLE_NAME()).fetch().get(0).value1();</span>
+<span class="nc" id="L125">        } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L126">            log.trace(&quot;Could not get number of movements from {} - perhaps the table hasn't been created.&quot;,</span>
+<span class="nc" id="L127">                      BatchedMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L128">        }</span>
+        try {
+<span class="nc" id="L130">            numMovements += jooq.selectCount().from(FullMovementsFileReader.getTABLE_NAME()).fetch().get(0).value1();</span>
+<span class="nc" id="L131">        } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L132">            log.trace(&quot;Could not get number of movements from {} - perhaps the table hasn't been created.&quot;,</span>
+<span class="nc" id="L133">                      FullMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L134">        }</span>
+        try {
+<span class="nc" id="L136">            numMovements += jooq.selectCount().from(DirectedMovementsFileReader.getTABLE_NAME()).fetch().get(0).value1();</span>
+<span class="nc" id="L137">        } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L138">            log.trace(&quot;Could not get number of movements from {} - perhaps the table hasn't been created.&quot;,</span>
+<span class="nc" id="L139">                      DirectedMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L140">        }</span>
+<span class="nc" id="L141">        return numMovements;</span>
+    }
+
+    /**
+     * Get the number of movements stored in the internal database filtered on a date range.
+     * @param startDate the first date in the range with which we will filter the movements
+     * @param endDate   the final date in the range with which we will filter the movements
+     * @return a collection of movement events that have been recorded.
+     */
+    public int getNumMovements(final int startDate, final int endDate) {
+<span class="nc" id="L151">        int numMovements = 0;</span>
+
+        try {
+<span class="nc" id="L154">            numMovements = jooq.selectCount().from(BatchedMovementsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L155">                    .where(String.format(&quot;%s &gt;= %d and %s &lt;= %d&quot;,</span>
+<span class="nc" id="L156">                                         BatchedMovementsFileReader.getDEPARTURE_DATE(), startDate,</span>
+<span class="nc" id="L157">                                         BatchedMovementsFileReader.getDESTINATION_DATE(), endDate)).fetch().get(0).value1();</span>
+<span class="nc" id="L158">        } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L159">            log.trace(&quot;Could not get number of movements from {} - perhaps the table hasn't been created.&quot;,</span>
+<span class="nc" id="L160">                      BatchedMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L161">        }</span>
+        try {
+<span class="nc" id="L163">            numMovements += jooq.selectCount().from(FullMovementsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L164">                    .where(String.format(&quot;%s &gt;= %d and %s &lt;= %d&quot;,</span>
+<span class="nc" id="L165">                                         FullMovementsFileReader.getDEPARTURE_DATE(), startDate,</span>
+<span class="nc" id="L166">                                         FullMovementsFileReader.getDESTINATION_DATE(), endDate))</span>
+<span class="nc" id="L167">                    .fetch().get(0).value1();</span>
+<span class="nc" id="L168">        } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L169">            log.trace(&quot;Could not get number of movements from {} - perhaps the table hasn't been created.&quot;,</span>
+<span class="nc" id="L170">                      FullMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L171">        }</span>
+        try {
+<span class="nc" id="L173">            numMovements += jooq.selectCount().from(DirectedMovementsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L174">                    .where(String.format(&quot;%s &gt;= %d and %s &lt;= %d&quot;,</span>
+<span class="nc" id="L175">                                         DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate,</span>
+<span class="nc" id="L176">                                         DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate))</span>
+<span class="nc" id="L177">                    .fetch().get(0).value1();</span>
+<span class="nc" id="L178">        } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L179">            log.trace(&quot;Could not get number of movements from {} - perhaps the table hasn't been created.&quot;,</span>
+<span class="nc" id="L180">                      DirectedMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L181">        }</span>
+<span class="nc" id="L182">        return numMovements;</span>
+    }
+
+    /**
+     * Get all the movements that have been read from the file(s) specified in the configuration file.
+     * @return a collection of movement events that have been recorded.
+     */
+    public Collection&lt;Movement&gt; getMovements() {
+<span class="nc" id="L190">        final Collection&lt;Movement&gt; movements = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L191">        final StopWatch sw = new StopWatch();</span>
+<span class="nc" id="L192">        sw.start();</span>
+
+        Result&lt;Record&gt; records;
+        try {
+<span class="nc" id="L196">            records = jooq.select().from(BatchedMovementsFileReader.getTABLE_NAME()).fetch();</span>
+<span class="nc bnc" id="L197" title="All 2 branches missed.">            for (Record r : records) {</span>
+<span class="nc" id="L198">                final Movement movement = createMovement(r);</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">                if (movement != null) {</span>
+<span class="nc" id="L200">                    movements.add(movement);</span>
+                }
+<span class="nc" id="L202">            }</span>
+<span class="nc" id="L203">        } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L204">            log.trace(&quot;Could not get movements from {} - this is not an error; the project might be configutred with one.&quot;,</span>
+<span class="nc" id="L205">                      BatchedMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L206">        }</span>
+
+        try {
+<span class="nc" id="L209">            records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME()).fetch();</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">            for (Record r : records) {</span>
+<span class="nc" id="L211">                final Movement movement = createMovement(r);</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">                if (movement != null) {</span>
+<span class="nc" id="L213">                    movements.add(movement);</span>
+                }
+<span class="nc" id="L215">            }</span>
+<span class="nc" id="L216">        } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L217">            log.trace(&quot;Could not get movements from {} - this is not an error; the project might be configutred with one.&quot;,</span>
+<span class="nc" id="L218">                      FullMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L219">        }</span>
+
+        try {
+<span class="nc" id="L222">            records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME()).fetch();</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">            for (Record r : records) {</span>
+<span class="nc" id="L224">                final Movement movement = createMovement(r);</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">                if (movement != null) {</span>
+<span class="nc" id="L226">                    movements.add(movement);</span>
+                }
+<span class="nc" id="L228">            }</span>
+<span class="nc" id="L229">        } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L230">            log.trace(&quot;Could not get movements from {} - this is not an error; the project might be configutred with one.&quot;,</span>
+<span class="nc" id="L231">                      DirectedMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L232">        }</span>
+
+<span class="nc" id="L234">        sw.stop();</span>
+<span class="nc" id="L235">        log.debug(&quot;Found {} movements in {}.&quot;, movements.size(), sw.toString());</span>
+<span class="nc" id="L236">        return movements;</span>
+    }
+
+    /**
+     * Get all the movements that have been read from the file(s) specified in the configuration file filtered on a date
+     * range.
+     * @param startDate the first date in the range with which we will filter the movements
+     * @param endDate   the final date in the range with which we will filter the movements
+     * @return a collection of movement events that have been recorded.
+     */
+    public Collection&lt;Movement&gt; getMovements(final int startDate, final int endDate) {
+<span class="nc" id="L247">        log.trace(&quot;Getting all movements between {} and {}&quot;, startDate, endDate);</span>
+<span class="nc" id="L248">        final Collection&lt;Movement&gt; movements = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L249">        final StopWatch sw = new StopWatch();</span>
+<span class="nc" id="L250">        sw.start();</span>
+
+        try {
+            // try directed movements
+            Result&lt;Record&gt; records;
+
+            try {
+<span class="nc" id="L257">                records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L258">                        .where(String.format(&quot;%s &gt;= %d and %s &lt;= %d&quot;,</span>
+<span class="nc" id="L259">                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate,</span>
+<span class="nc" id="L260">                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate))</span>
+<span class="nc" id="L261">                        .fetch();</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">                for (Record r : records) {</span>
+<span class="nc" id="L263">                    final Movement movement = createMovement(r);</span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">                    if (movement != null) {</span>
+<span class="nc" id="L265">                        movements.add(movement);</span>
+                    }
+<span class="nc" id="L267">                }</span>
+<span class="nc" id="L268">            } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L269">                log.trace(&quot;Could not get movements from {} - this is not an error; the project might be configutred with one.&quot;,</span>
+<span class="nc" id="L270">                          DirectedMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L271">            }</span>
+
+            try {
+                // try full movements
+<span class="nc" id="L275">                records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L276">                        .where(String.format(&quot;%s &gt;= %d and %s &lt;= %d&quot;,</span>
+<span class="nc" id="L277">                                             FullMovementsFileReader.getDEPARTURE_DATE(), startDate,</span>
+<span class="nc" id="L278">                                             FullMovementsFileReader.getDESTINATION_DATE(), endDate))</span>
+<span class="nc" id="L279">                        .fetch();</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">                for (Record r : records) {</span>
+<span class="nc" id="L281">                    final Movement movement = createMovement(r);</span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">                    if (movement != null) {</span>
+<span class="nc" id="L283">                        movements.add(movement);</span>
+                    }
+<span class="nc" id="L285">                }</span>
+<span class="nc" id="L286">            } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L287">                log.trace(&quot;Could not get movements from {} - this is not an error; the project might be configutred with one.&quot;,</span>
+<span class="nc" id="L288">                          FullMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L289">            }</span>
+
+            try {
+                // try batched movements
+<span class="nc" id="L293">                records = jooq.select().from(BatchedMovementsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L294">                        .where(String.format(&quot;%s &gt;= %d and %s &lt;= %d&quot;,</span>
+<span class="nc" id="L295">                                             BatchedMovementsFileReader.getDEPARTURE_DATE(), startDate,</span>
+<span class="nc" id="L296">                                             BatchedMovementsFileReader.getDESTINATION_DATE(), endDate))</span>
+<span class="nc" id="L297">                        .fetch();</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">                for (Record r : records) {</span>
+<span class="nc" id="L299">                    final Movement movement = createMovement(r);</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">                    if (movement != null) {</span>
+<span class="nc" id="L301">                        movements.add(movement);</span>
+                    }
+<span class="nc" id="L303">                }</span>
+<span class="nc" id="L304">            } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L305">                log.trace(&quot;Could not get movements from {} - this is not an error; the project might be configutred with one.&quot;,</span>
+<span class="nc" id="L306">                          BatchedMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L307">            }</span>
+
+<span class="nc" id="L309">        } catch (org.jooq.exception.DataAccessException e) {</span>
+            // We WILL get an error here - we don't know the type of table here so we try directed, batched and full
+            // movements. We can ignore the errors.
+<span class="nc" id="L312">        }</span>
+
+<span class="nc" id="L314">        sw.stop();</span>
+<span class="nc" id="L315">        log.debug(&quot;Found {} movements in {}.&quot;, movements.size(), sw.toString());</span>
+<span class="nc" id="L316">        return movements;</span>
+    }
+
+    /**
+     * Get all the OFF movements that have been read from the file(s) specified in the configuration file filtered on a
+     * date range.
+     * @param startDate the first date in the range with which we will filter the movements
+     * @param endDate   the final date in the range with which we will filter the movements
+     * @return a collection of movement events that have been recorded.
+     */
+    public Collection&lt;Movement&gt; getOffMovements(final int startDate, final int endDate) {
+<span class="nc" id="L327">        log.trace(&quot;Getting off movements between {} and {}&quot;, startDate, endDate);</span>
+<span class="nc" id="L328">        final Collection&lt;Movement&gt; movements = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L329">        final StopWatch sw = new StopWatch();</span>
+<span class="nc" id="L330">        sw.start();</span>
+
+        try {
+            // try directed movements
+            Result&lt;Record&gt; records;
+
+            try {
+<span class="nc" id="L337">                records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L338">                        .where(String.format(&quot;%s &gt;= %d AND %s &lt;= %d AND %s ='OFF'&quot;,</span>
+<span class="nc" id="L339">                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate,</span>
+<span class="nc" id="L340">                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate,</span>
+<span class="nc" id="L341">                                             DirectedMovementsFileReader.getMOVEMENT_DIRECTION()))</span>
+<span class="nc" id="L342">                        .fetch();</span>
+<span class="nc bnc" id="L343" title="All 2 branches missed.">                for (Record r : records) {</span>
+<span class="nc" id="L344">                    final Movement movement = createMovement(r);</span>
+<span class="nc bnc" id="L345" title="All 2 branches missed.">                    if (movement != null) {</span>
+<span class="nc" id="L346">                        movements.add(movement);</span>
+                    }
+<span class="nc" id="L348">                }</span>
+<span class="nc" id="L349">            } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L350">                log.trace(&quot;Could not get movements from {} - this is not an error; the project might be configutred with one.&quot;,</span>
+<span class="nc" id="L351">                          DirectedMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L352">            }</span>
+
+            try {
+                // try full movements
+<span class="nc" id="L356">                records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L357">                        .where(String.format(&quot;%s &gt;= %d and %s &lt;= %d&quot;,</span>
+<span class="nc" id="L358">                                             FullMovementsFileReader.getDEPARTURE_DATE(), startDate,</span>
+<span class="nc" id="L359">                                             FullMovementsFileReader.getDEPARTURE_DATE(), endDate))</span>
+<span class="nc" id="L360">                        .fetch();</span>
+<span class="nc bnc" id="L361" title="All 2 branches missed.">                for (Record r : records) {</span>
+<span class="nc" id="L362">                    final Movement movement = createMovement(r);</span>
+<span class="nc bnc" id="L363" title="All 2 branches missed.">                    if (movement != null) {</span>
+<span class="nc" id="L364">                        movements.add(movement);</span>
+                    }
+<span class="nc" id="L366">                }</span>
+<span class="nc" id="L367">            } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L368">                log.trace(&quot;Could not get movements from {} - this is not an error; the project might be configutred with one.&quot;,</span>
+<span class="nc" id="L369">                          FullMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L370">            }</span>
+
+            try {
+                // try batched movements
+<span class="nc" id="L374">                records = jooq.select().from(BatchedMovementsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L375">                        .where(String.format(&quot;%s &gt;= %d and %s &lt;= %d&quot;,</span>
+<span class="nc" id="L376">                                             BatchedMovementsFileReader.getDEPARTURE_DATE(), startDate,</span>
+<span class="nc" id="L377">                                             BatchedMovementsFileReader.getDEPARTURE_DATE(), endDate))</span>
+<span class="nc" id="L378">                        .fetch();</span>
+<span class="nc bnc" id="L379" title="All 2 branches missed.">                for (Record r : records) {</span>
+<span class="nc" id="L380">                    final Movement movement = createMovement(r);</span>
+<span class="nc bnc" id="L381" title="All 2 branches missed.">                    if (movement != null) {</span>
+<span class="nc" id="L382">                        movements.add(movement);</span>
+                    }
+<span class="nc" id="L384">                }</span>
+<span class="nc" id="L385">            } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L386">                log.trace(&quot;Could not get movements from {} - this is not an error; the project might be configutred with one.&quot;,</span>
+<span class="nc" id="L387">                          BatchedMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L388">            }</span>
+
+<span class="nc" id="L390">        } catch (org.jooq.exception.DataAccessException e) {</span>
+            // We WILL get an error here - we don't know the type of table here so we try directed, batched and full
+            // movements. We can ignore the errors.
+<span class="nc" id="L393">        }</span>
+
+<span class="nc" id="L395">        sw.stop();</span>
+<span class="nc" id="L396">        log.debug(&quot;Found {} off movements in {}.&quot;, movements.size(), sw.toString());</span>
+<span class="nc" id="L397">        return movements;</span>
+    }
+
+    /**
+     * Get all the ON movements that have been read from the file(s) specified in the configuration file filtered on a
+     * date range.
+     * @param startDate the first date in the range with which we will filter the movements
+     * @param endDate   the final date in the range with which we will filter the movements
+     * @return a collection of movement events that have been recorded.
+     */
+    public Collection&lt;Movement&gt; getOnMovements(final int startDate, final int endDate) {
+<span class="nc" id="L408">        log.trace(&quot;Getting on movements between {} and {}&quot;, startDate, endDate);</span>
+<span class="nc" id="L409">        final Collection&lt;Movement&gt; movements = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L410">        final StopWatch sw = new StopWatch();</span>
+<span class="nc" id="L411">        sw.start();</span>
+
+        try {
+            // try directed movements
+            Result&lt;Record&gt; records;
+
+            try {
+<span class="nc" id="L418">                records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L419">                        .where(String.format(&quot;%s &gt;= %d AND %s &lt;= %d AND %s ='ON'&quot;,</span>
+<span class="nc" id="L420">                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate,</span>
+<span class="nc" id="L421">                                             DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate,</span>
+<span class="nc" id="L422">                                             DirectedMovementsFileReader.getMOVEMENT_DIRECTION()))</span>
+<span class="nc" id="L423">                        .fetch();</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">                for (Record r : records) {</span>
+<span class="nc" id="L425">                    final Movement movement = createMovement(r);</span>
+<span class="nc bnc" id="L426" title="All 2 branches missed.">                    if (movement != null) {</span>
+<span class="nc" id="L427">                        movements.add(movement);</span>
+                    }
+<span class="nc" id="L429">                }</span>
+<span class="nc" id="L430">            } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L431">                log.trace(&quot;Could not get movements from {} - this is not an error; the project might be configutred with one.&quot;,</span>
+<span class="nc" id="L432">                          DirectedMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L433">            }</span>
+
+            try {
+                // try full movements
+<span class="nc" id="L437">                records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L438">                        .where(String.format(&quot;%s &gt;= %d and %s &lt;= %d&quot;,</span>
+<span class="nc" id="L439">                                             FullMovementsFileReader.getDESTINATION_DATE(), startDate,</span>
+<span class="nc" id="L440">                                             FullMovementsFileReader.getDESTINATION_DATE(), endDate))</span>
+<span class="nc" id="L441">                        .fetch();</span>
+<span class="nc bnc" id="L442" title="All 2 branches missed.">                for (Record r : records) {</span>
+<span class="nc" id="L443">                    final Movement movement = createMovement(r);</span>
+<span class="nc bnc" id="L444" title="All 2 branches missed.">                    if (movement != null) {</span>
+<span class="nc" id="L445">                        movements.add(movement);</span>
+                    }
+<span class="nc" id="L447">                }</span>
+<span class="nc" id="L448">            } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L449">                log.trace(&quot;Could not get movements from {} - this is not an error; the project might be configutred with one.&quot;,</span>
+<span class="nc" id="L450">                          FullMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L451">            }</span>
+
+            try {
+                // try batched movements
+<span class="nc" id="L455">                records = jooq.select().from(BatchedMovementsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L456">                        .where(String.format(&quot;%s &gt;= %d and %s &lt;= %d&quot;,</span>
+<span class="nc" id="L457">                                             BatchedMovementsFileReader.getDESTINATION_DATE(), startDate,</span>
+<span class="nc" id="L458">                                             BatchedMovementsFileReader.getDESTINATION_DATE(), endDate))</span>
+<span class="nc" id="L459">                        .fetch();</span>
+<span class="nc bnc" id="L460" title="All 2 branches missed.">                for (Record r : records) {</span>
+<span class="nc" id="L461">                    final Movement movement = createMovement(r);</span>
+<span class="nc bnc" id="L462" title="All 2 branches missed.">                    if (movement != null) {</span>
+<span class="nc" id="L463">                        movements.add(movement);</span>
+                    }
+<span class="nc" id="L465">                }</span>
+<span class="nc" id="L466">            } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L467">                log.trace(&quot;Could not get movements from {} - this is not an error; the project might be configutred with one.&quot;,</span>
+<span class="nc" id="L468">                          BatchedMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L469">            }</span>
+
+<span class="nc" id="L471">        } catch (org.jooq.exception.DataAccessException e) {</span>
+            // We WILL get an error here - we don't know the type of table here so we try directed, batched and full
+            // movements. We can ignore the errors.
+<span class="nc" id="L474">        }</span>
+
+<span class="nc" id="L476">        sw.stop();</span>
+<span class="nc" id="L477">        log.debug(&quot;Found {} on movements in {}.&quot;, movements.size(), sw.toString());</span>
+<span class="nc" id="L478">        return movements;</span>
+    }
+
+    /**
+     * Get all the tests that have been read from the file(s) specified in the configuration file.
+     * @return a collection of movement events that have been recorded.
+     */
+    public Collection&lt;Test&gt; getTests() {
+<span class="nc" id="L486">        final Collection&lt;Test&gt; tests = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L487">        final StopWatch sw = new StopWatch();</span>
+<span class="nc" id="L488">        sw.start();</span>
+
+<span class="nc" id="L490">        final Result&lt;Record&gt; records = jooq.select().from(TestsFileReader.getTABLE_NAME()).fetch();</span>
+<span class="nc bnc" id="L491" title="All 2 branches missed.">        for (Record r : records) {</span>
+<span class="nc" id="L492">            final Test test = createTest(r);</span>
+<span class="nc bnc" id="L493" title="All 2 branches missed.">            if (test != null) {</span>
+<span class="nc" id="L494">                tests.add(test);</span>
+            }
+<span class="nc" id="L496">        }</span>
+
+<span class="nc" id="L498">        sw.stop();</span>
+<span class="nc" id="L499">        log.debug(&quot;Found {} tests in {}.&quot;, tests.size(), sw.toString());</span>
+<span class="nc" id="L500">        return tests;</span>
+    }
+
+    /**
+     * Get all the tests that have been read from the file(s) specified in the configuration file.
+     * @param startDate the first date in the range with which we will filter the tests.
+     * @param endDate   the final date in the range with which we will filter the tests.
+     * @return a collection of movement events that have been recorded.
+     */
+    public Collection&lt;Test&gt; getTests(final int startDate, final int endDate) {
+<span class="nc" id="L510">        final Collection&lt;Test&gt; tests = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L511">        final StopWatch sw = new StopWatch();</span>
+<span class="nc" id="L512">        sw.start();</span>
+
+<span class="nc" id="L514">        final Result&lt;Record&gt; records = jooq.select().from(TestsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L515">                .where(String.format(&quot;%s &gt;= %d and %s &lt;= %d&quot;,</span>
+<span class="nc" id="L516">                                     TestsFileReader.getTEST_DATE(), startDate,</span>
+<span class="nc" id="L517">                                     TestsFileReader.getTEST_DATE(), endDate))</span>
+<span class="nc" id="L518">                .fetch();</span>
+<span class="nc bnc" id="L519" title="All 2 branches missed.">        for (Record r : records) {</span>
+<span class="nc" id="L520">            final Test test = createTest(r);</span>
+<span class="nc bnc" id="L521" title="All 2 branches missed.">            if (test != null) {</span>
+<span class="nc" id="L522">                tests.add(test);</span>
+            }
+<span class="nc" id="L524">        }</span>
+
+<span class="nc" id="L526">        sw.stop();</span>
+<span class="nc" id="L527">        log.debug(&quot;Found {} tests in {}.&quot;, tests.size(), sw.toString());</span>
+<span class="nc" id="L528">        return tests;</span>
+    }
+
+    /**
+     * Get all the animals that have been read from the file(s) specified in the configuration file.
+     * @return a collection of animal events that have been recorded.
+     */
+    public Collection&lt;Animal&gt; getAnimals() {
+<span class="nc" id="L536">        final Collection&lt;Animal&gt; animals = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L537">        final StopWatch sw = new StopWatch();</span>
+<span class="nc" id="L538">        sw.start();</span>
+
+<span class="nc" id="L540">        final Result&lt;Record&gt; records = jooq.select().from(PopulationsFileReader.getLIFE_HISTORIES_TABLE_NAME()).fetch();</span>
+<span class="nc bnc" id="L541" title="All 2 branches missed.">        for (Record r : records) {</span>
+<span class="nc" id="L542">            final Animal animal = createAnimal(r);</span>
+<span class="nc bnc" id="L543" title="All 2 branches missed.">            if (animal != null) {</span>
+<span class="nc" id="L544">                animals.add(animal);</span>
+            }
+<span class="nc" id="L546">        }</span>
+
+<span class="nc" id="L548">        sw.stop();</span>
+<span class="nc" id="L549">        log.debug(&quot;Found {} animals in {}.&quot;, animals.size(), sw.toString());</span>
+<span class="nc" id="L550">        return animals;</span>
+    }
+
+    /**
+     * Get all the animals that have been read from the file(s) specified in the configuration file whose date of birth
+     * is before or on a given date and whose date of death (it there is any) is on or after the same date.
+     * @param date the date for which we reuqire the animals in the system.
+     * @return a collection of animals that have been recorded whose DoB &amp;ge; date and DoD &amp;ge; date
+     */
+    public Collection&lt;Animal&gt; getAnimals(final int date) {
+<span class="nc" id="L560">        final Collection&lt;Animal&gt; animals = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L561">        final String whereClause = String.format(&quot;%s &lt;= %d and (%s IS NULL or %s &gt;= %d)&quot;,</span>
+<span class="nc" id="L562">                                                 PopulationsFileReader.getDATE_OF_BIRTH(), date,</span>
+<span class="nc" id="L563">                                                 PopulationsFileReader.getDATE_OF_DEATH(),</span>
+<span class="nc" id="L564">                                                 PopulationsFileReader.getDATE_OF_DEATH(), date);</span>
+
+<span class="nc" id="L566">        final StopWatch sw = new StopWatch();</span>
+<span class="nc" id="L567">        sw.start();</span>
+
+<span class="nc" id="L569">        final Result&lt;Record&gt; records = jooq.select().from(PopulationsFileReader.getLIFE_HISTORIES_TABLE_NAME()).where(whereClause)</span>
+<span class="nc" id="L570">                .fetch();</span>
+<span class="nc bnc" id="L571" title="All 2 branches missed.">        for (Record r : records) {</span>
+<span class="nc" id="L572">            final Animal animal = createAnimal(r);</span>
+<span class="nc bnc" id="L573" title="All 2 branches missed.">            if (animal != null) {</span>
+<span class="nc" id="L574">                animals.add(animal);</span>
+            }
+<span class="nc" id="L576">        }</span>
+
+<span class="nc" id="L578">        sw.stop();</span>
+<span class="nc" id="L579">        log.debug(&quot;Found {} animals in {}.&quot;, animals.size(), sw.toString());</span>
+<span class="nc" id="L580">        return animals;</span>
+    }
+
+    /**
+     * Get all the movements that have been read from the file(s) specified in the configuration file.
+     * @return a collection of movement events that have been recorded.
+     */
+    public Collection&lt;Location&gt; getLocations() {
+<span class="nc" id="L588">        final Collection&lt;Location&gt; locations = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L589">        final StopWatch sw = new StopWatch();</span>
+<span class="nc" id="L590">        sw.start();</span>
+
+<span class="nc" id="L592">        final Result&lt;Record&gt; records = jooq.select().from(LocationsFileReader.getTABLE_NAME()).fetch();</span>
+<span class="nc bnc" id="L593" title="All 2 branches missed.">        for (Record r : records) {</span>
+<span class="nc" id="L594">            final Location location = createLocation(r);</span>
+<span class="nc bnc" id="L595" title="All 2 branches missed.">            if (location != null) {</span>
+<span class="nc" id="L596">                locations.add(location);</span>
+            }
+<span class="nc" id="L598">        }</span>
+
+<span class="nc" id="L600">        sw.stop();</span>
+<span class="nc" id="L601">        log.debug(&quot;Found {} locations in {}.&quot;, locations.size(), sw.toString());</span>
+<span class="nc" id="L602">        return locations;</span>
+    }
+
+    /**
+     * Get a location from the list of locations in the system. If there is no location matching the id a
+     * BroadwickException is thrown because we should only be looking for valid locations. Note, this method returns a
+     * live view of the movements so changes to one affect the other and in a worst case scenario can cause a
+     * ConcurrentModificationException. The returned collection isn't threadsafe or serializable, even if unfiltered is.
+     * @param locationId the id of the location we are looking for.
+     * @return the Location object with the required id.
+     */
+    public Location getLocation(final String locationId) {
+<span class="nc" id="L614">        Location location = locationsCache.getIfPresent(locationId);</span>
+<span class="nc bnc" id="L615" title="All 2 branches missed.">        if (location == null) {</span>
+<span class="nc" id="L616">            final Result&lt;Record&gt; records = jooq.select().from(LocationsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L617">                    .where(String.format(&quot;%s = '%s'&quot;, LocationsFileReader.getID(), locationId)).fetch();</span>
+<span class="nc bnc" id="L618" title="All 2 branches missed.">            for (Record r : records) {</span>
+<span class="nc" id="L619">                location = createLocation(r);</span>
+<span class="nc" id="L620">                locationsCache.put(location.getId(), location);</span>
+<span class="nc" id="L621">            }</span>
+        }
+<span class="nc" id="L623">        return location;</span>
+    }
+
+    /**
+     * Get an animal from the list of animals in the system. If there is no animal matching the id a BroadwickException
+     * is thrown because we should only be looking for valid animals. Note, this method returns a live view of the
+     * movements so changes to one affect the other and in a worst case scenario can cause a
+     * ConcurrentModificationException. The returned collection isn't threadsafe or serializable, even if unfiltered is.
+     * @param animalId the id of the animal we are looking for.
+     * @return the Animal object with the required id.
+     */
+    public Animal getAnimal(final String animalId) {
+<span class="nc" id="L635">        Animal animal = animalsCache.getIfPresent(animalId);</span>
+<span class="nc bnc" id="L636" title="All 2 branches missed.">        if (animal == null) {</span>
+<span class="nc" id="L637">            final Result&lt;Record&gt; records = jooq.select().from(PopulationsFileReader.getLIFE_HISTORIES_TABLE_NAME())</span>
+<span class="nc" id="L638">                    .where(String.format(&quot;ID = '%s'&quot;, animalId)).fetch();</span>
+<span class="nc bnc" id="L639" title="All 2 branches missed.">            for (Record r : records) {</span>
+<span class="nc" id="L640">                animal = createAnimal(r);</span>
+<span class="nc" id="L641">                animalsCache.put(animal.getId(), animal);</span>
+<span class="nc" id="L642">            }</span>
+        }
+<span class="nc" id="L644">        return animal;</span>
+    }
+
+    /**
+     * Get all the recorded movements for a given animal. Note, this method returns a live view of the movements so
+     * changes to one affect the other and in a worst case scenario can cause a ConcurrentModificationException. The
+     * returned collection isn't threadsafe or serializable, even if unfiltered is.
+     * @param animalId the id of the animal whose movements are to be returned.
+     * @return a collection of movement events that have been recorded for the animal with the given id.
+     */
+    public Collection&lt;Movement&gt; getMovementsForAnimal(final String animalId) {
+<span class="nc" id="L655">        final Collection&lt;Movement&gt; movements = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L656">        final StopWatch sw = new StopWatch();</span>
+<span class="nc" id="L657">        sw.start();</span>
+
+        Result&lt;Record&gt; records;
+        try {
+<span class="nc" id="L661">            records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L662">                    .where(String.format(&quot;%s = '%s'&quot;, FullMovementsFileReader.getID(), animalId))</span>
+<span class="nc" id="L663">                    .orderBy(DSL.fieldByName(FullMovementsFileReader.getDEPARTURE_DATE()).asc())</span>
+<span class="nc" id="L664">                    .fetch();</span>
+<span class="nc bnc" id="L665" title="All 2 branches missed.">            for (Record r : records) {</span>
+<span class="nc" id="L666">                movements.add(createMovement(r));</span>
+<span class="nc" id="L667">            }</span>
+<span class="nc" id="L668">        } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L669">            log.trace(&quot;Could not get movements from {} - this is not an error; the project might be configutred with one.&quot;,</span>
+<span class="nc" id="L670">                      FullMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L671">        }</span>
+
+        try {
+<span class="nc" id="L674">            records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L675">                    .where(String.format(&quot;%s = '%s'&quot;, DirectedMovementsFileReader.getID(), animalId))</span>
+<span class="nc" id="L676">                    .fetch();</span>
+<span class="nc bnc" id="L677" title="All 2 branches missed.">            for (Record r : records) {</span>
+<span class="nc" id="L678">                movements.add(createMovement(r));</span>
+<span class="nc" id="L679">            }</span>
+<span class="nc" id="L680">        } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L681">            log.trace(&quot;Could not get movements from {} - this is not an error; the project might be configutred with one.&quot;,</span>
+<span class="nc" id="L682">                      DirectedMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L683">        }</span>
+
+<span class="nc" id="L685">        sw.stop();</span>
+<span class="nc" id="L686">        log.debug(&quot;Found {} movements in {}.&quot;, movements.size(), sw.toString());</span>
+<span class="nc" id="L687">        return movements;</span>
+    }
+
+    /**
+     * Get an animals location at a specified date. If the animal does not have a specified location, e.g. if we are
+     * asking for its location before it's born or in the middle of a movement where the departure and destination dates
+     * span several days then a null location will be returned.
+     * @param animalId the id of the animal.
+     * @param date     the date for which we want the animals location.
+     * @return the location of the animal on date or Location.getNullLocation if there isn't a valid location.
+     */
+    public String getAnimalLocationIdAtDate(final String animalId, final int date) {
+
+<span class="nc" id="L700">        String locationId = &quot;&quot;;</span>
+<span class="nc" id="L701">        int locationDate = Integer.MIN_VALUE;</span>
+        Result&lt;Record2&lt;Object, Object&gt;&gt; records;
+        try {
+            // get the destination id of the last movement BEFORE the given date.
+<span class="nc" id="L705">            records = jooq.select(DSL.fieldByName(FullMovementsFileReader.getDESTINATION_ID()),</span>
+<span class="nc" id="L706">                                  DSL.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()))</span>
+<span class="nc" id="L707">                    .from(FullMovementsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L708">                    .where(String.format(&quot;%s = '%s' and (%s &lt;= %d or %s &lt;= %d)&quot;,</span>
+<span class="nc" id="L709">                                         FullMovementsFileReader.getID(), animalId,</span>
+<span class="nc" id="L710">                                         FullMovementsFileReader.getDEPARTURE_DATE(), date,</span>
+<span class="nc" id="L711">                                         FullMovementsFileReader.getDESTINATION_DATE(), date))</span>
+<span class="nc" id="L712">                    .orderBy(DSL.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()).desc())</span>
+<span class="nc" id="L713">                    .limit(1)</span>
+<span class="nc" id="L714">                    .fetch();</span>
+<span class="nc bnc" id="L715" title="All 2 branches missed.">            if (records.isNotEmpty()) {</span>
+<span class="nc" id="L716">                final int thisDate = (int) records.getValue(0, DSL.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()));</span>
+<span class="nc bnc" id="L717" title="All 2 branches missed.">                if (thisDate &gt; locationDate) {</span>
+<span class="nc" id="L718">                    locationDate = (int) records.getValue(0, DSL.fieldByName(FullMovementsFileReader.getDESTINATION_DATE()));</span>
+<span class="nc" id="L719">                    locationId = (String) records.getValue(0, DSL.fieldByName(FullMovementsFileReader.getDESTINATION_ID()));</span>
+                }
+            }
+<span class="nc" id="L722">        } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L723">            log.trace(&quot;Could not get movements from {} - this is not an error; the project might be configutred with one.&quot;,</span>
+<span class="nc" id="L724">                      FullMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L725">        }</span>
+
+        try {
+<span class="nc" id="L728">            records = jooq.select(DSL.fieldByName(DirectedMovementsFileReader.getLOCATION_ID()),</span>
+<span class="nc" id="L729">                                  DSL.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()))</span>
+<span class="nc" id="L730">                    .from(DirectedMovementsFileReader.getTABLE_NAME())</span>
+<span class="nc" id="L731">                    .where(String.format(&quot;%s = '%s' and %s &lt;= %d&quot;,</span>
+<span class="nc" id="L732">                                         DirectedMovementsFileReader.getID(), animalId,</span>
+<span class="nc" id="L733">                                         DirectedMovementsFileReader.getMOVEMENT_DATE(), date))</span>
+<span class="nc" id="L734">                    .orderBy(DSL.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()).desc())</span>
+<span class="nc" id="L735">                    .limit(1)</span>
+<span class="nc" id="L736">                    .fetch();</span>
+<span class="nc bnc" id="L737" title="All 2 branches missed.">            if (records.isNotEmpty()) {</span>
+<span class="nc" id="L738">                final int thisDate = (int) records.getValue(0, DSL.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()));</span>
+<span class="nc bnc" id="L739" title="All 2 branches missed.">                if (thisDate &gt; locationDate) {</span>
+<span class="nc" id="L740">                    locationDate = (int) records.getValue(0, DSL.fieldByName(DirectedMovementsFileReader.getMOVEMENT_DATE()));</span>
+<span class="nc" id="L741">                    locationId = (String) records.getValue(0, DSL.fieldByName(DirectedMovementsFileReader.getLOCATION_ID()));</span>
+                }
+            }
+<span class="nc" id="L744">        } catch (org.jooq.exception.DataAccessException e) {</span>
+<span class="nc" id="L745">            log.trace(&quot;Could not get movements from {} - this is not an error; the project might be configutred with one.&quot;,</span>
+<span class="nc" id="L746">                      DirectedMovementsFileReader.getTABLE_NAME());</span>
+<span class="nc" id="L747">        }</span>
+
+<span class="nc bnc" id="L749" title="All 2 branches missed.">        if (locationDate &gt; Integer.MIN_VALUE) {</span>
+<span class="nc" id="L750">            return locationId;</span>
+        } else {
+            // else no movement =&gt; it is still on it's location of birth.
+<span class="nc" id="L753">            final Animal animal = getAnimal(animalId);</span>
+<span class="nc bnc" id="L754" title="All 2 branches missed.">            if (animal != null) {</span>
+<span class="nc" id="L755">                return animal.getLocationOfBirth();</span>
+            } else {
+<span class="nc" id="L757">                log.error(&quot;Could not find location for {} at {}&quot;, animalId, date);</span>
+            }
+        }
+<span class="nc" id="L760">        return null;</span>
+    }
+
+    /**
+     * Run a custom query against the database. This method is not intended to be used in general situations as it
+     * exposed the underlying jooq data structures but in some situations it may be used as a last resort.
+     * @param query the SQL query to be run.
+     * @return a Result set of records that were returned by the database.
+     */
+    public Result&lt;Record&gt; runCustomQuery(final String query) {
+<span class="nc" id="L770">        Result&lt;Record&gt; records = null;</span>
+        try {
+<span class="nc" id="L772">            records = jooq.fetch(query);</span>
+<span class="nc" id="L773">        } catch (DataAccessException e) {</span>
+<span class="nc" id="L774">            log.error(&quot;Could not execute SQL {}. {}&quot;, query, e.getLocalizedMessage());</span>
+<span class="nc" id="L775">        }</span>
+<span class="nc" id="L776">        return records;</span>
+    }
+
+    /**
+     * Create a location object from the node object defining it in the graph database.
+     * @param locationRecord the record object from the database defining the location.
+     * @return the created location object.
+     */
+    private Location createLocation(final Record locationRecord) {
+<span class="nc" id="L785">        String id = &quot;&quot;;</span>
+<span class="nc" id="L786">        Double easting = null;</span>
+<span class="nc" id="L787">        Double northing = null;</span>
+
+        try {
+<span class="nc" id="L790">            id = (String) locationRecord.getValue(LocationsFileReader.getID());</span>
+<span class="nc" id="L791">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L793">        }</span>
+        try {
+<span class="nc" id="L795">            easting = (Double) locationRecord.getValue(LocationsFileReader.getEASTING());</span>
+<span class="nc" id="L796">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L798">        }</span>
+        try {
+<span class="nc" id="L800">            northing = (Double) locationRecord.getValue(LocationsFileReader.getNORTHING());</span>
+<span class="nc" id="L801">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L803">        }</span>
+
+        // TODO add custom tags
+//        for (int i = 6; i &lt; locationRecord.size(); i++) {
+//            locationRecord.getValue(i);
+//        }
+<span class="nc" id="L809">        final Map&lt;String, Integer&gt; populations = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L810">        log.trace(&quot;Creating location object for {}&quot;,</span>
+<span class="nc" id="L811">                  String.format(&quot;%s %f,%f %s&quot;, id, easting, northing, populations));</span>
+
+<span class="nc" id="L813">        return new Location(id, easting, northing, populations);</span>
+    }
+
+    /**
+     * Create an animal object from the node object defining it in the graph database.
+     * @param animalRecord the record object from the database defining the animal.
+     * @return the created animal object.
+     */
+    private Animal createAnimal(final Record animalRecord) {
+
+<span class="nc" id="L823">        String id = &quot;&quot;;</span>
+<span class="nc" id="L824">        Integer dob = null;</span>
+<span class="nc" id="L825">        String lob = &quot;&quot;;</span>
+<span class="nc" id="L826">        Integer dod = null;</span>
+<span class="nc" id="L827">        String lod = &quot;&quot;;</span>
+<span class="nc" id="L828">        String species = &quot;&quot;;</span>
+
+        try {
+<span class="nc" id="L831">            id = (String) animalRecord.getValue(PopulationsFileReader.getID());</span>
+<span class="nc" id="L832">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+<span class="nc" id="L833">            log.trace(&quot;error {}&quot;, e.getLocalizedMessage());</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L835">        }</span>
+        try {
+<span class="nc" id="L837">            dob = (Integer) animalRecord.getValue(PopulationsFileReader.getDATE_OF_BIRTH());</span>
+<span class="nc" id="L838">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L840">        }</span>
+        try {
+<span class="nc" id="L842">            lob = (String) animalRecord.getValue(PopulationsFileReader.getLOCATION_OF_BIRTH());</span>
+<span class="nc" id="L843">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L845">        }</span>
+        try {
+<span class="nc" id="L847">            dod = (Integer) animalRecord.getValue(PopulationsFileReader.getDATE_OF_DEATH());</span>
+<span class="nc" id="L848">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L850">        }</span>
+        try {
+<span class="nc" id="L852">            lod = (String) animalRecord.getValue(PopulationsFileReader.getLOCATION_OF_DEATH());</span>
+<span class="nc" id="L853">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L855">        }</span>
+        try {
+<span class="nc" id="L857">            species = (String) animalRecord.getValue(PopulationsFileReader.getSPECIES());</span>
+<span class="nc" id="L858">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L860">        }</span>
+
+        // TODO add custom tags
+//        for (int i = 6; i &lt; animalRecord.size(); i++) {
+//            animalRecord.getValue(i);
+//        }
+<span class="nc" id="L866">        log.trace(&quot;Creating animal object for {}&quot;,</span>
+<span class="nc" id="L867">                  String.format(&quot;%s (%s) dob:%d[%s] dod:%d[%s]&quot;, id, species, dob, lob, dod, lod));</span>
+
+<span class="nc" id="L869">        return new Animal(id, species, dob, lob, dod, lod);</span>
+
+    }
+
+    /**
+     * Create a Test object from the node object defining it in the graph database.
+     * @param testRecord the record object from the database defining the test.
+     * @return the created test object.
+     */
+    private Test createTest(final Record testRecord) {
+
+<span class="nc" id="L880">        String id = &quot;&quot;;</span>
+<span class="nc" id="L881">        String group = &quot;&quot;;</span>
+<span class="nc" id="L882">        String location = &quot;&quot;;</span>
+<span class="nc" id="L883">        Integer testDate = null;</span>
+<span class="nc" id="L884">        Boolean positiveResult = null;</span>
+<span class="nc" id="L885">        Boolean negativeResult = null;</span>
+
+        try {
+<span class="nc" id="L888">            id = (String) testRecord.getValue(TestsFileReader.getID());</span>
+<span class="nc" id="L889">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L891">        }</span>
+        try {
+<span class="nc" id="L893">            group = (String) testRecord.getValue(TestsFileReader.getGROUP_ID());</span>
+<span class="nc" id="L894">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L896">        }</span>
+        try {
+<span class="nc" id="L898">            location = (String) testRecord.getValue(TestsFileReader.getLOCATION_ID());</span>
+<span class="nc" id="L899">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L901">        }</span>
+        try {
+<span class="nc" id="L903">            testDate = (Integer) testRecord.getValue(TestsFileReader.getTEST_DATE());</span>
+<span class="nc" id="L904">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L906">        }</span>
+        try {
+<span class="nc" id="L908">            final Integer val = (Integer) testRecord.getValue(TestsFileReader.getPOSITIVE_RESULT());</span>
+<span class="nc bnc" id="L909" title="All 2 branches missed.">            if (val == 0) {</span>
+<span class="nc" id="L910">                positiveResult = Boolean.FALSE;</span>
+            } else {
+<span class="nc" id="L912">                positiveResult = Boolean.TRUE;</span>
+            }
+<span class="nc" id="L914">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L916">        }</span>
+        try {
+<span class="nc" id="L918">            final Integer val = (Integer) testRecord.getValue(TestsFileReader.getNEGATIVE_RESULT());</span>
+<span class="nc bnc" id="L919" title="All 2 branches missed.">            if (val == 0) {</span>
+<span class="nc" id="L920">                negativeResult = Boolean.FALSE;</span>
+            } else {
+<span class="nc" id="L922">                negativeResult = Boolean.TRUE;</span>
+            }
+<span class="nc" id="L924">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L926">        }</span>
+
+        // TODO add custom tags
+//        for (int i = 6; i &lt; testRecord.size(); i++) {
+//            testRecord.getValue(i);
+//        }
+<span class="nc" id="L932">        log.trace(&quot;Creating test object for {}&quot;,</span>
+<span class="nc" id="L933">                  String.format(&quot;%s group:%s location:%s date:%d pos:%s neg:%s&quot;, id, group, location, testDate, positiveResult, negativeResult));</span>
+
+<span class="nc" id="L935">        return new Test(id, group, location, testDate, positiveResult, negativeResult);</span>
+    }
+
+    /**
+     * Create a movement object from the relationship object defining it in the graph database.
+     * @param movementRecord the record object from the database defining the movement.
+     * @return the created movement object.
+     */
+    private Movement createMovement(final Record movementRecord) {
+
+<span class="nc" id="L945">        String id = &quot;&quot;;</span>
+<span class="nc" id="L946">        Integer batchSize = null;</span>
+<span class="nc" id="L947">        Integer departureDate = null;</span>
+<span class="nc" id="L948">        String departureId = &quot;&quot;;</span>
+<span class="nc" id="L949">        Integer destinationDate = null;</span>
+<span class="nc" id="L950">        String destinationId = &quot;&quot;;</span>
+<span class="nc" id="L951">        Integer marketDate = null;</span>
+<span class="nc" id="L952">        String marketId = &quot;&quot;;</span>
+<span class="nc" id="L953">        String species = &quot;&quot;;</span>
+
+        try {
+<span class="nc" id="L956">            id = (String) movementRecord.getValue(FullMovementsFileReader.getID());</span>
+<span class="nc" id="L957">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L959">        }</span>
+        try {
+<span class="nc" id="L961">            batchSize = (Integer) movementRecord.getValue(BatchedMovementsFileReader.getBATCH_SIZE());</span>
+<span class="nc" id="L962">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L964">        }</span>
+        try {
+<span class="nc" id="L966">            departureDate = (Integer) movementRecord.getValue(FullMovementsFileReader.getDEPARTURE_DATE());</span>
+<span class="nc" id="L967">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L969">        }</span>
+        try {
+<span class="nc" id="L971">            departureId = (String) movementRecord.getValue(FullMovementsFileReader.getDEPARTURE_ID());</span>
+<span class="nc" id="L972">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L974">        }</span>
+        try {
+<span class="nc" id="L976">            destinationDate = (Integer) movementRecord.getValue(FullMovementsFileReader.getDESTINATION_DATE());</span>
+<span class="nc" id="L977">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L979">        }</span>
+        try {
+<span class="nc" id="L981">            destinationId = (String) movementRecord.getValue(FullMovementsFileReader.getDESTINATION_ID());</span>
+<span class="nc" id="L982">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L984">        }</span>
+        try {
+<span class="nc" id="L986">            marketDate = (Integer) movementRecord.getValue(BatchedMovementsFileReader.getMARKET_DATE());</span>
+<span class="nc" id="L987">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L989">        }</span>
+        try {
+<span class="nc" id="L991">            marketId = (String) movementRecord.getValue(BatchedMovementsFileReader.getMARKET_ID());</span>
+<span class="nc" id="L992">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L994">        }</span>
+        try {
+<span class="nc" id="L996">            species = (String) movementRecord.getValue(DirectedMovementsFileReader.getSPECIES());</span>
+<span class="nc" id="L997">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L999">        }</span>
+        // For directed movements, set the appropriate destination/departure id and dates.
+        try {
+<span class="nc" id="L1002">            final String direction = (String) movementRecord.getValue(DirectedMovementsFileReader.getMOVEMENT_DIRECTION());</span>
+<span class="nc bnc" id="L1003" title="All 2 branches missed.">            if (&quot;ON&quot;.equalsIgnoreCase(direction)) {</span>
+<span class="nc" id="L1004">                destinationId = (String) movementRecord.getValue(DirectedMovementsFileReader.getLOCATION_ID());</span>
+<span class="nc" id="L1005">                destinationDate = (Integer) movementRecord.getValue(DirectedMovementsFileReader.getMOVEMENT_DATE());</span>
+            } else {
+<span class="nc" id="L1007">                departureId = (String) movementRecord.getValue(DirectedMovementsFileReader.getLOCATION_ID());</span>
+<span class="nc" id="L1008">                departureDate = (Integer) movementRecord.getValue(DirectedMovementsFileReader.getMOVEMENT_DATE());</span>
+            }
+<span class="nc" id="L1010">        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {</span>
+            // ignore - the field was not in the record.
+<span class="nc" id="L1012">        }</span>
+
+        // TODO add custom tags
+//        for (int i = 6; i &lt; testRecord.size(); i++) {
+//            testRecord.getValue(i);
+//        }
+<span class="nc" id="L1018">        log.trace(&quot;Creating movement object for {}&quot;,</span>
+<span class="nc" id="L1019">                  String.format(&quot;%s batchSize:%d departureDate:%d departureId:%s destinationDate:%d destinationId:%s marketDate:%s marketId:%s species:%s&quot;,</span>
+                                id, batchSize, departureDate, departureId, destinationDate, destinationId, marketDate, marketId, species));
+
+<span class="nc" id="L1022">        return new Movement(id, batchSize, departureDate, departureId, destinationDate, destinationId, marketDate, marketId, species);</span>
+    }
+<span class="nc" id="L1024">    Cache&lt;String, Collection&lt;Movement&gt;&gt; movementsCache = CacheBuilder.newBuilder().maximumSize(1000).build();</span>
+<span class="nc" id="L1025">    Cache&lt;String, Location&gt; locationsCache = CacheBuilder.newBuilder().maximumSize(1000).build();</span>
+<span class="nc" id="L1026">    Cache&lt;String, Animal&gt; animalsCache = CacheBuilder.newBuilder().maximumSize(1000).build();</span>
+<span class="nc" id="L1027">    Cache&lt;String, Test&gt; testsCache = CacheBuilder.newBuilder().maximumSize(1000).build();</span>
+    private DSLContext jooq;
+<span class="nc" id="L1029">    @Getter</span>
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+    private Connection connection;
+}
+
+/**
+ * Implement a comparator for movements so that movements can be stored in ascending date order with OFF movements
+ * appearing before ON movements in the movements cache.
+ */
+<span class="nc" id="L1038">class MovementsComparator implements Comparator&lt;Movement&gt;,Serializable {</span>
+
+    @Override
+    public int compare(final Movement m1, final Movement m2) {
+        // it's probably easiest to use the natural ordering determined by the toString() methods.
+        // The departure information appears in the string before the destination information so we, in effect are 
+        // ordering by departure date.
+<span class="nc" id="L1045">        return m1.toString().compareTo(m2.toString());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

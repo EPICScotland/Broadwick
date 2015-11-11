@@ -151,8 +151,8 @@
 <a class="jxr_linenumber" name="141" href="#141">141</a>             }
 <a class="jxr_linenumber" name="142" href="#142">142</a>         }
 <a class="jxr_linenumber" name="143" href="#143">143</a>         <strong class="jxr_keyword">final</strong> StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder(100);
-<a class="jxr_linenumber" name="144" href="#144">144</a>         sb.append(<span class="jxr_string">"No reaction could be selected!\n"</span>);
-<a class="jxr_linenumber" name="145" href="#145">145</a>         sb.append(<span class="jxr_string">"reaction = "</span>).append(test).append(<span class="jxr_string">"\n"</span>);
+<a class="jxr_linenumber" name="144" href="#144">144</a>         sb.append(<span class="jxr_string">"No reaction could be selected!\nreaction = "</span>);
+<a class="jxr_linenumber" name="145" href="#145">145</a>         sb.append(test).append(<span class="jxr_string">"\n"</span>);
 <a class="jxr_linenumber" name="146" href="#146">146</a>         sb.append(<strong class="jxr_keyword">this</strong>.getTransitionKernel().getTransitionEvents().toString());
 <a class="jxr_linenumber" name="147" href="#147">147</a>         <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../broadwick/stochastic/SimulationException.html">SimulationException</a>(sb.toString());
 <a class="jxr_linenumber" name="148" href="#148">148</a>     }
@@ -161,7 +161,7 @@
 <a class="jxr_linenumber" name="151" href="#151">151</a> <em class="jxr_javadoccomment">     * obtains a random (but following a specific distribution) timestep as described by the direct method in chapter 5A</em>
 <a class="jxr_linenumber" name="152" href="#152">152</a> <em class="jxr_javadoccomment">     * page 417ff.</em>
 <a class="jxr_linenumber" name="153" href="#153">153</a> <em class="jxr_javadoccomment">     * @param sum sum of the propensities</em>
-<a class="jxr_linenumber" name="154" href="#154">154</a> <em class="jxr_javadoccomment">     * @return	tau</em>
+<a class="jxr_linenumber" name="154" href="#154">154</a> <em class="jxr_javadoccomment">     * @return    tau</em>
 <a class="jxr_linenumber" name="155" href="#155">155</a> <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="156" href="#156">156</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">double</strong> directMCTau(<strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">double</strong> sum) {
 <a class="jxr_linenumber" name="157" href="#157">157</a>         <strong class="jxr_keyword">if</strong> (Double.compare(sum, 0.0) == 0) {

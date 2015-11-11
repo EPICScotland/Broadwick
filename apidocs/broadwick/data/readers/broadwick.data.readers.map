@@ -1,16 +1,16 @@
 <map id="G" name="G">
-<area shape="rect" id="node1_0" href="./TestsFileReader.html" title="broadwick.data.readers.TestsFileReader" alt="" coords="16,301,425,613"/>
-<area shape="rect" id="node1" href="./TestsFileReader.html" title="&lt;TABLE&gt;" alt="" coords="5,296,436,619"/>
-<area shape="rect" id="node2_1" href="./PopulationsFileReader.html" title="broadwick.data.readers.PopulationsFileReader" alt="" coords="471,237,978,677"/>
-<area shape="rect" id="node2" href="./PopulationsFileReader.html" title="&lt;TABLE&gt;" alt="" coords="461,232,989,683"/>
-<area shape="rect" id="node3_2" href="./LocationsFileReader.html" title="broadwick.data.readers.LocationsFileReader" alt="" coords="1023,325,1503,589"/>
-<area shape="rect" id="node3" href="./LocationsFileReader.html" title="&lt;TABLE&gt;" alt="" coords="1013,320,1514,595"/>
-<area shape="rect" id="node4_3" href="./FullMovementsFileReader.html" title="broadwick.data.readers.FullMovementsFileReader" alt="" coords="1549,285,2087,629"/>
-<area shape="rect" id="node4" href="./FullMovementsFileReader.html" title="&lt;TABLE&gt;" alt="" coords="1539,280,2097,635"/>
-<area shape="rect" id="node5_4" href="./DirectedMovementsFileReader.html" title="broadwick.data.readers.DirectedMovementsFileReader" alt="" coords="2132,309,2728,605"/>
-<area shape="rect" id="node5" href="./DirectedMovementsFileReader.html" title="&lt;TABLE&gt;" alt="" coords="2121,304,2739,611"/>
-<area shape="rect" id="node6_5" href="./DataFileReader.html" title="broadwick.data.readers.DataFileReader" alt="" coords="838,11,2243,179"/>
-<area shape="rect" id="node6" href="./DataFileReader.html" title="&lt;TABLE&gt;" alt="" coords="827,5,2254,184"/>
-<area shape="rect" id="node7_6" href="./BatchedMovementsFileReader.html" title="broadwick.data.readers.BatchedMovementsFileReader" alt="" coords="2773,285,3351,629"/>
-<area shape="rect" id="node7" href="./BatchedMovementsFileReader.html" title="&lt;TABLE&gt;" alt="" coords="2763,280,3361,635"/>
+<area shape="rect" id="node1_0" href="./TestsFileReader.html" title="broadwick.data.readers.TestsFileReader" alt="" coords="16,301,421,613"/>
+<area shape="rect" id="node1" href="./TestsFileReader.html" title="&lt;TABLE&gt;" alt="" coords="5,296,432,619"/>
+<area shape="rect" id="node2_1" href="./PopulationsFileReader.html" title="broadwick.data.readers.PopulationsFileReader" alt="" coords="467,237,970,677"/>
+<area shape="rect" id="node2" href="./PopulationsFileReader.html" title="&lt;TABLE&gt;" alt="" coords="457,232,981,683"/>
+<area shape="rect" id="node3_2" href="./LocationsFileReader.html" title="broadwick.data.readers.LocationsFileReader" alt="" coords="1016,325,1493,589"/>
+<area shape="rect" id="node3" href="./LocationsFileReader.html" title="&lt;TABLE&gt;" alt="" coords="1005,320,1504,595"/>
+<area shape="rect" id="node4_3" href="./FullMovementsFileReader.html" title="broadwick.data.readers.FullMovementsFileReader" alt="" coords="1539,285,2077,629"/>
+<area shape="rect" id="node4" href="./FullMovementsFileReader.html" title="&lt;TABLE&gt;" alt="" coords="1528,280,2088,635"/>
+<area shape="rect" id="node5_4" href="./DirectedMovementsFileReader.html" title="broadwick.data.readers.DirectedMovementsFileReader" alt="" coords="2123,309,2714,605"/>
+<area shape="rect" id="node5" href="./DirectedMovementsFileReader.html" title="&lt;TABLE&gt;" alt="" coords="2113,304,2725,611"/>
+<area shape="rect" id="node6_5" href="./DataFileReader.html" title="broadwick.data.readers.DataFileReader" alt="" coords="847,11,2215,179"/>
+<area shape="rect" id="node6" href="./DataFileReader.html" title="&lt;TABLE&gt;" alt="" coords="836,5,2225,184"/>
+<area shape="rect" id="node7_6" href="./BatchedMovementsFileReader.html" title="broadwick.data.readers.BatchedMovementsFileReader" alt="" coords="2760,285,3333,629"/>
+<area shape="rect" id="node7" href="./BatchedMovementsFileReader.html" title="&lt;TABLE&gt;" alt="" coords="2749,280,3344,635"/>
 </map>

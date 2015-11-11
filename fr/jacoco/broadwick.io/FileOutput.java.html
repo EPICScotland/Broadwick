@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>FileOutput.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.io</a> &gt; <span class="el_source">FileOutput.java</span></div><h1>FileOutput.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.io;
+
+import broadwick.BroadwickVersion;
+import com.google.common.base.Throwables;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Simple interface to printing values to a file. It simply wraps the java io classes to simplify the output of data.
+ */
+<span class="fc" id="L28">@Slf4j</span>
+public class FileOutput implements AutoCloseable {
+
+    /**
+     * Create a null file output object similar to writing to /dev/null. This allows for empty FileOutput objects to be
+     * used without throwing NullPointerExceptions.
+     */
+<span class="nc" id="L35">    public FileOutput() {</span>
+<span class="nc" id="L36">        buffer = new NullOutputStream();</span>
+<span class="nc" id="L37">    }</span>
+
+    /**
+     * Create a file with the given name.
+     * @param dataFileName the name of the file.
+     */
+    public FileOutput(final String dataFileName) {
+<span class="fc" id="L44">        this(dataFileName, false, false, DEFAULT_ENCODING);</span>
+<span class="fc" id="L45">    }</span>
+
+    /**
+     * Create a file with the given name.
+     * @param dataFileName the name of the file.
+     * @param addVersion   boolean that determines whether or not the project version number should be applied to the
+     *                     start of the file.
+     */
+    public FileOutput(final String dataFileName, final boolean addVersion) {
+<span class="fc" id="L54">        this(dataFileName, addVersion, true, DEFAULT_ENCODING);</span>
+<span class="fc" id="L55">    }</span>
+
+    /**
+     * Create a file with the given name.
+     * @param dataFileName the name of the file.
+     * @param addVersion   boolean that determines whether or not the project version number should be applied to the
+     *                     start of the file.
+     * @param append       if &lt;code&gt;true&lt;/code&gt;, then bytes will be written to the end of the file.
+     */
+    public FileOutput(final String dataFileName, final boolean addVersion, final boolean append) {
+<span class="nc" id="L65">        this(dataFileName, addVersion, append, DEFAULT_ENCODING);</span>
+<span class="nc" id="L66">    }</span>
+
+    /**
+     * Create a file with the given name.
+     * @param dataFileName the name of the file.
+     * @param addVersion   boolean that determines whether or not the project version number should be applied to the
+     *                     start of the file.
+     * @param append       if &lt;code&gt;true&lt;/code&gt;, then bytes will be written to the end of the file.
+     * @param encoding     the character encoding used in the file.
+     */
+    public FileOutput(final String dataFileName, final boolean addVersion, final boolean append,
+<span class="fc" id="L77">                      final String encoding) {</span>
+        try {
+<span class="fc" id="L79">            fileEncoding = encoding;</span>
+<span class="fc" id="L80">            buffer = new BufferedOutputStream(new FileOutputStream(dataFileName, append));</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">            if (addVersion) {</span>
+<span class="nc" id="L82">                buffer.write(&quot;# Version : &quot;.getBytes(fileEncoding));</span>
+<span class="nc" id="L83">                buffer.write(BroadwickVersion.getVersionAndTimeStamp().getBytes(fileEncoding));</span>
+<span class="nc" id="L84">                buffer.write(&quot;\n&quot;.getBytes(fileEncoding));</span>
+<span class="nc" id="L85">                buffer.flush();</span>
+            }
+<span class="nc" id="L87">        } catch (IOException ex) {</span>
+<span class="nc" id="L88">            log.error(ex.getLocalizedMessage());</span>
+<span class="nc" id="L89">            throw new BroadwickIOException(ex.getLocalizedMessage() + Throwables.getStackTraceAsString(ex));</span>
+<span class="fc" id="L90">        }</span>
+<span class="fc" id="L91">    }</span>
+
+    /**
+     * Write the string to the file stream.
+     * @param str the string to write to the stream.
+     */
+    public final void write(final String str) {
+        try {
+<span class="fc" id="L99">            buffer.write(str.getBytes(fileEncoding));</span>
+<span class="fc" id="L100">            buffer.flush();</span>
+<span class="fc" id="L101">        } catch (IOException ex) {</span>
+<span class="fc" id="L102">            log.error(ex.getLocalizedMessage());</span>
+<span class="fc" id="L103">            throw new BroadwickIOException(ex.getLocalizedMessage() + Throwables.getStackTraceAsString(ex));</span>
+<span class="fc" id="L104">        }</span>
+<span class="fc" id="L105">    }</span>
+
+    /**
+     * Writes a formatted string to the file stream.
+     * @param format A format string as described in &lt;a href=&quot;#syntax&quot;&gt;Format string syntax&lt;/a&gt;
+     * @param args   Arguments referenced by the format specifiers in the format string. If there are more arguments
+     *               than format specifiers, the extra arguments are ignored. The maximum number of arguments is limited
+     *               by the maximum dimension of a Java array as defined by the &lt;a
+     *               href=&quot;http://java.sun.com/docs/books/vmspec/&quot;&gt;Java Virtual Machine Specification&lt;/a&gt;
+     * @return the string written to the buffer.
+     */
+    public final String write(final String format, final Object... args) {
+<span class="nc" id="L117">        String str = &quot;&quot;;</span>
+        try {
+<span class="nc" id="L119">            str = String.format(format, args);</span>
+<span class="nc" id="L120">            buffer.write(str.getBytes(fileEncoding));</span>
+<span class="nc" id="L121">            buffer.flush();</span>
+<span class="nc" id="L122">        } catch (IOException ex) {</span>
+<span class="nc" id="L123">            log.error(ex.getLocalizedMessage());</span>
+<span class="nc" id="L124">            throw new BroadwickIOException(ex.getLocalizedMessage() + Throwables.getStackTraceAsString(ex));</span>
+<span class="nc" id="L125">        }</span>
+<span class="nc" id="L126">        return str;</span>
+    }
+
+    @Override
+    public final void close() {
+        try {
+<span class="fc" id="L132">            buffer.close();</span>
+<span class="nc" id="L133">        } catch (IOException ex) {</span>
+<span class="nc" id="L134">            log.error(ex.getLocalizedMessage());</span>
+<span class="fc" id="L135">        }</span>
+<span class="fc" id="L136">    }</span>
+
+    /**
+     * Flushes the file stream.
+     */
+    public final void flush() {
+        try {
+<span class="nc" id="L143">            buffer.flush();</span>
+<span class="nc" id="L144">        } catch (IOException ex) {</span>
+<span class="nc" id="L145">            log.error(ex.getLocalizedMessage());</span>
+<span class="nc" id="L146">        }</span>
+<span class="nc" id="L147">    }</span>
+
+    /**
+     * Save data in the form of a string to a named file.
+     * @param dataFileName the name of the file in which the data is to be saved.
+     * @param data         the data to be saved.
+     * @param addVersion   add the project version number to the start of the file.
+     */
+    public static void saveToFile(final String dataFileName, final String data, final boolean addVersion) {
+<span class="pc" id="L156">        try (FileOutput fl = new FileOutput(dataFileName, addVersion)) {</span>
+<span class="fc" id="L157">            fl.write(data);</span>
+            // we can let any thrown BroadIOException get caught further up the stack.
+<span class="pc bpc" id="L159" title="6 of 8 branches missed.">        }</span>
+<span class="fc" id="L160">    }</span>
+
+    /**
+     * Save data in the form of a string to a named file.
+     * @param dataFileName the name of the file in which the data is to be saved.
+     * @param format       A format string as described in &lt;a href=&quot;#syntax&quot;&gt;Format string syntax&lt;/a&gt;
+     * @param addVersion   add the project version number to the start of the file.
+     * @param args         Arguments referenced by the format specifiers in the format string. If there are more
+     *                     arguments than format specifiers, the extra arguments are ignored. The maximum number of
+     *                     arguments is limited by the maximum dimension of a Java array as defined by the &lt;a
+     *                     href=&quot;http://java.sun.com/docs/books/vmspec/&quot;&gt;Java Virtual Machine Specification&lt;/a&gt;
+     */
+    public static void saveToFile(final String dataFileName, final String format, final boolean addVersion, final Object... args) {
+<span class="nc" id="L173">        try (FileOutput fl = new FileOutput(dataFileName, addVersion)) {</span>
+<span class="nc" id="L174">            fl.write(format, args);</span>
+            // we can let any thrown BroadIOException get caught further up the stack.
+<span class="nc bnc" id="L176" title="All 8 branches missed.">        }</span>
+<span class="nc" id="L177">    }</span>
+
+    private BufferedOutputStream buffer;
+    private String fileEncoding;
+    private static final String DEFAULT_ENCODING = &quot;UTF-8&quot;;
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

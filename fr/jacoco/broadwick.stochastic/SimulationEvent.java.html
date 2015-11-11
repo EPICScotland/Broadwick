@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>SimulationEvent.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.stochastic</a> &gt; <span class="el_source">SimulationEvent.java</span></div><h1>SimulationEvent.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.stochastic;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * A class containing all the details of an event in the stochastic ODE model.
+ */
+<span class="nc bnc" id="L25" title="All 22 branches missed.">@EqualsAndHashCode</span>
+public class SimulationEvent {
+
+    /**
+     * Construct a new event from the initial state in one bin to a final state in another bin.
+     * @param initialState the name and index of the bin of the initial state.
+     * @param finalState the name and index of the bin of the final state.
+     */
+<span class="nc" id="L33">    public SimulationEvent(final SimulationState initialState, final SimulationState finalState) {</span>
+<span class="nc" id="L34">        this.initialState = initialState;</span>
+<span class="nc" id="L35">        this.finalState = finalState;</span>
+<span class="nc" id="L36">    }</span>
+
+    @Override
+    public final String toString() {
+<span class="nc" id="L40">        final StringBuilder sb = new StringBuilder(50);</span>
+<span class="nc" id="L41">        sb.append(initialState.toString());</span>
+<span class="nc" id="L42">        sb.append(&quot; --&gt;  &quot;);</span>
+<span class="nc" id="L43">        sb.append(finalState.toString());</span>
+
+<span class="nc" id="L45">        return sb.toString();</span>
+    }    
+
+<span class="nc" id="L48">    @Getter</span>
+<span class="nc" id="L49">    @Setter</span>
+    private SimulationState initialState;
+<span class="nc" id="L51">    @Getter</span>
+<span class="nc" id="L52">    @Setter</span>
+    private SimulationState finalState;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

@@ -92,7 +92,7 @@
 <a class="jxr_linenumber" name="82" href="#82">82</a>      <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="83" href="#83">83</a>  <em class="jxr_javadoccomment">     * Starts the simulation up to a given time. It just uses a {@link DefaultController} and calls</em>
 <a class="jxr_linenumber" name="84" href="#84">84</a>  <em class="jxr_javadoccomment">     * {@link StochasticSimulator#start(SimulationController)}.</em>
-<a class="jxr_linenumber" name="85" href="#85">85</a>  <em class="jxr_javadoccomment">     * @param time	simulation time</em>
+<a class="jxr_linenumber" name="85" href="#85">85</a>  <em class="jxr_javadoccomment">     * @param time    simulation time</em>
 <a class="jxr_linenumber" name="86" href="#86">86</a>  <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="87" href="#87">87</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">void</strong> run(<strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">double</strong> time) {
 <a class="jxr_linenumber" name="88" href="#88">88</a>          <strong class="jxr_keyword">if</strong> (controller == <strong class="jxr_keyword">null</strong>) {
@@ -143,7 +143,7 @@
 <a class="jxr_linenumber" name="133" href="#133">133</a>             }
 <a class="jxr_linenumber" name="134" href="#134">134</a>         } <strong class="jxr_keyword">catch</strong> (Exception e) {
 <a class="jxr_linenumber" name="135" href="#135">135</a>             log.error(<span class="jxr_string">"Error running stochastic simulation. {}"</span>, Throwables.getStackTraceAsString(e));
-<a class="jxr_linenumber" name="136" href="#136">136</a>             <strong class="jxr_keyword">throw</strong> (e);
+<a class="jxr_linenumber" name="136" href="#136">136</a>             <strong class="jxr_keyword">throw</strong> e;
 <a class="jxr_linenumber" name="137" href="#137">137</a>         }
 <a class="jxr_linenumber" name="138" href="#138">138</a>     }
 <a class="jxr_linenumber" name="139" href="#139">139</a> 
@@ -159,7 +159,7 @@
 <a class="jxr_linenumber" name="149" href="#149">149</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="150" href="#150">150</a> <em class="jxr_javadoccomment">     * Fires a reaction. It calls the observers and the {@link AmountManager}.</em>
 <a class="jxr_linenumber" name="151" href="#151">151</a> <em class="jxr_javadoccomment">     * @param mu reaction to be fired.</em>
-<a class="jxr_linenumber" name="152" href="#152">152</a> <em class="jxr_javadoccomment">     * @param t	 time at which the firing occurs.</em>
+<a class="jxr_linenumber" name="152" href="#152">152</a> <em class="jxr_javadoccomment">     * @param t     time at which the firing occurs.</em>
 <a class="jxr_linenumber" name="153" href="#153">153</a> <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="154" href="#154">154</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">void</strong> doEvent(<strong class="jxr_keyword">final</strong> <a href="../../broadwick/stochastic/SimulationEvent.html">SimulationEvent</a> mu, <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">double</strong> t) {
 <a class="jxr_linenumber" name="155" href="#155">155</a>         doEvent(mu, t, 1);
@@ -168,7 +168,7 @@
 <a class="jxr_linenumber" name="158" href="#158">158</a>     <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="159" href="#159">159</a> <em class="jxr_javadoccomment">     * Perform an event by informing the subscribed observers and the amountManager.</em>
 <a class="jxr_linenumber" name="160" href="#160">160</a> <em class="jxr_javadoccomment">     * @param event event to be performed.</em>
-<a class="jxr_linenumber" name="161" href="#161">161</a> <em class="jxr_javadoccomment">     * @param t	    time at which the firing occurs.</em>
+<a class="jxr_linenumber" name="161" href="#161">161</a> <em class="jxr_javadoccomment">     * @param t        time at which the firing occurs.</em>
 <a class="jxr_linenumber" name="162" href="#162">162</a> <em class="jxr_javadoccomment">     * @param n     the number of times mu is to be fired.</em>
 <a class="jxr_linenumber" name="163" href="#163">163</a> <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="164" href="#164">164</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">void</strong> doEvent(<strong class="jxr_keyword">final</strong> <a href="../../broadwick/stochastic/SimulationEvent.html">SimulationEvent</a> event, <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">double</strong> t, <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> n) {
@@ -331,7 +331,7 @@
 <a class="jxr_linenumber" name="321" href="#321">321</a>             <strong class="jxr_keyword">return</strong> eventData;
 <a class="jxr_linenumber" name="322" href="#322">322</a>         }
 <a class="jxr_linenumber" name="323" href="#323">323</a>         @Getter
-<a class="jxr_linenumber" name="324" href="#324">324</a>         <strong class="jxr_keyword">private</strong> Table&lt;Double, Observer, Collection&lt;Object&gt;&gt; thetas;
+<a class="jxr_linenumber" name="324" href="#324">324</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Table&lt;Double, Observer, Collection&lt;Object&gt;&gt; thetas;
 <a class="jxr_linenumber" name="325" href="#325">325</a>         @Getter
 <a class="jxr_linenumber" name="326" href="#326">326</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">double</strong> nextThetaEventTime;
 <a class="jxr_linenumber" name="327" href="#327">327</a>     }
@@ -375,9 +375,9 @@
 <a class="jxr_linenumber" name="365" href="#365">365</a>     @Getter
 <a class="jxr_linenumber" name="366" href="#366">366</a>     @Setter
 <a class="jxr_linenumber" name="367" href="#367">367</a>     <strong class="jxr_keyword">private</strong> <a href="../../broadwick/stochastic/SimulationController.html">SimulationController</a> controller = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="368" href="#368">368</a>     <strong class="jxr_keyword">private</strong> <a href="../../broadwick/stochastic/StochasticSimulator.html">ThetaQueue</a> thetaQueue = <strong class="jxr_keyword">new</strong> <a href="../../broadwick/stochastic/StochasticSimulator.html">ThetaQueue</a>();
+<a class="jxr_linenumber" name="368" href="#368">368</a>     <strong class="jxr_keyword">private</strong> <a href="../../broadwick/stochastic/StochasticSimulator.html">ThetaQueue</a> thetaQueue;
 <a class="jxr_linenumber" name="369" href="#369">369</a>     @Getter
-<a class="jxr_linenumber" name="370" href="#370">370</a>     <strong class="jxr_keyword">private</strong> Set&lt;Observer&gt; observers = <strong class="jxr_keyword">new</strong> HashSet&lt;&gt;(1);
+<a class="jxr_linenumber" name="370" href="#370">370</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Set&lt;Observer&gt; observers = <strong class="jxr_keyword">new</strong> HashSet&lt;&gt;(1);
 <a class="jxr_linenumber" name="371" href="#371">371</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">boolean</strong> reverseTime = false;
 <a class="jxr_linenumber" name="372" href="#372">372</a> }
 </pre>

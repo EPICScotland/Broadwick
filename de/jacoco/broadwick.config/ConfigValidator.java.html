@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ConfigValidator.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.config</a> &gt; <span class="el_source">ConfigValidator.java</span></div><h1>ConfigValidator.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.config;
+
+import broadwick.config.generated.Models;
+import broadwick.config.generated.Project;
+import broadwick.model.Model;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Validator class for configuration files supplied to Broadwick, the framework for epidemiological modelling.
+ */
+<span class="nc" id="L26">@Slf4j</span>
+public final class ConfigValidator {
+
+    /**
+     * Create an validator instance that is capable of checking the content of a configuration file.
+     * @param project the contents of the [read] configuration file. project.
+     */
+<span class="nc" id="L33">    public ConfigValidator(final Project project) {</span>
+<span class="nc" id="L34">        this.project = project;</span>
+<span class="nc" id="L35">    }</span>
+
+    /**
+     * Validate the project.
+     * @return a ConfigValidationErrors object that contains all the errors (if any).
+     */
+    public ConfigValidationErrors validate() {
+        try {
+<span class="nc" id="L43">            validateModels();</span>
+<span class="nc" id="L44">        } catch (Exception e) {</span>
+<span class="nc" id="L45">            errors.addError(&quot;Could not validate the configuration file. &quot; + e.getLocalizedMessage());</span>
+<span class="nc" id="L46">        }</span>
+
+<span class="nc" id="L48">        return errors;</span>
+    }
+
+    /**
+     * Validate the Models section of the configuration file. Any errors will be saved in the local ValidationErrors.
+     */
+    private void validateModels() {
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        for (Models.Model model : project.getModels().getModel()) {</span>
+
+            // we create (using reflection) the model(s) in the configuration file and check that the parameters
+            // and priors in the configuration file are valid for the model (by checking that the model has fields
+            // marked with the @Parameter and @Prior annotations).
+<span class="nc" id="L60">            final String clazz = model.getClassname();</span>
+<span class="nc" id="L61">            final Model modelObj = this.&lt;Model&gt;createObject(Model.class, clazz);</span>
+
+<span class="nc bnc" id="L63" title="All 2 branches missed.">            if (modelObj == null) {</span>
+<span class="nc" id="L64">                errors.addError(String.format(&quot;Could not create class [%s]. Does it exist?&quot;, clazz));</span>
+            }
+            // TODO else perform any validation
+<span class="nc" id="L67">        }</span>
+<span class="nc" id="L68">    }</span>
+
+    /**
+     * If the project has been validated, i.e. it is structurally ok, then this method will simply return the project
+     * supplied in this objects constructor, else it will return null.
+     * @return null if the project is invalid (i.e. contains major errors) else returns the project object supplied to
+     *         the constructor.
+     */
+    public Project getValidatedProject() {
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        if (errors.isValid()) {</span>
+<span class="nc" id="L78">            return project;</span>
+        } else {
+<span class="nc" id="L80">            return null;</span>
+        }
+    }
+
+    /**
+     * Create an object through reflection, to use this method to create a solver object
+     * &lt;code&gt;
+     * Solver solverObj = this.&lt;Solver&gt;createObject(Solver.class, &quot;RungeKutta4&quot;);
+     * &lt;/code&gt;
+     * @param &lt;T&gt;   the type of object to create.
+     * @param clazz the class type of the object we will create.
+     * @param name  the name of the class that is to be instantiated.
+     * @return the created object.
+     */
+    private &lt;T&gt; T createObject(final Class&lt;T&gt; clazz, final String name) {
+<span class="nc" id="L95">        T object = null;</span>
+        try {
+            // Check if the class exists
+<span class="nc" id="L98">            object = clazz.cast(Class.forName(name).newInstance());</span>
+
+<span class="nc" id="L100">        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {</span>
+<span class="nc" id="L101">            errors.addError(&quot;Could not find &quot; + clazz.getCanonicalName() + &quot; class &lt;&quot; + name + &quot;&gt;&quot;);</span>
+<span class="nc" id="L102">        }</span>
+<span class="nc" id="L103">        return object;</span>
+    }
+
+    private Project project;
+<span class="nc" id="L107">    private ConfigValidationErrors errors = new ConfigValidationErrors();</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>RNG.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.rng</a> &gt; <span class="el_source">RNG.java</span></div><h1>RNG.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.rng;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.math3.random.MersenneTwister;
+import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.random.Well44497b;
+
+/**
+ * Random number generator singleton class This class is not thread safe.
+ */
+<span class="nc bnc" id="L37" title="All 22 branches missed.">@EqualsAndHashCode</span>
+<span class="nc" id="L38">@ToString</span>
+<span class="fc" id="L39">@Slf4j</span>
+public class RNG implements Serializable {
+
+    /**
+     * Create a random number generator using the default JDK-provied PRNG.
+     */
+<span class="nc" id="L45">    public RNG() {</span>
+        // By default, the implementation provided in RandomDataImpl uses
+        // the JDK-provided PRNG. Like most other PRNGs, the JDK generator
+        // generates sequences of random numbers based on an initial
+        // &quot;seed value&quot;.
+<span class="nc" id="L50">        generator = new RandomDataGenerator();</span>
+<span class="nc" id="L51">    }</span>
+
+    /**
+     * Create a random number generator from a given generator using the current time as a seed.
+     * @param gen the random number generator to use.
+     */
+<span class="fc" id="L57">    public RNG(final Generator gen) {</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if (gen.equals(Generator.MERSENNE)) {</span>
+<span class="nc" id="L59">            generator = new RandomDataGenerator(new MersenneTwister(System.currentTimeMillis() * Thread.currentThread().getId()));</span>
+<span class="nc" id="L60">            name = &quot;Mersenne Twister&quot;;</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        } else if (gen.equals(Generator.Well19937c)) {</span>
+<span class="fc" id="L62">            generator = new RandomDataGenerator(new Well19937c(System.currentTimeMillis() * Thread.currentThread().getId()));</span>
+<span class="fc" id="L63">            name = &quot;Well19937c&quot;;</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        } else if (gen.equals(Generator.Well44497b)) {</span>
+<span class="nc" id="L65">            generator = new RandomDataGenerator(new Well44497b(System.currentTimeMillis() * Thread.currentThread().getId()));</span>
+<span class="nc" id="L66">            name = &quot;Well44497b&quot;;</span>
+        } else {
+            // By default, the implementation provided in RandomDataImpl uses
+            // the JDK-provided PRNG. Like most other PRNGs, the JDK generator
+            // generates sequences of random numbers based on an initial
+            // &quot;seed value&quot;.
+<span class="nc" id="L72">            generator = new RandomDataGenerator();</span>
+        }
+<span class="fc" id="L74">    }</span>
+
+    /**
+     * Get a list of valid geometries for the lattice.
+     * @return List&lt;&gt; a list of valid lattice geometries (in uppercase)
+     */
+    public static List&lt;String&gt; validGenerators() {
+<span class="nc" id="L81">        final ArrayList&lt;String&gt; generators = new ArrayList&lt;&gt;(3);</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        for (Generator value : Generator.values()) {</span>
+<span class="nc" id="L83">            generators.add(value.name());</span>
+        }
+<span class="nc" id="L85">        return generators;</span>
+    }
+
+    /**
+     * Seed the random number generator.
+     * @param seed the seed to use in the Rng
+     */
+    public final void seed(final int seed) {
+<span class="nc" id="L93">        generator.reSeed(seed);</span>
+<span class="nc" id="L94">    }</span>
+
+    /**
+     * Generates a uniformly distributed random value from the open interval ( &lt;code&gt;0.0&lt;/code&gt;, &lt;code&gt;1.0&lt;/code&gt;)
+     * (i.e., endpoints excluded).
+     * &lt;p&gt;
+     * &lt;strong&gt;Definition&lt;/strong&gt;: &lt;a href=&quot;http://www.itl.nist.gov/div898/handbook/eda/section3/eda3662.htm&quot;&gt;
+     * Uniform Distribution&lt;/a&gt;
+     * &lt;code&gt;0.0&lt;/code&gt; and &lt;code&gt;1.0 - 0.0&lt;/code&gt; are the &lt;a href =
+     * &quot;http://www.itl.nist.gov/div898/handbook/eda/section3/eda364.htm&quot;&gt;
+     * location and scale parameters&lt;/a&gt;, respectively.&lt;/p&gt;
+     * @return uniformly distributed random value between lower and upper (exclusive)
+     */
+    public final double getDouble() {
+<span class="nc" id="L108">        return generator.nextUniform(0.0, 1.0);</span>
+    }
+
+    /**
+     * Generates a uniformly distributed random value from the open interval ( &lt;code&gt;lower&lt;/code&gt;, &lt;code&gt;upper&lt;/code&gt;)
+     * (i.e., endpoints excluded).
+     * &lt;p&gt;
+     * &lt;strong&gt;Definition&lt;/strong&gt;: &lt;a href=&quot;http://www.itl.nist.gov/div898/handbook/eda/section3/eda3662.htm&quot;&gt;
+     * Uniform Distribution&lt;/a&gt;
+     * &lt;code&gt;lower&lt;/code&gt; and &lt;code&gt;upper - lower&lt;/code&gt; are the &lt;a href =
+     * &quot;http://www.itl.nist.gov/div898/handbook/eda/section3/eda364.htm&quot;&gt;
+     * location and scale parameters&lt;/a&gt;, respectively.&lt;/p&gt;
+     * &lt;p&gt;
+     * &lt;strong&gt;Preconditions&lt;/strong&gt;:&lt;ul&gt; &lt;li&gt;&lt;code&gt;lower &lt; upper&lt;/code&gt; (otherwise an IllegalArgumentException is
+     * thrown.)&lt;/li&gt; &lt;/ul&gt;&lt;/p&gt;
+     * @param lower lower endpoint of the interval of support
+     * @param upper upper endpoint of the interval of support
+     * @return uniformly distributed random value between lower and upper (exclusive)
+     */
+    public final double getDouble(final double lower, final double upper) {
+<span class="nc" id="L128">        double lo = lower;</span>
+<span class="nc" id="L129">        double hi = upper;</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">        if (lower &gt;= upper) {</span>
+<span class="nc" id="L131">            hi = lower;</span>
+<span class="nc" id="L132">            lo = upper;</span>
+        }
+<span class="nc bnc" id="L134" title="All 2 branches missed.">        if (lower == upper) {</span>
+<span class="nc" id="L135">            return lower;</span>
+        }
+<span class="nc" id="L137">        return generator.nextUniform(lo, hi);</span>
+    }
+
+    /**
+     * Generates a uniformly distributed random integer between &lt;code&gt;lower&lt;/code&gt; and &lt;code&gt;upper&lt;/code&gt; (endpoints
+     * included).
+     * &lt;p&gt;
+     * The generated integer will be random, but not cryptographically secure. To generate cryptographically secure
+     * integer sequences, use &lt;code&gt;nextSecureInt&lt;/code&gt;.&lt;/p&gt;
+     * &lt;p&gt;
+     * &lt;strong&gt;Preconditions&lt;/strong&gt;:&lt;ul&gt;
+     * &lt;li&gt;&lt;code&gt;lower &lt; upper&lt;/code&gt; (otherwise an IllegalArgumentException is thrown.)&lt;/li&gt; &lt;/ul&gt;&lt;/p&gt;
+     * @param lower lower bound for generated integer
+     * @param upper upper bound for generated integer
+     * @return a random integer greater than or equal to &lt;code&gt;lower&lt;/code&gt; and less than or equal * * * to
+     *         &lt;code&gt;upper&lt;/code&gt;. If lower == upper then lower is returned.
+     */
+    public final int getInteger(final int lower, final int upper) {
+<span class="fc" id="L155">        int lo = lower;</span>
+<span class="fc" id="L156">        int hi = upper;</span>
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">        if (lower &gt;= upper) {</span>
+<span class="nc" id="L158">            hi = lower;</span>
+<span class="nc" id="L159">            lo = upper;</span>
+        }
+<span class="pc bpc" id="L161" title="1 of 2 branches missed.">        if (lower == upper) {</span>
+<span class="nc" id="L162">            return lower;</span>
+        }
+<span class="fc" id="L164">        return generator.nextInt(lo, hi);</span>
+    }
+
+    /**
+     * Generates a random value from the Poisson distribution with the given mean.
+     * &lt;p&gt;
+     * &lt;strong&gt;Definition&lt;/strong&gt;: &lt;a href=&quot;http://www.itl.nist.gov/div898/handbook/eda/section3/eda366j.htm&quot;&gt;
+     * Poisson Distribution&lt;/a&gt;
+     * &lt;/p&gt;
+     * &lt;p&gt;
+     * &lt;strong&gt;Preconditions&lt;/strong&gt;: &lt;ul&gt;
+     * &lt;li&gt;The specified mean &lt;i&gt;must&lt;/i&gt; be positive (otherwise an IllegalArgumentException is thrown.)&lt;/li&gt; &lt;/ul&gt;&lt;/p&gt;
+     * @param mean Mean of the distribution
+     * @return poisson deviate with the specified mean
+     */
+    public final long getPoisson(final double mean) {
+<span class="nc" id="L180">        return generator.nextPoisson(mean);</span>
+    }
+
+    /**
+     * Generates a random value from the Normal (or Gaussian) distribution with the given mean and standard deviation.
+     * &lt;p&gt;
+     * &lt;strong&gt;Definition&lt;/strong&gt;:
+     * &lt;a href=&quot;http://www.itl.nist.gov/div898/handbook/eda/section3/eda3661.htm&quot;&gt;
+     * Normal Distribution&lt;/a&gt;&lt;/p&gt;
+     * &lt;p&gt;
+     * &lt;strong&gt;Preconditions&lt;/strong&gt;: &lt;ul&gt;
+     * &lt;li&gt;&lt;code&gt;sigma &gt; 0&lt;/code&gt; (otherwise an IllegalArgumentException is thrown.)&lt;/li&gt; &lt;/ul&gt;&lt;/p&gt;
+     * @param mu    Mean of the distribution
+     * @param sigma Standard deviation given as a percentage of the mean.
+     * @return random value from Gaussian distribution with mean = mu, standard deviation = sigma
+     */
+    public final double getGaussian(final double mu, final double sigma) {
+<span class="nc" id="L197">        return generator.nextGaussian(mu, sigma);</span>
+    }
+
+    /**
+     * Get a boolean (true/false) value.
+     * @return boolean random true/false value
+     */
+    public final boolean getBoolean() {
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        return getDouble(0.0, 1.0) &lt; 0.5;</span>
+    }
+
+    /**
+     * Generates a random value from the binomial distribution with the given N and p. The returned value is a random
+     * integer drawn from &lt;DIV ALIGN=&quot;CENTER&quot; CLASS=&quot;mathdisplay&quot;&gt; &lt;I&gt;P&lt;/I&gt;(&lt;I&gt;x&lt;/I&gt;) = (&lt;SUP&gt;n&lt;/SUP&gt;&lt;SUB&gt;x&lt;/SUB&gt;)
+     * &lt;I&gt;p&lt;/I&gt;&lt;SUP&gt;x&lt;/SUP&gt;(1-&lt;I&gt;p&lt;/I&gt;)&lt;SUP&gt;(&lt;I&gt;n-x&lt;/I&gt;)&lt;/SUP&gt; &lt;/DIV&gt;&lt;P&gt;
+     * &lt;/P&gt;
+     * Successive draws from this distribution can be combined, i.e. if X ~ getBinomial(n, p) and Y ~ getBinomial(m, p)
+     * are independent binomial variables , then X + Y is again a binomial variable; its distribution is
+     * getBinomial(n+m, p)
+     * @param n the number of trials.
+     * @param p the probability of success of each trial.
+     * @return the number of successes on n trials.
+     */
+    public final int getBinomial(final int n, final double p) {
+<span class="nc" id="L221">        int x = 0;</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">        for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">            if (generator.nextUniform(0.0, 1.0) &lt; p) {</span>
+<span class="nc" id="L224">                x++;</span>
+            }
+        }
+<span class="nc" id="L227">        return x;</span>
+    }
+
+    /**
+     * Randomly pick an object from an array of objects.
+     * @param &lt;T&gt;     generic type of the array elements.
+     * @param objects an array of objects, one of whom is to be picked.
+     * @return a random element from objects.
+     */
+    //public final &lt;T&gt; T newArray(Class&lt;T&gt;[] objects) {
+    public final &lt;T&gt; T selectOneOf(final T[] objects) {
+<span class="nc" id="L238">        return objects[getInteger(0, objects.length - 1)];</span>
+    }
+
+    /**
+     * Randomly pick an object from an array of objects.
+     * @param &lt;T&gt;           generic type of the array elements.
+     * @param objects       an array of objects, one of whom is to be picked.
+     * @param probabilities the probabilities of selecting each of the objects.
+     * @return a random element from objects.
+     */
+    public final &lt;T&gt; T selectOneOf(final T[] objects, final double[] probabilities) {
+<span class="nc" id="L249">        final double r = getDouble();</span>
+<span class="nc" id="L250">        double cdf = 0.0;</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">        for (int i = 0; i &lt; objects.length; i++) {</span>
+<span class="nc" id="L252">            cdf += probabilities[i];</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">            if (r &lt;= cdf) {</span>
+<span class="nc" id="L254">                return objects[i];</span>
+            }
+        }
+<span class="nc" id="L257">        return objects[objects.length];</span>
+    }
+
+    /**
+     * @param set a Set in which to look for a random element
+     * @param &lt;T&gt; generic type of the Set elements
+     * @return a random element in the Set or null if the set is empty
+     */
+    public &lt;T&gt; T selectOneOf(Set&lt;T&gt; set) {
+<span class="nc" id="L266">        int item = getInteger(0, set.size() - 1);</span>
+<span class="nc" id="L267">        int i = 0;</span>
+<span class="nc bnc" id="L268" title="All 2 branches missed.">        for (T obj : set) {</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">            if (i == item) {</span>
+<span class="nc" id="L270">                return obj;</span>
+            }
+<span class="nc" id="L272">            i++;</span>
+<span class="nc" id="L273">        }</span>
+<span class="nc" id="L274">        return null;</span>
+    }
+
+    /**
+     * Randomly pick an object from an array of objects.
+     * @param &lt;T&gt;     The type of the elements in the collection
+     * @param objects an array of objects, one of whom is to be picked.
+     * @return a random element from objects.
+     */
+    public final &lt;T&gt; T selectOneOf(final Collection&lt;T&gt; objects) {
+
+<span class="nc" id="L285">        final int n = getInteger(0, objects.size() - 1);</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">        if (objects instanceof List) {</span>
+<span class="nc" id="L287">            return ((List&lt;T&gt;) objects).get(n);</span>
+        } else {
+<span class="nc" id="L289">            return com.google.common.collect.Iterators.get(objects.iterator(), n);</span>
+        }
+    }
+
+    /**
+     * Randomly pick N objects from an array of objects. Note, this assumes that N much much less than the size of the
+     * array being sampled from, if this is not the case this method is VERY slow.
+     * @param &lt;T&gt;     The type of the elements in the collection
+     * @param objects an array of objects, one of whom is to be picked.
+     * @param n       the number of objects we will select.
+     * @return a random element from objects.
+     */
+    public final &lt;T&gt; List&lt;T&gt; selectManyOf(final T[] objects, final int n) {
+
+<span class="nc bnc" id="L303" title="All 2 branches missed.">        if (n &gt; objects.length) {</span>
+<span class="nc" id="L304">            throw new IllegalArgumentException(String.format(&quot;Cannot select %d elements from array of %d objects&quot;, n, objects.length));</span>
+        }
+
+        // this uses simple rejection sampling, a faster method (especially if n is close to objects.size() can be found
+        // at http://lemire.me/blog/archives/2013/08/16/picking-n-distinct-numbers-at-random-how-to-do-it-fast/
+<span class="nc" id="L309">        final List&lt;T&gt; list = new ArrayList&lt;&gt;(n);</span>
+<span class="nc" id="L310">        final Set&lt;Integer&gt; sampled = new TreeSet&lt;&gt;();</span>
+<span class="nc bnc" id="L311" title="All 2 branches missed.">        for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc" id="L312">            int index = getInteger(0, objects.length - 1);</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">            while (sampled.contains(index)) {</span>
+<span class="nc" id="L314">                index = getInteger(0, objects.length - 1);</span>
+            }
+<span class="nc" id="L316">            sampled.add(index);</span>
+<span class="nc" id="L317">            list.add(objects[index]);</span>
+        }
+
+<span class="nc" id="L320">        return list;</span>
+    }
+
+    /**
+     * Randomly pick N objects from an array of objects. Note, this assumes that N much much less than the size of the
+     * array being sampled from, if this is not the case this method is VERY slow.
+     * @param &lt;T&gt;     The type of the elements in the collection
+     * @param objects an array of objects, one of whom is to be picked.
+     * @param n       the number of objects we will select.
+     * @return a random element from objects.
+     */
+    public final &lt;T&gt; List&lt;T&gt; selectManyOf(final Collection&lt;T&gt; objects, final int n) {
+<span class="nc bnc" id="L332" title="All 2 branches missed.">        if (objects.size() &lt; n) {</span>
+<span class="nc" id="L333">            throw new IllegalArgumentException(String.format(&quot;Cannot select %d elements from a Collection of %d objects&quot;, n, objects.size()));</span>
+        }
+<span class="nc" id="L335">        final Set&lt;Integer&gt; s = new HashSet&lt;&gt;(n);</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">        while (s.size() &lt; n) {</span>
+<span class="nc" id="L337">            s.add(getInteger(0, objects.size() - 1));</span>
+        }
+
+<span class="nc" id="L340">        final List&lt;T&gt; list = new ArrayList&lt;&gt;(n);</span>
+<span class="nc" id="L341">        int i = 0;</span>
+<span class="nc bnc" id="L342" title="All 2 branches missed.">        for (T obj : objects) {</span>
+<span class="nc bnc" id="L343" title="All 2 branches missed.">            if (s.contains(i)) {</span>
+<span class="nc" id="L344">                list.add(obj);</span>
+            }
+<span class="nc" id="L346">            i = i + 1;</span>
+<span class="nc" id="L347">        }</span>
+
+<span class="nc bnc" id="L349" title="All 2 branches missed.">        if (list.size() != n) {</span>
+<span class="nc" id="L350">            log.error(&quot;Could not correctly select correct number of objects from a collection of objects.&quot;);</span>
+        }
+
+<span class="nc" id="L353">        return list;</span>
+    }
+
+    /**
+     * Randomly pick N objects from an array of objects. Note, this assumes that N much much less than the size of the
+     * array being sampled from, if this is not the case this method is VERY slow.
+     * @param &lt;T&gt;     The type of the elements in the collection
+     * @param objects an array of objects, one of whom is to be picked.
+     * @param n       the number of objects we will select.
+     * @return a random element from objects.
+     */
+    public final &lt;T&gt; Set&lt;T&gt; selectManyOf(final Set&lt;T&gt; objects, final int n) {
+<span class="nc bnc" id="L365" title="All 2 branches missed.">        if (objects.size() &lt; n) {</span>
+<span class="nc" id="L366">            throw new IllegalArgumentException(String.format(&quot;Cannot select %d elements from a Set of %d objects&quot;, n, objects.size()));</span>
+        }
+
+<span class="nc" id="L369">        final Set&lt;Integer&gt; s = new HashSet&lt;&gt;(n);</span>
+<span class="nc bnc" id="L370" title="All 2 branches missed.">        while (s.size() &lt; n) {</span>
+<span class="nc" id="L371">            s.add(getInteger(0, objects.size() - 1));</span>
+        }
+
+<span class="nc" id="L374">        final Set&lt;T&gt; list = new HashSet&lt;&gt;(n);</span>
+<span class="nc" id="L375">        int i = 0;</span>
+<span class="nc bnc" id="L376" title="All 2 branches missed.">        for (T obj : objects) {</span>
+<span class="nc bnc" id="L377" title="All 2 branches missed.">            if (s.contains(i)) {</span>
+<span class="nc" id="L378">                list.add(obj);</span>
+            }
+<span class="nc" id="L380">            i = i + 1;</span>
+<span class="nc" id="L381">        }</span>
+
+<span class="nc bnc" id="L383" title="All 2 branches missed.">        if (list.size() != n) {</span>
+<span class="nc" id="L384">            log.error(&quot;Could not correctly select correct number of objects from a collection of objects.&quot;);</span>
+        }
+
+<span class="nc" id="L387">        return list;</span>
+    }
+
+    /**
+     * Random number generator type.
+     */
+    private final RandomDataGenerator generator;
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+<span class="nc" id="L395">    @Getter</span>
+    private String name;
+
+    /**
+     * Random number generator type.
+     */
+<span class="pc" id="L401">    public static enum Generator {</span>
+
+        /*
+         * This generator features an extremely long period (219937-1) and 623-dimensional equidistribution up to 32 bits accuracy.
+         * The home page for this generator is located at http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html.
+         * This generator is described in a paper by Makoto Matsumoto and Takuji Nishimura in 1998:
+         * &quot;Mersenne Twister: A 623-Dimensionally Equidistributed Uniform Pseudo-Random Number Generator&quot;,
+         * ACM Transactions on Modeling and Computer Simulation, Vol. 8, No. 1, January 1998, pp 3--30
+         */
+<span class="fc" id="L410">        MERSENNE,</span>
+        /*
+         * WELL19937c pseudo-random number generator from François Panneton, Pierre L'Ecuyer and Makoto Matsumoto.
+         * This generator is described in a paper by François Panneton, Pierre L'Ecuyer and Makoto Matsumoto
+         * &quot;Improved Long-Period Generators Based on Linear Recurrences Modulo 2&quot; ACM Transactions on Mathematical Software, 32, 1 (2006)
+         */
+<span class="fc" id="L416">        Well19937c,</span>
+        /*
+         * WELL44497b pseudo-random number generator from François Panneton, Pierre L'Ecuyer and Makoto Matsumoto.
+         * This generator is described in a paper by François Panneton, Pierre L'Ecuyer and Makoto Matsumoto
+         * &quot;Improved Long-Period Generators Based on Linear Recurrences Modulo 2&quot; ACM Transactions on Mathematical Software, 32, 1 (2006)
+         */
+<span class="fc" id="L422">        Well44497b</span>
+    };
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

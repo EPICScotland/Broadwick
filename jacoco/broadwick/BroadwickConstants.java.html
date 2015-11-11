@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>BroadwickConstants.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick</a> &gt; <span class="el_source">BroadwickConstants.java</span></div><h1>BroadwickConstants.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick;
+
+import lombok.Getter;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
+/**
+ * All the constants for the Broadwick framework are defined here.
+ */
+public final class BroadwickConstants {
+
+    /**
+     * Utility constructor (hidden).
+     */
+<span class="nc" id="L32">    private BroadwickConstants() {</span>
+<span class="nc" id="L33">    }</span>
+
+    /**
+     * Convert a date object to an integer (number of days from a fixed start date, here 1/1/1900). All dates in the
+     * database are stored as integer values using this method.
+     * @param date the date object we are converting.
+     * @return the number of days from a fixed 'zero date'.
+     */
+    public static int getDate(final DateTime date) {
+<span class="nc" id="L42">        return Days.daysBetween(ZERO_DATE, date).getDays();</span>
+    }
+
+    /**
+     * Convert an integer (number of days from a fixed start date, here 1/1/1900) to a DateTime object. All dates in the
+     * database are stored as integer values, this method converts that integer to a DateTime object.
+     * @param date the integer date offset.
+     * @return the datetime object corresponding to the 'zero date' plus date.
+     */
+    public static DateTime toDate(final int date) {
+<span class="nc" id="L52">        return ZERO_DATE.plusDays(date);</span>
+    }
+
+    /**
+     * Convert a date object to an integer (number of days from a fixed start date, here 1/1/1900). All dates in the
+     * database are stored as integer values using this method.
+     * @param date       the date object we are converting.
+     * @param dateFormat the format the date is in when doing the conversion.
+     * @return the number of days from a fixed 'zero date'.
+     */
+    public static int getDate(final String date, final String dateFormat) {
+<span class="nc" id="L63">        final DateTimeFormatter pattern = DateTimeFormat.forPattern(dateFormat);</span>
+<span class="nc" id="L64">        final DateTime dateTime = pattern.parseDateTime(date);</span>
+<span class="nc" id="L65">        return BroadwickConstants.getDate(dateTime);</span>
+    }
+
+<span class="nc" id="L68">    @Getter</span>
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+<span class="nc" id="L70">    private static final DateTime ZERO_DATE = new DateTime(1900, 1, 1, 0, 0);</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

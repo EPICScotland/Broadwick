@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ShortestPath.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.graph.algorithms</a> &gt; <span class="el_source">ShortestPath.java</span></div><h1>ShortestPath.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.graph.algorithms;
+
+import broadwick.graph.Edge;
+import broadwick.graph.EdgeType;
+import edu.uci.ics.jung.algorithms.shortestpath.DijkstraDistance;
+import broadwick.graph.Graph;
+import broadwick.graph.Vertex;
+import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
+import java.util.List;
+import org.apache.commons.collections15.Transformer;
+
+/**
+ * Calculates distances in a specified graph, using Dijkstra's single-source-shortest-path algorithm. All edge weights
+ * in the graph must be nonnegative; otherwise an
+ * &lt;code&gt;IllegalArgumentException&lt;/code&gt; will be thrown.
+ * @param &lt;V&gt; the vertex type.
+ * @param &lt;E&gt; the edge type.
+ */
+public class ShortestPath&lt;V extends Vertex, E extends Edge&lt;V&gt;&gt; {
+
+    /**
+     * Create a ShortestPath instance.
+     * @param graph the network/graph on which we will be looking for shortest paths.
+     */
+<span class="nc" id="L40">    public ShortestPath(final Graph&lt;V, E&gt; graph) {</span>
+
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        if (EdgeType.DIRECTED.equals(graph.getEdgeType())) {</span>
+<span class="nc" id="L43">            jungGraph = new edu.uci.ics.jung.graph.DirectedSparseMultigraph&lt;&gt;();</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        } else if (EdgeType.UNDIRECTED.equals(graph.getEdgeType())) {</span>
+<span class="nc" id="L45">            jungGraph = new edu.uci.ics.jung.graph.UndirectedSparseMultigraph&lt;&gt;();</span>
+        } else {
+<span class="nc" id="L47">            throw new IllegalArgumentException(&quot;Could not create ShortestPath object for unknown grpah type.&quot;);</span>
+        }
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        for (E edge : graph.getEdges()) {</span>
+<span class="nc" id="L50">            jungGraph.addEdge(edge, edge.getSource(), edge.getDestination());</span>
+<span class="nc" id="L51">        }</span>
+
+
+<span class="nc" id="L54">        weightTransformer = new EdgeWeightTransformer();</span>
+<span class="nc" id="L55">    }</span>
+
+    /**
+     * Returns the length of a shortest path from the source to the target vertex, or null if the target is not
+     * reachable from the source. If either vertex is not in the graph for which this instance was created, throws
+     * &lt;code&gt;IllegalArgumentException&lt;/code&gt;.
+     * @param source the source
+     * @param target the target
+     * @return the distance from source to target
+     */
+    public final double calculateDistance(final V source, final V target) {
+
+<span class="nc" id="L67">        final DijkstraDistance&lt;V, E&gt; distance = new DijkstraDistance&lt;&gt;(jungGraph, weightTransformer);</span>
+<span class="nc" id="L68">        final Number d = distance.getDistance(source, target);</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        return d == null ? 0 : d.doubleValue();</span>
+    }
+
+    /**
+     * Returns a List of the edges on the shortest path from source to target, in order of their occurrence on this
+     * path. If either vertex is not in the graph for which this instance was created, throws IllegalArgumentException
+     * @param source the vertex from which distances are measured
+     * @param target the number of vertics for which to measure distances
+     * @return a list of edges that comprise the shortest path from source to target.
+     */
+    public final List&lt;E&gt; getEdgesInPath(final V source, final V target) {
+<span class="nc" id="L80">        final DijkstraShortestPath&lt;V,E&gt; path = new DijkstraShortestPath&lt;&gt;(jungGraph);</span>
+<span class="nc" id="L81">        return path.getPath(source, target);</span>
+    }
+    private edu.uci.ics.jung.graph.AbstractTypedGraph&lt;V,E&gt; jungGraph;
+    private final Transformer&lt;E, Number&gt; weightTransformer;
+
+    /**
+     * Transformer class to transform the edge of a graph to a double (it's weight).
+     */
+<span class="nc" id="L89">    private class EdgeWeightTransformer implements Transformer&lt;E, Number&gt; {</span>
+
+        @Override
+        public Number transform(final E edge) {
+            // all nonnull values are instances of broadwick.graph.Edge
+<span class="nc bnc" id="L94" title="All 2 branches missed.">            if (edge != null) {</span>
+<span class="nc" id="L95">                return ((Edge) edge).getWeight();</span>
+            } else {
+<span class="nc" id="L97">                return 1.0;</span>
+            }
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

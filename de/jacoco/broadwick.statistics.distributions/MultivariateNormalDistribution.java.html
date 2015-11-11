@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MultivariateNormalDistribution.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.statistics.distributions</a> &gt; <span class="el_source">MultivariateNormalDistribution.java</span></div><h1>MultivariateNormalDistribution.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.statistics.distributions;
+
+import broadwick.math.Vector;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.math3.random.Well44497b;
+
+/**
+ * Sample from a Multivariate Normal (Gaussian) Distribution, a generalization of the one-dimensional (univariate) 
+ * normal distribution to higher dimensions. This is a simple wrapper class for the Apache Commons Math 
+ * multivariate normal library.
+ * &lt;p&gt;
+ * References:&lt;/p&gt;&lt;p&gt;
+ * &lt;ul&gt;
+ * &lt;li&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/Multivariate_normal_distribution&quot;&gt; Multivariatenormal Distribution&lt;/a&gt;&lt;/li&gt;
+ * &lt;/ul&gt;
+ * &lt;/p&gt;
+ */
+<span class="nc" id="L33">@Slf4j</span>
+public class MultivariateNormalDistribution implements ContinuousMultivariateDistribution {
+
+    /**
+     * Create a normal distribution with a given mean and standard deviation.
+     * @param means  the [mathematical] vector of means.
+     * @param covariances the covariance matrix.
+     */
+<span class="nc" id="L41">    public MultivariateNormalDistribution(final double[] means, final double[][] covariances) {</span>
+<span class="nc" id="L42">        this.mnd = new org.apache.commons.math3.distribution.MultivariateNormalDistribution(</span>
+<span class="nc" id="L43">                new Well44497b(System.currentTimeMillis() * Thread.currentThread().getId()),</span>
+                means, covariances);
+        
+//        Find any real matrix A such that A AT = Σ. When Σ is positive-definite, the Cholesky decomposition is typically used,                                                                                                      
+//        Let z = (z1, …, zN)T be a vector whose components are N independent standard normal variates .
+//        Let x be μ + Az. This has the desired distribution due to the affine transformation property.
+<span class="nc" id="L49">    }</span>
+
+    @Override
+    public final Vector sample() {
+<span class="nc" id="L53">        return new Vector(mnd.sample());</span>
+    }
+
+    
+    org.apache.commons.math3.distribution.MultivariateNormalDistribution mnd;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

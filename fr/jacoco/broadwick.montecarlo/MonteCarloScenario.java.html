@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MonteCarloScenario.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.montecarlo</a> &gt; <span class="el_source">MonteCarloScenario.java</span></div><h1>MonteCarloScenario.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.montecarlo;
+
+import broadwick.utils.CloneUtils;
+import java.io.Serializable;
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * A simple model class thats runs a model and creates named quantities, i.e. a map containing the vlaues and their
+ * names.
+ */
+<span class="nc" id="L27">public abstract class MonteCarloScenario implements Serializable {</span>
+
+    /**
+     * Compute the value of the Monte Carlo model/simulation at the given set of coordinates.
+     * @param seed a seed for the random number generator in the scenario. Scenarios are created so quickly, relying on
+     * the clock as a seed may lead to a lot of generator with the same sequence.
+     * @return a Monte Carlo Results object.
+     */
+    public abstract MonteCarloResults run(final int seed);
+    
+    
+    /**
+     * Create a copy of the MonteCarloScenario object. This is used by the MonteCarlo producer object to create a 
+     * copy of each scenario object, allowing for each scenario to control which attributes are deep or shallow copied.
+     * @return a (deep) copy of the MonteCarloScenario object.
+     */
+    public MonteCarloScenario copyOf() {
+<span class="nc" id="L44">        return (MonteCarloScenario) CloneUtils.deepClone(this);</span>
+    }
+    
+<span class="nc" id="L47">    @Getter</span>
+<span class="nc" id="L48">    @Setter</span>
+    MonteCarloStep step;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>OdeSolver.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.odesolver</a> &gt; <span class="el_source">OdeSolver.java</span></div><h1>OdeSolver.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.odesolver;
+
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.Synchronized;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
+/**
+ * A base class for all ODE solvers.
+ */
+<span class="nc" id="L37">@Slf4j</span>
+public abstract class OdeSolver {
+
+    /**
+     * Create the solver object with initial consitions.
+     * @param ode the ode object containing the specification of the ode.
+     * @param tStart the start time (the independent variable is assumed to be time)
+     * @param tEnd the end time (the independent variable is assumed to be time)
+     * @param stepSize the size of the step to be used in the solver.
+     */
+<span class="nc" id="L47">    public OdeSolver(final Ode ode, final double tStart, final double tEnd, final double stepSize) {</span>
+<span class="nc" id="L48">        this.ode = ode;</span>
+<span class="nc" id="L49">        this.independentVariableStart = tStart;</span>
+<span class="nc" id="L50">        this.independentVariableEnd = tEnd;</span>
+<span class="nc" id="L51">        this.stepSize = stepSize;</span>
+<span class="nc" id="L52">        this.thetaQueue = new ThetaQueue();</span>
+
+<span class="nc" id="L54">        dependentVariables = new ArrayList&lt;&gt;(ode.getInitialValues());</span>
+<span class="nc" id="L55">        log.debug(&quot;Created ODE solver&quot;);</span>
+<span class="nc" id="L56">    }</span>
+
+    /**
+     * Add an observer to the engines list of observers.
+     * @param observer the observer.
+     */
+    public final void addObserver(final Observer observer) {
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        if (observer.getSolver() != this) {</span>
+<span class="nc" id="L64">            log.error(&quot;Cannot add Observer to OdeSolver, type = {}&quot;, observer.getSolver());</span>
+<span class="nc" id="L65">            throw new IllegalArgumentException(&quot;Observer doesn't belong to this solver!&quot;);</span>
+        }
+<span class="nc" id="L67">        log.trace(&quot;Adding Observer to OdeSolver&quot;);</span>
+<span class="nc" id="L68">        this.getObservers().add(observer);</span>
+<span class="nc" id="L69">    }</span>
+
+    /**
+     * Register a new theta event that is triggered at a given time.
+     * @param obs       the observers which is registering.
+     * @param thetaTime the time the theta event occurs.
+     * @param event     the theta event.
+     */
+    public final void registerNewTheta(final Observer obs, final double thetaTime, final Object event) {
+<span class="nc" id="L78">        thetaQueue.pushTheta(thetaTime, obs, event);</span>
+<span class="nc" id="L79">    }</span>
+
+        /**
+     * Gets called when the simulator reaches the predetermined time of a theta event. All the observers for the events
+     * that are configured for this time are notified and given a list of events that are triggered.
+     */
+    protected final void doThetaEvent() {
+<span class="nc" id="L86">        final double nextThetaEventTime = thetaQueue.getNextThetaEventTime();</span>
+
+<span class="nc" id="L88">        final Map&lt;Observer, Collection&lt;Object&gt;&gt; nextEvents = thetaQueue.getNextEventDataAndRemove();</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        for (Map.Entry&lt;Observer, Collection&lt;Object&gt;&gt; entry : nextEvents.entrySet()) {</span>
+
+<span class="nc" id="L91">            final Observer observer = entry.getKey();</span>
+<span class="nc" id="L92">            final Collection&lt;Object&gt; events = entry.getValue();</span>
+
+<span class="nc bnc" id="L94" title="All 2 branches missed.">            if (events != null) {</span>
+<span class="nc" id="L95">                log.trace(&quot;Informing observer of {} theta events&quot;, events.size());</span>
+<span class="nc" id="L96">                observer.theta(nextThetaEventTime, events);</span>
+            }
+<span class="nc" id="L98">        }</span>
+<span class="nc" id="L99">        log.trace(&quot;Finished theta events next =  {}&quot;, thetaQueue.getNextThetaEventTime());</span>
+<span class="nc" id="L100">    }</span>
+    
+    /**
+     * Theta defines a moment, where the simulator has to invoke &lt;TT&gt;theta&lt;/TT&gt; of a observers. It is used e.g. to
+     * determine the amounts of species at one moments. Extending class just have to call
+     * {@link Simulator#doThetaEvent()} which basically calls the observers.
+     * @return the theta
+     */
+    public final double getNextThetaEventTime() {
+<span class="nc" id="L109">        return thetaQueue.getNextThetaEventTime();</span>
+    }
+
+    /**
+     * Get a csv representation of the current state of the dependent variables. 
+     * @return a csv string.
+     */
+    public final String getDependetVariablesAsCsv() {
+<span class="nc" id="L117">        return StringUtils.join(dependentVariables, &quot;,&quot;);</span>
+    }
+
+    /**
+     * Get the dependent variables.
+     * @return an array of the dependent variables.
+     */
+    public final List&lt;Double&gt; getDependentVariables() {
+<span class="nc" id="L125">        return dependentVariables;</span>
+    }
+
+    /**
+     * Solve the system of ODEs.
+     */
+    public abstract void run();
+
+    /**
+     * Manages the registered theta events. Each registered theta event is stored in a table containing the time of the
+     * event the list of observers for that event and the list of events for that time.
+     */
+    private static class ThetaQueue {
+
+        /**
+         * Construct an empty theta queue.
+         */
+<span class="nc" id="L142">        public ThetaQueue() {</span>
+<span class="nc" id="L143">            thetas = TreeBasedTable.create();</span>
+<span class="nc" id="L144">        }</span>
+
+        /**
+         * Add a new theta event to the registry, including the time, collection of observers and collection of events.
+         * Each event is stored as an object where it is assumed that the observer
+         * @param time  the time the theta event occurs.
+         * @param obs   the observers.
+         * @param theta the theta event.
+         */
+<span class="nc" id="L153">        @Synchronized</span>
+        public void pushTheta(final double time, final Observer obs, final Object theta) {
+<span class="nc" id="L155">            log.trace(&quot;Adding new {} theta event at t={}&quot;, theta.getClass(), time);</span>
+
+<span class="nc" id="L157">            Collection&lt;Object&gt; events = thetas.get(time, obs);</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">            if (events == null) {</span>
+                try {
+<span class="nc" id="L160">                    log.trace(&quot;No theta events registered at t={}; Creating new list&quot;, time);</span>
+<span class="nc" id="L161">                    events = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L162">                    events.add(theta);</span>
+<span class="nc" id="L163">                    thetas.put(time, obs, events);</span>
+<span class="nc" id="L164">                } catch (UnsupportedOperationException | ClassCastException |</span>
+                         IllegalArgumentException | IllegalStateException e) {
+<span class="nc" id="L166">                    log.error(&quot;Could not register theta. {}&quot;, e.getLocalizedMessage());</span>
+<span class="nc" id="L167">                }</span>
+            } else {
+<span class="nc" id="L169">                log.trace(&quot;Found {} theta events for t={}; Adding new event&quot;, events.size(), time);</span>
+<span class="nc" id="L170">                events.add(theta);</span>
+            }
+            
+            // Now we need to update the nextThetaEventTime
+<span class="nc bnc" id="L174" title="All 2 branches missed.">            if (thetas.rowKeySet().isEmpty()) {</span>
+<span class="nc" id="L175">                nextThetaEventTime = Double.POSITIVE_INFINITY;</span>
+            } else {
+<span class="nc" id="L177">                nextThetaEventTime = Collections.min(thetas.rowKeySet());</span>
+            }
+<span class="nc" id="L179">        }</span>
+
+        /**
+         * Get the next observer and the collection of events they are subscribed to and remove it from the theta queue.
+         * @return a map of the observers and their subscribed data.
+         */
+        public Map&lt;Observer, Collection&lt;Object&gt;&gt; getNextEventDataAndRemove() {
+<span class="nc" id="L186">            final Map&lt;Observer, Collection&lt;Object&gt;&gt; nextEventData = thetas.row(nextThetaEventTime);</span>
+
+            // we have a view of the underlying data that we want to return, copy it first then delete the
+            // underlying data.
+<span class="nc" id="L190">            final Map&lt;Observer, Collection&lt;Object&gt;&gt; eventData = new HashMap&lt;&gt;(nextEventData);</span>
+<span class="nc" id="L191">            log.trace(&quot;Found {} configured events and observers at t={}&quot;, eventData.size(), nextThetaEventTime);</span>
+
+<span class="nc bnc" id="L193" title="All 2 branches missed.">            for (Observer obs : eventData.keySet()) {</span>
+<span class="nc" id="L194">                final Collection&lt;Object&gt; removed = thetas.remove(nextThetaEventTime, obs);</span>
+<span class="nc" id="L195">                log.trace(&quot;Removed {} items from registered theta list&quot;, removed.size());</span>
+<span class="nc" id="L196">            }</span>
+
+            // Now we need to update the nextThetaEventTime
+<span class="nc bnc" id="L199" title="All 2 branches missed.">            if (thetas.rowKeySet().isEmpty()) {</span>
+<span class="nc" id="L200">                nextThetaEventTime = Double.POSITIVE_INFINITY;</span>
+            } else {
+<span class="nc" id="L202">                nextThetaEventTime = Collections.min(thetas.rowKeySet());</span>
+            }
+
+<span class="nc" id="L205">            return eventData;</span>
+        }
+<span class="nc" id="L207">        @Getter</span>
+        private final Table&lt;Double, Observer, Collection&lt;Object&gt;&gt; thetas;
+<span class="nc" id="L209">        @Getter</span>
+        private double nextThetaEventTime;
+    }
+
+    protected final List&lt;Double&gt; dependentVariables;
+    protected final double stepSize;
+<span class="nc" id="L215">    @Getter</span>
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+    private final Double independentVariableStart;
+<span class="nc" id="L218">    @Getter</span>
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+    private final Double independentVariableEnd;
+<span class="nc" id="L221">    @Getter</span>
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+    private final Ode ode;
+<span class="nc" id="L224">    @Getter</span>
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+    protected double currentTime = 0;
+<span class="nc" id="L227">    @Getter</span>
+<span class="nc" id="L228">    @Setter</span>
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+    private OdeController controller = new DefaultOdeController(100.0);
+<span class="nc" id="L231">    @Getter</span>
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+    private final Set&lt;Observer&gt; observers = new HashSet&lt;&gt;(1);
+    private ThetaQueue thetaQueue;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

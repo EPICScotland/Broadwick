@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>HypergeometricDistribution.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.statistics.distributions</a> &gt; <span class="el_source">HypergeometricDistribution.java</span></div><h1>HypergeometricDistribution.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2015 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.statistics.distributions;
+
+/**
+ *
+ * &lt;p&gt;
+ * The hypergeometric distribution applies to sampling without replacement from a finite population whose elements can
+ * be classified into two mutually exclusive categories like Pass/Fail. As random selections are made from the
+ * population, each subsequent draw decreases the population causing the probability of success to change with each
+ * draw.
+ * &lt;p&gt;
+ * @see &lt;a href=&quot;http://en.wikipedia.org/wiki/Hypergeometric_distribution&quot;&gt;Hypergeometric distribution (Wikipedia)&lt;/a&gt;
+ * @see &lt;a href=&quot;http://mathworld.wolfram.com/HypergeometricDistribution.html&quot;&gt;Hypergeometric distribution
+ * (MathWorld)&lt;/a&gt;
+ */
+public class HypergeometricDistribution implements DiscreteDistribution {
+
+    /**
+     * A hypergeometric distribution gives the distribution of the number of successes in \(n\) draws from a population
+     * of size \(N\) containing \(n_{succ}\) successes. \(N,n,n_{succ}\) can be any integers such that \(N\ge n&gt;0\) and
+     * \(N\ge n_{succ} \ge 0\).
+     * @param popSize      the population size, \(N\).
+     * @param sampleSize   the number of draws, \(n\).
+     * @param numSuccesses the number of successes, \(n_{succ}\).
+     */
+<span class="nc" id="L40">    public HypergeometricDistribution(final int popSize, final int sampleSize, final int numSuccesses) {</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">        if (!(popSize &gt;= sampleSize)) {</span>
+<span class="nc" id="L42">            throw new IllegalArgumentException(String.format(&quot;The population size (%d) MUST be greater than or equal to the sample size (%d).&quot;, popSize, sampleSize));</span>
+        }
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        if (!(popSize &gt;= numSuccesses)) {</span>
+<span class="nc" id="L45">            throw new IllegalArgumentException(String.format(&quot;The population size (%d) MUST be greater than or equal to the number of successes (%d).&quot;, popSize,numSuccesses));</span>
+        }
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        if (!(sampleSize &gt; 0)) {</span>
+<span class="nc" id="L48">            throw new IllegalArgumentException(String.format(&quot;The sample size (%d) MUST be greater than 0.&quot;, sampleSize));</span>
+        }
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (!(numSuccesses &gt;= 0)) {</span>
+<span class="nc" id="L51">            throw new IllegalArgumentException(String.format(&quot;The number of successes (%d) MUST be greater than or equal to 0&quot;, numSuccesses));</span>
+        }
+
+<span class="nc" id="L54">        dist = new org.apache.commons.math3.distribution.HypergeometricDistribution(popSize,</span>
+                                                                                    numSuccesses,
+                                                                                    sampleSize);
+<span class="nc" id="L57">    }</span>
+
+    @Override
+    public int sample() {
+<span class="nc" id="L61">        return dist.sample(); //.inverseCumulativeProbability(RNG.getDouble());</span>
+    }
+
+    /**
+     * {@inheritDoc}
+     * &lt;p&gt;
+     * For population size {@code N}, number of successes {@code m}, and sample size {@code n}, the mean is
+     * {@code n * m / N}.
+     * @return
+     */
+    @Override
+    public final double getMean() {
+<span class="nc" id="L73">        return dist.getNumericalMean();</span>
+    }
+
+    /**
+     * {@inheritDoc}
+     * &lt;p&gt;
+     * For population size {@code N}, number of successes {@code m}, and sample size {@code n}, the variance is
+     * {@code [n * m * (N - n) * (N - m)] / [N^2 * (N - 1)]}.
+     * @return
+     */
+    @Override
+    public final double getVariance() {
+<span class="nc" id="L85">        return dist.getNumericalVariance();</span>
+    }
+
+    private final org.apache.commons.math3.distribution.HypergeometricDistribution dist;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

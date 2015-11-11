@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>RungeKutta4.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.odesolver</a> &gt; <span class="el_source">RungeKutta4.java</span></div><h1>RungeKutta4.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.odesolver;
+
+import java.util.ArrayList;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * A fourth order Runge Kutta solver for systems of ODEs.
+ */
+<span class="nc" id="L25">@Slf4j</span>
+public class RungeKutta4 extends OdeSolver {
+
+    /**
+     * Create the solver for a give ode object and initial consitions.
+     * @param ode      the ode object containing the specification of the ode.
+     * @param tStart   the start time (the independent variable is assumed to be time)
+     * @param tEnd     the end time (the independent variable is assumed to be time)
+     * @param stepSize the size of the step to be used in the solver.
+     */
+    public RungeKutta4(final Ode ode, final double tStart, final double tEnd, final double stepSize) {
+<span class="nc" id="L36">        super(ode, tStart, tEnd, stepSize);</span>
+<span class="nc" id="L37">    }</span>
+
+    @Override
+    public final void run() {
+<span class="nc" id="L41">        log.debug(&quot;Running Runge Kutta 4th Order solver&quot;);</span>
+
+        // tell our observers that the simulation has started
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        for (Observer observer : getObservers()) {</span>
+<span class="nc" id="L45">            observer.started();</span>
+<span class="nc" id="L46">        }</span>
+
+        // create some internal working arrays
+<span class="nc" id="L49">        final int n = this.getOde().getInitialValues().size();</span>
+<span class="nc" id="L50">        Double[] k1 = new Double[n];</span>
+<span class="nc" id="L51">        Double[] k2 = new Double[n];</span>
+<span class="nc" id="L52">        Double[] k3 = new Double[n];</span>
+<span class="nc" id="L53">        Double[] k4 = new Double[n];</span>
+<span class="nc" id="L54">        final double halfStep = 0.5 * stepSize;</span>
+        List&lt;Double&gt; dydx;
+<span class="nc" id="L56">        final List&lt;Double&gt; yd = new ArrayList&lt;&gt;(n);</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc" id="L58">            yd.add(0.0);</span>
+        }
+
+        do {
+<span class="nc" id="L62">            currentTime = currentTime + stepSize;</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">            while (currentTime &gt; getNextThetaEventTime()) {</span>
+<span class="nc" id="L64">                doThetaEvent();</span>
+            }
+<span class="nc" id="L66">            dydx = this.getOde().computeDerivatives(currentTime, dependentVariables);</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">            for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc" id="L68">                k1[i] = stepSize * dydx.get(i);</span>
+<span class="nc" id="L69">                yd.set(i, dependentVariables.get(i) + k1[i] / 2);</span>
+            }
+<span class="nc" id="L71">            dydx = this.getOde().computeDerivatives(currentTime + halfStep, yd);</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">            for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc" id="L73">                k2[i] = stepSize * dydx.get(i);</span>
+<span class="nc" id="L74">                yd.set(i, dependentVariables.get(i) + k2[i] / 2);</span>
+            }
+<span class="nc" id="L76">            dydx = this.getOde().computeDerivatives(currentTime + halfStep, yd);</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">            for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc" id="L78">                k3[i] = stepSize * dydx.get(i);</span>
+<span class="nc" id="L79">                yd.set(i, dependentVariables.get(i) + k3[i]);</span>
+            }
+<span class="nc" id="L81">            dydx = this.getOde().computeDerivatives(currentTime + stepSize, yd);</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">            for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc" id="L83">                k4[i] = stepSize * dydx.get(i);</span>
+            }
+
+<span class="nc bnc" id="L86" title="All 2 branches missed.">            for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc" id="L87">                final double newVal = dependentVariables.get(i) + (k1[i] / 6 + k2[i] / 3 + k3[i] / 3 + k4[i] / 6);</span>
+<span class="nc" id="L88">                dependentVariables.set(i, newVal);</span>
+            }
+
+<span class="nc bnc" id="L91" title="All 2 branches missed.">            for (Observer observer : getObservers()) {</span>
+<span class="nc" id="L92">                observer.step();</span>
+<span class="nc" id="L93">            }</span>
+
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        } while (this.getController().goOn(this));</span>
+
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        for (Observer observer : getObservers()) {</span>
+<span class="nc" id="L98">            observer.finished();</span>
+<span class="nc" id="L99">        }</span>
+<span class="nc" id="L100">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

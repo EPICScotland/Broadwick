@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>LoggingFacade.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick</a> &gt; <span class="el_source">LoggingFacade.java</span></div><h1>LoggingFacade.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.filter.ThresholdFilter;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.ConsoleAppender;
+import ch.qos.logback.core.FileAppender;
+import ch.qos.logback.core.encoder.Encoder;
+import ch.qos.logback.core.filter.Filter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Facade class to the underlying logger to allow the loggers to be configured programmatically.
+ */
+<span class="nc" id="L39">@Slf4j</span>
+public final class LoggingFacade {
+
+    /**
+     * Create the logging facade, by default adding a console logger to output logging info to the screen (console). A
+     * level of 'error' is configured by default, once the configuration file is read the logging level can be changed.
+     */
+<span class="nc" id="L46">    public LoggingFacade() {</span>
+
+        try {
+            // assume SLF4J is bound to logback in the current environment
+<span class="nc" id="L50">            loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();</span>
+<span class="nc" id="L51">            loggerContext.start();</span>
+
+<span class="nc" id="L53">            rootLogger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);</span>
+<span class="nc" id="L54">            rootLogger.detachAndStopAllAppenders();</span>
+<span class="nc" id="L55">            rootLogger.setLevel(Level.OFF);</span>
+
+            // Create the layout pattern for the appenders.
+<span class="nc" id="L58">            addConsoleLogger(&quot;error&quot;, logFormatThreadMsg);</span>
+
+<span class="nc" id="L60">        } catch (ClassCastException cce) {</span>
+<span class="nc" id="L61">            rootLogger.error(&quot;Apparently SLF4J is not backed by Logback. This is a requirement, thus an internal fault.&quot;);</span>
+<span class="nc" id="L62">        }</span>
+<span class="nc" id="L63">    }</span>
+
+    /**
+     * Add a console logger to the list of loggers of the project. This will replace all the console loggers already
+     * added using this method.
+     * @param level   the logging level to be applied.
+     * @param pattern the pattern for the logger.
+     */
+    public void addConsoleLogger(final String level, final String pattern) {
+
+<span class="nc" id="L73">        final String consoleName = &quot;Console&quot;;</span>
+
+        // remove the old console appender - it will be called &quot;Console&quot; if it was added using this method.
+<span class="nc" id="L76">        rootLogger.detachAppender(consoleName);</span>
+
+<span class="nc" id="L78">        final ConsoleAppender&lt;ILoggingEvent&gt; appender = new ConsoleAppender&lt;&gt;();</span>
+<span class="nc" id="L79">        appender.setName(consoleName);</span>
+<span class="nc" id="L80">        appender.setEncoder(createPatternLayoutEncoder(pattern));</span>
+<span class="nc" id="L81">        appender.addFilter(createThresholdFilter(level));</span>
+
+<span class="nc" id="L83">        appender.setContext(loggerContext);</span>
+<span class="nc" id="L84">        appender.start();</span>
+<span class="nc" id="L85">        rootLogger.addAppender((Appender&lt;ILoggingEvent&gt;) appender);</span>
+<span class="nc" id="L86">    }</span>
+
+    /**
+     * Add a file logger to the list of loggers of the project.
+     * @param file      the name of the file to which the logging messages will be added.
+     * @param level     the logging level to be applied.
+     * @param pattern   the pattern for the logger.
+     * @param overwrite if true, the contents of any previous log are overwritten. If false, the logs are appended.
+     */
+    public void addFileLogger(final String file, final String level, final String pattern, final Boolean overwrite) {
+
+        // Delete the old log file.
+        try {
+<span class="nc bnc" id="L99" title="All 4 branches missed.">            if (overwrite != null &amp;&amp; overwrite.booleanValue()) {</span>
+<span class="nc" id="L100">                Files.delete(Paths.get(file));</span>
+            }
+<span class="nc" id="L102">        } catch (IOException ex) {</span>
+<span class="nc" id="L103">            log.error(&quot;Could not delete old log file; {}&quot;, ex.getLocalizedMessage());</span>
+<span class="nc" id="L104">        }</span>
+
+<span class="nc" id="L106">        final FileAppender&lt;ILoggingEvent&gt; appender = new FileAppender&lt;&gt;();</span>
+<span class="nc" id="L107">        appender.setFile(file);</span>
+<span class="nc" id="L108">        appender.setEncoder(createPatternLayoutEncoder(pattern));</span>
+<span class="nc" id="L109">        appender.addFilter(createThresholdFilter(level));</span>
+
+<span class="nc" id="L111">        appender.setContext(loggerContext);</span>
+<span class="nc" id="L112">        appender.start();</span>
+<span class="nc" id="L113">        rootLogger.addAppender((Appender&lt;ILoggingEvent&gt;) appender);</span>
+<span class="nc" id="L114">    }</span>
+
+    /**
+     * Create a pattern layout encoder for a given pattern.
+     * @param pattern the pattern to apply.
+     * @return the created encoder.
+     */
+    private Encoder&lt;ILoggingEvent&gt; createPatternLayoutEncoder(final String pattern) {
+        // Set a default pattern if the supplied pattern is empty
+<span class="nc bnc" id="L123" title="All 2 branches missed.">        final String patt = (pattern == null) ? logFormatThreadMsg : pattern;</span>
+
+<span class="nc" id="L125">        final PatternLayoutEncoder encoder = new PatternLayoutEncoder();</span>
+<span class="nc" id="L126">        encoder.setContext(loggerContext);</span>
+<span class="nc" id="L127">        encoder.setPattern(patt);</span>
+<span class="nc" id="L128">        encoder.start();</span>
+<span class="nc" id="L129">        return (Encoder&lt;ILoggingEvent&gt;) encoder;</span>
+    }
+
+    /**
+     * Create a thresholdFilter for a given level.
+     * @param level the level to set.
+     * @return the created filter.
+     */
+    private Filter&lt;ILoggingEvent&gt; createThresholdFilter(final String level) {
+        // Set a default level if the supplied level is empty
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        final String lev = (level == null) ? &quot;info&quot; : level;</span>
+<span class="nc" id="L140">        setLoggingLevel(level);</span>
+
+<span class="nc" id="L142">        final ThresholdFilter filter = new ThresholdFilter();</span>
+<span class="nc" id="L143">        filter.setLevel(lev);</span>
+<span class="nc" id="L144">        filter.start();</span>
+<span class="nc" id="L145">        return (Filter&lt;ILoggingEvent&gt;) filter;</span>
+    }
+
+    /**
+     * Convert the string passed as argument to a Level. If the conversion fails, then this method returns Level.DEBUG.
+     * @param level the logging level that should be used.
+     */
+    private void setLoggingLevel(final String level) {
+<span class="nc" id="L153">        rootLogger.setLevel(Level.toLevel(level));</span>
+<span class="nc" id="L154">    }</span>
+<span class="nc" id="L155">    @Getter</span>
+    private Logger rootLogger;
+    private LoggerContext loggerContext;
+<span class="nc" id="L158">    private String logFormatThreadMsg = &quot;[%thread] %msg\n&quot;;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

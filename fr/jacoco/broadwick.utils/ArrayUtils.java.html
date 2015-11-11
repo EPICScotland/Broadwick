@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ArrayUtils.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.utils</a> &gt; <span class="el_source">ArrayUtils.java</span></div><h1>ArrayUtils.java</h1><pre class="source lang-java linenums">package broadwick.utils;
+
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
+import java.text.Format;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.regex.Pattern;
+
+/**
+ * Useful methods for acting on arrays.
+ */
+public final class ArrayUtils {
+
+    /**
+     * Hidden Utility constructor.
+     */
+<span class="nc" id="L19">    private ArrayUtils() {</span>
+<span class="nc" id="L20">    }</span>
+
+    /**
+     * Get the maximum element in an array of longs.
+     * @param longs the array to search.
+     * @return the maximum value in the array.
+     */
+    public static long max(final long[] longs) {
+<span class="fc" id="L28">        long max = 0l;</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        for (int j = 0; j &lt; longs.length; j++) {</span>
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">            max = (longs[j] &gt; max) ? longs[j] : max;</span>
+        }
+<span class="fc" id="L32">        return max;</span>
+    }
+
+    /**
+     * Get the sum of an array of doubles.
+     * @param doubles the array to sum.
+     * @return the sum of the array
+     */
+    public static Double sum(final Double[] doubles) {
+<span class="fc" id="L41">        Double sum = 0.0;</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        for (int j = 0; j &lt; doubles.length; j++) {</span>
+<span class="fc" id="L43">            sum += doubles[j];</span>
+        }
+<span class="fc" id="L45">        return sum;</span>
+    }
+
+
+    /**
+     * Get the sum of an array of integers.
+     * @param integers the array to sum.
+     * @return the sum of the array
+     */
+    public static Integer sum(final Integer[] integers) {
+<span class="nc" id="L55">        Integer sum = 0;</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        for (int j = 0; j &lt; integers.length; j++) {</span>
+<span class="nc" id="L57">            sum += integers[j];</span>
+        }
+<span class="nc" id="L59">        return sum;</span>
+    }
+
+    /**
+     * Modify an array by multiplying each element by a constant scaling factor.
+     * @param longs the array to scale.
+     * @param scale the scaling factor
+     */
+    public static void scale(long[] longs, final double scale) {
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        for (int j = 0; j &lt; longs.length; j++) {</span>
+<span class="fc" id="L69">            longs[j] *= scale;</span>
+        }
+<span class="fc" id="L71">    }</span>
+
+    /**
+     * Given an array containing double values as string convert them to Doubles.
+     * @param arr the String[] to be converted.
+     * @return the converted Double array.
+     */
+    public static Double[] toDoubleArray(final String[] arr) {
+<span class="nc" id="L79">        Double[] doubles = new Double[arr.length];</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        for (int i = 0; i &lt; arr.length; ++i) {</span>
+<span class="nc" id="L81">            doubles[i] = Double.valueOf(arr[i]);</span>
+        }
+<span class="nc" id="L83">        return doubles;</span>
+    }
+
+    /**
+     * Given a comma separated string containing double values as strings convert them to an
+     * array of Doubles.
+     * @param str the string containing comma separated double values.
+     * @return the converted Double array.
+     */
+    public static Double[] toDoubleArray(final String str) {
+<span class="nc" id="L93">        return toDoubleArray(toStringArray(str));</span>
+    }
+
+    /**
+     * Create a  new ArrayList from a comma separated list of ints encoded as string values.
+     * @param str a comma separated list of double values
+     * @return an ArrayList of the strings converted to ints.
+     */
+    public static List&lt;Double&gt; toArrayListDouble(final String str) {
+<span class="nc" id="L102">        return new ArrayList&lt;&gt;(java.util.Arrays.asList(toDoubleArray(str)));</span>
+    }
+
+    /**
+     * Given an array containing integer values as string convert them to integers.
+     * @param arr the String[] to be converted.
+     * @return the converted integer array.
+     */
+    public static Integer[] toIntegerArray(final String[] arr) {
+<span class="nc" id="L111">        Integer[] ints = new Integer[arr.length];</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        for (int i = 0; i &lt; arr.length; ++i) {</span>
+<span class="nc" id="L113">            ints[i] = Integer.valueOf(arr[i]);</span>
+        }
+<span class="nc" id="L115">        return ints;</span>
+    }
+
+    /**
+     * Given a comma separated string containing integer values as strings convert them to an
+     * array of integers.
+     * @param str the string containing comma separated double values.
+     * @return the converted integer array.
+     */
+    public static Integer[] toIntegerArray(final String str) {
+<span class="nc" id="L125">        return toIntegerArray(toStringArray(str));</span>
+    }
+
+    /**
+     * Create a  new ArrayList from a comma separated list of integers encoded as string values.
+     * @param str a comma separated list of integer values
+     * @return an ArrayList of the strings converted to integers.
+     */
+    public static List&lt;Integer&gt; toArrayListInteger(final String str) {
+<span class="nc" id="L134">        return new ArrayList&lt;&gt;(java.util.Arrays.asList(toIntegerArray(str)));</span>
+    }
+
+    /**
+     * Split a string into an array strings,ignoring whitespace around each string.
+     * @param str the string to split
+     * @param token the (char) token used to split the string.
+     * @return an array of strings.
+     */
+    public static String[] toStringArray(final String str, final Pattern token) {
+<span class="nc" id="L144">        return Iterables.toArray(Splitter.on(token).trimResults().split(str), String.class);</span>
+    }
+
+       /**
+     * Split a string into an array strings,ignoring whitespace around each string.
+     * @param str the string to split
+     * @param token the (char) token used to split the string.
+     * @return an array of strings.
+     */
+    @SuppressWarnings(&quot;all&quot;)
+    public static String[] toStringArray(String str, char token) {
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        if (str.indexOf(token) &gt; 0) {</span>
+<span class="fc" id="L156">            return Iterables.toArray(Splitter.on(token).trimResults().split(str), String.class);</span>
+        } else {
+<span class="fc" id="L158">            String[] arr = {str};</span>
+<span class="fc" id="L159">            return arr;</span>
+        }
+    }
+
+    /**
+     * Split a string into an array strings, ignoring whitespace around each string. The token used to split is the comma.
+     * @param str the string to split
+     * @return an array of strings.
+     */
+    public static String[] toStringArray(final String str) {
+<span class="fc" id="L169">        return toStringArray(str, ',');</span>
+    }
+
+    /**
+     * Split a string into a collection of strings, ignoring whitespace around each string. The token used to split is the comma.
+     * @param str the string to split
+     * @return a collection of strings.
+     */
+    public static Collection&lt;String&gt; toCollectionStrings(final String str) {
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">        if (str.isEmpty()) {</span>
+<span class="nc" id="L179">            return new ArrayList&lt;&gt;();</span>
+        }
+<span class="fc" id="L181">        return java.util.Arrays.asList(toStringArray(str));</span>
+    }
+
+    /**
+     * Create a csv string for an array of Objects.
+     * @param objects the array of objects.
+     * @return a csv string of the array.
+     */
+    public static String toString(final Object[] objects) {
+<span class="nc" id="L190">        final StringBuilder sb = new StringBuilder();</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">        for (Object o : objects) {</span>
+<span class="nc" id="L192">            sb.append(o.toString());</span>
+<span class="nc" id="L193">            sb.append(',');</span>
+        }
+<span class="nc" id="L195">        sb.deleteCharAt(sb.length() - 1);</span>
+
+<span class="nc" id="L197">        return sb.toString();</span>
+    }
+
+    /**
+     * Create a csv string for an array of Objects.
+     * @param objects the array of objects.
+     * @param fmt the formatter to beapplied to each element.
+     * @return a csv string of the array.
+     */
+    public static String toString(final Object[] objects, final Format fmt) {
+<span class="nc" id="L207">        final StringBuilder sb = new StringBuilder();</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">        for (Object o : objects) {</span>
+            try {
+<span class="nc" id="L210">                sb.append(fmt.format(o));</span>
+<span class="nc" id="L211">            } catch (IllegalArgumentException iae) {</span>
+<span class="nc" id="L212">                sb.append(o.toString());</span>
+<span class="nc" id="L213">            }</span>
+<span class="nc" id="L214">            sb.append(',');</span>
+        }
+<span class="nc" id="L216">        sb.deleteCharAt(sb.length() - 1);</span>
+
+<span class="nc" id="L218">        return sb.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

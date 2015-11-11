@@ -71,7 +71,7 @@
 <a class="jxr_linenumber" name="61" href="#61">61</a>              <strong class="jxr_keyword">double</strong> eventRate = rate;
 <a class="jxr_linenumber" name="62" href="#62">62</a>              <strong class="jxr_keyword">if</strong> (kernel.containsKey(event)) {
 <a class="jxr_linenumber" name="63" href="#63">63</a>                  eventRate += kernel.get(event);
-<a class="jxr_linenumber" name="64" href="#64">64</a>                  log.debug(<span class="jxr_string">"Kernel already contains event {}, updating rate by {}"</span>, event, rate);
+<a class="jxr_linenumber" name="64" href="#64">64</a>                  log.trace(<span class="jxr_string">"Kernel already contains event {}, updating rate by {}"</span>, event, rate);
 <a class="jxr_linenumber" name="65" href="#65">65</a>              } 
 <a class="jxr_linenumber" name="66" href="#66">66</a>              kernel.put(event, eventRate);
 <a class="jxr_linenumber" name="67" href="#67">67</a>          }

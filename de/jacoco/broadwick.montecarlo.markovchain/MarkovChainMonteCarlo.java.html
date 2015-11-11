@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MarkovChainMonteCarlo.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.montecarlo.markovchain</a> &gt; <span class="el_source">MarkovChainMonteCarlo.java</span></div><h1>MarkovChainMonteCarlo.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2013 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.montecarlo.markovchain;
+
+import broadwick.BroadwickException;
+import broadwick.io.FileOutput;
+import broadwick.montecarlo.MonteCarlo;
+import broadwick.montecarlo.MonteCarloResults;
+import broadwick.montecarlo.MonteCarloScenario;
+import broadwick.montecarlo.MonteCarloStep;
+import broadwick.montecarlo.acceptor.MetropolisHastings;
+import broadwick.montecarlo.acceptor.MonteCarloAcceptor;
+import broadwick.montecarlo.markovchain.controller.MarkovChainController;
+import broadwick.montecarlo.markovchain.controller.MarkovChainMaxNumStepController;
+import broadwick.montecarlo.markovchain.observer.MarkovChainObserver;
+import broadwick.rng.RNG;
+import com.google.common.base.Throwables;
+import java.util.HashSet;
+import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Monte Carlo class that is responsible for constructing Monte Carlo chains and the simulations thereon.
+ */
+<span class="nc" id="L40">@Slf4j</span>
+public class MarkovChainMonteCarlo {
+
+    /**
+     * Create a Monte Carlo instance.
+     * @param model          The Monte Carlo Model to be run.
+     * @param numSimulations The number of time the Monte Carlo model should be run at each step.
+     * @param consumer       the object that will consume and aggregate the MC results.
+     * @param generator      the object that will generate the Monte Carlo chain/path.
+     */
+    public MarkovChainMonteCarlo(final MonteCarloScenario model, final int numSimulations,
+                                 final MonteCarloResults consumer,
+                                 final MarkovStepGenerator generator) {
+<span class="nc" id="L53">        this(model, numSimulations, consumer, new MarkovChainMaxNumStepController(1000), generator);</span>
+<span class="nc" id="L54">    }</span>
+
+    /**
+     * Create a Monte Carlo instance.
+     * @param model          The Monte Carlo Model to be run.
+     * @param numSimulations The number of time the Monte Carlo model should be run at each step.
+     * @param consumer       the object that will consume and aggregate the MC results.
+     * @param controller     the controller object for this class.
+     * @param generator      the object that will generate the Monte Carlo chain/path.
+     */
+    public MarkovChainMonteCarlo(final MonteCarloScenario model, final int numSimulations,
+                                 final MonteCarloResults consumer, final MarkovChainController controller,
+<span class="nc" id="L66">                                 final MarkovStepGenerator generator) {</span>
+<span class="nc" id="L67">        this.observers = new HashSet&lt;&gt;(1);</span>
+<span class="nc" id="L68">        this.model = model;</span>
+<span class="nc" id="L69">        this.numSimulations = numSimulations;</span>
+<span class="nc" id="L70">        this.consumer = consumer;</span>
+<span class="nc" id="L71">        this.mcController = controller;</span>
+<span class="nc" id="L72">        this.pathGenerator = generator;</span>
+<span class="nc" id="L73">        this.acceptor = new MetropolisHastings(GENERATOR.getInteger(Integer.MIN_VALUE, Integer.MAX_VALUE));</span>
+<span class="nc" id="L74">    }</span>
+
+    /**
+     * Run the MonteCarlo Simulation.
+     */
+    public final void run() {
+
+        try {
+<span class="nc" id="L82">            MonteCarloStep currentStep = pathGenerator.getInitialStep();</span>
+
+<span class="nc" id="L84">            writer.write(&quot;# Steps taken [1]\n&quot;);</span>
+<span class="nc" id="L85">            writer.write(&quot;# Current step accepted? [2]\n&quot;);</span>
+<span class="nc" id="L86">            writer.write(String.format(&quot;# Current step coordinates [3-%d]%n&quot;, 2 + currentStep.getCoordinates().size()));</span>
+<span class="nc" id="L87">            writer.write(String.format(&quot;# Results for current step [%d-n]%n&quot;, 3 + currentStep.getCoordinates().size()));</span>
+
+<span class="nc bnc" id="L89" title="All 2 branches missed.">            for (MarkovChainObserver observer : observers) {</span>
+<span class="nc" id="L90">                observer.started();</span>
+<span class="nc" id="L91">            }</span>
+
+<span class="nc" id="L93">            log.info(&quot;Running Monte Carlo simulation with initial step {}&quot;, currentStep.toString());</span>
+<span class="nc" id="L94">            model.setStep(currentStep);</span>
+
+<span class="nc" id="L96">            MonteCarlo mc = new MonteCarlo(model, numSimulations);</span>
+<span class="nc" id="L97">            mc.setResultsConsumer(consumer);</span>
+<span class="nc" id="L98">            mc.run();</span>
+<span class="nc" id="L99">            MonteCarloResults prevResults = mc.getResults();</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">            for (MarkovChainObserver observer : observers) {</span>
+<span class="nc" id="L101">                observer.step();</span>
+<span class="nc" id="L102">                observer.takeMeasurements();</span>
+<span class="nc" id="L103">            }</span>
+<span class="nc" id="L104">            writer.write(&quot;%d,%d,%s,%s\n&quot;, numStepsTaken, 1, currentStep.toString(), prevResults.toCsv());</span>
+<span class="nc" id="L105">            numStepsTaken++;</span>
+
+<span class="nc bnc" id="L107" title="All 2 branches missed.">            while (mcController.goOn(this)) {</span>
+<span class="nc" id="L108">                int stepsSinceLastMeasurement = 0;</span>
+<span class="nc" id="L109">                final MonteCarloStep proposedStep = pathGenerator.generateNextStep(currentStep);</span>
+<span class="nc" id="L110">                model.setStep(proposedStep);</span>
+
+<span class="nc" id="L112">                mc = new MonteCarlo(model, numSimulations);</span>
+<span class="nc" id="L113">                mc.setResultsConsumer(consumer);</span>
+<span class="nc" id="L114">                mc.run();</span>
+<span class="nc" id="L115">                final MonteCarloResults currentResults = mc.getResults();</span>
+
+<span class="nc bnc" id="L117" title="All 2 branches missed.">                for (MarkovChainObserver observer : observers) {</span>
+<span class="nc" id="L118">                    observer.step();</span>
+<span class="nc" id="L119">                }</span>
+
+<span class="nc" id="L121">                final boolean accepted = acceptor.accept(prevResults, currentResults);</span>
+
+<span class="nc bnc" id="L123" title="All 2 branches missed.">                writer.write(&quot;%d,%d,%s,%s\n&quot;, numStepsTaken, accepted ? 1 : 0,</span>
+<span class="nc" id="L124">                             proposedStep.toString(), currentResults.toCsv());</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">                if (accepted) {</span>
+<span class="nc" id="L126">                    log.info(&quot;Accepted Monte Carlo step ({})&quot;, proposedStep.toString());</span>
+<span class="nc" id="L127">                    numAcceptedSteps++;</span>
+<span class="nc bnc" id="L128" title="All 6 branches missed.">                    if (numStepsTaken &gt; burnIn</span>
+                        &amp;&amp; (thinningInterval == 0 || stepsSinceLastMeasurement % thinningInterval == 0)) {
+<span class="nc" id="L130">                        stepsSinceLastMeasurement++;</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">                        for (MarkovChainObserver observer : observers) {</span>
+<span class="nc" id="L132">                            observer.takeMeasurements();</span>
+<span class="nc" id="L133">                        }</span>
+                    }
+<span class="nc" id="L135">                    currentStep = proposedStep;</span>
+<span class="nc" id="L136">                    prevResults = currentResults;</span>
+                } else {
+<span class="nc" id="L138">                    log.info(&quot;Rejected Monte Carlo step ({})&quot;, proposedStep.toString());</span>
+                }
+<span class="nc" id="L140">                numStepsTaken++;</span>
+<span class="nc" id="L141">            }</span>
+
+<span class="nc bnc" id="L143" title="All 2 branches missed.">            for (MarkovChainObserver observer : observers) {</span>
+<span class="nc" id="L144">                observer.finished();</span>
+<span class="nc" id="L145">            }</span>
+<span class="nc" id="L146">        } catch (Exception e) {</span>
+<span class="nc" id="L147">            log.error(&quot;Error running Monte Carlo simulation. {}&quot;, Throwables.getStackTraceAsString(e));</span>
+<span class="nc" id="L148">            throw new BroadwickException(&quot;Error running Monte Carlo simulation.&quot; + Throwables.getStackTraceAsString(e));</span>
+<span class="nc" id="L149">        }</span>
+<span class="nc" id="L150">    }</span>
+
+    /**
+     * Add an observer to the list of observers.
+     * @param observer the observer that is used to monitor/take measurements.
+     */
+    public final void addObserver(final MarkovChainObserver observer) {
+<span class="nc" id="L157">        observers.add(observer);</span>
+<span class="nc" id="L158">    }</span>
+<span class="nc" id="L159">    @Getter</span>
+    private int numStepsTaken = 0;
+    private int numSimulations;
+<span class="nc" id="L162">    @Getter</span>
+    @SuppressWarnings(&quot;PMD.UnusedPrivateField&quot;)
+    private int numAcceptedSteps = 0;
+<span class="nc" id="L165">    @Setter</span>
+    private int burnIn = 0;
+<span class="nc" id="L167">    @Setter</span>
+    private int thinningInterval = 0;
+<span class="nc" id="L169">    @Setter</span>
+    private MonteCarloAcceptor acceptor;
+<span class="nc" id="L171">    @Setter</span>
+    private MarkovChainController mcController;
+<span class="nc" id="L173">    @Getter</span>
+    private Set&lt;MarkovChainObserver&gt; observers;
+<span class="nc" id="L175">    @Setter</span>
+    private FileOutput writer = new FileOutput();
+<span class="nc" id="L177">    @Getter</span>
+    private MonteCarloScenario model;
+    private MarkovStepGenerator pathGenerator;
+<span class="nc" id="L180">    @Getter</span>
+    private MonteCarloResults consumer;
+<span class="nc" id="L182">    private static final RNG GENERATOR = new RNG(RNG.Generator.Well19937c);</span>
+    // TODO measure [auto]correlation function(s)
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>

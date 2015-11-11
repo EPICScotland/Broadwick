@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Matrix.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Broadwick</a> &gt; <a href="index.source.html" class="el_package">broadwick.math</a> &gt; <span class="el_source">Matrix.java</span></div><h1>Matrix.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2015 University of Glasgow.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package broadwick.math;
+
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.MatrixUtils;
+
+/**
+ * Implementation of real valued Matrix.
+ */
+public class Matrix {
+
+    /**
+     * Create a matrix from the internal representation of the matrix (copy construtor). This constructor
+     * is intentionally private to hide the internal representation of the matrix.
+     * @param data the data to be copied.
+     */
+<span class="nc" id="L31">    private Matrix(final Array2DRowRealMatrix data) {</span>
+<span class="nc" id="L32">        this.numRows = data.getRowDimension();</span>
+<span class="nc" id="L33">        this.numCols = data.getColumnDimension();</span>
+<span class="nc" id="L34">        this.data = (Array2DRowRealMatrix) data.copy();</span>
+<span class="nc" id="L35">    }</span>
+
+    /** 
+     * Create a matrix using the data in an array (copy constructor). This constructor will copy the contents
+     * of the argument.
+     * @param data the data array to be copied.
+     */
+<span class="nc" id="L42">    private Matrix(final double[][] data) {</span>
+<span class="nc" id="L43">        this.data = new Array2DRowRealMatrix(data);</span>
+<span class="nc" id="L44">        this.numRows = this.data.getRowDimension();</span>
+<span class="nc" id="L45">        this.numCols = this.data.getColumnDimension();</span>
+<span class="nc" id="L46">    }</span>
+
+    /**
+     * Create a matrix with the given dimensions. 
+     * @param rowDimension the number of rows in the matrix.
+     * @param columnDimension the number of columns in the matrix.
+     */
+<span class="nc" id="L53">    public Matrix(final int rowDimension, final int columnDimension) {</span>
+<span class="nc" id="L54">        this.numRows = rowDimension;</span>
+<span class="nc" id="L55">        this.numCols = columnDimension;</span>
+<span class="nc" id="L56">        data = new Array2DRowRealMatrix(rowDimension, columnDimension);</span>
+
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        for (int i = 0; i &lt; rowDimension; i++) {</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">            for (int j = 0; j &lt; columnDimension; j++) {</span>
+<span class="nc" id="L60">                data.setEntry(i, j, 0.0);</span>
+            }
+        }
+<span class="nc" id="L63">    }</span>
+
+    /**
+     * Get the contents of the matrix. The (i,j) element of the matrix is returned where i is the row index and j 
+     * is the column index.
+     * @param row the row index.
+     * @param column the column index.
+     * @return the entry at eh requiered index.
+     */
+    public double element(final int row, final int column) {
+<span class="nc" id="L73">        return data.getEntry(row, column);</span>
+    }
+
+    /**
+     * Set the matrix element at a given point.
+     * @param row the row index of the new element.
+     * @param column the column element of the new element.
+     * @param value the value to be set.
+     * @return the new matrix element at the given coordinates.
+     */
+    public double setEntry(final int row, final int column, final double value) {
+<span class="nc" id="L84">        data.setEntry(row, column, value);</span>
+<span class="nc" id="L85">        return data.getEntry(row, column);</span>
+    }
+
+    /**
+     * Return an array representation of this matrix.
+     * @return a double[][] containing the values of this matrix.
+     */
+    public double[][] toArray() {
+<span class="nc" id="L93">        return data.getData();</span>
+    }
+
+    /**
+     * Create a copy of the matrix. A new matrix is returned with the same contents of this one.
+     * @return a copy of this matrix.
+     */
+    public Matrix copy() {
+<span class="nc" id="L101">        return new Matrix(data);</span>
+    }
+
+    /**
+     * Get the number of rows in the matrix.
+     * @return the number of rows.
+     */
+    public int rows() {
+<span class="nc" id="L109">        return numRows;</span>
+    }
+
+    /**
+     * Get the number of columns in the matrix.
+     * @return the number of columns.
+     */
+    public int columns() {
+<span class="nc" id="L117">        return numCols;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L122">        StringBuilder sb = new StringBuilder();</span>
+
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        for (int i = 0; i &lt; numRows; i++) {</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">            for (int j = 0; j &lt; numCols; j++) {</span>
+<span class="nc" id="L126">                sb.append(data.getEntry(i, j)).append(&quot;,&quot;);</span>
+            }
+<span class="nc" id="L128">            sb.append(&quot;\n&quot;);</span>
+        }
+<span class="nc" id="L130">        return sb.toString();</span>
+    }
+
+    /**
+     * Get the inverse of the matrix. This will return a new matrix object that is the inverse.
+     * @return a Matrix object that is the inverse of this matrix.
+     */
+    public Matrix inverse() {
+<span class="nc" id="L138">        return new Matrix(MatrixUtils.inverse(data).getData());</span>
+    }
+
+    /**
+     * Get the transpose of the matrix. This will return a new matrix object that is the transpose.
+     * @return a Matrix object that is the transpose of this matrix.
+     */
+    public Matrix transpose() {
+<span class="nc" id="L146">        return new Matrix(data.transpose().getData());</span>
+    }
+
+    /**
+     * Returns the result of subtracting m from this.
+     * @param m matrix to be subtracted
+     * @return this-m
+     */
+    public Matrix subtract(final Matrix m) {
+<span class="nc" id="L155">        return new Matrix(data.subtract(m.data));</span>
+    }
+
+    /**
+     * Returns the result of postmultiplying this by m.
+     * @param m matrix to postmultiply by
+     * @return this*m
+     */
+    public Matrix multiply(final Matrix m) {
+<span class="nc" id="L164">        return new Matrix(data.multiply(m.data));</span>
+    }
+    
+        /**
+     * Returns the result of postmultiplying this by a scalar.
+     * @param d the scalar with which we will multiply this matrix
+     * @return this*d
+     */
+    public Matrix multiply(final double d) {
+<span class="nc" id="L173">        return new Matrix(data.scalarMultiply(d).getData());</span>
+    }
+
+    /**
+     * Returns the result of multiplying this by the vector v.
+     * @param v the vector.
+     * @return this*v
+     */
+    public Vector multiply(final Vector v) {
+<span class="nc" id="L182">        return new Vector(data.operate(v.toArray()));</span>
+    }
+
+    /**
+     * Returns the (row) vector result of premultiplying this by the vector v.
+     * @param v the row vector to premultiply by
+     * @return v*this
+     */
+    public Vector preMultiply(final Vector v) {
+<span class="nc" id="L191">        return new Vector(data.preMultiply(v.toArray()));</span>
+    }
+
+    private final int numRows;
+    private final int numCols;
+    private final Array2DRowRealMatrix data;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.0.201403182114</span></div></body></html>
