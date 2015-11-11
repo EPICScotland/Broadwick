@@ -32,7 +32,7 @@
                Included Monte Carlo simulations, Markov Chain generators and MCMC simulations.
            </action>         
          </release>
-      <release version="current"  date="2014-07-04" description="1.1">
+      <release version="current"  date="2014-07-04" description="1.2">
            <action dev="Anthony O'Hare" type="add">
               Added [deterministoc] ODE solver.
               Fully generified the RNG, no more casting from Object when selecting random elements from collections or arrays.
