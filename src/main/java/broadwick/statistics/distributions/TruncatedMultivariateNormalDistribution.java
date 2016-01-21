@@ -17,6 +17,7 @@ package broadwick.statistics.distributions;
 
 import broadwick.math.Matrix;
 import broadwick.math.Vector;
+import broadwick.rng.RNG;
 
 /**
  * Sample from a truncated Multivariate Normal (Gaussian) Distribution, i.e. a normal distribution whose value is
@@ -39,22 +40,22 @@ public class TruncatedMultivariateNormalDistribution implements ContinuousMultiv
      */
     public TruncatedMultivariateNormalDistribution(final Vector means, final Matrix covariances,
                                                    final Vector lb, final Vector ub) {
-        
-        if (means.length() != lb.length() || lb.length() != ub.length() 
+
+        if (means.length() != lb.length() || lb.length() != ub.length()
             || ub.length() != covariances.rows() || covariances.rows() != covariances.columns()) {
-                throw new IllegalArgumentException("The lengths of the input vectors must be equal and the covariances matirx must be square with the same size as the input vectors.");
+            throw new IllegalArgumentException("The lengths of the input vectors must be equal and the covariances matirx must be square with the same size as the input vectors.");
         }
-        
-        for (int i=0; i< means.length(); i++) {
+
+        for (int i = 0; i < means.length(); i++) {
             if (means.element(i) < lb.element(i) || means.element(i) > ub.element(i)) {
                 throw new IllegalArgumentException("The means of the distribution must lie between the lower and upper bounds");
             }
-            
+
             if (lb.element(i) > ub.element(i)) {
                 throw new IllegalArgumentException("The lower bound of the distribution must be less than the upper bound");
             }
         }
-        
+
         this.means = means;
         this.covariances = covariances;
         this.upperBounds = ub;
@@ -112,7 +113,8 @@ public class TruncatedMultivariateNormalDistribution implements ContinuousMultiv
             // now draw from the 1-d normal truncated to [lb, ub]
             TruncatedNormalDistribution dist = new TruncatedNormalDistribution(mui, Math.sqrt(s2i),
                                                                                lowerBounds.element(i),
-                                                                               upperBounds.element(i));
+                                                                               upperBounds.element(i),
+                                                                               GENERATOR.getInteger(Integer.MIN_VALUE, Integer.MAX_VALUE));
             proposal.setEntry(i, dist.sample());
 
         }
@@ -142,9 +144,19 @@ public class TruncatedMultivariateNormalDistribution implements ContinuousMultiv
         return proposal;
     }
 
+    /**
+     * Reseed the random number generator used.
+     * @param seed the new seed to use.
+     */
+    @Override
+    public void reseed(final int seed) {
+        GENERATOR.seed(seed);
+    }
+
     private final int n;
     private final Vector lowerBounds;
     private final Vector upperBounds;
     private final Vector means;
     private final Matrix covariances;
+    private static final RNG GENERATOR = new RNG(RNG.Generator.Well19937c);
 }

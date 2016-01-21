@@ -47,6 +47,15 @@ public class Uniform implements ContinuousDistribution {
     public double sample() {
         return GENERATOR.getDouble(min, max);
     }
+    
+    /**
+     * Reseed the random number generator used.
+     * @param seed the new seed to use.
+     */
+    @Override
+    public void reseed(final int seed) {
+        GENERATOR.seed(seed);
+    }
 
     @Getter
     private final double min;

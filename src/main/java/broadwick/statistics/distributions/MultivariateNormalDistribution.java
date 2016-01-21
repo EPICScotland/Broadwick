@@ -53,6 +53,13 @@ public class MultivariateNormalDistribution implements ContinuousMultivariateDis
         return new Vector(mnd.sample());
     }
 
+    /**
+     * Reseed the random number generator used. In this case reseeding the distribution has no effect.
+     * @param seed the new seed to use.
+     */
+    @Override
+    public void reseed(final int seed) { 
+    }
     
     org.apache.commons.math3.distribution.MultivariateNormalDistribution mnd;
 }

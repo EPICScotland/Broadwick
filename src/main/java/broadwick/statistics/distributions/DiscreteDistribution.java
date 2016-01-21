@@ -21,25 +21,30 @@ package broadwick.statistics.distributions;
 public interface DiscreteDistribution {
 
     /**
-    * Generate a random value sampled from this distribution.
-    * 
+     * Generate a random value sampled from this distribution.
+     * <p>
      * @return the sampled value from the distribution.
      */
     int sample();
-    
-    
+
     /**
      * Get the numerical value of the mean of this distribution.
-     *
+     * <p>
      * @return the mean or {@code Double.NaN} if it is not defined
      */
     double getMean();
-    
-     /**
+
+    /**
      * Get the numerical value of the variance of this distribution.
-     *
-     * @return the variance (possibly {@code Double.POSITIVE_INFINITY} or
-     * {@code Double.NaN} if it is not defined)
+     * <p>
+     * @return the variance (possibly {@code Double.POSITIVE_INFINITY} or {@code Double.NaN} if it is not defined)
      */
     double getVariance();
+
+    /**
+     * Reseed the random number generator used.
+     * @param seed the new seed to use.
+     */
+    void reseed(final int seed);
+
 }

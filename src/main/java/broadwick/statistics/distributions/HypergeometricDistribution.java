@@ -42,7 +42,7 @@ public class HypergeometricDistribution implements DiscreteDistribution {
             throw new IllegalArgumentException(String.format("The population size (%d) MUST be greater than or equal to the sample size (%d).", popSize, sampleSize));
         }
         if (!(popSize >= numSuccesses)) {
-            throw new IllegalArgumentException(String.format("The population size (%d) MUST be greater than or equal to the number of successes (%d).", popSize,numSuccesses));
+            throw new IllegalArgumentException(String.format("The population size (%d) MUST be greater than or equal to the number of successes (%d).", popSize, numSuccesses));
         }
         if (!(sampleSize > 0)) {
             throw new IllegalArgumentException(String.format("The sample size (%d) MUST be greater than 0.", sampleSize));
@@ -83,6 +83,14 @@ public class HypergeometricDistribution implements DiscreteDistribution {
     @Override
     public final double getVariance() {
         return dist.getNumericalVariance();
+    }
+
+    /**
+     * Reseed the random number generator used. In this case reseeding the distribution has no effect.
+     * @param seed the new seed to use.
+     */
+    @Override
+    public void reseed(final int seed) { 
     }
 
     private final org.apache.commons.math3.distribution.HypergeometricDistribution dist;

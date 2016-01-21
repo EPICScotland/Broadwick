@@ -388,6 +388,14 @@ public class IntegerDistribution implements Serializable {
         }
         return str.toString();
     }
+    
+    /**
+     * Reseed the random number generator used.
+     * @param seed the new seed to use.
+     */
+    public void reseed(final int seed) {
+        GENERATOR.seed(seed);
+    }
 
     /**
      * Get a string representation of the histogram in a csv format.
