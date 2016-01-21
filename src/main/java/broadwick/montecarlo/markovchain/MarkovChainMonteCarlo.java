@@ -149,6 +149,7 @@ public class MarkovChainMonteCarlo {
      * @return <tt>true</tt> if this object didn't already contain the observer.
      */
     public final boolean addObserver(final MarkovChainObserver observer) {
+        observer.setMonteCarlo(this);
         return observers.add(observer);
     }
     
