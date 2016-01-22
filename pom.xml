@@ -51,8 +51,8 @@
     </developers>
 
     <scm>
-        <connection>scm:hg:.</connection>
-        <developerConnection>scm:hg:.</developerConnection>
+        <connection>scm:git:.</connection>
+        <developerConnection>scm:git:.</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
