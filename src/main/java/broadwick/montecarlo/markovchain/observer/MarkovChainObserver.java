@@ -30,6 +30,8 @@ public abstract class MarkovChainObserver implements Comparable<MarkovChainObser
      * Creates an observer dedicated to one Monte Carlo process.
      */
     public MarkovChainObserver() {
+        // NOTE: the monteCarlo object isn't set until the observer is attached to the MarkovChain. Until it is the
+        // monteCarlo field will be null
     }
 
     @Override
