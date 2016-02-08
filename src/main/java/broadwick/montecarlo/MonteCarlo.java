@@ -92,12 +92,6 @@ public class MonteCarlo {
         resultsConsumer.reset();
     }
 
-    @Override
-    public void finalize() throws Throwable {
-        super.finalize();
-        resultsConsumer = null;
-    }
-
     private final MonteCarloScenario simulation;
     private MonteCarloResults resultsConsumer;
     private final int numSimulations;
@@ -159,14 +153,8 @@ class Consumer implements Runnable {
         log.debug("Analysed {} simulation results in {}.", numSimulationsFound, sw);
     }
 
-    @Override
-    public void finalize() throws Throwable {
-        super.finalize();
-        joinedResults = null;
-    }
-
     private final ArrayBlockingQueue<MonteCarloResults> queue;
-    private MonteCarloResults joinedResults;
+    private final MonteCarloResults joinedResults;
     private int numSimulationsFound = 0;
 }
 
@@ -233,14 +221,8 @@ class Producer implements Runnable {
         }
     }
 
-    @Override
-    public void finalize() throws Throwable {
-        super.finalize();
-        simulation = null;
-    }
-
     private final ArrayBlockingQueue<MonteCarloResults> queue;
-    private MonteCarloScenario simulation;
+    private final MonteCarloScenario simulation;
     private final int numSimulations;
 }
 

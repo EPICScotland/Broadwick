@@ -44,7 +44,7 @@ public class Uniform implements ContinuousDistribution {
     }
 
     @Override
-    public double sample() {
+    public final double sample() {
         return GENERATOR.getDouble(min, max);
     }
     
@@ -53,7 +53,7 @@ public class Uniform implements ContinuousDistribution {
      * @param seed the new seed to use.
      */
     @Override
-    public void reseed(final int seed) {
+    public final void reseed(final int seed) {
         GENERATOR.seed(seed);
     }
 

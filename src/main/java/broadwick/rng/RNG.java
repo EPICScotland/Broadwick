@@ -79,7 +79,7 @@ public class RNG implements Serializable {
      */
     public static List<String> validGenerators() {
         final ArrayList<String> generators = new ArrayList<>(3);
-        for (Generator value : Generator.values()) {
+        for (final Generator value : Generator.values()) {
             generators.add(value.name());
         }
         return generators;
@@ -262,10 +262,10 @@ public class RNG implements Serializable {
      * @param <T> generic type of the Set elements
      * @return a random element in the Set or null if the set is empty
      */
-    public <T> T selectOneOf(Set<T> set) {
-        int item = getInteger(0, set.size() - 1);
+    public final <T> T selectOneOf(Set<T> set) {
+        final int item = getInteger(0, set.size() - 1);
         int i = 0;
-        for (T obj : set) {
+        for (final T obj : set) {
             if (i == item) {
                 return obj;
             }
@@ -339,7 +339,7 @@ public class RNG implements Serializable {
 
         final List<T> list = new ArrayList<>(n);
         int i = 0;
-        for (T obj : objects) {
+        for (final T obj : objects) {
             if (s.contains(i)) {
                 list.add(obj);
             }
@@ -373,7 +373,7 @@ public class RNG implements Serializable {
 
         final Set<T> list = new HashSet<>(n);
         int i = 0;
-        for (T obj : objects) {
+        for (final T obj : objects) {
             if (s.contains(i)) {
                 list.add(obj);
             }

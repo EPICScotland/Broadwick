@@ -59,7 +59,7 @@ public class Normal implements ContinuousDistribution {
      * @param seed the new seed to use.
      */
     @Override
-    public void reseed(final int seed) {
+    public final void reseed(final int seed) {
         GENERATOR.seed(seed);
     }
 

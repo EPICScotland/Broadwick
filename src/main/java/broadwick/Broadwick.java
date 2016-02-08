@@ -209,7 +209,7 @@ public final class Broadwick {
         final Map<String, Model> registeredModels = new HashMap<>();
         try {
 
-            for (Models.Model model : project.getModels().getModel()) {
+            for (final Models.Model model : project.getModels().getModel()) {
                 // Create and register the new model object that we will be running later.
                 final Model newInstance = Model.class.cast(Class.forName(model.getClassname()).newInstance());
                 newInstance.setModelConfiguration(getModelsConfiguration(model.getId(), getAllModelConfigurations()));

@@ -42,7 +42,7 @@ public class Location {
         this.easting = easting;
         this.northing = northing;
         this.populations = new HashMap<>();
-        for (Map.Entry<String, Integer> population : populations.entrySet()) {
+        for (final Map.Entry<String, Integer> population : populations.entrySet()) {
             this.populations.put(population.getKey(), population.getValue());
         }
     }

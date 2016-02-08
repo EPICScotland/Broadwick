@@ -231,7 +231,7 @@ public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.grap
 
     @Override
     public final boolean removeVertex(final V vertex) {
-        boolean removed = tree.removeVertex(vertex);
+        final boolean removed = tree.removeVertex(vertex);
         if (removed) {
             vertexmaps.remove(vertex.id);
         }
@@ -240,7 +240,7 @@ public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.grap
 
     @Override
     public final boolean removeEdge(final E edge) {
-        boolean removed = tree.removeEdge(edge);
+        final boolean removed = tree.removeEdge(edge);
         if (removed) {
             edgemaps.remove(edge.id);
         }

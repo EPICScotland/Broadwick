@@ -68,13 +68,13 @@ public class ApproxBayesianComp {
     private void save(final AbcNamedQuantity prior) {
 
         if (posteriors.isEmpty()) {
-            for (Map.Entry<String, Double> entry : prior.getParameters().entrySet()) {
+            for (final Map.Entry<String, Double> entry : prior.getParameters().entrySet()) {
                 final LinkedList<Double> vals = new LinkedList<>();
                 vals.add(entry.getValue());
                 posteriors.put(entry.getKey(), vals);
             }
         } else {
-            for (Map.Entry<String, Double> entry : prior.getParameters().entrySet()) {
+            for (final Map.Entry<String, Double> entry : prior.getParameters().entrySet()) {
                 posteriors.get(entry.getKey()).add(entry.getValue());
             }
         }
@@ -83,12 +83,12 @@ public class ApproxBayesianComp {
     private AbcController controller = new AbcMaxNumStepController();
     @Setter
     private AbcDistance distance = new AbcAbsDistance();
-    private AbcModel model;
-    private AbcPriorsSampler priors;
+    private final AbcModel model;
+    private final AbcPriorsSampler priors;
     @Getter
-    private Map<String, LinkedList<Double>> posteriors;
-    private AbcNamedQuantity observedData;
-    private double epsilon;
+    private final Map<String, LinkedList<Double>> posteriors;
+    private final AbcNamedQuantity observedData;
+    private final double epsilon;
     @Getter
     @SuppressWarnings("PMD.UnusedPrivateField")
     private int numSamplesTaken;

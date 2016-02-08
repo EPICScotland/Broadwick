@@ -23,7 +23,7 @@ import broadwick.io.FileOutput;
 /**
  * Simple class to write the nodes/edges of a network in edgelist format.
  */
-public class EdgeList {
+public final class EdgeList {
 
     /**
      * hidden constructor for static class.
@@ -38,9 +38,9 @@ public class EdgeList {
      * @return a string representing a document.
      */
     public static String toString(final Graph<? extends Vertex, ? extends Edge<?>> network) {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
 
-        for (Edge<?> edge : network.getEdges()) {
+        for (final Edge<?> edge : network.getEdges()) {
             sb.append(edge.getSource().getId()).append("\t");
             sb.append(edge.getDestination().getId()).append("\t");
             sb.append(edge.getWeight()).append("\n");

@@ -43,7 +43,7 @@ public class Vertex implements Serializable {
      * @return the attribute (or null if no attribute matches the name).
      */
     public final VertexAttribute getAttributeByName(final String attributeName) {
-        for (VertexAttribute attr : attributes) {
+        for (final VertexAttribute attr : attributes) {
             if (StringUtils.equalsIgnoreCase(attributeName, attr.getName())) {
                 return attr;
             }
@@ -57,7 +57,7 @@ public class Vertex implements Serializable {
      * @return true if the collection of attributes changed as a result of the call
      */
     public final boolean addAttribute(final VertexAttribute attribute) {
-        for (VertexAttribute attr : attributes) {
+        for (final VertexAttribute attr : attributes) {
             if (StringUtils.equalsIgnoreCase(attribute.getName(), attr.getName())) {
                 attributes.remove(attr);
                 break;

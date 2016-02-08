@@ -69,7 +69,7 @@ public class TruncatedNormalDistribution implements ContinuousDistribution {
     }
 
     @Override
-    public double sample() {
+    public final double sample() {
 
         // Sample using the method of C.P. Robert (doi: 10.1007/BF00143942, arXiv:0907.4010 [stat.CO])
         double x = Double.NaN;
@@ -77,7 +77,7 @@ public class TruncatedNormalDistribution implements ContinuousDistribution {
         double u = GENERATOR.getDouble();
 
         while (u > rho) {
-            double z = GENERATOR.getDouble(lower, upper);
+            final double z = GENERATOR.getDouble(lower, upper);
             if (0 > lower && 0 < upper) {
                 rho = Math.exp(-z * z / 2.0);
             } else if (upper < 0) {
@@ -93,7 +93,11 @@ public class TruncatedNormalDistribution implements ContinuousDistribution {
         return x;
     }
 
-    public double rejectionSample() {
+    /**
+     * Use a simple rejection sampling technique. This is not efficient if the required range does not include the mean.
+     * @return 
+     */
+    public final double rejectionSample() {
         // use a simple rejection sampling
         final Normal dist = new Normal(mean, sd);
         double val = dist.sample();
@@ -109,7 +113,7 @@ public class TruncatedNormalDistribution implements ContinuousDistribution {
      * @param seed the new seed to use.
      */
     @Override
-    public void reseed(final int seed) {
+    public final void reseed(final int seed) {
         GENERATOR.seed(seed);
     }
 

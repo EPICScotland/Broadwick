@@ -117,7 +117,7 @@ public class NewickTreeParser {
      */
     private void parseString(final String stringToParse, final PhyloNode parent,
                              final Tree<PhyloNode, Edge<PhyloNode>> tree) {
-        for (String node : findNodes(stringToParse)) {
+        for (final String node : findNodes(stringToParse)) {
             parseNode(node, tree, parent);
         }
     }
@@ -192,11 +192,11 @@ public class NewickTreeParser {
             // this is a branch so create a branch node and set the parent
             final int rparen = node.lastIndexOf(')');
             final PhyloNode branchNode = addNodeToTree(node.substring(rparen + 1), tree, parent, true);
-            for (String nd : findNodes(node.substring(1, rparen))) {
+            for (final String nd : findNodes(node.substring(1, rparen))) {
                 parseNode(nd, tree, branchNode);
             }
         } else if (node.indexOf(',') != -1) {
-            for (String nd : findNodes(node)) {
+            for (final String nd : findNodes(node)) {
                 parseNode(nd, tree, parent);
             }
         } else {

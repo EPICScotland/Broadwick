@@ -64,17 +64,17 @@ public class TruncatedMultivariateNormalDistribution implements ContinuousMultiv
     }
 
     @Override
-    public Vector sample() {
+    public final Vector sample() {
 
-        Vector proposal = new Vector(n);
+        final Vector proposal = new Vector(n);
 
         // Gibbs sampler of Christian Robert (arxiv:0907.4010v1 [stat.CO])
         // Robert, C.P, "Simulation of truncated normal variables",
         //   Statistics and Computing, pp. 121-125 (1995).
-        Matrix covInv = covariances.inverse();
+        final Matrix covInv = covariances.inverse();
         for (int i = 0; i < n; i++) {
             // get the (n-1) vector from the i-th column of the covariances matrix, removing the i-th row.
-            Matrix sigmaI = new Matrix(n - 1, 1);
+            final Matrix sigmaI = new Matrix(n - 1, 1);
             for (int j = 0; j < n - 1; j++) {
                 if (j != i) {
                     sigmaI.setEntry(j, 0, covariances.element(j, i));
@@ -83,7 +83,7 @@ public class TruncatedMultivariateNormalDistribution implements ContinuousMultiv
 
             // Get the inverse of the (n-1)(n-1) matrix obtained from the covariance matrix removing the
             // ith row and column.
-            Matrix sigmaIinv = new Matrix(n - 1, n - 1);
+            final Matrix sigmaIinv = new Matrix(n - 1, n - 1);
             for (int j = 0; j < n - 1; j++) {
                 if (j != i) {
                     for (int k = 0; k < n - 1; k++) {
@@ -95,8 +95,8 @@ public class TruncatedMultivariateNormalDistribution implements ContinuousMultiv
             }
 
             // x_i is the (n-1) vector of components not being updated at this iteration.
-            Matrix xI = new Matrix(1, n - 1);
-            Matrix muI = new Matrix(1, n - 1);
+            final Matrix xI = new Matrix(1, n - 1);
+            final Matrix muI = new Matrix(1, n - 1);
             for (int j = 0; j < n - 1; j++) {
                 if (j != i) {
                     xI.setEntry(0, j, means.element(j));
@@ -106,12 +106,12 @@ public class TruncatedMultivariateNormalDistribution implements ContinuousMultiv
 
             // mui is E(xi|x_i)
             //  mui = mu(i) + sigmai_i * sigma_i_iInv * (x_i - mu_i);
-            Matrix diff = xI.transpose().subtract(muI.transpose());
-            double mui = means.element(i) + sigmaI.transpose().multiply(sigmaIinv).multiply(diff).element(0, 0);
-            double s2i = covariances.element(i, i) - sigmaI.transpose().multiply(sigmaIinv).multiply(sigmaI).element(0, 0);
+            final Matrix diff = xI.transpose().subtract(muI.transpose());
+            final double mui = means.element(i) + sigmaI.transpose().multiply(sigmaIinv).multiply(diff).element(0, 0);
+            final double s2i = covariances.element(i, i) - sigmaI.transpose().multiply(sigmaIinv).multiply(sigmaI).element(0, 0);
 
             // now draw from the 1-d normal truncated to [lb, ub]
-            TruncatedNormalDistribution dist = new TruncatedNormalDistribution(mui, Math.sqrt(s2i),
+            final TruncatedNormalDistribution dist = new TruncatedNormalDistribution(mui, Math.sqrt(s2i),
                                                                                lowerBounds.element(i),
                                                                                upperBounds.element(i),
                                                                                GENERATOR.getInteger(Integer.MIN_VALUE, Integer.MAX_VALUE));
@@ -149,7 +149,7 @@ public class TruncatedMultivariateNormalDistribution implements ContinuousMultiv
      * @param seed the new seed to use.
      */
     @Override
-    public void reseed(final int seed) {
+    public final void reseed(final int seed) {
         GENERATOR.seed(seed);
     }
 

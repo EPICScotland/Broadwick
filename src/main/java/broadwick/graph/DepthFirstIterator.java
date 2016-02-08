@@ -63,7 +63,7 @@ public class DepthFirstIterator<V extends Vertex, E extends Edge<V>> implements 
             if (!vertexList.contains(root)) {
                 vertexList.add(root);
             }
-            for (V vertex : tree.getSuccessors(tree.getRoot())) {
+            for (final V vertex : tree.getSuccessors(tree.getRoot())) {
                 vertexList.add(vertex);
                 final Tree<V, E> subtree = tree.getSubTree(vertex);
                 traverseTree(subtree);

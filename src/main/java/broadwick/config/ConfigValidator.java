@@ -52,7 +52,7 @@ public final class ConfigValidator {
      * Validate the Models section of the configuration file. Any errors will be saved in the local ValidationErrors.
      */
     private void validateModels() {
-        for (Models.Model model : project.getModels().getModel()) {
+        for (final Models.Model model : project.getModels().getModel()) {
 
             // we create (using reflection) the model(s) in the configuration file and check that the parameters
             // and priors in the configuration file are valid for the model (by checking that the model has fields

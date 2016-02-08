@@ -41,7 +41,7 @@ public class RungeKutta4 extends OdeSolver {
         log.debug("Running Runge Kutta 4th Order solver");
 
         // tell our observers that the simulation has started
-        for (Observer observer : getObservers()) {
+        for (final Observer observer : getObservers()) {
             observer.started();
         }
 
@@ -88,13 +88,13 @@ public class RungeKutta4 extends OdeSolver {
                 dependentVariables.set(i, newVal);
             }
 
-            for (Observer observer : getObservers()) {
+            for (final Observer observer : getObservers()) {
                 observer.step();
             }
 
         } while (this.getController().goOn(this));
 
-        for (Observer observer : getObservers()) {
+        for (final Observer observer : getObservers()) {
             observer.finished();
         }
     }

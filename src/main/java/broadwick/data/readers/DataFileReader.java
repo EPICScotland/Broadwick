@@ -46,7 +46,7 @@ public abstract class DataFileReader {
      */
     protected final String asCsv(final Collection<String> data) {
         final StringBuilder sb = new StringBuilder();
-        for (String name : data) {
+        for (final String name : data) {
             if (name != null) {
                 sb.append(name).append(",");
             }
@@ -64,7 +64,7 @@ public abstract class DataFileReader {
      */
     protected final String asQuestionCsv(final Collection<String> data) {
         final StringBuilder sb = new StringBuilder();
-        for (String name : data) {
+        for (final String name : data) {
             if (name != null) {
                 sb.append("?,");
             }
@@ -191,7 +191,7 @@ public abstract class DataFileReader {
                 List<String> data = instance.readLine();
                 while (data != null && !data.isEmpty()) {
                     int parameterIndex = 1;
-                    for (Map.Entry<String, Integer> entry : insertedColInfo.entrySet()) {
+                    for (final Map.Entry<String, Integer> entry : insertedColInfo.entrySet()) {
                         if (entry.getValue() == -1) {
                             pstmt.setObject(parameterIndex, null);
                         } else {

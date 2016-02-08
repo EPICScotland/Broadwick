@@ -87,7 +87,7 @@ public class PopulationsFileReader extends DataFileReader {
                                  SECTION_NAME, errors);
 
         if (populationFile.getCustomTags() != null) {
-            for (CustomTags.CustomTag tag : populationFile.getCustomTags().getCustomTag()) {
+            for (final CustomTags.CustomTag tag : populationFile.getCustomTags().getCustomTag()) {
                 updateCreateTableCommand(tag.getName(), tag.getColumn(), " VARCHAR(128), ",
                                          insertedColInfo, createTableCommand, LIFE_HISTORIES_TABLE_NAME, SECTION_NAME, errors);
                 if ("date".equals(tag.getType())) {
@@ -157,7 +157,7 @@ public class PopulationsFileReader extends DataFileReader {
         }
 
         if (populationFile.getCustomTags() != null) {
-            for (CustomTags.CustomTag tag : populationFile.getCustomTags().getCustomTag()) {
+            for (final CustomTags.CustomTag tag : populationFile.getCustomTags().getCustomTag()) {
                 if (populationFile.getPopulation().getSpeciesColumn() != 0) {
                     updateCreateTableCommand(tag.getName(), tag.getColumn(), " VARCHAR(128), ",
                                              insertedColInfo, createTableCommand, POPULATIONS_TABLE_NAME, SECTION_NAME, errors);
@@ -206,14 +206,14 @@ public class PopulationsFileReader extends DataFileReader {
         return inserted;
     }
 
-    private DatabaseImpl database;
-    private String dataFile;
-    private String dateFormat;
+    private final DatabaseImpl database;
+    private final String dataFile;
+    private final String dateFormat;
     private StringBuilder createTableCommand;
     private String insertString;
-    private Map<String, Integer> insertedColInfo;
-    private Collection<Integer> dateFields;
-    private DataFiles.PopulationFile populationFile;
+    private final Map<String, Integer> insertedColInfo;
+    private final Collection<Integer> dateFields;
+    private final DataFiles.PopulationFile populationFile;
     private static String tableName;
     @Getter
     private static final String ID = "ID";

@@ -70,7 +70,7 @@ public class BatchedMovementsFileReader extends DataFileReader {
                                  insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
 
         if (movementFile.getCustomTags() != null) {
-            for (CustomTags.CustomTag tag : movementFile.getCustomTags().getCustomTag()) {
+            for (final CustomTags.CustomTag tag : movementFile.getCustomTags().getCustomTag()) {
                 updateCreateTableCommand(tag.getName(), tag.getColumn(), " VARCHAR(128), ",
                                          insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
                 if ("date".equals(tag.getType())) {
@@ -125,15 +125,15 @@ public class BatchedMovementsFileReader extends DataFileReader {
         return inserted;
     }
 
-    private DatabaseImpl database;
-    private String dataFile;
-    private String dateFormat;
+    private final DatabaseImpl database;
+    private final String dataFile;
+    private final String dateFormat;
     @Getter
     private static final String TABLE_NAME = "BatchedMovements";
-    private StringBuilder createTableCommand;
-    private String insertString;
-    private Map<String, Integer> insertedColInfo;
-    private Collection<Integer> dateFields;
+    private final StringBuilder createTableCommand;
+    private final String insertString;
+    private final Map<String, Integer> insertedColInfo;
+    private final Collection<Integer> dateFields;
     @Getter
     private static final String BATCH_SIZE = "BATCHSIZE";
     @Getter

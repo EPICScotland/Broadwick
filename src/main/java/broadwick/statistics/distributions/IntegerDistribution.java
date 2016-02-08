@@ -55,7 +55,7 @@ public class IntegerDistribution implements Serializable {
     @Synchronized
     private void init(final int nbins) {
         for (int i = 1; i <= nbins; i++) {
-            bins.put(Integer.valueOf(i), Integer.valueOf(0));
+            bins.put(i, 0);
         }
     }
 
@@ -63,7 +63,7 @@ public class IntegerDistribution implements Serializable {
      * Clear all the data from the distribution, after this method the distribution has no denominator or frequency.
      */
     @Synchronized
-    public void clear() {
+    public final void clear() {
         bins.clear();
     }
 
@@ -73,8 +73,8 @@ public class IntegerDistribution implements Serializable {
      */
     @Synchronized
     public final void reset(final int val) {
-        for (int i : getBins()) {
-            bins.put(Integer.valueOf(i), val);
+        for (final int i : getBins()) {
+            bins.put(i, val);
         }
     }
 
@@ -83,8 +83,8 @@ public class IntegerDistribution implements Serializable {
      */
     @Synchronized
     public final void reset() {
-        for (int i : getBins()) {
-            bins.put(Integer.valueOf(i), 0);
+        for (final int i : getBins()) {
+            bins.put(i, 0);
         }
     }
 
@@ -94,7 +94,7 @@ public class IntegerDistribution implements Serializable {
      */
     @Synchronized
     public final void add(final IntegerDistribution hist) {
-        for (Integer i : hist.getBins()) {
+        for (final Integer i : hist.getBins()) {
             if (bins.containsKey(i)) {
                 bins.put(i, this.getFrequency(i) + hist.getFrequency(i));
             } else {
@@ -192,7 +192,7 @@ public class IntegerDistribution implements Serializable {
         final Integer[] arr = bins.keySet().toArray(new Integer[bins.size()]);
         int index = 0;
         int sum = 0;
-        for (int value : bins.values()) {
+        for (final int value : bins.values()) {
             sum += value;
             if (sum >= randomBin) {
                 return arr[index];
@@ -212,7 +212,7 @@ public class IntegerDistribution implements Serializable {
         final int randomBin = GENERATOR.getInteger(0, cumulativeSum);
 
         int sum = 0;
-        for (int value : bins.values()) {
+        for (final int value : bins.values()) {
             sum += value;
             if (sum >= randomBin) {
                 return value;
@@ -232,7 +232,7 @@ public class IntegerDistribution implements Serializable {
     public final IntegerDistribution copy() {
         final IntegerDistribution clone = new IntegerDistribution(bins.size());
 
-        for (Integer bin : this.getBins()) {
+        for (final Integer bin : this.getBins()) {
             clone.setFrequency(bin, bins.get(bin));
         }
 
@@ -246,7 +246,7 @@ public class IntegerDistribution implements Serializable {
     @Synchronized
     public final Integer getSumCounts() {
         int sum = 0;
-        for (int value : bins.values()) {
+        for (final int value : bins.values()) {
             sum += value;
         }
         return sum;
@@ -325,7 +325,7 @@ public class IntegerDistribution implements Serializable {
     public final IntegerDistribution scaleBins(final double factor) {
         final IntegerDistribution data = this.copy();
 
-        for (Integer bin : data.getBins()) {
+        for (final Integer bin : data.getBins()) {
             final double d = data.getFrequency(bin) * factor;
             data.setFrequency(bin, (int) d);
         }
@@ -345,7 +345,7 @@ public class IntegerDistribution implements Serializable {
         final Map<Integer, Double> fractions = new HashMap<>(this.getNumBins());
         final double factor = constant / Double.valueOf(this.getSumCounts());
 
-        for (Integer bin : data.getBins()) {
+        for (final Integer bin : data.getBins()) {
             final double d = data.getFrequency(bin) * factor;
             final int size = (int) Math.floor(d);
             fractions.put(bin, d - size);
@@ -359,7 +359,7 @@ public class IntegerDistribution implements Serializable {
             int binMax = -1;
             double max = 0.0;
 
-            for (Entry<Integer, Double> entry : fractions.entrySet()) {
+            for (final Entry<Integer, Double> entry : fractions.entrySet()) {
                 if (entry.getValue() > max) {
                     max = entry.getValue();
                     binMax = entry.getKey();
@@ -383,7 +383,7 @@ public class IntegerDistribution implements Serializable {
     @Synchronized
     public final String toString() {
         final StringBuilder str = new StringBuilder(10);
-        for (Map.Entry<Integer, Integer> entry : bins.entrySet()) {
+        for (final Map.Entry<Integer, Integer> entry : bins.entrySet()) {
             str.append(entry.getKey()).append(":").append(entry.getValue()).append("\n");
         }
         return str.toString();
@@ -393,7 +393,7 @@ public class IntegerDistribution implements Serializable {
      * Reseed the random number generator used.
      * @param seed the new seed to use.
      */
-    public void reseed(final int seed) {
+    public final void reseed(final int seed) {
         GENERATOR.seed(seed);
     }
 
@@ -404,7 +404,7 @@ public class IntegerDistribution implements Serializable {
     @Synchronized
     public final String toCsv() {
         final StringBuilder str = new StringBuilder(10);
-        for (Map.Entry<Integer, Integer> entry : bins.entrySet()) {
+        for (final Map.Entry<Integer, Integer> entry : bins.entrySet()) {
             str.append(entry.getValue()).append(",");
         }
         if (str.length() > 0) {

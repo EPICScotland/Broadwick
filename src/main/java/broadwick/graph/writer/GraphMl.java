@@ -60,7 +60,7 @@ public final class GraphMl {
         graphml.addNamespaceDeclaration(schemLocation);
 
         // keys for graphic representation
-        for (VertexAttribute attr : network.getVertexAttributes()) {
+        for (final VertexAttribute attr : network.getVertexAttributes()) {
             final Element element = new Element("key");
             element.setAttribute("id", attr.getName());
             element.setAttribute("for", "node");
@@ -74,7 +74,7 @@ public final class GraphMl {
             graphml.addContent(element);
         }
 
-        for (EdgeAttribute attr : network.getEdgeAttributes()) {
+        for (final EdgeAttribute attr : network.getEdgeAttributes()) {
             final Element element = new Element("key");
             element.setAttribute("id", attr.getName());
             element.setAttribute("for", "edge");
@@ -172,7 +172,7 @@ public final class GraphMl {
         final Element node = new Element("node");
         node.setAttribute("id", vertex.getId());
 
-        for (VertexAttribute attr : vertex.getAttributes()) {
+        for (final VertexAttribute attr : vertex.getAttributes()) {
             final Element data = new Element("data");
             data.setAttribute("key", attr.getName());
             data.setText(attr.getValue().toString());

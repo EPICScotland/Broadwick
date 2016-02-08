@@ -160,7 +160,7 @@ public class FileInput implements AutoCloseable {
                 trimmedLine = trimmedLine.substring(0, indexOfCommentchar);
             }
 
-            for (String token : Splitter.on(fieldSep).trimResults().split(trimmedLine)) {
+            for (final String token : Splitter.on(fieldSep).trimResults().split(trimmedLine)) {
                 tokens.add(token.trim());
             }
 

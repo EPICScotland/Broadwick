@@ -153,7 +153,7 @@ public class LocalPoolExecutor implements Executor {
      * @param tasks a collection of future object that are to be stopped.
      */
     private void stopAllTasks(final List<Future<?>> tasks) {
-        for (Future<?> task : tasks) {
+        for (final Future<?> task : tasks) {
             task.cancel(true);
         }
         status = Executor.Status.TERMINATED;

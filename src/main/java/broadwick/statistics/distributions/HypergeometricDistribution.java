@@ -57,7 +57,7 @@ public class HypergeometricDistribution implements DiscreteDistribution {
     }
 
     @Override
-    public int sample() {
+    public final int sample() {
         return dist.sample(); //.inverseCumulativeProbability(RNG.getDouble());
     }
 

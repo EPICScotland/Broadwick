@@ -106,7 +106,7 @@ public abstract class StochasticSimulator {
             init();
 
             // tell our observers that the simulation has started
-            for (Observer observer : observers) {
+            for (final Observer observer : observers) {
                 observer.started();
             }
 
@@ -120,7 +120,7 @@ public abstract class StochasticSimulator {
                 //amountManager.doHouseKeeping();
 
                 // tell our observers that the step has been completed.
-                for (Observer observer : observers) {
+                for (final Observer observer : observers) {
                     observer.step();
                 }
                 sw.split();
@@ -128,7 +128,7 @@ public abstract class StochasticSimulator {
             }
 
             // tell our observers that the simulation has finished.
-            for (Observer observer : observers) {
+            for (final Observer observer : observers) {
                 observer.finished();
             }
         } catch (Exception e) {
@@ -163,7 +163,7 @@ public abstract class StochasticSimulator {
      */
     protected final void doEvent(final SimulationEvent event, final double t, final int n) {
         log.trace("Performing event {}", event);
-        for (Observer observer : observers) {
+        for (final Observer observer : observers) {
             observer.observeEvent(event, t, n);
         }
         // change the amount of the reactants
@@ -181,7 +181,7 @@ public abstract class StochasticSimulator {
         log.trace("Performing theta events at t = {}", nextThetaEventTime);
 
         final Map<Observer, Collection<Object>> nextEvents = thetaQueue.getNextEventDataAndRemove();
-        for (Map.Entry<Observer, Collection<Object>> entry : nextEvents.entrySet()) {
+        for (final Map.Entry<Observer, Collection<Object>> entry : nextEvents.entrySet()) {
 
             final Observer observer = entry.getKey();
             final Collection<Object> events = entry.getValue();
@@ -298,7 +298,7 @@ public abstract class StochasticSimulator {
             final Map<Observer, Collection<Object>> eventData = new HashMap<>(nextEventData);
             log.trace("Found {} configured events and observers at t={}", eventData.size(), nextThetaEventTime);
 
-            for (Observer obs : eventData.keySet()) {
+            for (final Observer obs : eventData.keySet()) {
                 final Collection<Object> removed = thetas.remove(nextThetaEventTime, obs);
                 log.trace("Removed {} items from registered theta list", removed.size());
             }

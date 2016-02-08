@@ -16,7 +16,6 @@
 package broadwick.montecarlo.markovchain;
 
 import broadwick.BroadwickException;
-import broadwick.io.FileOutput;
 import broadwick.montecarlo.MonteCarlo;
 import broadwick.montecarlo.MonteCarloResults;
 import broadwick.montecarlo.MonteCarloScenario;
@@ -107,7 +106,7 @@ public class MarkovChainMonteCarlo {
     public final void run() {
 
         try {
-            for (MarkovChainObserver observer : observers) {
+            for (final MarkovChainObserver observer : observers) {
                 observer.started();
             }
 
@@ -119,7 +118,7 @@ public class MarkovChainMonteCarlo {
             mc.setResultsConsumer(consumer);
             mc.run();
             MonteCarloResults prevResults = mc.getResults();
-            for (MarkovChainObserver observer : observers) {
+            for (final MarkovChainObserver observer : observers) {
                 observer.step();
                 observer.takeMeasurements();
             }
@@ -136,7 +135,7 @@ public class MarkovChainMonteCarlo {
                 final MonteCarloResults currentResults = mc.getResults();
 
                 lastStepAccepted = acceptor.accept(prevResults, currentResults);
-                for (MarkovChainObserver observer : observers) {
+                for (final MarkovChainObserver observer : observers) {
                     observer.step();
                 }
 
@@ -146,7 +145,7 @@ public class MarkovChainMonteCarlo {
                     if (numStepsTaken > burnIn
                         && (thinningInterval == 0 || stepsSinceLastMeasurement % thinningInterval == 0)) {
                         stepsSinceLastMeasurement++;
-                        for (MarkovChainObserver observer : observers) {
+                        for (final MarkovChainObserver observer : observers) {
                             observer.takeMeasurements();
                         }
                     }
@@ -158,7 +157,7 @@ public class MarkovChainMonteCarlo {
                 numStepsTaken++;
             }
 
-            for (MarkovChainObserver observer : observers) {
+            for (final MarkovChainObserver observer : observers) {
                 observer.finished();
             }
         } catch (Exception e) {
@@ -167,8 +166,8 @@ public class MarkovChainMonteCarlo {
         }
     }
 
-    public String getHeader() {
-        return String.format("# Steps taken [1]\n# Current step accepted? [2]\n# Current step coordinates [3-%d]%n# Results for current step [%d-n]%n",
+    public final String getHeader() {
+        return String.format("# Steps taken [1]%n# Current step accepted? [2]%n# Current step coordinates [3-%d]%n# Results for current step [%d-n]%n",
                              2 + currentStep.getCoordinates().size(), 3 + currentStep.getCoordinates().size());
     }
 
