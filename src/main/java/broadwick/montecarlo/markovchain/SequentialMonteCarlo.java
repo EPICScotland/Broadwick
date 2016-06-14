@@ -24,6 +24,7 @@ import broadwick.montecarlo.MonteCarloStep;
 import broadwick.montecarlo.acceptor.MonteCarloAcceptor;
 import broadwick.montecarlo.markovchain.controller.MarkovChainController;
 import broadwick.montecarlo.markovchain.observer.MarkovChainObserver;
+import broadwick.rng.RNG;
 import broadwick.statistics.distributions.Uniform;
 import broadwick.utils.CloneUtils;
 import com.google.common.base.Throwables;
@@ -78,6 +79,44 @@ public class SequentialMonteCarlo {
         this.pathGenerator = pathGenerator;
         this.acceptor = acceptor;
         this.observers = new HashSet<>(1);
+
+        generator = new RNG(RNG.Generator.Well19937c);
+    }
+
+    /**
+     * Create a SMC object that will create several MCMC objects each with a different starting point.
+     * @param priors        the priors from which the initial starting points will be drawn.
+     * @param numParticles  the number of particles (walkers) to create.
+     * @param scenario      the Monte Carlo scenario to be run at each step.
+     * @param numScenarios  the number of scenarios to be run at each step.
+     * @param results       the Monte Carlo Results object that will gather the results of the scenarios.
+     * @param controller    the controller object that will tell the MCMC to stop.
+     * @param pathGenerator the generator function for creating proposal steps.
+     * @param acceptor      the object that specifies whether or not a proposed step is accepted.
+     * @param seed          the seed for the RNG.
+     */
+    public SequentialMonteCarlo(final Collection<Prior> priors,
+                                final int numParticles,
+                                final MonteCarloScenario scenario,
+                                final int numScenarios,
+                                final MonteCarloResults results,
+                                final MarkovChainController controller,
+                                final MarkovStepGenerator pathGenerator,
+                                final MonteCarloAcceptor acceptor,
+                                final int seed) {
+
+        this.priors = priors;
+        this.numParticles = numParticles;
+        this.scenario = scenario;
+        this.numScenarios = numScenarios;
+        this.results = results;
+        this.controller = controller;
+        this.pathGenerator = pathGenerator;
+        this.acceptor = acceptor;
+        this.observers = new HashSet<>(1);
+
+        generator = new RNG(RNG.Generator.Well19937c);
+        generator.seed(seed);
     }
 
     /**
@@ -92,7 +131,7 @@ public class SequentialMonteCarlo {
                     .setDaemon(true)
                     .build();
             final ExecutorService es = Executors.newFixedThreadPool(poolSize, threadFactory);
-
+            
             final StopWatch sw = new StopWatch();
             sw.start();
             for (int i = 0; i < numParticles; i++) {
@@ -107,13 +146,14 @@ public class SequentialMonteCarlo {
                                 //TODO - this only works for uniform priors - need to find a neat way of making this 
                                 // list of priors a list of actual distribution objects e.g. Uniform, TruncatedNormalDistribution
                                 final UniformPrior uniformPrior = (UniformPrior) prior;
-                                initialVals.put(uniformPrior.getId(), (new Uniform(uniformPrior.getMin(), uniformPrior.getMax())).sample());
+                                initialVals.put(uniformPrior.getId(), (new Uniform(uniformPrior.getMin(), uniformPrior.getMax(),
+                                                                                   generator.getInteger(Integer.MIN_VALUE, Integer.MAX_VALUE))).sample());
                             }
                             final MonteCarloStep step = new MonteCarloStep(initialVals);
 
                             final MonteCarloScenario mc = scenario.copyOf();
                             mc.setStep(step);
-                            //TODO - give a seed to this MCMC object
+
                             // construct and run the MCMC object for this particle
                             final MarkovChainMonteCarlo mcmc = new MarkovChainMonteCarlo(
                                     mc,
@@ -165,6 +205,7 @@ public class SequentialMonteCarlo {
     private final MarkovStepGenerator pathGenerator;
     private final MonteCarloAcceptor acceptor;
     private final Collection<Prior> priors;
+    private final RNG generator;
 }
 
 @Slf4j
