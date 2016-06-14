@@ -20,8 +20,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Sample from a Uniform Distribution. This is a simple wrapper class for the RNG.getDouble method using a
- * Well19937c random number generator.
+ * Sample from a Uniform Distribution. This is a simple wrapper class for the RNG.getDouble method using a Well19937c
+ * random number generator.
  * <p>
  * References:</p><p>
  * <ul>
@@ -33,8 +33,8 @@ import lombok.extern.slf4j.Slf4j;
 public class Uniform implements ContinuousDistribution {
 
     /**
-     * Create a uniform distribution with a given min and max. The min and max parameters are checked so that
-     * the distributions minimum is the minimum of the parameters and the maximum is the maximum of the parameters.
+     * Create a uniform distribution with a given min and max. The min and max parameters are checked so that the
+     * distributions minimum is the minimum of the parameters and the maximum is the maximum of the parameters.
      * @param min the minimum value of the distribution.
      * @param max the maximum value of the distribution.
      */
@@ -43,11 +43,25 @@ public class Uniform implements ContinuousDistribution {
         this.max = Math.max(min, max);
     }
 
+    /**
+     * Create a uniform distribution with a given min and max. The min and max parameters are checked so that the
+     * distributions minimum is the minimum of the parameters and the maximum is the maximum of the parameters.
+     * @param min the minimum value of the distribution.
+     * @param max the maximum value of the distribution.
+     * @param seed the seed for the RNG.
+     */
+    public Uniform(final double min, final double max, final int seed) {
+        this.min = Math.min(min, max);
+        this.max = Math.max(min, max);
+        
+        GENERATOR.seed(seed);
+    }
+
     @Override
     public final double sample() {
         return GENERATOR.getDouble(min, max);
     }
-    
+
     /**
      * Reseed the random number generator used.
      * @param seed the new seed to use.
@@ -61,6 +75,6 @@ public class Uniform implements ContinuousDistribution {
     private final double min;
     @Getter
     private final double max;
-    
+
     private static final RNG GENERATOR = new RNG(RNG.Generator.Well19937c);
 }
