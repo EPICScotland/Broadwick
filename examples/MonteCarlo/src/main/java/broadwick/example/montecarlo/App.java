@@ -69,7 +69,7 @@ class Simulation extends MonteCarloScenario {
     }
 
     @Override
-    public MonteCarloResults run() {
+    public MonteCarloResults run(final int seed) {
         // Estimate pi by randomly throwing darts into a square of side 2 units centered on (0,0). Te ratio of the area
         // of the circle to the square is pi/4, so the ratio of the number of darts that lie inside the cirlce compared
         // to those that lie insode the square is pi/4.
