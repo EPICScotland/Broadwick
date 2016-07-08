@@ -4,7 +4,7 @@
 
     <groupId>montecarlo</groupId>
     <artifactId>MonteCarlo</artifactId>
-    <version>1.0</version>
+    <version>1.2</version>
     <packaging>jar</packaging>
 
     <name>BroadwickExamples:MonteCarlo</name>
