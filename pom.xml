@@ -18,7 +18,7 @@
     <description>Framework for mathematical modelling of epidemics.</description>
 
     <prerequisites>
-        <maven>3.0.0</maven>
+        <maven>3.0.2</maven>
     </prerequisites>
 
     <organization>
@@ -51,8 +51,8 @@
     </developers>
 
     <scm>
-        <connection>scm:hg:.</connection>
-        <developerConnection>scm:hg:.</developerConnection>
+        <connection>scm:git:.</connection>
+        <developerConnection>scm:git:.</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
@@ -92,12 +92,12 @@
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 
-        <buildnumber-maven-plugin.version>1.2</buildnumber-maven-plugin.version>
+        <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
         <ch.qos.logback.version>1.1.3</ch.qos.logback.version>
-        <com.google.guava.version>18.0</com.google.guava.version>
-        <jacoco-maven-plugin.version>0.7.0.201403182114</jacoco-maven-plugin.version>
+        <com.google.guava.version>19.0-rc2</com.google.guava.version>
+        <jacoco-maven-plugin.version>0.7.5.201505241946</jacoco-maven-plugin.version>
         <jdk.version>1.7</jdk.version>
-        <joda-time.version>2.7</joda-time.version>
+        <joda-time.version>2.9</joda-time.version>
         <jre.version>1.7</jre.version>
         <junit.junit.version>4.12</junit.junit.version>
         <jung.version>2.0.1</jung.version>	
@@ -106,33 +106,33 @@
         <org.apache.mahout.commons.commons-cli.version>2.0-mahout</org.apache.mahout.commons.commons-cli.version>
         <org.apache.commons.lang3.version>3.4</org.apache.commons.lang3.version>  
         <org.apache.commons-math3.version>3.5</org.apache.commons-math3.version>
-        <org.codehaus.mojo-sonar-maven-plugin.version>2.5</org.codehaus.mojo-sonar-maven-plugin.version>
+        <org.codehaus.mojo-sonar-maven-plugin.version>2.6</org.codehaus.mojo-sonar-maven-plugin.version>
         <org.jdom.version>2.0.2</org.jdom.version>
-        <org.jooq.version>3.5.4</org.jooq.version>
+        <org.jooq.version>3.7.0</org.jooq.version>
         <org.jvnet.jaxb2_commons.version>0.4.1.5</org.jvnet.jaxb2_commons.version>
-        <org.projectlombok.lombok.version>1.16.4</org.projectlombok.lombok.version>
-        <org.slf4j.slf4j-api.version>1.7.12</org.slf4j.slf4j-api.version>
+        <org.projectlombok.lombok.version>1.16.6</org.projectlombok.lombok.version>
+        <org.slf4j.slf4j-api.version>1.7.13</org.slf4j.slf4j-api.version>
         <org.swinglabs.swing-layout.version>1.0.3</org.swinglabs.swing-layout.version>
         <org.umlgraph.version>5.6</org.umlgraph.version>                                               
         <taglist-maven-plugin.version>2.4</taglist-maven-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.0.3</maven.min-version>
         <maven-changes-plugin.version>2.7.1</maven-changes-plugin.version>
-        <maven-clean-plugin.version>2.5</maven-clean-plugin.version>
-        <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
-        <maven-deploy-plugin.version>2.7</maven-deploy-plugin.version>
+        <maven-clean-plugin.version>2.6.1</maven-clean-plugin.version>
+        <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
+        <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
         <maven-fluido-skin.version>1.2.1</maven-fluido-skin.version>
-        <maven-install-plugin.version>2.4</maven-install-plugin.version>
-        <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
-        <maven-javadoc-plugin.version>2.8.1</maven-javadoc-plugin.version>
-        <maven-jaxb2-plugin.version>0.12.3</maven-jaxb2-plugin.version>
+        <maven-install-plugin.version>2.5.2</maven-install-plugin.version>
+        <maven-jar-plugin.version>2.6</maven-jar-plugin.version>
+        <maven-javadoc-plugin.version>2.10.3</maven-javadoc-plugin.version>
+        <maven-jaxb2-plugin.version>0.13.1</maven-jaxb2-plugin.version>
         <maven-jxr-plugin.version>2.3</maven-jxr-plugin.version>
         <maven-project-info-reports-plugin.version>2.4</maven-project-info-reports-plugin.version>
-        <maven-resources-plugin.version>2.6</maven-resources-plugin.version>
-        <maven-site-plugin.version>3.2</maven-site-plugin.version>
-        <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
-        <maven-surefire-plugin.version>2.14.1</maven-surefire-plugin.version>
-        <uk.com.robust-it.cloning.version>1.9.1</uk.com.robust-it.cloning.version>
+        <maven-resources-plugin.version>2.7</maven-resources-plugin.version>
+        <maven-site-plugin.version>3.4</maven-site-plugin.version>
+        <maven-source-plugin.version>2.4</maven-source-plugin.version>
+        <maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
+        <uk.com.robust-it.cloning.version>1.9.2</uk.com.robust-it.cloning.version>
     </properties>
 
     <pluginRepositories>
@@ -459,7 +459,6 @@
                                 <report>help</report>
                                 <report>modules</report>
                                 <report>project-team</report>
-                                <!--<report>scm</report>-->
                                 <report>plugins</report>
                                 <report>plugin-management</report>
                             </reports>
@@ -479,6 +478,7 @@
                                 </docletArtifact>
                                 <useStandardDocletOptions>true</useStandardDocletOptions>                
                                 <additionalparam>
+                                    -Xdoclint:none
                                     -views -all
                                     -inferrel -inferdep -quiet -hide java.*
                                     -collpackages java.util.* -qualify
@@ -491,7 +491,7 @@
                                     -nodefontname "Trebuchet MS"
                                     -nodefontpackagename "Trebuchet MS"
                                     -nodefonttagname "Trebuchet MS"
-                                    -header '<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>'
+                                    -header '&lt;script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"&gt;&lt;/script&gt;
                                 </additionalparam>
                             </configuration>
                         </plugin>

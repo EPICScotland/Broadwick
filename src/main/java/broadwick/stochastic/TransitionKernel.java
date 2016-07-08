@@ -45,7 +45,7 @@ public class TransitionKernel implements Cloneable {
     public final Object clone() throws CloneNotSupportedException {
         super.clone();
         final TransitionKernel newKernel = new TransitionKernel();
-        for (Map.Entry<SimulationEvent, Double> entry : kernel.entrySet()) {
+        for (final Map.Entry<SimulationEvent, Double> entry : kernel.entrySet()) {
             newKernel.addToKernel(entry.getKey(), entry.getValue());
         }
         return newKernel;
@@ -109,7 +109,7 @@ public class TransitionKernel implements Cloneable {
 
         double cumulativeProb = 0.0;
         final Map<SimulationEvent, Double> cumulativeDistFn = new LinkedHashMap<>(5);
-        for (SimulationEvent e : getTransitionEvents()) {
+        for (final SimulationEvent e : getTransitionEvents()) {
             cumulativeProb += getTransitionProbability(e);
             cumulativeDistFn.put(e, cumulativeProb);
         }

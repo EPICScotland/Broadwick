@@ -50,7 +50,7 @@ public final class GraphViz {
 
         sb.append(graphHdr).append("  {\n");
 
-        for (Vertex vertex : network.getVertices()) {
+        for (final Vertex vertex : network.getVertices()) {
             sb.append("   ");
             sb.append(vertex.getId());
             sb.append(";\n");
@@ -58,7 +58,7 @@ public final class GraphViz {
 
         sb.append("\n");
 
-        for (Edge<?> edge : network.getEdges()) {
+        for (final Edge<?> edge : network.getEdges()) {
             sb.append("   ");
             sb.append(edge.getSource().getId());
             sb.append(" ").append(edgeOp).append(" ");

@@ -41,7 +41,7 @@ public class AbcNamedQuantity {
     @Override
     public final String toString() {
         final StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, Double> entry : parameters.entrySet()) {
+        for (final Map.Entry<String, Double> entry : parameters.entrySet()) {
             sb.append(entry.getValue()).append(',');
         }
 

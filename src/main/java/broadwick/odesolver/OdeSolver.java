@@ -86,7 +86,7 @@ public abstract class OdeSolver {
         final double nextThetaEventTime = thetaQueue.getNextThetaEventTime();
 
         final Map<Observer, Collection<Object>> nextEvents = thetaQueue.getNextEventDataAndRemove();
-        for (Map.Entry<Observer, Collection<Object>> entry : nextEvents.entrySet()) {
+        for (final Map.Entry<Observer, Collection<Object>> entry : nextEvents.entrySet()) {
 
             final Observer observer = entry.getKey();
             final Collection<Object> events = entry.getValue();
@@ -190,7 +190,7 @@ public abstract class OdeSolver {
             final Map<Observer, Collection<Object>> eventData = new HashMap<>(nextEventData);
             log.trace("Found {} configured events and observers at t={}", eventData.size(), nextThetaEventTime);
 
-            for (Observer obs : eventData.keySet()) {
+            for (final Observer obs : eventData.keySet()) {
                 final Collection<Object> removed = thetas.remove(nextThetaEventTime, obs);
                 log.trace("Removed {} items from registered theta list", removed.size());
             }
@@ -231,5 +231,5 @@ public abstract class OdeSolver {
     @Getter
     @SuppressWarnings("PMD.UnusedPrivateField")
     private final Set<Observer> observers = new HashSet<>(1);
-    private ThetaQueue thetaQueue;
+    private final ThetaQueue thetaQueue;
 }

@@ -15,7 +15,7 @@
  */
 
 /**
- * This package contains examples of how to use the Monte Carlo pacage.
+ * This package contains examples of how to use the Monte Carlo package.
  */
 package broadwick.example.montecarlo;
 

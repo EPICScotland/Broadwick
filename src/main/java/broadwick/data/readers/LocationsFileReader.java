@@ -59,7 +59,7 @@ public class LocationsFileReader extends DataFileReader {
                                  insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
 
         if (locationsFile.getCustomTags() != null) {
-            for (CustomTags.CustomTag tag : locationsFile.getCustomTags().getCustomTag()) {
+            for (final CustomTags.CustomTag tag : locationsFile.getCustomTags().getCustomTag()) {
                 updateCreateTableCommand(tag.getName(), tag.getColumn(), " VARCHAR(128), ",
                                          insertedColInfo, createTableCommand, TABLE_NAME, SECTION_NAME, errors);
                 if ("date".equals(tag.getType())) {

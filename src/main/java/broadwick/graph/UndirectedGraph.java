@@ -166,7 +166,7 @@ public class UndirectedGraph<V extends Vertex, E extends Edge<V>> implements bro
 
     @Override
     public final boolean removeVertex(final V vertex) {
-        boolean removed = graph.removeVertex(vertex);
+        final boolean removed = graph.removeVertex(vertex);
         if (removed) {
             vertexmaps.remove(vertex.id);
         }
@@ -175,7 +175,7 @@ public class UndirectedGraph<V extends Vertex, E extends Edge<V>> implements bro
 
     @Override
     public final boolean removeEdge(final E edge) {
-        boolean removed = graph.removeEdge(edge);
+        final boolean removed = graph.removeEdge(edge);
         if (removed) {
             edgemaps.remove(edge.id);
         }

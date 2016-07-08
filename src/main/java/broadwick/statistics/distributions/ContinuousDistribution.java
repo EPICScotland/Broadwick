@@ -26,4 +26,11 @@ public interface ContinuousDistribution {
      * @return the sampled value from the distribution.
      */
     double sample();
+    
+    
+    /**
+     * Reseed the random number generator used.
+     * @param seed the new seed to use.
+     */
+    void reseed(final int seed);
 }

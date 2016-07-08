@@ -17,7 +17,6 @@ package broadwick.statistics.distributions;
 
 import broadwick.math.Vector;
 
-
 /**
  * Interface defining all distribution classes.
  */
@@ -28,4 +27,10 @@ public interface ContinuousMultivariateDistribution {
      * @return the sampled value from t he distribution.
      */
     Vector sample();
+
+    /**
+     * Reseed the random number generator used.
+     * @param seed the new seed to use.
+     */
+    void reseed(final int seed);
 }

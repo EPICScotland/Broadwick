@@ -170,7 +170,7 @@ public class DataReader implements java.lang.AutoCloseable {
     private int readAllDirectedMovementSections(final List<DirectedMovementFile> directedMovementFiles, final String addingFileMsg) {
         int elementsRead = 0;
 
-        for (DataFiles.DirectedMovementFile file : directedMovementFiles) {
+        for (final DataFiles.DirectedMovementFile file : directedMovementFiles) {
             log.trace(String.format(addingFileMsg, file.getName()));
             final DirectedMovementsFileReader movementsFileReader = new DirectedMovementsFileReader(file, dbImpl);
             elementsRead += movementsFileReader.insert();
@@ -191,7 +191,7 @@ public class DataReader implements java.lang.AutoCloseable {
     private int readAllFullMovementSections(final List<FullMovementFile> fullMovementFiles, final String addingFileMsg) {
         int elementsRead = 0;
 
-        for (DataFiles.FullMovementFile file : fullMovementFiles) {
+        for (final DataFiles.FullMovementFile file : fullMovementFiles) {
             log.trace(String.format(addingFileMsg, file.getName()));
             final FullMovementsFileReader movementsFileReader = new FullMovementsFileReader(file, dbImpl);
             elementsRead += movementsFileReader.insert();
@@ -212,7 +212,7 @@ public class DataReader implements java.lang.AutoCloseable {
     private int readAllBatchedMovementSections(final List<BatchMovementFile> batchMovementFiles, final String addingFileMsg) {
         int elementsRead = 0;
 
-        for (DataFiles.BatchMovementFile file : batchMovementFiles) {
+        for (final DataFiles.BatchMovementFile file : batchMovementFiles) {
             log.trace(String.format(addingFileMsg, file.getName()));
             final BatchedMovementsFileReader movementsFileReader = new BatchedMovementsFileReader(file, dbImpl);
             elementsRead += movementsFileReader.insert();
@@ -233,7 +233,7 @@ public class DataReader implements java.lang.AutoCloseable {
     private int readAllLocationSections(final List<LocationsFile> locationsFile, final String addingFileMsg) {
         int elementsRead = 0;
 
-        for (DataFiles.LocationsFile file : locationsFile) {
+        for (final DataFiles.LocationsFile file : locationsFile) {
             log.trace(String.format(addingFileMsg, file.getName()));
             final LocationsFileReader locationsFileReader = new LocationsFileReader(file, dbImpl);
             elementsRead += locationsFileReader.insert();
@@ -254,7 +254,7 @@ public class DataReader implements java.lang.AutoCloseable {
     private int readAllTestSections(final List<TestsFile> testsFile, final String addingFileMsg) {
         int elementsRead = 0;
 
-        for (DataFiles.TestsFile file : testsFile) {
+        for (final DataFiles.TestsFile file : testsFile) {
             log.trace(String.format(addingFileMsg, file.getName()));
             final TestsFileReader testsFileReader = new TestsFileReader(file, dbImpl);
             elementsRead += testsFileReader.insert();
@@ -275,7 +275,7 @@ public class DataReader implements java.lang.AutoCloseable {
     private int readAllPopulationSections(final List<PopulationFile> populationsFiles, final String addingFileMsg) {
         int elementsRead = 0;
 
-        for (DataFiles.PopulationFile file : populationsFiles) {
+        for (final DataFiles.PopulationFile file : populationsFiles) {
             log.trace(String.format(addingFileMsg, file.getName()));
             final PopulationsFileReader populationsFileReader = new PopulationsFileReader(file, dbImpl);
             elementsRead += populationsFileReader.insert();

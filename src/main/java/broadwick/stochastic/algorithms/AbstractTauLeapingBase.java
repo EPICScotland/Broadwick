@@ -48,7 +48,7 @@ public abstract class AbstractTauLeapingBase extends StochasticSimulator {
         final Set<SimulationEvent> transitionEvents = new LinkedHashSet<>();
         transitionEvents.addAll(getTransitionKernel().getTransitionEvents());
         
-        for (SimulationEvent event : transitionEvents) {
+        for (final SimulationEvent event : transitionEvents) {
             if (getTransitionKernel().getTransitionEvents().contains(event)) {
                 final double rate = getTransitionKernel().getTransitionProbability(event);
                 final double times = GENERATOR.getPoisson(rate * tau);

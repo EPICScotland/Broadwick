@@ -32,7 +32,7 @@ public class MonteCarloStep implements Serializable {
      */
     public MonteCarloStep(final MonteCarloStep step) {
         this.coordinates = new LinkedHashMap<>();
-        for (Map.Entry<String, Double> entry : step.coordinates.entrySet()) {
+        for (final Map.Entry<String, Double> entry : step.coordinates.entrySet()) {
             coordinates.put(entry.getKey(), entry.getValue());
         }
     }
@@ -53,7 +53,7 @@ public class MonteCarloStep implements Serializable {
     @Override
     public final String toString() {
         final StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, Double> entry : coordinates.entrySet()) {
+        for (final Map.Entry<String, Double> entry : coordinates.entrySet()) {
             sb.append(entry.getValue()).append(',');
         }
 

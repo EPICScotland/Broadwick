@@ -94,7 +94,7 @@ public class GillespieSimple extends StochasticSimulator {
      */
     private double calculateRTotal() {
         double rTotal = 0.0;
-        for (SimulationEvent event : this.getTransitionKernel().getTransitionEvents()) {
+        for (final SimulationEvent event : this.getTransitionKernel().getTransitionEvents()) {
             rTotal += this.getTransitionKernel().getTransitionProbability(event);
         }
         return rTotal;
@@ -134,7 +134,7 @@ public class GillespieSimple extends StochasticSimulator {
         final double test = GENERATOR.getDouble() * rTotal;
 
         double sum = 0;
-        for (SimulationEvent event : getTransitionKernel().getTransitionEvents()) {
+        for (final SimulationEvent event : getTransitionKernel().getTransitionEvents()) {
             sum += this.getTransitionKernel().getTransitionProbability(event);
             if (test <= sum) {
                 return event;

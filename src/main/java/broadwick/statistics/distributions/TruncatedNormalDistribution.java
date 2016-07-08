@@ -52,19 +52,32 @@ public class TruncatedNormalDistribution implements ContinuousDistribution {
         this.sd = sd;
         this.lower = lb;
         this.upper = ub;
-        this.generator = new RNG(RNG.Generator.Well19937c);
+    }
+
+    /**
+     * Create an instance of the normal distribution distribution truncated to given limits.
+     * @param mean the mean of the normal distribution.
+     * @param sd   the standard deviation of the distribution.
+     * @param lb   the lower bound of the distribution, no values lower than this will be returned.
+     * @param ub   the upper bound of the distribution, no values higher1 than this will be returned.
+     * @param seed the seed to be used in the random number generator.
+     */
+    public TruncatedNormalDistribution(final double mean, final double sd,
+                                       final double lb, final double ub, final int seed) {
+        this(mean, sd, lb, ub);
+        GENERATOR.seed(seed);
     }
 
     @Override
-    public double sample() {
+    public final double sample() {
 
         // Sample using the method of C.P. Robert (doi: 10.1007/BF00143942, arXiv:0907.4010 [stat.CO])
         double x = Double.NaN;
         double rho = 0.0;
-        double u = generator.getDouble();
+        double u = GENERATOR.getDouble();
 
         while (u > rho) {
-            double z = generator.getDouble(lower, upper);
+            final double z = GENERATOR.getDouble(lower, upper);
             if (0 > lower && 0 < upper) {
                 rho = Math.exp(-z * z / 2.0);
             } else if (upper < 0) {
@@ -73,14 +86,18 @@ public class TruncatedNormalDistribution implements ContinuousDistribution {
                 rho = Math.exp(((lower * lower) - (z * z)) / 2.0);
             }
 
-            u = generator.getDouble();
+            u = GENERATOR.getDouble();
             x = z;
         }
 
         return x;
     }
 
-    public double rejectionSample() {
+    /**
+     * Use a simple rejection sampling technique. This is not efficient if the required range does not include the mean.
+     * @return 
+     */
+    public final double rejectionSample() {
         // use a simple rejection sampling
         final Normal dist = new Normal(mean, sd);
         double val = dist.sample();
@@ -91,11 +108,20 @@ public class TruncatedNormalDistribution implements ContinuousDistribution {
         return val;
     }
 
+    /**
+     * Reseed the random number generator used.
+     * @param seed the new seed to use.
+     */
+    @Override
+    public final void reseed(final int seed) {
+        GENERATOR.seed(seed);
+    }
+
     @Getter
     private double mean;
     @Getter
     private double sd;
     private double lower;
     private double upper;
-    private RNG generator;
+    private static final RNG GENERATOR = new RNG(RNG.Generator.Well19937c);
 }

@@ -57,7 +57,7 @@ public class Vector {
      * @param i the vector element to be found.
      * @return the vector element
      */
-    public double element(final int i) {
+    public final double element(final int i) {
         return data[i];
     }
 
@@ -67,7 +67,7 @@ public class Vector {
      * @param value the value of the vector element.
      * @return the updated value.
      */
-    public double setEntry(final int i, final double value) {
+    public final double setEntry(final int i, final double value) {
         data[i] = value;
         return data[i];
     }
@@ -76,7 +76,7 @@ public class Vector {
      * Return a copy of the vector as an array.
      * @return a copy of the vector as an array.
      */
-    public double[] toArray() {
+    public final double[] toArray() {
         return data.clone();
     }
 
@@ -84,7 +84,7 @@ public class Vector {
      * Obtain the length, i.e. the number of components of this vector.
      * @return the number of elements in the vector.
      */
-    public int length() {
+    public final int length() {
         return data.length;
     }
 
@@ -93,8 +93,8 @@ public class Vector {
      * @param v the vector to be added to this one.
      * @return this (updated) vector.
      */
-    public Vector add(final Vector v) {
-        Vector v1 = new Vector(data);
+    public final Vector add(final Vector v) {
+        final Vector v1 = new Vector(data);
 
         for (int i = 0; i < data.length; i++) {
             v1.setEntry(i, v1.element(i) + v.element(i));
@@ -107,8 +107,8 @@ public class Vector {
      * @param v the vector to be subtracted from this one.
      * @return this (updated) vector.
      */
-    public Vector subtract(final Vector v) {
-        Vector v1 = new Vector(data);
+    public final Vector subtract(final Vector v) {
+        final Vector v1 = new Vector(data);
 
         for (int i = 0; i < data.length; i++) {
             v1.setEntry(i, v1.element(i) - v.element(i));
@@ -121,7 +121,7 @@ public class Vector {
      * @param v the vector to be dotted.
      * @return this (updated) vector.
      */
-    public double multiply(final Vector v) {
+    public final double multiply(final Vector v) {
         double d = 0.0;
 
         for (int i = 0; i < data.length; i++) {
@@ -131,8 +131,8 @@ public class Vector {
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("(");
+    public final String toString() {
+        final StringBuilder sb = new StringBuilder("(");
 
         for (int i = 0; i < data.length; i++) {
             sb.append(data[i]).append(",");

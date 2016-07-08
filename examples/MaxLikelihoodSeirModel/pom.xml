@@ -4,7 +4,7 @@
 
     <groupId>MaxLikelihoodSeirModel</groupId>
     <artifactId>MaxLikelihoodSeirModel</artifactId>
-    <version>0.1</version>
+    <version>1.2</version>
     <packaging>jar</packaging>
 
     <name>BroadwickExamples:MaxLikelihoodSeirModel</name>
@@ -18,9 +18,9 @@
 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 	<jdk.version>1.7</jdk.version>
-	<junit.junit.version>4.11</junit.junit.version>
+	<junit.junit.version>4.12</junit.junit.version>
 	<broadwick.version>1.2</broadwick.version>
-	<maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
+	<maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
 	<onejar-plugin.version>1.4.5</onejar-plugin.version>
     </properties>
 

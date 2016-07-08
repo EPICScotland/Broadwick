@@ -21,8 +21,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Sample fro a Normal (Gaussian) Distribution. This is a simple wrapper class for the RNG.getGaussian
- * method using a Well19937c random number generator.
+ * Sample fro a Normal (Gaussian) Distribution. This is a simple wrapper class for the RNG.getGaussian method using a
+ * Well19937c random number generator.
  * <p>
  * References:</p><p>
  * <ul>
@@ -53,6 +53,16 @@ public class Normal implements ContinuousDistribution {
     public final double sample() {
         return GENERATOR.getGaussian(mean, stdDev);
     }
+
+    /**
+     * Reseed the random number generator used.
+     * @param seed the new seed to use.
+     */
+    @Override
+    public final void reseed(final int seed) {
+        GENERATOR.seed(seed);
+    }
+
     @Getter
     @Setter
     private double mean = 0.0;

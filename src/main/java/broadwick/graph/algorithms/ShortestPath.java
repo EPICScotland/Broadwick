@@ -46,7 +46,7 @@ public class ShortestPath<V extends Vertex, E extends Edge<V>> {
         } else {
             throw new IllegalArgumentException("Could not create ShortestPath object for unknown grpah type.");
         }
-        for (E edge : graph.getEdges()) {
+        for (final E edge : graph.getEdges()) {
             jungGraph.addEdge(edge, edge.getSource(), edge.getDestination());
         }
 

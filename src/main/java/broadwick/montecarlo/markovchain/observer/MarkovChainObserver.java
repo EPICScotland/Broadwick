@@ -17,6 +17,7 @@ package broadwick.montecarlo.markovchain.observer;
 
 import broadwick.montecarlo.markovchain.MarkovChainMonteCarlo;
 import lombok.EqualsAndHashCode;
+import lombok.Setter;
 
 /**
  * Implementing classes are used to take measurements during a Monte Carlo run.
@@ -27,10 +28,10 @@ public abstract class MarkovChainObserver implements Comparable<MarkovChainObser
 
     /**
      * Creates an observer dedicated to one Monte Carlo process.
-     * @param mc the Monte Carlo process
      */
-    public MarkovChainObserver(final MarkovChainMonteCarlo mc) {
-        this.monteCarlo = mc;
+    public MarkovChainObserver() {
+        // NOTE: the monteCarlo object isn't set until the observer is attached to the MarkovChain. Until it is the
+        // monteCarlo field will be null
     }
 
     @Override
@@ -65,6 +66,7 @@ public abstract class MarkovChainObserver implements Comparable<MarkovChainObser
      * Gets called when a simulation has finished, directly after the termination check.
      */
     public abstract void finished();
+    @Setter
     @SuppressWarnings("PMD.UnusedPrivateField")
-    protected final MarkovChainMonteCarlo monteCarlo;
+    protected MarkovChainMonteCarlo monteCarlo;
 }

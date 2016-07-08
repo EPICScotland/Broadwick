@@ -29,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
  * where
  * <SPAN CLASS="MATH">&sum;<SUB>i=1</SUB><SUP>d</SUP><I>x</I><SUB>i</SUB> = <I>numSamples</I></SPAN> and
  * <SPAN CLASS="MATH">&sum;<SUB>i=1</SUB><SUP>d</SUP><I>probabilities</I><SUB>i</SUB> = 1</SPAN>.
- * <p/>
  */
 @Slf4j
 public class MultinomialDistribution implements Serializable {
@@ -58,7 +57,7 @@ public class MultinomialDistribution implements Serializable {
         this.probabilities = new double[dimension];
         for (int i = 0; i < dimension; i++) {
             if ((p[i] < 0) || (p[i] > 1)) {
-                throw new IllegalArgumentException("p is not a probability vector");
+                throw new IllegalArgumentException("p is not a probability vector, values not in the range [0,1]");
             }
 
             this.probabilities[i] = p[i];
@@ -66,7 +65,7 @@ public class MultinomialDistribution implements Serializable {
         }
 
         if (Math.abs(sumP - 1.0) > 1E-15) {
-            throw new IllegalArgumentException("p is not a probability vector");
+            throw new IllegalArgumentException("p is not a probability vector, Sum(p) is not one");
         }
     }
 

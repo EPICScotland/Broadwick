@@ -91,7 +91,7 @@ public class Edge<V extends Vertex> implements Serializable {
      * @return the attribute (or null if no attribute matches the name).
      */
     public final EdgeAttribute getAttributeByName(final String attributeName) {
-        for (EdgeAttribute attr : attributes) {
+        for (final EdgeAttribute attr : attributes) {
             if (StringUtils.equalsIgnoreCase(attributeName, attr.getName())) {
                 return attr;
             }

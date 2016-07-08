@@ -1,0 +1,120 @@
+\chapter{Installation}
+
+A compiled Broadwick jar is available from the EPIC Scotland website that can be added to your project. Broadwick uses maven as its build tool and so this manual is rather maven focused. You can use Broadwick with other tools or import it into your IDE settings though this is outside the scope of this manual.
+
+\section{Installing the Distribution Jar}
+If you plan on downloading the distribution jar file you should place it under 
+\begin{sourcecode}
+\${HOME}/.m2/repository/broadwick/broadwick/1.2
+\end{sourcecode}
+
+\section{Installing From Source}
+To download the Broadwick sources
+\begin{enumerate}
+\item Create a directory for broad wick and ‘cd’ into that directory
+\item Copy the broadwick sources.
+      \begin{sourcecode}
+      git clone https://github.com/EPICScotland/Broadwick .
+      \end{sourcecode}
+      (this may take a while as there are release snapshots that are also on the site)
+\item Build the jar library.
+\begin{sourcecode}
+man package install; cd archetype; man install
+\end{sourcecode}
+
+You should see output similar to
+\begin{sourcecode}
+INFO --- maven-compiler-plugin:3.1:compile (default-compile) @ broadwick ---
+INFO Changes detected - recompiling the module!
+INFO Compiling 157 source files to /XXXX/XXXX/XXXX/EPICScotland/Broadwick/target/classes
+WARNING bootstrap class path not set in conjunction with -source 1.7
+WARNING No processor claimed any of these annotations: javax.xml.bind.annotation.XmlAccessorType,javax.xml.bind.annotation.XmlAttribute,lombok.Synchronized,lombok.Setter,lombok.Getter,lombok.EqualsAndHashCode,javax.xml.bind.annotation.XmlRootElement,javax.xml.bind.annotation.XmlSeeAlso,lombok.extern.slf4j.Slf4j,javax.xml.bind.annotation.XmlType,javax.xml.bind.annotation.XmlElements,javax.xml.bind.annotation.XmlRegistry,lombok.Data,lombok.ToString,javax.xml.bind.annotation.XmlElement
+\end{sourcecode}
+
+      This will install the broadwick jar and the archetype under .m2/repository/broadwick/broadwick/1.2
+
+\end{enumerate}
+
+Now you can create a new project using this archetype:
+\begin{sourcecode}
+mvn3 archetype:generate -DarchetypeGroupId=broadwick -DarchetypeArtifactId=broadwick- archetype -DarchetypeVersion=1.2 -DgroupId=<unique id for your project> -DartifactId=<your project name> -Dversion=0.1 -Dpackage=<your package> 
+\end{sourcecode}
+
+
+
+
+\section{Ubuntu}
+
+The version of Java on Ubuntu 15.04 (other versions are also possibley affected) causes the following error when compiling Broadwick due to the jaxb plugin which is used to generate java sources.
+
+\begin{sourcecode}
+WARNING: Error injecting: org.jvnet.mjiip.v\_2.XJC2Mojo
+java.lang.NoClassDefFoundError: com/sun/xml/bind/api/ErrorListener \
+	at java.lang.ClassLoader.defineClass1(Native Method)  \
+	at java.lang.ClassLoader.defineClass(ClassLoader.java:800) \
+	at java.security.SecureClassLoader.defineClass(SecureClassLo
+\end{sourcecode}
+
+We reccommend using the version of Java from Oracle. The following steps show how to download and install Java on Ubuntu (it is possible to revert back to Ubuntu's version afterwards).
+\begin{enumerate}
+
+\item Download the 32-bit or 64-bit Linux "compressed binary file" - it has a ".tar.gz" file extension.
+\item Uncompress it
+\begin{sourcecode}
+		 tar -xvf jdk-8u71-linux-x64.tar.gz (32-bit)
+\end{sourcecode}
+
+    		The JDK 8 package is extracted into ./jdk1.8.0\_71 directory. N.B.: Check carefully this folder name since Oracle seem to change this occasionally with each update.
+
+\item Move the JDK 8 directory to /usr/lib
+
+\begin{sourcecode}
+    		sudo mkdir -p /usr/lib/jvm
+    		sudo mv ./jdk1.8.0\_71 /usr/lib/jvm/
+\end{sourcecode}
+
+\item Now run
+
+\begin{sourcecode}
+    		sudo update-alternatives --install "/usr/bin/java" "java" "/usr/lib/jvm/jdk1.8.0\_71/bin/java" 1
+    		sudo update-alternatives --install "/usr/bin/javac" "javac" "/usr/lib/jvm/jdk1.8.0\_71/bin/javac" 1
+    		sudo update-alternatives --install "/usr/bin/javaws" "javaws" "/usr/lib/jvm/jdk1.8.0\_71/bin/javaws" 1
+\end{sourcecode}
+
+    	This will assign Oracle JDK a priority of 1, which means that installing other JDKs will replace it as the default. Be sure to use a higher priority if you want Oracle JDK to remain the default.
+
+\item Correct the file ownership and the permissions of the executables:
+
+\begin{sourcecode}
+   		sudo chmod a+x /usr/bin/java
+    		sudo chmod a+x /usr/bin/javac
+    		sudo chmod a+x /usr/bin/javaws
+    		sudo chown -R root:root /usr/lib/jvm/jdk1.8.0\_71
+\end{sourcecode}
+
+     	N.B.: Remember - Java JDK has many more executables that you can similarly install as above. java, javac, javaws are probably the most frequently required. This answer lists the other executables available.
+
+\item Run
+
+\begin{sourcecode}
+    		sudo update-alternatives --config java
+\end{sourcecode}
+
+    You will see output similar to the one below - choose the number of jdk1.8.0\_71
+
+\begin{sourcecode}
+    sudo update-alternatives --config java
+\end{sourcecode}
+    There are 3 choices for the alternative java (providing /usr/bin/java).
+
+\begin{sourcecode}
+      Selection    Path                                            Priority   Status
+    ------------------------------------------------------------ \
+    *  0            /usr/lib/jvm/java-7-openjdk-amd64/jre/bin/java   1071      auto mode \
+      1            /usr/lib/jvm/java-7-openjdk-amd64/jre/bin/java   1071      manual mode
+      2            /usr/lib/jvm/jdk1.8.0\_71/bin/java                   1         manual mode
+\end{sourcecode}
+
+\end{enumerate}
+ 
+

@@ -188,7 +188,7 @@ public final class ArrayUtils {
      */
     public static String toString(final Object[] objects) {
         final StringBuilder sb = new StringBuilder();
-        for (Object o : objects) {
+        for (final Object o : objects) {
             sb.append(o.toString());
             sb.append(',');
         }
@@ -205,7 +205,7 @@ public final class ArrayUtils {
      */
     public static String toString(final Object[] objects, final Format fmt) {
         final StringBuilder sb = new StringBuilder();
-        for (Object o : objects) {
+        for (final Object o : objects) {
             try {
                 sb.append(fmt.format(o));
             } catch (IllegalArgumentException iae) {

@@ -29,7 +29,7 @@ public class MarkovNormalProposal implements MarkovProposalFunction {
     public final MonteCarloStep generate(final MonteCarloStep step) {
 
         final Map<String, Double> proposedStep = new LinkedHashMap<>(step.getCoordinates().size());
-        for (Map.Entry<String, Double> entry : step.getCoordinates().entrySet()) {
+        for (final Map.Entry<String, Double> entry : step.getCoordinates().entrySet()) {
             proposedStep.put(entry.getKey(), GENERATOR.getGaussian(entry.getValue(), 1.0));
         }
         

@@ -16,7 +16,6 @@
 package broadwick.montecarlo.markovchain;
 
 import broadwick.BroadwickException;
-import broadwick.io.FileOutput;
 import broadwick.montecarlo.MonteCarlo;
 import broadwick.montecarlo.MonteCarloResults;
 import broadwick.montecarlo.MonteCarloScenario;
@@ -32,12 +31,14 @@ import java.util.HashSet;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * Monte Carlo class that is responsible for constructing Monte Carlo chains and the simulations thereon.
  */
 @Slf4j
+@EqualsAndHashCode
 public class MarkovChainMonteCarlo {
 
     /**
@@ -71,6 +72,32 @@ public class MarkovChainMonteCarlo {
         this.mcController = controller;
         this.pathGenerator = generator;
         this.acceptor = new MetropolisHastings(GENERATOR.getInteger(Integer.MIN_VALUE, Integer.MAX_VALUE));
+        this.currentStep = pathGenerator.getInitialStep();
+        this.id = hashCode();
+    }
+
+    /**
+     * Create a Monte Carlo instance.
+     * @param model          The Monte Carlo Model to be run.
+     * @param numSimulations The number of time the Monte Carlo model should be run at each step.
+     * @param consumer       the object that will consume and aggregate the MC results.
+     * @param controller     the controller object for this class.
+     * @param generator      the object that will generate the Monte Carlo chain/path.
+     * @param step           the coordinates of the initial step.
+     * @param id             the id of this MCMC object (useful to differentiate several running chains).
+     */
+    public MarkovChainMonteCarlo(final MonteCarloScenario model, final int numSimulations,
+                                 final MonteCarloResults consumer, final MarkovChainController controller,
+                                 final MarkovStepGenerator generator, final MonteCarloStep step, final int id) {
+        this.observers = new HashSet<>(1);
+        this.model = model;
+        this.numSimulations = numSimulations;
+        this.consumer = consumer;
+        this.mcController = controller;
+        this.pathGenerator = generator;
+        this.acceptor = new MetropolisHastings(GENERATOR.getInteger(Integer.MIN_VALUE, Integer.MAX_VALUE));
+        this.currentStep = step;
+        this.id = id;
     }
 
     /**
@@ -79,34 +106,27 @@ public class MarkovChainMonteCarlo {
     public final void run() {
 
         try {
-            MonteCarloStep currentStep = pathGenerator.getInitialStep();
-
-            writer.write("# Steps taken [1]\n");
-            writer.write("# Current step accepted? [2]\n");
-            writer.write(String.format("# Current step coordinates [3-%d]%n", 2 + currentStep.getCoordinates().size()));
-            writer.write(String.format("# Results for current step [%d-n]%n", 3 + currentStep.getCoordinates().size()));
-
-            for (MarkovChainObserver observer : observers) {
+            for (final MarkovChainObserver observer : observers) {
                 observer.started();
             }
 
             log.info("Running Monte Carlo simulation with initial step {}", currentStep.toString());
             model.setStep(currentStep);
+            proposedStep = currentStep;
 
             MonteCarlo mc = new MonteCarlo(model, numSimulations);
             mc.setResultsConsumer(consumer);
             mc.run();
             MonteCarloResults prevResults = mc.getResults();
-            for (MarkovChainObserver observer : observers) {
+            for (final MarkovChainObserver observer : observers) {
                 observer.step();
                 observer.takeMeasurements();
             }
-            writer.write("%d,%d,%s,%s\n", numStepsTaken, 1, currentStep.toString(), prevResults.toCsv());
             numStepsTaken++;
 
             while (mcController.goOn(this)) {
                 int stepsSinceLastMeasurement = 0;
-                final MonteCarloStep proposedStep = pathGenerator.generateNextStep(currentStep);
+                proposedStep = pathGenerator.generateNextStep(currentStep);
                 model.setStep(proposedStep);
 
                 mc = new MonteCarlo(model, numSimulations);
@@ -114,21 +134,18 @@ public class MarkovChainMonteCarlo {
                 mc.run();
                 final MonteCarloResults currentResults = mc.getResults();
 
-                for (MarkovChainObserver observer : observers) {
+                lastStepAccepted = acceptor.accept(prevResults, currentResults);
+                for (final MarkovChainObserver observer : observers) {
                     observer.step();
                 }
 
-                final boolean accepted = acceptor.accept(prevResults, currentResults);
-
-                writer.write("%d,%d,%s,%s\n", numStepsTaken, accepted ? 1 : 0,
-                             proposedStep.toString(), currentResults.toCsv());
-                if (accepted) {
+                if (lastStepAccepted) {
                     log.info("Accepted Monte Carlo step ({})", proposedStep.toString());
                     numAcceptedSteps++;
                     if (numStepsTaken > burnIn
                         && (thinningInterval == 0 || stepsSinceLastMeasurement % thinningInterval == 0)) {
                         stepsSinceLastMeasurement++;
-                        for (MarkovChainObserver observer : observers) {
+                        for (final MarkovChainObserver observer : observers) {
                             observer.takeMeasurements();
                         }
                     }
@@ -140,7 +157,7 @@ public class MarkovChainMonteCarlo {
                 numStepsTaken++;
             }
 
-            for (MarkovChainObserver observer : observers) {
+            for (final MarkovChainObserver observer : observers) {
                 observer.finished();
             }
         } catch (Exception e) {
@@ -149,16 +166,28 @@ public class MarkovChainMonteCarlo {
         }
     }
 
+    public final String getHeader() {
+        return String.format("# Steps taken [1]%n# Current step accepted? [2]%n# Current step coordinates [3-%d]%n# Results for current step [%d-n]%n",
+                             2 + currentStep.getCoordinates().size(), 3 + currentStep.getCoordinates().size());
+    }
+
     /**
      * Add an observer to the list of observers.
      * @param observer the observer that is used to monitor/take measurements.
+     * @return <tt>true</tt> if this object didn't already contain the observer.
      */
-    public final void addObserver(final MarkovChainObserver observer) {
-        observers.add(observer);
+    public final boolean addObserver(final MarkovChainObserver observer) {
+        observer.setMonteCarlo(this);
+        return observers.add(observer);
     }
+
     @Getter
     private int numStepsTaken = 0;
     private int numSimulations;
+    @Getter
+    private final int id;
+    @Getter
+    private boolean lastStepAccepted = true; // accept the first step!
     @Getter
     @SuppressWarnings("PMD.UnusedPrivateField")
     private int numAcceptedSteps = 0;
@@ -172,11 +201,13 @@ public class MarkovChainMonteCarlo {
     private MarkovChainController mcController;
     @Getter
     private Set<MarkovChainObserver> observers;
-    @Setter
-    private FileOutput writer = new FileOutput();
     @Getter
     private MonteCarloScenario model;
     private MarkovStepGenerator pathGenerator;
+    @Getter
+    private MonteCarloStep currentStep;
+    @Getter
+    private MonteCarloStep proposedStep;
     @Getter
     private MonteCarloResults consumer;
     private static final RNG GENERATOR = new RNG(RNG.Generator.Well19937c);

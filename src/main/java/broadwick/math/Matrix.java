@@ -69,7 +69,7 @@ public class Matrix {
      * @param column the column index.
      * @return the entry at eh requiered index.
      */
-    public double element(final int row, final int column) {
+    public final double element(final int row, final int column) {
         return data.getEntry(row, column);
     }
 
@@ -80,7 +80,7 @@ public class Matrix {
      * @param value the value to be set.
      * @return the new matrix element at the given coordinates.
      */
-    public double setEntry(final int row, final int column, final double value) {
+    public final double setEntry(final int row, final int column, final double value) {
         data.setEntry(row, column, value);
         return data.getEntry(row, column);
     }
@@ -89,7 +89,7 @@ public class Matrix {
      * Return an array representation of this matrix.
      * @return a double[][] containing the values of this matrix.
      */
-    public double[][] toArray() {
+    public final double[][] toArray() {
         return data.getData();
     }
 
@@ -97,7 +97,7 @@ public class Matrix {
      * Create a copy of the matrix. A new matrix is returned with the same contents of this one.
      * @return a copy of this matrix.
      */
-    public Matrix copy() {
+    public final Matrix copy() {
         return new Matrix(data);
     }
 
@@ -105,7 +105,7 @@ public class Matrix {
      * Get the number of rows in the matrix.
      * @return the number of rows.
      */
-    public int rows() {
+    public final int rows() {
         return numRows;
     }
 
@@ -113,13 +113,13 @@ public class Matrix {
      * Get the number of columns in the matrix.
      * @return the number of columns.
      */
-    public int columns() {
+    public final int columns() {
         return numCols;
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
+    public final String toString() {
+        final StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < numRows; i++) {
             for (int j = 0; j < numCols; j++) {
@@ -134,7 +134,7 @@ public class Matrix {
      * Get the inverse of the matrix. This will return a new matrix object that is the inverse.
      * @return a Matrix object that is the inverse of this matrix.
      */
-    public Matrix inverse() {
+    public final Matrix inverse() {
         return new Matrix(MatrixUtils.inverse(data).getData());
     }
 
@@ -142,7 +142,7 @@ public class Matrix {
      * Get the transpose of the matrix. This will return a new matrix object that is the transpose.
      * @return a Matrix object that is the transpose of this matrix.
      */
-    public Matrix transpose() {
+    public final Matrix transpose() {
         return new Matrix(data.transpose().getData());
     }
 
@@ -151,7 +151,7 @@ public class Matrix {
      * @param m matrix to be subtracted
      * @return this-m
      */
-    public Matrix subtract(final Matrix m) {
+    public final Matrix subtract(final Matrix m) {
         return new Matrix(data.subtract(m.data));
     }
 
@@ -160,7 +160,7 @@ public class Matrix {
      * @param m matrix to postmultiply by
      * @return this*m
      */
-    public Matrix multiply(final Matrix m) {
+    public final Matrix multiply(final Matrix m) {
         return new Matrix(data.multiply(m.data));
     }
     
@@ -169,7 +169,7 @@ public class Matrix {
      * @param d the scalar with which we will multiply this matrix
      * @return this*d
      */
-    public Matrix multiply(final double d) {
+    public final Matrix multiply(final double d) {
         return new Matrix(data.scalarMultiply(d).getData());
     }
 
@@ -178,7 +178,7 @@ public class Matrix {
      * @param v the vector.
      * @return this*v
      */
-    public Vector multiply(final Vector v) {
+    public final Vector multiply(final Vector v) {
         return new Vector(data.operate(v.toArray()));
     }
 
@@ -187,7 +187,7 @@ public class Matrix {
      * @param v the row vector to premultiply by
      * @return v*this
      */
-    public Vector preMultiply(final Vector v) {
+    public final Vector preMultiply(final Vector v) {
         return new Vector(data.preMultiply(v.toArray()));
     }
 

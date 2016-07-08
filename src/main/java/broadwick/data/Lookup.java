@@ -194,7 +194,7 @@ public final class Lookup {
         Result<Record> records;
         try {
             records = jooq.select().from(BatchedMovementsFileReader.getTABLE_NAME()).fetch();
-            for (Record r : records) {
+            for (final Record r : records) {
                 final Movement movement = createMovement(r);
                 if (movement != null) {
                     movements.add(movement);
@@ -207,7 +207,7 @@ public final class Lookup {
 
         try {
             records = jooq.select().from(FullMovementsFileReader.getTABLE_NAME()).fetch();
-            for (Record r : records) {
+            for (final Record r : records) {
                 final Movement movement = createMovement(r);
                 if (movement != null) {
                     movements.add(movement);
@@ -220,7 +220,7 @@ public final class Lookup {
 
         try {
             records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME()).fetch();
-            for (Record r : records) {
+            for (final Record r : records) {
                 final Movement movement = createMovement(r);
                 if (movement != null) {
                     movements.add(movement);
@@ -259,7 +259,7 @@ public final class Lookup {
                                              DirectedMovementsFileReader.getMOVEMENT_DATE(), startDate,
                                              DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate))
                         .fetch();
-                for (Record r : records) {
+                for (final Record r : records) {
                     final Movement movement = createMovement(r);
                     if (movement != null) {
                         movements.add(movement);
@@ -277,7 +277,7 @@ public final class Lookup {
                                              FullMovementsFileReader.getDEPARTURE_DATE(), startDate,
                                              FullMovementsFileReader.getDESTINATION_DATE(), endDate))
                         .fetch();
-                for (Record r : records) {
+                for (final Record r : records) {
                     final Movement movement = createMovement(r);
                     if (movement != null) {
                         movements.add(movement);
@@ -295,7 +295,7 @@ public final class Lookup {
                                              BatchedMovementsFileReader.getDEPARTURE_DATE(), startDate,
                                              BatchedMovementsFileReader.getDESTINATION_DATE(), endDate))
                         .fetch();
-                for (Record r : records) {
+                for (final Record r : records) {
                     final Movement movement = createMovement(r);
                     if (movement != null) {
                         movements.add(movement);
@@ -340,7 +340,7 @@ public final class Lookup {
                                              DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate,
                                              DirectedMovementsFileReader.getMOVEMENT_DIRECTION()))
                         .fetch();
-                for (Record r : records) {
+                for (final Record r : records) {
                     final Movement movement = createMovement(r);
                     if (movement != null) {
                         movements.add(movement);
@@ -358,7 +358,7 @@ public final class Lookup {
                                              FullMovementsFileReader.getDEPARTURE_DATE(), startDate,
                                              FullMovementsFileReader.getDEPARTURE_DATE(), endDate))
                         .fetch();
-                for (Record r : records) {
+                for (final Record r : records) {
                     final Movement movement = createMovement(r);
                     if (movement != null) {
                         movements.add(movement);
@@ -376,7 +376,7 @@ public final class Lookup {
                                              BatchedMovementsFileReader.getDEPARTURE_DATE(), startDate,
                                              BatchedMovementsFileReader.getDEPARTURE_DATE(), endDate))
                         .fetch();
-                for (Record r : records) {
+                for (final Record r : records) {
                     final Movement movement = createMovement(r);
                     if (movement != null) {
                         movements.add(movement);
@@ -421,7 +421,7 @@ public final class Lookup {
                                              DirectedMovementsFileReader.getMOVEMENT_DATE(), endDate,
                                              DirectedMovementsFileReader.getMOVEMENT_DIRECTION()))
                         .fetch();
-                for (Record r : records) {
+                for (final Record r : records) {
                     final Movement movement = createMovement(r);
                     if (movement != null) {
                         movements.add(movement);
@@ -439,7 +439,7 @@ public final class Lookup {
                                              FullMovementsFileReader.getDESTINATION_DATE(), startDate,
                                              FullMovementsFileReader.getDESTINATION_DATE(), endDate))
                         .fetch();
-                for (Record r : records) {
+                for (final Record r : records) {
                     final Movement movement = createMovement(r);
                     if (movement != null) {
                         movements.add(movement);
@@ -457,7 +457,7 @@ public final class Lookup {
                                              BatchedMovementsFileReader.getDESTINATION_DATE(), startDate,
                                              BatchedMovementsFileReader.getDESTINATION_DATE(), endDate))
                         .fetch();
-                for (Record r : records) {
+                for (final Record r : records) {
                     final Movement movement = createMovement(r);
                     if (movement != null) {
                         movements.add(movement);
@@ -488,7 +488,7 @@ public final class Lookup {
         sw.start();
 
         final Result<Record> records = jooq.select().from(TestsFileReader.getTABLE_NAME()).fetch();
-        for (Record r : records) {
+        for (final Record r : records) {
             final Test test = createTest(r);
             if (test != null) {
                 tests.add(test);
@@ -516,7 +516,7 @@ public final class Lookup {
                                      TestsFileReader.getTEST_DATE(), startDate,
                                      TestsFileReader.getTEST_DATE(), endDate))
                 .fetch();
-        for (Record r : records) {
+        for (final Record r : records) {
             final Test test = createTest(r);
             if (test != null) {
                 tests.add(test);
@@ -538,7 +538,7 @@ public final class Lookup {
         sw.start();
 
         final Result<Record> records = jooq.select().from(PopulationsFileReader.getLIFE_HISTORIES_TABLE_NAME()).fetch();
-        for (Record r : records) {
+        for (final Record r : records) {
             final Animal animal = createAnimal(r);
             if (animal != null) {
                 animals.add(animal);
@@ -568,7 +568,7 @@ public final class Lookup {
 
         final Result<Record> records = jooq.select().from(PopulationsFileReader.getLIFE_HISTORIES_TABLE_NAME()).where(whereClause)
                 .fetch();
-        for (Record r : records) {
+        for (final Record r : records) {
             final Animal animal = createAnimal(r);
             if (animal != null) {
                 animals.add(animal);
@@ -590,7 +590,7 @@ public final class Lookup {
         sw.start();
 
         final Result<Record> records = jooq.select().from(LocationsFileReader.getTABLE_NAME()).fetch();
-        for (Record r : records) {
+        for (final Record r : records) {
             final Location location = createLocation(r);
             if (location != null) {
                 locations.add(location);
@@ -615,7 +615,7 @@ public final class Lookup {
         if (location == null) {
             final Result<Record> records = jooq.select().from(LocationsFileReader.getTABLE_NAME())
                     .where(String.format("%s = '%s'", LocationsFileReader.getID(), locationId)).fetch();
-            for (Record r : records) {
+            for (final Record r : records) {
                 location = createLocation(r);
                 locationsCache.put(location.getId(), location);
             }
@@ -636,7 +636,7 @@ public final class Lookup {
         if (animal == null) {
             final Result<Record> records = jooq.select().from(PopulationsFileReader.getLIFE_HISTORIES_TABLE_NAME())
                     .where(String.format("ID = '%s'", animalId)).fetch();
-            for (Record r : records) {
+            for (final Record r : records) {
                 animal = createAnimal(r);
                 animalsCache.put(animal.getId(), animal);
             }
@@ -662,7 +662,7 @@ public final class Lookup {
                     .where(String.format("%s = '%s'", FullMovementsFileReader.getID(), animalId))
                     .orderBy(DSL.fieldByName(FullMovementsFileReader.getDEPARTURE_DATE()).asc())
                     .fetch();
-            for (Record r : records) {
+            for (final Record r : records) {
                 movements.add(createMovement(r));
             }
         } catch (org.jooq.exception.DataAccessException e) {
@@ -674,7 +674,7 @@ public final class Lookup {
             records = jooq.select().from(DirectedMovementsFileReader.getTABLE_NAME())
                     .where(String.format("%s = '%s'", DirectedMovementsFileReader.getID(), animalId))
                     .fetch();
-            for (Record r : records) {
+            for (final Record r : records) {
                 movements.add(createMovement(r));
             }
         } catch (org.jooq.exception.DataAccessException e) {
