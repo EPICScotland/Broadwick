@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project>
+    <logs>
+	<console>
+	    <level>info</level> 
+	    <pattern>[%thread] %-5level %msg %n</pattern>
+	</console>
+	<file>
+	    <name>broadwick.stochasticinf.log</name> 
+	    <level>trace</level> 
+	    <pattern>[%thread] %-5level %msg %n</pattern>
+	    <overwrite>true</overwrite>
+	</file>
+    </logs>
+   
+    <models>
+	<model id="Broadwick Project">
+	    <classname>broadwick.stochasticinf.App</classname>
+
+	    <priors>
+		<uniformPrior id="beta">
+		    <hint>Transmission term</hint>
+		    <distribution>uniform</distribution>
+                    <initialVal>0.8</initialVal> <!-- this is ignored -->
+		    <min>0.0001</min>
+                    <max>10.0</max>
+		</uniformPrior>
+		<uniformPrior id="sigma">
+		    <hint>Exposed to test sensitive rate term</hint>
+		    <distribution>uniform</distribution>
+                    <initialVal>0.05</initialVal> <!-- this is ignored -->
+		    <min>0.0001</min>
+		    <max>5.0</max>
+		</uniformPrior>
+		<uniformPrior id="gamma">
+		    <hint>Test sensitive to infectious rate term</hint>
+		    <distribution>uniform</distribution>
+                    <initialVal>0.08</initialVal> <!-- this is ignored -->
+		    <min>0.0001</min>
+		    <max>10.0</max>
+		</uniformPrior>
+            </priors>
+
+	    <parameter id="initialSusceptibles" value="99" />
+	    <parameter id="initialExposed1" value="0" />
+	    <parameter id="initialExposed2" value="0" />
+	    <parameter id="initialInfectious" value="1" />
+	    <parameter id="tMax" value="100" />
+            <parameter id="percentageDeviation" value="0.1"/>
+            <parameter id="numParticles" value="100"/>
+            <parameter id="numScenarios" value="50"/>
+            <parameter id="numMcSteps" value="2000"/>
+            <parameter id="observedExposed" value="15"/>
+            <parameter id="observedInfectious" value="5"/>
+
+
+	    <parameter id="outputFile" value="broadwick.stochasticSIR.dat" />
+
+	</model>
+    </models>
+</project>
+
+

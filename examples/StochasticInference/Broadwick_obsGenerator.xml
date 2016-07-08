@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project>
+    <logs>
+	<console>
+	    <level>info</level> 
+	    <pattern>[%thread] %-5level %msg %n</pattern>
+	</console>
+	<file>
+	    <name>broadwick.ObsGenerator.log</name> 
+	    <level>trace</level> 
+	    <pattern>[%thread] %-5level %msg %n</pattern>
+	    <overwrite>true</overwrite>
+	</file>
+    </logs>
+   
+    <models>
+	<model id="Broadwick Project">
+	    <classname>broadwick.stochasticinf.ObsGenerator</classname>
+
+	    <parameter id="startTime" value="0" />
+	    <parameter id="endTime" value="10" />
+	    <parameter id="numSteps" value="100" />
+
+	    <parameter id="beta" value="0.8" />
+	    <parameter id="sigma" value="0.05" />
+	    <parameter id="gamma" value="0.08" />
+	    <parameter id="initialS" value="99" />
+	    <parameter id="initialE1" value="0" />
+	    <parameter id="initialE2" value="0" />
+	    <parameter id="initialI" value="1" />
+
+	    <parameter id="outputFile" value="broadwick.stochasticinf.ObsGenerator.dat" />
+
+	</model>
+    </models>
+</project>
+
+
