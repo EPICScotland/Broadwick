@@ -33,6 +33,8 @@ public class Samples implements Serializable {
         product = 0.0;
         sumInv = 0.0;
         total = 0;
+        max = Double.NEGATIVE_INFINITY;
+        min = Double.POSITIVE_INFINITY;
     }
 
     /**
@@ -44,6 +46,8 @@ public class Samples implements Serializable {
         sumSqr = value * value;
         product = value;
         sumInv = 1.0 / value;
+        max = Math.max(max, value);
+        min = Math.min(min, value);
         total = 1;
     }
 
@@ -57,6 +61,8 @@ public class Samples implements Serializable {
         sumSqr += (value * value);
         product = (product == 0) ? value : product * value;
         sumInv += (1.0 / value);
+        max = Math.max(max, value);
+        min = Math.min(min, value);
         total++;
         return this;
     }
@@ -72,6 +78,8 @@ public class Samples implements Serializable {
         product += value.product;
         sumInv += value.sumInv;
         total += value.getSize();
+        max = Math.max(max, value.getMax());
+        min = Math.min(min, value.getMin());
         return this;
     }
 
@@ -126,6 +134,22 @@ public class Samples implements Serializable {
     public final int getSize() {
         return total;
     }
+    
+        /**
+     * Obtain the maximum value in the of the set of observables.
+     * @return double the mean in the observed values.
+     */
+    public final double getMax() {
+        return max;
+    }
+    
+        /**
+     * Obtain the minimum value in the of the set of observables.
+     * @return double the mean in the observed values.
+     */
+    public final double getMin() {
+        return min;
+    }
 
     /**
      * Default sample variance implementation based on the second moment \f$ M_n^{(2)} \f$ moment<2>, mean and count.
@@ -175,4 +199,6 @@ public class Samples implements Serializable {
     private double product = 0.0; // The product of all values added to the accumulator.
     private double sumInv = 0.0; // The sum of the 1/value.
     private int total = 0; // The total number of values added to the accumulator.
+    private double max = Double.NEGATIVE_INFINITY;
+    private double min = Double.POSITIVE_INFINITY;
 }
