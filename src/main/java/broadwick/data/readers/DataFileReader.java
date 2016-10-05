@@ -107,7 +107,7 @@ public abstract class DataFileReader {
                 insertedColDetails.put(columnName, columnIndex);
                 addedColumnName = columnName;
             } else {
-                errors.append("No ").append(columnName).append(" column set in ").append(sectionName).append(" section\n");
+                errors.append("No ").append(columnName).append(" column set in ").append(sectionName).append(" section.");
             }
         }
 

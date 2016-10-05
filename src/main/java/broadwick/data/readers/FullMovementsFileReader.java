@@ -93,8 +93,8 @@ public class FullMovementsFileReader extends DataFileReader {
         }
 
         final StringBuilder createIndexCommand = new StringBuilder();
-        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_FULL_MVMT_ID ON %s (%s);",
-                                                TABLE_NAME, ID));
+//        createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_FULL_MVMT_ID ON %s (%s);",
+//                                                TABLE_NAME, ID));
         createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_FULL_MVMT_ALL ON %s (%s,%s,%s,%s,%s);",
                                                 TABLE_NAME, ID, DEPARTURE_ID, DEPARTURE_DATE, DESTINATION_ID, DESTINATION_DATE));
         createIndexCommand.append(String.format(" CREATE INDEX IF NOT EXISTS IDX_FULL_MVMT_DEP ON %s (%s);",
@@ -122,7 +122,7 @@ public class FullMovementsFileReader extends DataFileReader {
          try (Connection connection = database.getConnection()) {  
          createTable(TABLE_NAME, createTableCommand.toString(), connection);
 
-         inserted = insert(connection, TABLE_NAME, insertString, dataFile, dateFormat,  insertedColInfo, dateFields);
+         inserted = insert(connection, TABLE_NAME, insertString, dataFile, dateFormat, insertedColInfo, dateFields);
          } catch (Exception ex) {
             log.error("{}", ex.getLocalizedMessage());
             log.error("Error reading movement data. {}", Throwables.getStackTraceAsString(ex));
