@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project>
+    <logs>
+	<console>
+	    <level>debug</level> 
+	    <pattern>[%thread] %-5level %msg %n</pattern>
+	</console>
+	<file>
+	    <name>broadwick.networkedsir.log</name> 
+	    <level>info</level> 
+	    <pattern>[%thread] %-5level %msg %n</pattern>
+	    <overwrite>true</overwrite>
+	</file>
+    </logs>
+
+
+    <data>
+	<datafiles>
+            <LocationsFile>
+                <name>data/locations.csv</name>
+                <alias>locations</alias> 
+                <separator>,</separator>
+                <locationIdColumn>1</locationIdColumn> 
+                <eastingColumn>2</eastingColumn>
+                <northingColumn>3</northingColumn>
+            </LocationsFile>
+            <FullMovementFile>
+		<name>data/movements.csv</name>
+		<alias>movements</alias>
+		<separator>,</separator>
+                <dateFormat>D</dateFormat>
+                <idColumn>-1</idColumn>
+		<departureDateColumn>3</departureDateColumn>
+		<destinationDateColumn>3</destinationDateColumn>
+		<departureLocationIdColumn>1</departureLocationIdColumn>
+		<destinationLocationIdColumn>2</destinationLocationIdColumn>
+	    </FullMovementFile>
+	</datafiles>
+    </data>
+
+   
+    <models>
+	<model id="Broadwick Project">
+	    <classname>broadwick.networkedsir.App</classname>
+
+            <priors>
+		<uniformPrior id="beta">
+		    <hint>Transmission term</hint>
+		    <distribution>uniform</distribution>
+		    <initialVal>0.09</initialVal>
+		    <min>0.001</min>
+                    <max>0.1</max>
+		</uniformPrior>
+		<uniformPrior id="sigma">
+		    <hint>Exposed to test sensitive rate term</hint>
+		    <distribution>uniform</distribution>
+		    <initialVal>0.006</initialVal>
+		    <min>0.0001</min>
+                    <max>0.05</max>
+		</uniformPrior>
+            </priors>
+
+            <!--
+                 the number of observed infected and removed were 65 and 35 respectively,
+                 for beta,sigma = 0.09,0.007
+            -->
+
+	    <parameter id="numObservedInfected" value="65" />
+	    <parameter id="numObservedRemoved" value="35" />
+            <parameter id="tMax" value="11" />
+
+            <parameter id="numParticles" value="25" />
+            <parameter id="numScenarios" value="100" />
+            <parameter id="numMcSteps" value="1000" />
+
+	</model>
+    </models>
+</project>
+
+

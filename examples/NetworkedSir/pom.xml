@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>NetworkedSir</groupId>
+    <artifactId>NetworkedSir</artifactId>
+    <version>1.2</version>
+    <packaging>jar</packaging>
+
+    <name>BroadwickExamples:NetworkedSir</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+	<jdk.version>1.8</jdk.version>
+	<junit.junit.version>4.12</junit.junit.version>
+	<broadwick.version>1.2</broadwick.version>
+	<maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
+	<onejar-plugin.version>1.4.5</onejar-plugin.version>
+    </properties>
+
+    <pluginRepositories>
+	<pluginRepository>
+	    <id>onejar-maven-plugin.googlecode.com</id>
+	    <url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
+	</pluginRepository>
+    </pluginRepositories>
+
+    <dependencies>
+
+	<!-- broadwick framework dependency -->
+	<dependency>
+	    <groupId>broadwick</groupId>
+	    <artifactId>broadwick</artifactId>
+	    <version>${broadwick.version}</version>
+	</dependency>
+
+	<!-- Testing dependencies -->
+	<dependency>
+	    <groupId>junit</groupId>
+	    <artifactId>junit</artifactId>
+	    <version>${junit.junit.version}</version>
+	    <scope>test</scope>
+	</dependency>
+
+	<!-- Useful dependencies -->
+
+    </dependencies>
+
+
+    <build>
+	<plugins>
+
+	    <!-- Package all the jars into a single executable jar -->
+	    <plugin>
+		<groupId>org.dstovall</groupId>
+		<artifactId>onejar-maven-plugin</artifactId>
+		<version>${onejar-plugin.version}</version>
+		<executions>
+		    <execution>
+			<configuration>
+			    <mainClass>broadwick.Broadwick</mainClass>
+			    <attachToBuild>false</attachToBuild>
+			    <classifier>onejar</classifier>
+			</configuration>
+			<goals>
+			    <goal>one-jar</goal>
+			</goals>
+		    </execution>
+		</executions>
+	    </plugin>
+	    <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-compiler-plugin</artifactId>
+		<version>${maven-compiler-plugin.version}</version>
+	     <configuration>
+		 <source>${jdk.version}</source>
+		 <target>${jdk.version}</target>
+	     </configuration>
+	    </plugin>
+	</plugins>
+    </build>
+
+</project>
