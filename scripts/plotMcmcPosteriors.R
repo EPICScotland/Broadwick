@@ -1,3 +1,4 @@
+# see http://flowingdata.com/2012/05/15/how-to-visualize-and-compare-distributions/
 suppressPackageStartupMessages(library("optparse"))
 suppressPackageStartupMessages(library("akima"))
 suppressPackageStartupMessages(library("fields"))
