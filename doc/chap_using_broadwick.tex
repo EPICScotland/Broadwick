@@ -119,7 +119,7 @@ DirectedMovementFile:
 <movementDirectionColumn> &  \\
 <locationColumn> &  \\
 <speciesColumn> &  \\
-<dateFormat> &  \\
+<dateFormat> &  The format the date is given in the data file, see below for details.\\
 <customTags> & This optional field allows for optional information to be stored in the database. \\
 \bottomrule
 \end{tabulary}\\
@@ -139,7 +139,7 @@ FullMovementFile:
 <marketIdColumn> & \\
 <marketDateColumn> & \\
 <speciesColumn> & \\
-<dateFormat> & \\
+<dateFormat> & The format the date is given in the data file, see below for details.\\
 <customTags> & This optional field allows for optional information to be stored in the database.\\
 \bottomrule
 \end{tabulary}\\
@@ -159,7 +159,7 @@ BatchMovementFile:
 <marketIdColumn> & \\
 <marketDateColumn> & \\
 <speciesColumn> & \\
-<dateFormat> & \\
+<dateFormat> & The format the date is given in the data file, see below for details.\\
 <customTags> & This optional field allows for optional information to be stored in the database.\\
 \bottomrule
 \end{tabulary}\\
@@ -174,7 +174,7 @@ PopulationFile:
 <lifehistory> & \\
 <population> & \\
 <speciesColumn> & \\
-<dateFormat> & \\
+<dateFormat> & The format the date is given in the data file, see below for details.\\
 <customTags> & This optional field allows for optional information to be stored in the database.\\
 \bottomrule
 \end{tabulary}
@@ -209,7 +209,7 @@ LocationFile:
 <locationIdColumn> & The column in the file containing the id of the location.\\
 <eastingColumn> & The column in the file containing the easting coordinate. Coordinates aren’t strictly adhered to in Broadwick so a simple y-coordinate is sufficient.\\
 <northingColumn> & The column in the file containing the northing coordinate. Coordinates aren’t strictly adhered to in Broadwick so a simple x-coordinate is sufficient.\\
-<dateFormat> & \\
+<dateFormat> & The format the date is given in the data file, see below for details.\\
 <customTags> & This optional field allows for optional information to be stored in the database.\\
 \bottomrule
 \end{tabulary}
@@ -227,8 +227,39 @@ TestsFile:
 <testDateColumn> & \\
 <postiveResultColumn> & \\
 <negativeResultColumn> & \\
-<dateFormat> & \\
+<dateFormat> & The format the date is given in the data file, see below for details.\\
 <customTags> & This optional field allows for optional information to be stored in the database. \\
+\bottomrule
+\end{tabulary}
+
+The date format specification follows the standard formatting for dates and times:
+
+\begin{tabulary}{1.0\textwidth}{l p{10cm}}
+\toprule
+Symbol &Meaning              \\
+ G     &era                  \\
+ C     &century of era (>=0) \\
+ Y     &year of era (>=0)    \\
+ x     &year          \\
+ w     &week of weekyear     \\
+ e     &day of week          \\
+ E     &day of week          \\
+ y     &year                 \\
+ D     &day of year          \\
+ M     &month of year        \\
+ d     &day of month         \\
+ a     &halfday of day       \\
+ K     &hour of halfday (0~11)      \\
+ h     &clockhour of halfday (1~12) \\
+ H     &hour of day (0~23)          \\
+ k     &clockhour of day (1~24)     \\
+ m     &minute of hour              \\
+ s     &second of minute            \\
+ S     &fraction of second          \\
+ z     &time zone                   \\
+ Z     &time zone offset/id         \\
+ '     &escape for text             \\
+ ''    &single quote                \\
 \bottomrule
 \end{tabulary}
 
