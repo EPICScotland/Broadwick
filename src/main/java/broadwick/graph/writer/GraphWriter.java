@@ -27,15 +27,16 @@ public interface GraphWriter {
     /**
      * Print the content of the graph.
      * @param network the network object to be written.
+     * @todo change the declaration to abstract static in Java 8
      * @return a string representing a document.
      */
-    String toString(final Graph<? extends Vertex, ? extends Edge<?>> network);
+    abstract String toString(final Graph<? super Vertex, ? extends Edge<?>> network);
 
     /**
      * Write the XML document into file.
      * @param network the network object to be written.
      * @param file    the file name
      */
-    void save(final String file, final Graph<? extends Vertex, ? extends Edge<Vertex>> network);
+    void save(final String file, final Graph<? super Vertex, ? extends Edge<Vertex>> network);
 
 }

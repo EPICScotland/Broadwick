@@ -74,8 +74,24 @@ public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.grap
 
     @Override
     public final boolean addVertex(final V vertex) {
-        vertexmaps.put(vertex.getId(), vertex);
-        return tree.addVertex(vertex);
+
+        if (tree.getRoot() == null) {
+            vertexmaps.put(vertex.getId(), vertex);
+            return tree.addVertex(vertex);
+        } else {
+            throw new UnsupportedOperationException("Unless you are setting the root, use addVertex(Edge, Vertex)");
+        }
+    }
+
+    /**
+     * Adds a vertex to the graph. If the graph is a tree the first node added will be set as the root.
+     * @param edge   the unique edge to connect the parent and child nodes
+     * @param parent the existing parent to attach the child to
+     * @param child  the new child to add to the tree as a child of parent
+     * @return true if this call mutates the underlying graph
+     */
+    public final boolean addVertex(final E edge, final V parent, final V child) {
+        return tree.addChild(edge, parent, child, edu.uci.ics.jung.graph.util.EdgeType.DIRECTED);
     }
 
     /**
@@ -271,7 +287,7 @@ public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.grap
     public final void addEdgeAttribute(final String name, final Class type, final String defaultValue) {
         edgeAttributes.add(new EdgeAttribute(name, type, defaultValue));
     }
-    
+
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
@@ -282,7 +298,7 @@ public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.grap
         vertexmaps.clear();
         edgemaps.clear();
     }
-    
+
     @Getter
     private final Collection<VertexAttribute> vertexAttributes = new ArrayList<>();
     @Getter
