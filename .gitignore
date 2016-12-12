@@ -21,3 +21,5 @@
 /examples/StochasticSir/*.log
 /examples/StochasticSir/target/
 .idea
+/examples/StochasticInference/target/
+/examples/GillespieSir/target/
