@@ -47,4 +47,7 @@ public abstract class MonteCarloScenario implements Serializable {
     @Getter
     @Setter
     protected MonteCarloStep step;
+    @Getter
+    @Setter
+    protected Integer id;
 }

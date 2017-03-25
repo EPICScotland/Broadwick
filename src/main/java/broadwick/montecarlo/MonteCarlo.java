@@ -193,12 +193,14 @@ class Producer implements Runnable {
             final StopWatch sw = new StopWatch();
             sw.start();
             for (int i = 0; i < numSimulations; i++) {
+                final int scenarioId = i;
                 es.submit(new Runnable() {
                     @Override
                     public void run() {
                         try {
                             log.trace("Monte Carlo producer: creating scenario object");
                             final MonteCarloScenario scenario = simulation.copyOf();
+                            scenario.setId(scenarioId);
                             final MonteCarloResults results = scenario.run(generator.getInteger(0, Integer.MAX_VALUE - 1));
                             log.trace("Monte Carlo producer: generated results {}", results.getExpectedValue());
                             queue.put(results);
