@@ -177,6 +177,9 @@ public class RNG implements Serializable {
      * @return poisson deviate with the specified mean
      */
     public final long getPoisson(final double mean) {
+        if (mean == 0.0) {
+            return 0;
+        }
         return generator.nextPoisson(mean);
     }
 
@@ -394,6 +397,7 @@ public class RNG implements Serializable {
     @SuppressWarnings("PMD.UnusedPrivateField")
     @Getter
     private String name;
+    private static final long serialVersionUID = -8753849301390754586L;
 
     /**
      * Random number generator type.

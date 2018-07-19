@@ -189,8 +189,8 @@ public class Samples implements Serializable {
      */
     public final String getSummary() {
         final StringBuilder sb = new StringBuilder(10);
-        sb.append("\t").append(new DecimalFormat("0.0000E0").format(getMean()));
-        sb.append("\t").append(new DecimalFormat("0.0000E0").format(getStdDev()));
+        sb.append("\t").append(new DecimalFormat("0.###E0").format(getMean()));
+        sb.append("\t").append(new DecimalFormat("0.###E0").format(getStdDev()));
         return sb.toString();
     }
 
@@ -201,4 +201,5 @@ public class Samples implements Serializable {
     private int total = 0; // The total number of values added to the accumulator.
     private double max = Double.NEGATIVE_INFINITY;
     private double min = Double.POSITIVE_INFINITY;
+    private static final long serialVersionUID = -555916427676926813L;
 }

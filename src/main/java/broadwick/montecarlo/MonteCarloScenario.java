@@ -50,4 +50,5 @@ public abstract class MonteCarloScenario implements Serializable {
     @Getter
     @Setter
     protected Integer id;
+    private static final long serialVersionUID = -1252513968414508160L;
 }

@@ -21,10 +21,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * HashMap compatible Pair class (i.e. a
- * <code>Collection</code> that stores exactly 2 non-null objects and is not mutable). They respect
- * <code>equals</code> and may be used as indices or map keys. <p> Note that they do not protect from malevolent
- * behavior: if one or another object in the tuple is mutable, then it can be changed with the usual bad effects.
+ * HashMap compatible Pair class (i.e. a <code>Collection</code> that stores exactly 2 non-null objects and is not
+ * mutable). They respect <code>equals</code> and may be used as indices or map keys.
+ * <p>
+ * Note that they do not protect from malevolent behavior: if one or another object in the tuple is mutable, then it can
+ * be changed with the usual bad effects.
  * <p/>
  * @param <A> the type of the first element in pair.
  * @param <B> the type of the second element in the pair.
@@ -32,12 +33,6 @@ import lombok.Setter;
 @EqualsAndHashCode
 public class Pair<A, B> implements Serializable {
 
-    @Getter
-    @Setter
-    private A first;
-    @Getter
-    @Setter
-    private B second;
     /**
      * Create the pair object with the given coordinates.
      * @param first  the first element in the pair
@@ -64,4 +59,11 @@ public class Pair<A, B> implements Serializable {
         return sb.toString();
     }
 
+    @Getter
+    @Setter
+    private A first;
+    @Getter
+    @Setter
+    private B second;
+    private static final long serialVersionUID = -2077518097369250933L;
 }

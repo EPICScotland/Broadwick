@@ -28,9 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * A subtype of Graph which is a (directed, rooted) tree. Actually what we have here is a rooted tree, that is, there is
  * a designated single vertex, the root, from which we measure the shortest path to each vertex, which we call its
- * depth; the maximum over all such depths is the tree's height.
- * <p/>
- * The implementation here is backed by the DelegateTree implementation in the JUNG library.
+ * depth; the maximum over all such depths is the tree's height. The implementation here is backed by the DelegateTree
+ * implementation in the JUNG library.
  * @param <V> the vertex type.
  * @param <E> the edge type.
  */
@@ -306,5 +305,5 @@ public class Tree<V extends Vertex, E extends Edge<V>> implements broadwick.grap
     private DelegateTree<V, E> tree;
     private final HashMap<String, V> vertexmaps;
     private final HashMap<String, E> edgemaps;
-
+    private static final long serialVersionUID = -8753849301390754586L;
 }

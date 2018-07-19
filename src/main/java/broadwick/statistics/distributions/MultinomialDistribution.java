@@ -129,4 +129,5 @@ public class MultinomialDistribution implements Serializable {
     private int numSamples;
     private double[] probabilities;
     private int dimension;
+    private static final long serialVersionUID = -8753849301390754586L;
 }

@@ -65,4 +65,5 @@ public class MonteCarloStep implements Serializable {
     }
     @Getter
     Map<String, Double> coordinates;
+    private static final long serialVersionUID = 7785311113014969294L;
 }

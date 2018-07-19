@@ -32,4 +32,5 @@ public class VertexAttribute implements Serializable {
     @Getter
     @Setter
     private Object value;
+    private static final long serialVersionUID = -2963257444056921938L;
 }

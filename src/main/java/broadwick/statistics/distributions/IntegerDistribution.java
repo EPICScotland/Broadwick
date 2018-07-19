@@ -414,4 +414,5 @@ public class IntegerDistribution implements Serializable {
     }
     private ConcurrentMap<Integer, Integer> bins;
     private static final RNG GENERATOR = new RNG(RNG.Generator.Well19937c);
+    private static final long serialVersionUID = -8753849301390754581L;
 }

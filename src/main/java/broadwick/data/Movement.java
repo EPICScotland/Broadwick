@@ -35,4 +35,5 @@ public class Movement implements Serializable {
     private final Integer marketDate;
     private final String marketId;
     private final String species;
+    private static final long serialVersionUID = 3023200305533069343L;
 }

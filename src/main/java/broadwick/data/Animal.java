@@ -32,4 +32,5 @@ public class Animal implements Serializable {
     private final String locationOfBirth;
     private final Integer dateOfDeath;
     private final String locationOfDeath;
+    private static final long serialVersionUID = 1358067210450945701L;
 }

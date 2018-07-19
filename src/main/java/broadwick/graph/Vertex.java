@@ -102,4 +102,5 @@ public class Vertex implements Serializable {
 
     @Getter
     private Collection<VertexAttribute> attributes = new ArrayList<>();
+    private static final long serialVersionUID = -4449926581686486819L;
 }

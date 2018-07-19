@@ -32,4 +32,5 @@ public class Test implements Serializable {
     private final Integer testDate;
     private final Boolean positiveResult;
     private final Boolean negativeResult;
+    private static final long serialVersionUID = -6830452430310922412L;
 }

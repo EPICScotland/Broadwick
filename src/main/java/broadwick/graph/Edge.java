@@ -125,4 +125,5 @@ public class Edge<V extends Vertex> implements Serializable {
     protected Double weight = 1.0;
     @Getter
     private Collection<EdgeAttribute> attributes = new ArrayList<>();
+    private static final long serialVersionUID = 8120673357619908038L;
 }

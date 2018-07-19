@@ -33,4 +33,5 @@ public class EdgeAttribute implements Serializable {
     @Getter
     @Setter
     private String value;
+    private static final long serialVersionUID = 101558222030301900L;
 }
