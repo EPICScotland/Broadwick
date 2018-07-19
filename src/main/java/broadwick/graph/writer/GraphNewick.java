@@ -47,7 +47,7 @@ public class GraphNewick {
         return sb.toString();
     }
 
-    public void save(final String file, final Graph<? super Vertex, ? extends Edge<Vertex>> tree) {
+    public static void save(final String file, final Graph<? super Vertex, ? extends Edge<Vertex>> tree) {
         try (FileOutput fo = new FileOutput(file)) {
             fo.write(GraphNewick.toString(tree));
         }

@@ -44,7 +44,7 @@ public class ShortestPath<V extends Vertex, E extends Edge<V>> {
         } else if (EdgeType.UNDIRECTED.equals(graph.getEdgeType())) {
             jungGraph = new edu.uci.ics.jung.graph.UndirectedSparseMultigraph<>();
         } else {
-            throw new IllegalArgumentException("Could not create ShortestPath object for unknown grpah type.");
+            throw new IllegalArgumentException("Could not create ShortestPath object for unknown graph type.");
         }
         for (final E edge : graph.getEdges()) {
             jungGraph.addEdge(edge, edge.getSource(), edge.getDestination());

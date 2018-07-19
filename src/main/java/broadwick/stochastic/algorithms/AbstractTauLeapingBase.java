@@ -49,7 +49,7 @@ public abstract class AbstractTauLeapingBase extends StochasticSimulator {
         transitionEvents.addAll(getTransitionKernel().getTransitionEvents());
         
         for (final SimulationEvent event : transitionEvents) {
-            if (getTransitionKernel().getTransitionEvents().contains(event)) {
+            //if (getTransitionKernel().getTransitionEvents().contains(event)) {
                 final double rate = getTransitionKernel().getTransitionProbability(event);
                 final double times = GENERATOR.getPoisson(rate * tau);
                 if (times > 0) {
@@ -61,7 +61,7 @@ public abstract class AbstractTauLeapingBase extends StochasticSimulator {
                     doEvent(event, getCurrentTime(), (int) Math.round(times));
                     log.trace("fired event {} {} time(s)", event, times);
                 }
-            }
+            //}
         }
     }
 

@@ -146,9 +146,12 @@ public class SequentialMonteCarlo {
                                 //TODO - this only works for uniform priors - need to find a neat way of making this 
                                 // list of priors a list of actual distribution objects e.g. Uniform, TruncatedNormalDistribution
                                 final UniformPrior uniformPrior = (UniformPrior) prior;
-                                initialVals.put(uniformPrior.getId(), (new Uniform(uniformPrior.getMin(), uniformPrior.getMax(),
-                                                                                   generator.getInteger(Integer.MIN_VALUE, Integer.MAX_VALUE))).sample());
+                                initialVals.put(uniformPrior.getId(), new Uniform(
+                                        uniformPrior.getMin(), 
+                                        uniformPrior.getMax(),
+                                        generator.getInteger(Integer.MIN_VALUE, Integer.MAX_VALUE)).sample());
                             }
+                            
                             final MonteCarloStep step = new MonteCarloStep(initialVals);
 
                             final MonteCarloScenario mc = scenario.copyOf();

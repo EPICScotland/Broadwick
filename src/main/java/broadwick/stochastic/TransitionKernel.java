@@ -61,8 +61,12 @@ public class TransitionKernel implements Cloneable {
             double eventRate = rate;
             if (kernel.containsKey(event)) {
                 eventRate += kernel.get(event);
+                if (log.isTraceEnabled()) {
                 log.trace("Kernel already contains event {}, updating rate by {}", event, rate);
-            } 
+                }
+            } else if (log.isTraceEnabled()) {
+                log.trace("Adding event to kernel {} {}", event, eventRate);
+                }
             kernel.put(event, eventRate);
         }
     }
