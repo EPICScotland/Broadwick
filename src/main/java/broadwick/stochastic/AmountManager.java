@@ -15,12 +15,14 @@
  */
 package broadwick.stochastic;
 
+import java.io.Serializable;
+
 /**
  * An amount manager is responsible for keeping track of the populations within the simulation. Each
  * <code>StochasticProcess</code> calls the
  * <code>performEvent</code> method when it fires an event. The amount manager then
  */
-public interface AmountManager {
+public interface AmountManager extends Serializable {
 
     /**
      * Reflects a (multiple) firing of a reaction by adjusting the populations of the states. If a population becomes

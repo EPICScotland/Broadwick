@@ -17,6 +17,7 @@ package broadwick.stochastic.algorithms;
 
 import broadwick.stochastic.AmountManager;
 import broadwick.stochastic.TransitionKernel;
+import java.io.Serializable;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -25,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
  * for large population sizes. This class implements a fixed step size.
  */
 @Slf4j
-public class TauLeapingFixedStep extends AbstractTauLeapingBase {
+public class TauLeapingFixedStep extends AbstractTauLeapingBase implements Serializable {
 
     /**
      * Create the tau-leaping object.
@@ -69,4 +70,9 @@ public class TauLeapingFixedStep extends AbstractTauLeapingBase {
     }
 
     private final int tau;
+
+    /**
+     * The serialVersionUID.
+     */
+    private static final long serialVersionUID = -201226401874224152L;
 }

@@ -157,8 +157,8 @@ public class SamplesTest {
     public void testGetSummary() {
         
         final StringBuilder sb = new StringBuilder(10);
-        sb.append("\t").append(new DecimalFormat("0.0000E0").format(acc.getMean()));
-        sb.append("\t").append(new DecimalFormat("0.0000E0").format(acc.getStdDev()));
+        sb.append("\t").append(new DecimalFormat("0.###E0").format(acc.getMean()));
+        sb.append("\t").append(new DecimalFormat("0.###E0").format(acc.getStdDev()));
 
         assertEquals(acc.getSummary(), sb.toString());
     }

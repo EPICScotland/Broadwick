@@ -57,5 +57,4 @@ class SirModel implements Ode {
 
     private final double beta, gamma;
     List<Double> initialValues = new ArrayList<>(3);
-
 }

@@ -15,11 +15,13 @@
  */
 package broadwick.stochastic;
 
+import java.io.Serializable;
+
 /**
  * A SimulationController (and its implementing classes) are responsible for controlling the simulation in the sense
  * that the StochasticSimulator checks with the controller object whether to go on or not.
  */
-public interface SimulationController {
+public interface SimulationController extends Serializable {
 
     /**
      * Returns whether or not to go on with the given simulation.

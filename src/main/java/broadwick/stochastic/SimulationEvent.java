@@ -15,6 +15,7 @@
  */
 package broadwick.stochastic;
 
+import java.io.Serializable;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +24,7 @@ import lombok.Setter;
  * A class containing all the details of an event in the stochastic ODE model.
  */
 @EqualsAndHashCode
-public class SimulationEvent {
+public class SimulationEvent implements Serializable  {
 
     /**
      * Construct a new event from the initial state in one bin to a final state in another bin.
@@ -51,4 +52,8 @@ public class SimulationEvent {
     @Getter
     @Setter
     private SimulationState finalState;
+    /**
+     * The serialVersionUID.
+     */
+    private static final long serialVersionUID = 733479018452424502L;
 }

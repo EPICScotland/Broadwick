@@ -21,20 +21,31 @@ import broadwick.stochastic.SimulationEvent;
 import broadwick.stochastic.StochasticSimulator;
 import broadwick.stochastic.SimulationException;
 import broadwick.stochastic.TransitionKernel;
+import java.io.Serializable;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implementation of Gillespie's Direct method. It is a simple Monte-Carlo algorithm which draws from a from Gillspie
- * derived distribution a reaction that will fire and a time at which the reaction will fire. <p> For reference see
- * Daniel T. Gillespie., A General Method for Numerically Simulating the Stochastic Time Evolution of Coupled Chemical
- * Reactions, J.Comp.Phys. 22, 403 (1976)
+ * derived distribution a reaction that will fire and a time at which the reaction will fire.
+ * <p>
+ * For reference see Daniel T. Gillespie., A General Method for Numerically Simulating the Stochastic Time Evolution of
+ * Coupled Chemical Reactions, J.Comp.Phys. 22, 403 (1976)
  */
 @ToString
-public class GillespieSimple extends StochasticSimulator {
+@Slf4j
+public class GillespieSimple extends StochasticSimulator implements Serializable {
+
+    /**
+     * No args constructor. Do not use, it is added so that the class can be deserialised if needed.
+     */
+    public GillespieSimple() {
+        super();
+    }
 
     /**
      * Implementation of Gillespie's Direct method.
-     * @param amountManager the amount manager used in the simulator.
+     * @param amountManager    the amount manager used in the simulator.
      * @param transitionKernel the transition kernel to be used with the stochastic solver.
      */
     public GillespieSimple(final AmountManager amountManager, final TransitionKernel transitionKernel) {
@@ -43,11 +54,11 @@ public class GillespieSimple extends StochasticSimulator {
 
     /**
      * Implementation of Gillespie's Direct method.
-     * @param amountManager the amount manager used in the simulator.
+     * @param amountManager    the amount manager used in the simulator.
      * @param transitionKernel the transition kernel to be used with the stochastic solver.
-     * @param reverseTime true if we wish to go backwards in time.
+     * @param reverseTime      true if we wish to go backwards in time.
      */
-    public GillespieSimple(final AmountManager amountManager, 
+    public GillespieSimple(final AmountManager amountManager,
                            final TransitionKernel transitionKernel, final boolean reverseTime) {
         super(amountManager, transitionKernel, reverseTime);
     }
@@ -95,7 +106,9 @@ public class GillespieSimple extends StochasticSimulator {
     private double calculateRTotal() {
         double rTotal = 0.0;
         for (final SimulationEvent event : this.getTransitionKernel().getTransitionEvents()) {
-            rTotal += this.getTransitionKernel().getTransitionProbability(event);
+            if (this.getTransitionKernel().getTransitionProbability(event) != null) {
+                rTotal += this.getTransitionKernel().getTransitionProbability(event);
+            }
         }
         return rTotal;
     }
@@ -135,7 +148,9 @@ public class GillespieSimple extends StochasticSimulator {
 
         double sum = 0;
         for (final SimulationEvent event : getTransitionKernel().getTransitionEvents()) {
-            sum += this.getTransitionKernel().getTransitionProbability(event);
+            if (this.getTransitionKernel().getTransitionProbability(event) != null) {
+                sum += this.getTransitionKernel().getTransitionProbability(event);
+            }
             if (test <= sum) {
                 return event;
             }
@@ -151,7 +166,7 @@ public class GillespieSimple extends StochasticSimulator {
      * obtains a random (but following a specific distribution) timestep as described by the direct method in chapter 5A
      * page 417ff.
      * @param sum sum of the propensities
-     * @return    tau
+     * @return tau
      */
     protected final double directMCTau(final double sum) {
         if (Double.compare(sum, 0.0) == 0) {
@@ -167,4 +182,8 @@ public class GillespieSimple extends StochasticSimulator {
 
     private boolean changed = false;
     private static final RNG GENERATOR = new RNG(RNG.Generator.Well19937c);
+    /**
+     * The serialVersionUID.
+     */
+    private static final long serialVersionUID = -953479930339424502L;
 }

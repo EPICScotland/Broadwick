@@ -8,6 +8,8 @@
 /examples/DeterministicSir/broadwick.deterministicsir.dat
 /examples/DeterministicSir/*.log
 /examples/DeterministicSir/target/
+/examples/GillespieSir/target/
+/examples/GillespieSir/target/
 /examples/MarkovChain/*.log
 /examples/MarkovChain/*.csv
 /examples/MarkovChain/target/
@@ -17,9 +19,14 @@
 /examples/MaxLikelihoodSeirModel/target/
 /examples/MonteCarlo/*.log
 /examples/MonteCarlo/target/
+/examples/NetworkedSIR/broadwick.networkedsir.log
+/examples/NetworkedSIR/results/
+/examples/NetworkedSIR/target/
 /examples/StochasticSir/broadwick.stochasticSIR.dat
 /examples/StochasticSir/*.log
 /examples/StochasticSir/target/
+/examples/StochasticInference/results/
+/examples/StochasticInference/target/
 .idea
 /examples/StochasticInference/target/
 /examples/GillespieSir/target/

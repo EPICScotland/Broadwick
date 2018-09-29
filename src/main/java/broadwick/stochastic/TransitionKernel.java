@@ -15,6 +15,7 @@
  */
 package broadwick.stochastic;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @ToString
 @Slf4j
-public class TransitionKernel implements Cloneable {
+public class TransitionKernel implements Cloneable, Serializable {
 
     /**
      * Create a transition kernel object to hold the transition probabilities between vents.
@@ -49,12 +50,12 @@ public class TransitionKernel implements Cloneable {
             newKernel.addToKernel(entry.getKey(), entry.getValue());
         }
         return newKernel;
-    } 
-    
+    }
+
     /**
      * Add the transition rate for a given event.
      * @param event the event to be added to the kernel
-     * @param rate the rate at which this event occurs.
+     * @param rate  the rate at which this event occurs.
      */
     public final void addToKernel(final SimulationEvent event, final Double rate) {
         if (rate > 0.0) {
@@ -62,11 +63,11 @@ public class TransitionKernel implements Cloneable {
             if (kernel.containsKey(event)) {
                 eventRate += kernel.get(event);
                 if (log.isTraceEnabled()) {
-                log.trace("Kernel already contains event {}, updating rate by {}", event, rate);
+                    log.trace("Kernel already contains event {}, updating rate by {}", event, rate);
                 }
             } else if (log.isTraceEnabled()) {
                 log.trace("Adding event to kernel {} {}", event, eventRate);
-                }
+            }
             kernel.put(event, eventRate);
         }
     }
@@ -79,8 +80,8 @@ public class TransitionKernel implements Cloneable {
     }
 
     /**
-     * Get the collection of events stored in the transition kernel. This actually returns the
-     * keyset from the transition rates since they are always present and will always be in the kernel.
+     * Get the collection of events stored in the transition kernel. This actually returns the keyset from the
+     * transition rates since they are always present and will always be in the kernel.
      * @return the events in the kernel.
      */
     public final Set<SimulationEvent> getTransitionEvents() {
@@ -123,4 +124,8 @@ public class TransitionKernel implements Cloneable {
 
     // A collection of probabilities of progressing from one state to another.
     private Map<SimulationEvent, Double> kernel = new LinkedHashMap<>(5);
+    /**
+     * The serialVersionUID.
+     */
+    private static final long serialVersionUID = -953479930339424502L;
 }

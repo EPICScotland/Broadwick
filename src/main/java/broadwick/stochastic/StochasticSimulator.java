@@ -18,6 +18,7 @@ package broadwick.stochastic;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,11 +32,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 
 /**
- * Base class for stochastic simulators. Extending classes just have to implement
- * <code>performStep</code> which gets invoked as long as the simulation is running. They also may override
- * <code>init</code> but should in that case call
- * <code>super.init()</code> to avoid unwanted effects. <p> Simulators also should handle the special time
- * <code>theta</code>: is is a moment in time when
+ * Base class for stochastic simulators. Extending classes just have to implement <code>performStep</code> which gets
+ * invoked as long as the simulation is running. They also may override <code>init</code> but should in that case call
+ * <code>super.init()</code> to avoid unwanted effects.
+ * <p>
+ * Simulators also should handle the special time <code>theta</code>: is is a moment in time when
  * <code>doThetaEvent</code> is supposed to be invoked (e.g. to measure species populations at this moment). Consider
  * this, if you want to implement a simulator.
  * <p/>
@@ -54,7 +55,14 @@ import org.apache.commons.lang3.time.StopWatch;
  * @see http://www.bio.ifi.lmu.de/FERN/
  */
 @Slf4j
-public abstract class StochasticSimulator {
+public abstract class StochasticSimulator implements Serializable {
+
+    /**
+     * No args constructor. Do not use, it is added so that the class can be deserialised if needed.
+     */
+    public StochasticSimulator() {
+
+    }
 
     /**
      * Creates a new simulator using a given amount manager.
@@ -77,12 +85,13 @@ public abstract class StochasticSimulator {
         this.transitionKernel = transitionKernel;
         this.reverseTime = reverseTime;
         this.thetaQueue = new ThetaQueue();
+        this.currentTime = 0;
     }
 
     /**
      * Starts the simulation up to a given time. It just uses a {@link DefaultController} and calls
      * {@link StochasticSimulator#start(SimulationController)}.
-     * @param time    simulation time
+     * @param time simulation time
      */
     public final void run(final double time) {
         if (controller == null) {
@@ -116,9 +125,8 @@ public abstract class StochasticSimulator {
 
                 // The performStep() method is implemented by the specifc stochastic algorithm (e.g. Gillespie's)
                 performStep();
-                
-                //amountManager.doHouseKeeping();
 
+                //amountManager.doHouseKeeping();
                 // tell our observers that the step has been completed.
                 for (final Observer observer : observers) {
                     observer.step();
@@ -139,8 +147,7 @@ public abstract class StochasticSimulator {
 
     /**
      * Initializes the algorithm. <ul><li>set currentTime=0</li><li>reset the {@link AmountManager}</li><li>recalculate
-     * the propensities</li></ul> Gets called at the very beginning of
-     * <code>start</code>
+     * the propensities</li></ul> Gets called at the very beginning of <code>start</code>
      */
     public final void init() {
         currentTime = startTime;
@@ -149,7 +156,7 @@ public abstract class StochasticSimulator {
     /**
      * Fires a reaction. It calls the observers and the {@link AmountManager}.
      * @param mu reaction to be fired.
-     * @param t     time at which the firing occurs.
+     * @param t  time at which the firing occurs.
      */
     protected final void doEvent(final SimulationEvent mu, final double t) {
         doEvent(mu, t, 1);
@@ -158,7 +165,7 @@ public abstract class StochasticSimulator {
     /**
      * Perform an event by informing the subscribed observers and the amountManager.
      * @param event event to be performed.
-     * @param t        time at which the firing occurs.
+     * @param t     time at which the firing occurs.
      * @param n     the number of times mu is to be fired.
      */
     protected final void doEvent(final SimulationEvent event, final double t, final int n) {
@@ -237,7 +244,7 @@ public abstract class StochasticSimulator {
      * Manages the registered theta events. Each registered theta event is stored in a table containing the time of the
      * event the list of observers for that event and the list of events for that time.
      */
-    private class ThetaQueue {
+    private class ThetaQueue  implements Serializable {
 
         /**
          * Construct an empty theta queue.
@@ -270,8 +277,8 @@ public abstract class StochasticSimulator {
                     events = new HashSet<>();
                     events.add(theta);
                     thetas.put(time, obs, events);
-                } catch (UnsupportedOperationException | ClassCastException |
-                         IllegalArgumentException | IllegalStateException e) {
+                } catch (UnsupportedOperationException | ClassCastException
+                         | IllegalArgumentException | IllegalStateException e) {
                     log.error("Could not register theta. {}", e.getLocalizedMessage());
                 }
             } else {
@@ -324,6 +331,10 @@ public abstract class StochasticSimulator {
         private final Table<Double, Observer, Collection<Object>> thetas;
         @Getter
         private double nextThetaEventTime;
+    /**
+     * The serialVersionUID.
+     */
+    private static final long serialVersionUID = -37227993552224502L;
     }
 
     /**
@@ -351,17 +362,18 @@ public abstract class StochasticSimulator {
      */
     public abstract void setRngSeed(final int seed);
     @Setter
-    private int startTime = 0;
+    private double startTime = 0.0;
     @Setter
     @Getter
     @SuppressWarnings("PMD.UnusedPrivateField")
     private TransitionKernel transitionKernel;
     @Getter
+    @Setter
     private AmountManager amountManager;
     @Setter
     @Getter
     @SuppressWarnings("PMD.UnusedPrivateField")
-    private double currentTime = 0;
+    private double currentTime;
     @Getter
     @Setter
     private SimulationController controller = null;
@@ -369,4 +381,8 @@ public abstract class StochasticSimulator {
     @Getter
     private final Set<Observer> observers = new HashSet<>(1);
     protected boolean reverseTime = false;
+    /**
+     * The serialVersionUID.
+     */
+    private static final long serialVersionUID = 134726472339424152L;
 }

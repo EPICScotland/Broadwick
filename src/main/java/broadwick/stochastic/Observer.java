@@ -15,6 +15,7 @@
  */
 package broadwick.stochastic;
 
+import java.io.Serializable;
 import java.util.Collection;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -38,7 +39,7 @@ import lombok.Getter;
  */
 @EqualsAndHashCode
 @SuppressWarnings("squid:S1210")
-public abstract class Observer implements Comparable<Observer> {
+public abstract class Observer implements Comparable<Observer>, Serializable {
 
     /**
      * Creates an observer dedicated to one process. The observer is NOT registered at the process, you have to call
@@ -96,4 +97,9 @@ public abstract class Observer implements Comparable<Observer> {
     @Getter
     @SuppressWarnings("PMD.UnusedPrivateField")
     private StochasticSimulator process;
+    
+    /**
+     * The serialVersionUID.
+     */
+    private static final long serialVersionUID = 921401820339922502L;
 }

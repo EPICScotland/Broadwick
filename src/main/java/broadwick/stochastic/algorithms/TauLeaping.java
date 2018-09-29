@@ -18,13 +18,14 @@ package broadwick.stochastic.algorithms;
 import broadwick.stochastic.AmountManager;
 import broadwick.stochastic.SimulationEvent;
 import broadwick.stochastic.TransitionKernel;
+import java.io.Serializable;
 
 /**
  * Implementation of the tau-leaping algorithm that makes an approximation to the stochastic ODE by picking a reasonable
  * time-step and then performing all the reactions that occur in this step. It is faster than the Gillespie algorithm
  * for large population sizes.
  */
-public class TauLeaping extends AbstractTauLeapingBase {
+public class TauLeaping extends AbstractTauLeapingBase  implements Serializable{
 
     /**
      * Create the tau-leaping object.
@@ -77,5 +78,8 @@ public class TauLeaping extends AbstractTauLeapingBase {
         }
         return rTotal;
     }
-
+    /**
+     * The serialVersionUID.
+     */
+    private static final long serialVersionUID = 74622647292624152L;
 }
