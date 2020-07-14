@@ -1,0 +1,15 @@
+
+            ------
+            TODO
+            ------
+
+      * When a model requests a list of priors a list of distribution objects should be returned. Perhaps a Map<prior.id, new ContinuousDistribution())> may siffice.
+
+      * SequentialMonteCarlo 
+        - need a way of creating sequentially numbered writers to the underlying MCMC object.
+        - need a technique to reject particles.
+
+      * Version 2.0
+        - Update JDK/JRE to version >= 11
+        - Replace joda-time with improved datatime module in the JDK
+        - Replace uk.com.robust-it.cloning.version with save-to-json-and-back approach
