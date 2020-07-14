@@ -22,7 +22,7 @@ import broadwick.graph.Graph;
 import broadwick.graph.Vertex;
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 import java.util.List;
-import org.apache.commons.collections15.Transformer;
+import com.google.common.base.Function;
 
 /**
  * Calculates distances in a specified graph, using Dijkstra's single-source-shortest-path algorithm. All edge weights
@@ -39,19 +39,21 @@ public class ShortestPath<V extends Vertex, E extends Edge<V>> {
      */
     public ShortestPath(final Graph<V, E> graph) {
 
-        if (EdgeType.DIRECTED.equals(graph.getEdgeType())) {
-            jungGraph = new edu.uci.ics.jung.graph.DirectedSparseMultigraph<>();
-        } else if (EdgeType.UNDIRECTED.equals(graph.getEdgeType())) {
-            jungGraph = new edu.uci.ics.jung.graph.UndirectedSparseMultigraph<>();
-        } else {
+        if (null == graph.getEdgeType()) {
             throw new IllegalArgumentException("Could not create ShortestPath object for unknown graph type.");
+        } else switch (graph.getEdgeType()) {
+            case DIRECTED:
+                jungGraph = new edu.uci.ics.jung.graph.DirectedSparseMultigraph<>();
+                break;
+            case UNDIRECTED:
+                jungGraph = new edu.uci.ics.jung.graph.UndirectedSparseMultigraph<>();
+                break;
+            default:
+                throw new IllegalArgumentException("Could not create ShortestPath object for unknown graph type.");
         }
         for (final E edge : graph.getEdges()) {
             jungGraph.addEdge(edge, edge.getSource(), edge.getDestination());
         }
-
-
-        weightTransformer = new EdgeWeightTransformer();
     }
 
     /**
@@ -64,7 +66,7 @@ public class ShortestPath<V extends Vertex, E extends Edge<V>> {
      */
     public final double calculateDistance(final V source, final V target) {
 
-        final DijkstraDistance<V, E> distance = new DijkstraDistance<>(jungGraph, weightTransformer);
+        final DijkstraDistance<V, E> distance = new DijkstraDistance<V, E>(jungGraph, weightTransformer );
         final Number d = distance.getDistance(source, target);
         return d == null ? 0 : d.doubleValue();
     }
@@ -80,16 +82,11 @@ public class ShortestPath<V extends Vertex, E extends Edge<V>> {
         final DijkstraShortestPath<V,E> path = new DijkstraShortestPath<>(jungGraph);
         return path.getPath(source, target);
     }
+
     private edu.uci.ics.jung.graph.AbstractTypedGraph<V,E> jungGraph;
-    private final Transformer<E, Number> weightTransformer;
-
-    /**
-     * Transformer class to transform the edge of a graph to a double (it's weight).
-     */
-    private class EdgeWeightTransformer implements Transformer<E, Number> {
-
+    private final Function<E, ? extends Number> weightTransformer = new Function<E, Number>() {
         @Override
-        public Number transform(final E edge) {
+        public Double apply(final E edge) {
             // all nonnull values are instances of broadwick.graph.Edge
             if (edge != null) {
                 return ((Edge) edge).getWeight();
@@ -97,5 +94,6 @@ public class ShortestPath<V extends Vertex, E extends Edge<V>> {
                 return 1.0;
             }
         }
-    }
+    };
+
 }
