@@ -93,47 +93,47 @@
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 
         <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
-        <ch.qos.logback.version>1.2.3</ch.qos.logback.version>
+        <ch.qos.logback.version>1.3.0-alpha5</ch.qos.logback.version>
         <com.google.guava.version>29.0-jre</com.google.guava.version>
         <jacoco-maven-plugin.version>0.7.5.201505241946</jacoco-maven-plugin.version>
         <jdk.version>1.8</jdk.version>
-        <joda-time.version>2.9.9</joda-time.version>
+        <joda-time.version>2.10.6</joda-time.version>
         <jre.version>1.8</jre.version>
-        <junit.junit.version>4.12</junit.junit.version>
+        <junit.junit.version>4.13</junit.junit.version>
         <jung.version>2.1.1</jung.version>	
         <onejar-plugin.version>1.4.5</onejar-plugin.version>
         <org.h2.version>1.3.175</org.h2.version>
         <org.apache.mahout.commons.commons-cli.version>2.0-mahout</org.apache.mahout.commons.commons-cli.version>
-        <org.apache.commons-collections4.version>4.0</org.apache.commons-collections4.version>
-        <org.apache.commons.lang3.version>3.5</org.apache.commons.lang3.version>  
+        <org.apache.commons-collections4.version>4.4</org.apache.commons-collections4.version>
+        <org.apache.commons.lang3.version>3.10</org.apache.commons.lang3.version>
         <org.apache.commons-math3.version>3.6.1</org.apache.commons-math3.version>
         <org.codehaus.mojo-sonar-maven-plugin.version>2.6</org.codehaus.mojo-sonar-maven-plugin.version>
         <org.jdom.version>2.0.2</org.jdom.version>
-        <org.jooq.version>3.9.2</org.jooq.version>
+        <org.jooq.version>3.13.2</org.jooq.version>
         <org.jvnet.jaxb2_commons.version>0.4.1.5</org.jvnet.jaxb2_commons.version>
-        <org.projectlombok.lombok.version>1.16.16</org.projectlombok.lombok.version>
-        <org.slf4j.slf4j-api.version>1.7.13</org.slf4j.slf4j-api.version>
+        <org.projectlombok.lombok.version>1.18.12</org.projectlombok.lombok.version>
+        <org.slf4j.slf4j-api.version>2.0.0-alpha1</org.slf4j.slf4j-api.version>
         <org.swinglabs.swing-layout.version>1.0.3</org.swinglabs.swing-layout.version>
         <org.umlgraph.version>5.6</org.umlgraph.version>                                               
         <taglist-maven-plugin.version>2.4</taglist-maven-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.0.3</maven.min-version>
-        <maven-changes-plugin.version>2.7.1</maven-changes-plugin.version>
+        <maven-changes-plugin.version>2.12.1</maven-changes-plugin.version>
         <maven-clean-plugin.version>2.6.1</maven-clean-plugin.version>
         <maven-compiler-plugin.version>3.6.1</maven-compiler-plugin.version>
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
-	<maven-enforcer-plugin.version>1.4.1</maven-enforcer-plugin.version>
+        <maven-enforcer-plugin.version>1.4.1</maven-enforcer-plugin.version>
         <maven-install-plugin.version>2.5.2</maven-install-plugin.version>
         <maven-jar-plugin.version>2.6</maven-jar-plugin.version>
-        <maven-javadoc-plugin.version>2.10.3</maven-javadoc-plugin.version>
-        <maven-jaxb2-plugin.version>0.13.2</maven-jaxb2-plugin.version>
-        <maven-jxr-plugin.version>2.3</maven-jxr-plugin.version>
-        <maven-project-info-reports-plugin.version>2.4</maven-project-info-reports-plugin.version>
+        <maven-javadoc-plugin.version>3.0.0-M1</maven-javadoc-plugin.version>
+        <maven-jaxb2-plugin.version>0.14.0</maven-jaxb2-plugin.version>
+        <maven-jxr-plugin.version>3.0.0</maven-jxr-plugin.version>
+        <maven-project-info-reports-plugin.version>3.0.0</maven-project-info-reports-plugin.version>
         <maven-resources-plugin.version>2.7</maven-resources-plugin.version>
         <maven-site-plugin.version>3.4</maven-site-plugin.version>
         <maven-source-plugin.version>2.4</maven-source-plugin.version>
         <maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
-        <uk.com.robust-it.cloning.version>1.9.3</uk.com.robust-it.cloning.version>
+        <uk.com.robust-it.cloning.version>1.9.12</uk.com.robust-it.cloning.version>
     </properties>
 
     <pluginRepositories>
