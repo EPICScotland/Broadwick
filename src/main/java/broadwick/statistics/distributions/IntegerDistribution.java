@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import lombok.Synchronized;
@@ -253,6 +254,19 @@ public class IntegerDistribution implements Serializable {
     }
 
     /**
+     * Get the sum of the counts in the histogram.
+     * @return the sum of all the bins in the histogram.
+     */
+    @Synchronized
+    public final Integer getTotal() {
+        int sum = 0;
+        for (Map.Entry<Integer, Integer> entry : bins.entrySet()) {
+            sum += entry.getKey() * entry.getValue();
+        }
+        return sum;
+    }
+
+    /**
      * Get the bins in the histogram. The bins are the keySet of the underlying map object.
      * @return the number of bins.
      */
@@ -388,7 +402,7 @@ public class IntegerDistribution implements Serializable {
         }
         return str.toString();
     }
-    
+
     /**
      * Reseed the random number generator used.
      * @param seed the new seed to use.
