@@ -99,7 +99,7 @@
         <jdk.version>1.8</jdk.version>
         <joda-time.version>2.10.6</joda-time.version>
         <jre.version>1.8</jre.version>
-        <junit.junit.version>4.13</junit.junit.version>
+        <junit.junit.version>4.13.1</junit.junit.version>
         <jung.version>2.1.1</jung.version>	
         <onejar-plugin.version>1.4.5</onejar-plugin.version>
         <org.h2.version>1.3.175</org.h2.version>
