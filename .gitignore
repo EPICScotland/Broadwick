@@ -27,6 +27,7 @@
 /examples/StochasticSir/target/
 /examples/StochasticInference/results/
 /examples/StochasticInference/target/
-.idea
 /examples/StochasticInference/target/
 /examples/GillespieSir/target/
+broadwick.iml
+.idea
