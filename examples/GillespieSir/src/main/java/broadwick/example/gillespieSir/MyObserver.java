@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package broadwick.example.stochasticsir;
+package broadwick.example.gillespieSir;
 
 import broadwick.io.FileOutput;
 import broadwick.stochastic.Observer;

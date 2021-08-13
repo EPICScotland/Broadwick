@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package broadwick.example.stochasticsir;
+package broadwick.example.gillespieSir;
 
 import broadwick.stochastic.AmountManager;
 import broadwick.stochastic.SimulationEvent;
@@ -36,7 +36,7 @@ class MyAmountManager implements AmountManager {
      * @param r     the number of removed in the simulation.
      * @param model the model is told to update the transition probabilities when the numbers of S/I/R are changed.
      */
-    MyAmountManager(final int s, final int i, final int r, final StochasticSIR model) {
+    MyAmountManager(final int s, final int i, final int r, final GillespieSir model) {
         susceptible = new SimulationState() {
             @Override
             public String getStateName() {
@@ -134,6 +134,6 @@ class MyAmountManager implements AmountManager {
     private final SimulationState infectious;
     @Getter
     private final SimulationState removed;
-    private final StochasticSIR model;
+    private final GillespieSir model;
 
 }

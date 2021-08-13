@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package broadwick.example.stochasticsir;
+package broadwick.example.gillespieSir;
 
 /**
  * This theta event will simply add 50 new susceptibles to the amount manager.

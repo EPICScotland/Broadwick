@@ -1,0 +1,16 @@
+[main] INFO  Running broadwick Version 1.2 Build (Anthonys-MBP - cb3264f60a8094a517ac219e2c919554b8d04e58 : 2016-09-04 13:12)  
+[main] INFO  Running broadwick for the following models [Broadwick Project] 
+[BroadwickModels-0] INFO  Running Broadwick Project [broadwick.example.gillespieSir.GillespieSir] 
+[BroadwickModels-0] INFO  Initialising project 
+[BroadwickModels-0] INFO  Saving data to broadwick.gillespieSir.dat 
+[BroadwickModels-0] INFO  beta = 0.004, rho = 0.04 
+[BroadwickModels-0] INFO  Max t = 50.0 
+[BroadwickModels-0] INFO  initialSusceptibles =  99 
+[BroadwickModels-0] INFO  initialInfectious = 1 
+[BroadwickModels-0] INFO  initialRemoved = 0 
+[BroadwickModels-0] INFO  Running project 
+[BroadwickModels-0] INFO  Started Observing using MyObserver. 
+[BroadwickModels-0] INFO  Performing a theta event at t=20.0 
+[BroadwickModels-0] INFO  Finished Observing using MyObserver. 
+[BroadwickModels-0] INFO  Closing project 
+[main] INFO  Simulation complete. 00:00:00.212 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package broadwick.example.stochasticsir;
+package broadwick.example.gillespieSir;
 
 import broadwick.model.Model;
 import broadwick.stochastic.SimulationController;
@@ -31,15 +31,12 @@ import lombok.extern.slf4j.Slf4j;
  * the simulation.
  */
 @Slf4j
-public class StochasticSIR extends Model {
+public class GillespieSir extends Model {
 
     @Override
     public final void init() {
 	log.info("Initialising project");
         
-        outputFileName = getParameterValue("outputFile");
-        log.info("Initialising project");
-
         outputFileName = getParameterValue("outputFile");
         betaVal = getParameterValueAsDouble("beta");
         rhoVal = getParameterValueAsDouble("rho");

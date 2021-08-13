@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>StochasticSir</groupId>
-    <artifactId>StochasticSir</artifactId>
+    <artifactId>GillespieSir</artifactId>
     <version>1.2</version>
     <packaging>jar</packaging>
 
-    <name>BroadwickExamples:StochasticSir</name>
+    <name>BroadwickExamples:GillespieSir</name>
     <url>http://maven.apache.org</url>
 
     <properties>

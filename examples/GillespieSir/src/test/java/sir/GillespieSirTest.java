@@ -26,9 +26,9 @@ import org.junit.runners.model.Statement;
 import org.slf4j.MarkerFactory;
 
 @Slf4j
-public class StochasticSirTest {
+public class GillespieSirTest {
 
-    public StochasticSirTest() {
+    public GillespieSirTest() {
     }
 
     @BeforeClass

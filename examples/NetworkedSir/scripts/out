@@ -1,0 +1,64 @@
+plotting particle tracks
+plotting posterior distribution
+                                                     ignoring ../results/particle_0.dat (0 rows)
+                                                     ignoring ../results/particle_1.dat (0 rows)
+                                                      Reading ../results/particle_10.dat (1 rows)
+                                                     ignoring ../results/particle_11.dat (0 rows)
+                                                     ignoring ../results/particle_12.dat (0 rows)
+                                                      Reading ../results/particle_13.dat (1 rows)
+                                                     ignoring ../results/particle_14.dat (0 rows)
+                                                      Reading ../results/particle_15.dat (1 rows)
+                                                     ignoring ../results/particle_16.dat (0 rows)
+                                                      Reading ../results/particle_17.dat (1 rows)
+                                                     ignoring ../results/particle_18.dat (0 rows)
+                                                     ignoring ../results/particle_19.dat (0 rows)
+                                                     ignoring ../results/particle_2.dat (0 rows)
+                                                     ignoring ../results/particle_20.dat (0 rows)
+                                                     ignoring ../results/particle_21.dat (0 rows)
+                                                      Reading ../results/particle_22.dat (1 rows)
+                                                     ignoring ../results/particle_23.dat (0 rows)
+                                                     ignoring ../results/particle_24.dat (0 rows)
+                                                     ignoring ../results/particle_3.dat (0 rows)
+                                                     ignoring ../results/particle_4.dat (0 rows)
+                                                      Reading ../results/particle_5.dat (1 rows)
+                                                     ignoring ../results/particle_6.dat (0 rows)
+                                                      Reading ../results/particle_7.dat (3 rows)
+                                                      Reading ../results/particle_8.dat (1 rows)
+                                                     ignoring ../results/particle_9.dat (0 rows)
+max value = -2.877282
+Printing posterior sampling distributions for ../results/particle_*.dat
+Printing posterior distribution densities for ../results/particle_*.dat
+      beta = 0.091050 [95% CI = 0.076787,0.100850]
+      sigma = 0.005100 [95% CI = -0.001015,0.011763]
+plotting likelihood distribution
+plotting populations
+                                                     ignoring ../results/particle_0.dat (0 rows)
+                                                     ignoring ../results/particle_1.dat (0 rows)
+                                                      Reading ../results/particle_10.dat (1 rows)
+                                                     ignoring ../results/particle_11.dat (0 rows)
+                                                     ignoring ../results/particle_12.dat (0 rows)
+                                                      Reading ../results/particle_13.dat (1 rows)
+                                                     ignoring ../results/particle_14.dat (0 rows)
+                                                      Reading ../results/particle_15.dat (1 rows)
+                                                     ignoring ../results/particle_16.dat (0 rows)
+                                                      Reading ../results/particle_17.dat (1 rows)
+                                                     ignoring ../results/particle_18.dat (0 rows)
+                                                     ignoring ../results/particle_19.dat (0 rows)
+                                                     ignoring ../results/particle_2.dat (0 rows)
+                                                     ignoring ../results/particle_20.dat (0 rows)
+                                                     ignoring ../results/particle_21.dat (0 rows)
+                                                      Reading ../results/particle_22.dat (1 rows)
+                                                     ignoring ../results/particle_23.dat (0 rows)
+                                                     ignoring ../results/particle_24.dat (0 rows)
+                                                     ignoring ../results/particle_3.dat (0 rows)
+                                                     ignoring ../results/particle_4.dat (0 rows)
+                                                      Reading ../results/particle_5.dat (1 rows)
+                                                     ignoring ../results/particle_6.dat (0 rows)
+                                                      Reading ../results/particle_7.dat (3 rows)
+                                                      Reading ../results/particle_8.dat (1 rows)
+                                                     ignoring ../results/particle_9.dat (0 rows)
+max value = -2.877282
+Printing population distribution densities for ../results/particle_*.dat
+      I = 61.450000 [95% CI = 54.529793,64.867033]
+      R = 2.062641 [95% CI = 1.788195,2.490136]
+plotting time series data
