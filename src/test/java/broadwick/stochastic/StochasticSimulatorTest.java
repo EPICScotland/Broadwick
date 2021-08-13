@@ -57,7 +57,7 @@ public class StochasticSimulatorTest {
 
     @Before
     public void setUp() {
-        simulatorImpl = new StochasticSimulatorImpl();
+//        simulatorImpl = new StochasticSimulatorImpl();
         observerImpl = new ObserverImpl(simulatorImpl);
     }
 
@@ -289,30 +289,30 @@ public class StochasticSimulatorTest {
 //
 //        fail("The test case is a prototype.");
 //    }
-    public class StochasticSimulatorImpl extends StochasticSimulator {
-
-        public StochasticSimulatorImpl() {
-            super(null, null);
-        }
-
-        @Override
-        public void reinitialize() {
-        }
-
-        @Override
-        public void performStep() {
-        }
-
-        @Override
-        public String getName() {
-            return "StochasticSimulatorImpl";
-        }
-
-        @Override
-        public void setRngSeed(int seed) {
-        }
-
-    }
+//    public class StochasticSimulatorImpl extends StochasticSimulator {
+//
+//        public StochasticSimulatorImpl() {
+//            super(null, null);
+//        }
+//
+//        @Override
+//        public void reinitialize() {
+//        }
+//
+//        @Override
+//        public void performStep() {
+//        }
+//
+//        @Override
+//        public String getName() {
+//            return "StochasticSimulatorImpl";
+//        }
+//
+//        @Override
+//        public void setRngSeed(int seed) {
+//        }
+//
+//    }
 
     /**
      * Simple observer class that does the following:
