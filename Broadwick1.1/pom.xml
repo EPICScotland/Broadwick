@@ -75,7 +75,7 @@
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 
         <buildnumber-maven-plugin.version>1.2</buildnumber-maven-plugin.version>
-        <ch.qos.logback.version>1.0.13</ch.qos.logback.version>
+        <ch.qos.logback.version>1.2.13</ch.qos.logback.version>
         <com.google.guava.version>15.0</com.google.guava.version>
         <jacoco-maven-plugin.version>0.6.2.201302030002</jacoco-maven-plugin.version>
         <jdk.version>1.7</jdk.version>
